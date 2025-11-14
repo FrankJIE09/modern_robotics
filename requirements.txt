@@ -1,0 +1,7 @@
+numpy>=1.21.0,<2.0.0
+matplotlib>=3.5.0
+gymnasium>=0.26.0
+roboticstoolbox-python>=1.0.0
+spatialmath-python>=1.0.0
+swift-sim>=1.0.0
+
