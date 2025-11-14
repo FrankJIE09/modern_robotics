@@ -1,91 +1,82 @@
 """
-A*路径规划算法实现
+加权A*（次优A*）路径规划算法实现
 基于《现代机器人学》第10章的描述
+如果启发式成本通过乘以常数因子η > 1而被高估，则A*搜索将偏向于从更接近目标的节点进行探索
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-from matplotlib.animation import FuncAnimation
-from collections import deque
 import heapq
 
-# 导入中文字体配置
+# 导入中文字体配置和GridWorld
 try:
     from font_config import init_chinese_font
     init_chinese_font(verbose=False)
 except ImportError:
-    # 如果font_config不存在，使用备用方案
     plt.rcParams['font.sans-serif'] = ['DejaVu Sans', 'SimHei', 'Arial Unicode MS']
     plt.rcParams['axes.unicode_minus'] = False
 
+from astar_planner import GridWorld, visualize_astar, create_animation
 
-class AStarPlanner:
-    """A*路径规划器"""
+
+class WeightedAStarPlanner:
+    """加权A*路径规划器（次优A*，η > 1）"""
     
-    def __init__(self, grid, start, goal, heuristic_type='euclidean'):
+    def __init__(self, grid, start, goal, heuristic_type='euclidean', eta=1.5):
         """
-        初始化A*规划器
+        初始化加权A*规划器
         
         参数:
             grid: 2D数组，0表示自由空间，1表示障碍物
             start: 起始位置 (row, col)
             goal: 目标位置 (row, col) 或目标区域
             heuristic_type: 启发式类型 ('euclidean', 'manhattan', 'diagonal')
+            eta: 启发式膨胀因子（η > 1），越大越偏向目标，但可能不是最优解
         """
         self.grid = grid
         self.rows, self.cols = grid.shape
         self.start = start
         self.goal = goal
         self.heuristic_type = heuristic_type
+        self.eta = eta  # 启发式膨胀因子
         
         # 数据结构
         self.OPEN = []  # 优先队列：(估计总成本, 节点)
         self.CLOSED = set()
         self.past_cost = {}  # 从起点到节点的最小成本
         self.parent = {}  # 父节点映射
-        self.cost_matrix = self._build_cost_matrix()
         
         # 可视化数据
         self.explored_nodes = []
         self.path = []
-        self.visualization_steps = []  # 存储每一步的可视化状态
-        
-    def _build_cost_matrix(self):
-        """构建成本矩阵（这里简化为邻接矩阵）"""
-        # 对于网格，我们使用8连通（包括对角线）
-        # 实际成本在搜索时计算
-        return None
+        self.visualization_steps = []
     
     def _heuristic_cost_to_go(self, node):
-        """计算从节点到目标的启发式成本（乐观估计）"""
+        """计算从节点到目标的启发式成本（乘以膨胀因子η）"""
         row, col = node
         goal_row, goal_col = self.goal
         
         if self.heuristic_type == 'euclidean':
-            # 欧几里得距离
-            return np.sqrt((row - goal_row)**2 + (col - goal_col)**2)
+            h = np.sqrt((row - goal_row)**2 + (col - goal_col)**2)
         elif self.heuristic_type == 'manhattan':
-            # 曼哈顿距离
-            return abs(row - goal_row) + abs(col - goal_col)
+            h = abs(row - goal_row) + abs(col - goal_col)
         elif self.heuristic_type == 'diagonal':
-            # 对角线距离（允许对角线移动）
             dx = abs(row - goal_row)
             dy = abs(col - goal_col)
-            return max(dx, dy) + (np.sqrt(2) - 1) * min(dx, dy)
+            h = max(dx, dy) + (np.sqrt(2) - 1) * min(dx, dy)
         else:
-            return 0
+            h = 0
+        
+        # 乘以膨胀因子η（高估启发式）
+        return self.eta * h
     
     def _get_neighbors(self, node):
-        """获取节点的邻居（8连通）"""
+        """获取节点的邻居（4连通）"""
         row, col = node
         neighbors = []
         
-        # 8个方向：上、下、左、右、左上、右上、左下、右下
-        directions = [
-            (-1, 0), (1, 0), (0, -1), (0, 1),  # 4连通
-            # (-1, -1), (-1, 1), (1, -1), (1, 1)  # 对角线
-        ]
+        # 4个方向：上、下、左、右
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         
         for dr, dc in directions:
             new_row, new_col = row + dr, col + dc
@@ -99,41 +90,22 @@ class AStarPlanner:
         return neighbors
     
     def _edge_cost(self, node1, node2, parent_node=None):
-        """
-        计算从node1到node2的边成本（包括转弯成本）
-        
-        参数:
-            node1: 起始节点
-            node2: 目标节点
-            parent_node: node1的父节点（用于计算转弯成本）
-        
-        返回:
-            总成本 = 移动成本 + 转弯成本（如果转弯）
-        """
+        """计算从node1到node2的边成本（包括转弯成本）"""
         r1, c1 = node1
         r2, c2 = node2
         
         # 基础移动成本
-        if abs(r1 - r2) == 1 and abs(c1 - c2) == 1:
-            # 对角线移动
-            base_cost = np.sqrt(2)
-        else:
-            # 直线移动（上下左右）
-            base_cost = 1.0
+        base_cost = 1.0
         
         # 计算转弯成本
         turn_cost = 0.0
         if parent_node is not None:
-            # 计算方向向量
-            # 从parent到node1的方向
             pr, pc = parent_node
             dir1 = (r1 - pr, c1 - pc)
-            # 从node1到node2的方向
             dir2 = (r2 - r1, c2 - c1)
             
-            # 如果方向不同，说明转弯了
             if dir1 != dir2 and dir1 != (0, 0):
-                turn_cost = 2.0  # 转弯成本为2
+                turn_cost = 2.0
         
         return base_cost + turn_cost
     
@@ -142,12 +114,11 @@ class AStarPlanner:
         if isinstance(self.goal, tuple):
             return node == self.goal
         else:
-            # 如果是目标区域，检查是否在区域内
             return node in self.goal
     
     def plan(self, visualize=False, fig=None, ax=None):
         """
-        执行A*搜索
+        执行加权A*搜索（次优A*）
         
         参数:
             visualize: 是否实时可视化搜索过程
@@ -186,7 +157,6 @@ class AStarPlanner:
             
             # 检查是否到达目标
             if self._is_goal(current):
-                # 重构路径
                 self.path = self._reconstruct_path(current)
                 if visualize:
                     self._plot_final_path(fig, ax)
@@ -197,8 +167,7 @@ class AStarPlanner:
                 if nbr in self.CLOSED:
                     continue
                 
-                # 计算到达邻居的暂定成本（包括转弯成本）
-                # 获取current的父节点以计算转弯成本
+                # 计算到达邻居的暂定成本
                 parent_of_current = self.parent.get(current, None)
                 edge_cost = self._edge_cost(current, nbr, parent_of_current)
                 tentative_past_cost = self.past_cost[current] + edge_cost
@@ -208,11 +177,11 @@ class AStarPlanner:
                     self.past_cost[nbr] = tentative_past_cost
                     self.parent[nbr] = current
                     
-                    # 计算估计总成本
+                    # 计算估计总成本（使用膨胀的启发式）
                     h_nbr = self._heuristic_cost_to_go(nbr)
                     est_total_cost_nbr = tentative_past_cost + h_nbr
                     
-                    # 添加到OPEN（如果不在OPEN中或成本更低）
+                    # 添加到OPEN
                     heapq.heappush(self.OPEN, (est_total_cost_nbr, nbr))
             
             step += 1
@@ -228,11 +197,8 @@ class AStarPlanner:
             return
         
         ax.clear()
-        
-        # 绘制网格和障碍物
         ax.imshow(self.grid, cmap='Greys', origin='upper', alpha=0.3, vmin=0, vmax=1)
         
-        # 绘制起点和终点
         start_row, start_col = self.start
         goal_row, goal_col = self.goal
         ax.plot(start_col, start_row, 'go', markersize=20, label='起点', 
@@ -243,235 +209,74 @@ class AStarPlanner:
         if self.visualization_steps:
             step_data = self.visualization_steps[-1]
             
-            # 绘制 CLOSED 集合（已探索的节点）
             if step_data['closed']:
                 closed_x = [col for row, col in step_data['closed']]
                 closed_y = [row for row, col in step_data['closed']]
                 ax.scatter(closed_x, closed_y, c='lightblue', s=100, alpha=0.7,
                           edgecolors='blue', linewidths=1.5, label='CLOSED (已探索)', zorder=3)
             
-            # 绘制 OPEN 集合（待探索的节点）
             if step_data['open']:
                 open_x = [col for row, col in step_data['open']]
                 open_y = [row for row, col in step_data['open']]
                 ax.scatter(open_x, open_y, c='yellow', s=100, alpha=0.8,
                           edgecolors='orange', linewidths=1.5, label='OPEN (待探索)', zorder=4)
             
-            # 绘制当前节点
             current = step_data['current']
             ax.plot(current[1], current[0], 'rs', markersize=25, 
                    markeredgecolor='darkred', markeredgewidth=3, 
                    label=f'当前节点 (步骤 {step_data["step"]})', zorder=5)
             
-            # 显示成本信息
             info_text = f'步骤: {step_data["step"]}\n'
             info_text += f'当前节点: {current}\n'
             info_text += f'过去成本: {step_data["past_cost_current"]:.2f}\n'
             info_text += f'估计总成本: {step_data["est_total_cost"]:.2f}\n'
+            info_text += f'膨胀因子 η: {self.eta}\n'
             info_text += f'OPEN大小: {len(step_data["open"])}\n'
             info_text += f'CLOSED大小: {len(step_data["closed"])}'
             ax.text(0.98, 0.02, info_text, transform=ax.transAxes,
                    fontsize=10, verticalalignment='top',
                    bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
         
-        # 添加网格线
         ax.set_xticks(np.arange(-0.5, self.cols, 1), minor=True)
         ax.set_yticks(np.arange(-0.5, self.rows, 1), minor=True)
         ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5, alpha=0.3)
-        
         ax.set_xlim(-0.5, self.cols - 0.5)
         ax.set_ylim(-0.5, self.rows - 0.5)
         ax.set_aspect('equal')
         ax.legend(loc='upper right', fontsize=9)
-        ax.set_title('A* 搜索过程可视化', fontsize=14, fontweight='bold')
+        ax.set_title(f'加权A*搜索过程可视化 (η={self.eta})', fontsize=14, fontweight='bold')
         ax.set_xlabel('列', fontsize=12)
         ax.set_ylabel('行', fontsize=12)
-        
-        plt.pause(0.1)  # 暂停以显示动画效果
+        plt.pause(0.1)
     
     def _plot_final_path(self, fig, ax):
         """绘制最终路径"""
         if fig is None or ax is None or not self.path:
             return
-        
-        # 绘制最终路径
         path_x = [col for row, col in self.path]
         path_y = [row for row, col in self.path]
-        ax.plot(path_x, path_y, 'b-', linewidth=4, label='最优路径', zorder=6)
+        ax.plot(path_x, path_y, 'b-', linewidth=4, label='路径（可能次优）', zorder=6)
         ax.plot(path_x, path_y, 'bo', markersize=10, zorder=6)
-        
         plt.draw()
     
     def _reconstruct_path(self, goal_node):
         """从目标节点重构路径"""
         path = []
         current = goal_node
-        
         while current is not None:
             path.append(current)
             current = self.parent.get(current, None)
-        
         path.reverse()
         return path
 
 
-class GridWorld:
-    """2D网格世界环境"""
-    
-    def __init__(self, width=20, height=20, obstacle_ratio=0.3):
-        """
-        创建网格世界
-        
-        参数:
-            width: 网格宽度
-            height: 网格高度
-            obstacle_ratio: 障碍物比例
-        """
-        self.width = width
-        self.height = height
-        self.grid = np.zeros((height, width), dtype=int)
-        
-        # 随机生成障碍物
-        num_obstacles = int(width * height * obstacle_ratio)
-        for _ in range(num_obstacles):
-            row = np.random.randint(0, height)
-            col = np.random.randint(0, width)
-            self.grid[row, col] = 1
-        
-        # 确保起点和终点不是障碍物
-        self.start = (0, 0)
-        self.goal = (29,0)
-        self.grid[self.start] = 0
-        self.grid[self.goal] = 0
-    
-    def set_obstacles(self, obstacles):
-        """手动设置障碍物"""
-        for row, col in obstacles:
-            if 0 <= row < self.height and 0 <= col < self.width:
-                self.grid[row, col] = 1
-    
-    def set_start_goal(self, start, goal):
-        """设置起点和终点"""
-        self.start = start
-        self.goal = goal
-        self.grid[start] = 0
-        self.grid[goal] = 0
-
-
-def visualize_astar(planner, grid, start, goal, save_animation=False):
-    """可视化A*搜索过程"""
-    fig, ax = plt.subplots(figsize=(12, 10))
-    
-    # 绘制网格
-    ax.imshow(grid, cmap='Greys', origin='upper', alpha=0.3)
-    
-    # 绘制起点和终点
-    start_row, start_col = start
-    goal_row, goal_col = goal
-    ax.plot(start_col, start_row, 'go', markersize=15, label='起点', zorder=5)
-    ax.plot(goal_col, goal_row, 'ro', markersize=15, label='终点', zorder=5)
-    
-    # 绘制探索的节点
-    explored_x = [col for row, col in planner.explored_nodes]
-    explored_y = [row for row, col in planner.explored_nodes]
-    ax.scatter(explored_x, explored_y, c='yellow', s=30, alpha=0.6, 
-               label='探索节点', zorder=3)
-    
-    # 绘制路径
-    if planner.path:
-        path_x = [col for row, col in planner.path]
-        path_y = [row for row, col in planner.path]
-        ax.plot(path_x, path_y, 'b-', linewidth=3, label='最优路径', zorder=4)
-        ax.plot(path_x, path_y, 'bo', markersize=8, zorder=4)
-    
-    # 添加网格线
-    ax.set_xticks(np.arange(-0.5, grid.shape[1], 1), minor=True)
-    ax.set_yticks(np.arange(-0.5, grid.shape[0], 1), minor=True)
-    ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5, alpha=0.3)
-    
-    ax.set_xlim(-0.5, grid.shape[1] - 0.5)
-    ax.set_ylim(-0.5, grid.shape[0] - 0.5)
-    ax.set_aspect('equal')
-    ax.legend(loc='upper right')
-    ax.set_title('A*路径规划结果', fontsize=14, fontweight='bold')
-    ax.set_xlabel('列', fontsize=12)
-    ax.set_ylabel('行', fontsize=12)
-    
-    plt.tight_layout()
-    if save_animation:
-        plt.savefig('astar_result.png', dpi=150, bbox_inches='tight')
-    plt.show()
-
-
-def create_animation(planner, grid, start, goal, interval=50):
-    """创建A*搜索过程的动画"""
-    fig, ax = plt.subplots(figsize=(12, 10))
-    
-    # 初始化绘图
-    ax.imshow(grid, cmap='Greys', origin='upper', alpha=0.3)
-    start_row, start_col = start
-    goal_row, goal_col = goal
-    start_point = ax.plot(start_col, start_row, 'go', markersize=15, 
-                          label='起点', zorder=5)[0]
-    goal_point = ax.plot(goal_col, goal_row, 'ro', markersize=15, 
-                         label='终点', zorder=5)[0]
-    
-    explored_scatter = ax.scatter([], [], c='yellow', s=30, alpha=0.6, 
-                                   label='探索节点', zorder=3)
-    path_line = ax.plot([], [], 'b-', linewidth=3, label='当前路径', zorder=4)[0]
-    path_points = ax.plot([], [], 'bo', markersize=8, zorder=4)[0]
-    
-    ax.set_xticks(np.arange(-0.5, grid.shape[1], 1), minor=True)
-    ax.set_yticks(np.arange(-0.5, grid.shape[0], 1), minor=True)
-    ax.grid(which='minor', color='gray', linestyle='-', linewidth=0.5, alpha=0.3)
-    ax.set_xlim(-0.5, grid.shape[1] - 0.5)
-    ax.set_ylim(-0.5, grid.shape[0] - 0.5)
-    ax.set_aspect('equal')
-    ax.legend(loc='upper right')
-    ax.set_title('A*路径规划过程', fontsize=14, fontweight='bold')
-    ax.set_xlabel('列', fontsize=12)
-    ax.set_ylabel('行', fontsize=12)
-    
-    explored_x = []
-    explored_y = []
-    current_path = []
-    
-    def animate(frame):
-        nonlocal explored_x, explored_y, current_path
-        
-        if frame < len(planner.explored_nodes):
-            # 添加新探索的节点
-            node = planner.explored_nodes[frame]
-            explored_x.append(node[1])
-            explored_y.append(node[0])
-            explored_scatter.set_offsets(np.column_stack([explored_x, explored_y]))
-            
-            # 更新当前路径（如果已找到）
-            if frame == len(planner.explored_nodes) - 1 and planner.path:
-                path_x = [col for row, col in planner.path]
-                path_y = [row for row, col in planner.path]
-                path_line.set_data(path_x, path_y)
-                path_points.set_data(path_x, path_y)
-        
-        return explored_scatter, path_line, path_points
-    
-    anim = FuncAnimation(fig, animate, frames=len(planner.explored_nodes) + 10,
-                        interval=interval, blit=True, repeat=False)
-    
-    plt.tight_layout()
-    return anim
-
-
 def main():
-    """主函数：演示A*算法"""
+    """主函数：演示加权A*算法"""
     print("=" * 60)
-    print("A*路径规划算法演示")
+    print("加权A*（次优A*）路径规划算法演示")
     print("=" * 60)
     
-    # 创建网格世界
     world = GridWorld(width=30, height=30, obstacle_ratio=0.25)
-    
-    # 可以手动设置一些障碍物（可选）
     world.set_obstacles([(5, 5), (5, 6), (6, 5), (10, 10), (15, 15)])
     
     print(f"网格大小: {world.height} x {world.width}")
@@ -480,23 +285,23 @@ def main():
     print(f"障碍物数量: {np.sum(world.grid == 1)}")
     print()
     
-    # 创建A*规划器
-    planner = AStarPlanner(
+    # 创建加权A*规划器（η=1.5，可以调整）
+    planner = WeightedAStarPlanner(
         grid=world.grid,
         start=world.start,
         goal=world.goal,
-        heuristic_type='euclidean'  # 可选: 'euclidean', 'manhattan', 'diagonal'
+        heuristic_type='euclidean',
+        eta=1.5  # 膨胀因子，越大越快但可能不是最优
     )
     
-    print("开始A*搜索...")
+    print(f"开始加权A*搜索（η={planner.eta}）...")
     
-    # 创建实时可视化
     fig, ax = plt.subplots(figsize=(14, 12))
-    plt.ion()  # 开启交互模式
+    plt.ion()
     
     success, path = planner.plan(visualize=True, fig=fig, ax=ax)
     
-    plt.ioff()  # 关闭交互模式
+    plt.ioff()
     
     if success:
         print(f"✓ 找到路径！")
@@ -504,16 +309,14 @@ def main():
         print(f"  总成本: {planner.past_cost[world.goal]:.2f}")
         print(f"  探索节点数: {len(planner.explored_nodes)}")
         print(f"  路径效率: {len(path) / len(planner.explored_nodes) * 100:.1f}%")
+        print(f"  注意：由于η={planner.eta} > 1，此路径可能不是最优解")
     else:
         print("✗ 未找到路径")
     
     print()
-    
-    # 可视化结果
     print("生成可视化...")
     visualize_astar(planner, world.grid, world.start, world.goal, save_animation=True)
     
-    # 可选：创建动画
     print("创建动画...")
     anim = create_animation(planner, world.grid, world.start, world.goal, interval=30)
     plt.show()
