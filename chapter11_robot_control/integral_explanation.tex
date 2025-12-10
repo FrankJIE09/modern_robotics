@@ -1,0 +1,270 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么$\int_0^{\infty} \theta_e(\tau) d\tau$可能等于1？}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+\textbf{为什么$\int_0^{\infty} \theta_e(\tau) d\tau = 1$？}
+
+这个积分出现在PI控制器的稳态分析中。让我们详细分析什么情况下这个积分等于1。
+
+\section{PI控制器回顾}
+
+PI控制器的控制律为：
+\begin{equation}
+\tau = K_p \theta_e + K_i \int_0^t \theta_e(\tau) d\tau
+\end{equation}
+
+在稳态时（$t \to \infty$），如果$\theta_e = 0$：
+\begin{equation}
+\tau_{ss} = K_i \int_0^{\infty} \theta_e(\tau) d\tau
+\end{equation}
+
+\section{单位阶跃响应情况}
+
+\subsection{定义}
+
+\textbf{单位误差响应}定义为：系统在初始条件$\theta_e(0) = 1$和$\dot{\theta}_e(0) = 0$下的响应。
+
+对于一阶系统（P控制器，无干扰）：
+\begin{equation}
+\dot{\theta}_e = -K_p \theta_e, \quad \theta_e(0) = 1
+\end{equation}
+
+解为：
+\begin{equation}
+\theta_e(t) = e^{-K_p t}
+\end{equation}
+
+\subsection{计算积分}
+
+计算从0到无穷的积分：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \int_0^{\infty} e^{-K_p \tau} d\tau
+\end{equation}
+
+使用积分公式：
+\begin{equation}
+\int e^{ax} dx = \frac{1}{a} e^{ax} + C
+\end{equation}
+
+因此：
+\begin{align}
+\int_0^{\infty} e^{-K_p \tau} d\tau &= \left[-\frac{1}{K_p} e^{-K_p \tau}\right]_0^{\infty} \\
+&= -\frac{1}{K_p} \left(e^{-\infty} - e^{0}\right) \\
+&= -\frac{1}{K_p} (0 - 1) \\
+&= \frac{1}{K_p}
+\end{align}
+
+\textbf{结论：}对于一阶系统，$\int_0^{\infty} \theta_e(\tau) d\tau = \frac{1}{K_p} \neq 1$（除非$K_p = 1$）。
+
+\section{什么时候积分等于1？}
+
+\subsection{情况1：$K_p = 1$的一阶系统}
+
+如果$K_p = 1$，则：
+\begin{equation}
+\theta_e(t) = e^{-t}
+\end{equation}
+
+积分：
+\begin{equation}
+\int_0^{\infty} e^{-\tau} d\tau = 1
+\end{equation}
+
+\textbf{因此，只有当$K_p = 1$时，单位误差响应的积分才等于1。}
+
+\subsection{情况2：归一化的误差响应}
+
+如果我们定义归一化的误差响应，使得积分等于1，则需要：
+\begin{equation}
+\tilde{\theta}_e(t) = K_p \theta_e(t) = K_p e^{-K_p t}
+\end{equation}
+
+则：
+\begin{equation}
+\int_0^{\infty} \tilde{\theta}_e(\tau) d\tau = K_p \int_0^{\infty} e^{-K_p \tau} d\tau = K_p \cdot \frac{1}{K_p} = 1
+\end{equation}
+
+\subsection{情况3：单位阶跃输入响应}
+
+对于单位阶跃输入（$\theta_d = 1$，$\theta(0) = 0$），误差为：
+\begin{equation}
+\theta_e(t) = 1 - \theta(t)
+\end{equation}
+
+如果系统最终收敛到$\theta(\infty) = 1$，则$\theta_e(\infty) = 0$。
+
+但积分$\int_0^{\infty} \theta_e(\tau) d\tau$通常不等于1，而是等于某个有限值。
+
+\section{PI控制器中的积分项}
+
+\subsection{关键理解}
+
+在PI控制器的稳态分析中，我们通常\textbf{不要求}$\int_0^{\infty} \theta_e(\tau) d\tau = 1$。
+
+重要的是：
+\begin{equation}
+\tau_{ss} = K_i \int_0^{\infty} \theta_e(\tau) d\tau = \text{持续干扰}
+\end{equation}
+
+即：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \frac{\text{持续干扰}}{K_i}
+\end{equation}
+
+\textbf{这个积分值取决于干扰大小和积分增益$K_i$，不一定等于1。}
+
+\subsection{数值示例}
+
+假设：
+\begin{itemize}
+\item 持续干扰（重力）：$mgr = 10$ N·m
+\item 积分增益：$K_i = 10$ N·m/(rad·s)
+\end{itemize}
+
+在稳态时，如果$\theta_e = 0$：
+\begin{equation}
+\tau_{ss} = K_i \int_0^{\infty} \theta_e(\tau) d\tau = 10
+\end{equation}
+
+因此：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \frac{10}{10} = 1
+\end{equation}
+
+\textbf{在这个特定例子中，积分确实等于1，但这是因为干扰和增益的特定组合。}
+
+如果干扰变为$mgr = 20$ N·m，$K_i = 10$不变：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \frac{20}{10} = 2
+\end{equation}
+
+如果干扰为$mgr = 10$ N·m，$K_i = 5$：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \frac{10}{5} = 2
+\end{equation}
+
+\section{一般情况下的积分值}
+
+\subsection{一阶系统}
+
+对于一阶误差动力学：
+\begin{equation}
+\dot{\theta}_e = -K_p \theta_e, \quad \theta_e(0) = \theta_{e,0}
+\end{equation}
+
+解：
+\begin{equation}
+\theta_e(t) = \theta_{e,0} e^{-K_p t}
+\end{equation}
+
+积分：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \theta_{e,0} \int_0^{\infty} e^{-K_p \tau} d\tau = \frac{\theta_{e,0}}{K_p}
+\end{equation}
+
+\textbf{只有当$\theta_{e,0} = K_p$时，积分才等于1。}
+
+\subsection{二阶系统（临界阻尼）}
+
+对于临界阻尼系统（$\zeta = 1$）：
+\begin{equation}
+\theta_e(t) = (1 + \omega_n t)e^{-\omega_n t}, \quad \theta_e(0) = 1
+\end{equation}
+
+积分：
+\begin{align}
+\int_0^{\infty} \theta_e(\tau) d\tau &= \int_0^{\infty} (1 + \omega_n \tau)e^{-\omega_n \tau} d\tau \\
+&= \int_0^{\infty} e^{-\omega_n \tau} d\tau + \omega_n \int_0^{\infty} \tau e^{-\omega_n \tau} d\tau \\
+&= \frac{1}{\omega_n} + \omega_n \cdot \frac{1}{\omega_n^2} \\
+&= \frac{1}{\omega_n} + \frac{1}{\omega_n} \\
+&= \frac{2}{\omega_n}
+\end{align}
+
+使用积分公式：$\int_0^{\infty} x e^{-ax} dx = \frac{1}{a^2}$（当$a > 0$）。
+
+\textbf{对于临界阻尼系统，积分等于$\frac{2}{\omega_n}$，只有当$\omega_n = 2$时才等于1。}
+
+\subsection{二阶系统（欠阻尼）}
+
+对于欠阻尼系统（$\zeta < 1$）：
+\begin{equation}
+\theta_e(t) = e^{-\zeta\omega_n t}\left(\cos(\omega_d t) + \frac{\zeta\omega_n}{\omega_d}\sin(\omega_d t)\right)
+\end{equation}
+
+其中$\omega_d = \omega_n\sqrt{1-\zeta^2}$。
+
+积分计算较复杂，但一般不等于1。
+
+\section{为什么在某些例子中积分等于1？}
+
+在PI控制器的稳态分析中，如果：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = 1
+\end{equation}
+
+这通常意味着：
+\begin{equation}
+K_i \cdot 1 = \text{持续干扰}
+\end{equation}
+
+即：
+\begin{equation}
+K_i = \text{持续干扰}
+\end{equation}
+
+\textbf{这是设计选择的结果，而不是数学必然性。}
+
+\section{实际意义}
+
+在实际PI控制器设计中：
+
+\begin{enumerate}
+\item \textbf{积分项的作用：}累积历史误差，在稳态时提供抵消干扰的力矩
+
+\item \textbf{积分值：}$\int_0^{\infty} \theta_e(\tau) d\tau$的值取决于：
+   \begin{itemize}
+   \item 误差响应的时间历程
+   \item 持续干扰的大小
+   \item 积分增益$K_i$
+   \end{itemize}
+
+\item \textbf{设计目标：}不是让积分等于1，而是让：
+   \begin{equation}
+   K_i \int_0^{\infty} \theta_e(\tau) d\tau = \text{持续干扰}
+   \end{equation}
+   使得稳态误差$\theta_e(\infty) = 0$
+
+\item \textbf{如果积分等于1：}这只是一个巧合，发生在特定参数组合下
+\end{enumerate}
+
+\section{总结}
+
+\textbf{为什么$\int_0^{\infty} \theta_e(\tau) d\tau$可能等于1？}
+
+\begin{enumerate}
+\item \textbf{一阶系统：}只有当$K_p = 1$或初始误差$\theta_{e,0} = K_p$时，单位误差响应的积分才等于1
+
+\item \textbf{PI控制器稳态：}积分值由$\frac{\text{持续干扰}}{K_i}$决定，当这个比值等于1时，积分等于1
+
+\item \textbf{这不是一般规律：}积分等于1只是特定参数组合下的结果，不是数学必然性
+
+\item \textbf{重要的是：}在PI控制器中，重要的是$K_i \int_0^{\infty} \theta_e(\tau) d\tau$等于持续干扰，而不是积分本身等于1
+\end{enumerate}
+
+\textbf{关键点：}如果看到$\int_0^{\infty} \theta_e(\tau) d\tau = 1$，这通常是因为示例中选择了特定的参数值（如$K_i = \text{持续干扰}$），使得这个等式成立。在实际设计中，这个积分可以是任何正值，只要满足$K_i \times \text{积分值} = \text{持续干扰}$即可。
+
+\end{document}
+

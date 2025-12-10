@@ -1,0 +1,382 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{基于速度控制的导纳控制算法}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+标准的导纳控制算法使用力矩控制：感测外力后，计算期望加速度，然后通过逆动力学转换为关节力矩。但在某些情况下，机器人可能只有速度控制能力（例如，使用速度控制模式的电机放大器）。本文将讨论如何将导纳控制算法适配为速度控制。
+
+\section{标准导纳控制（力矩控制）回顾}
+
+标准的导纳控制算法流程如下：
+
+\subsection{任务空间期望加速度}
+
+根据阻抗模型，期望的末端执行器加速度为：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}},
+\end{equation}
+其中：
+\begin{itemize}
+\item $x, \dot{x}$: \textbf{当前实际}末端执行器位置和速度（不是误差项！）
+\item $\ddot{x}_d$: 期望的末端执行器加速度（这是要计算的）
+\item $M, B, K$: 正定虚拟质量、阻尼和刚度矩阵
+\item $f_{\text{ext}}$: 感测到的外力（由力-力矩传感器测量）
+\end{itemize}
+
+\textbf{重要说明}：
+\begin{itemize}
+\item 公式中的$x$和$\dot{x}$是\textbf{当前实际状态}，不是误差项（不是$x_d - x$）
+\item 这是导纳控制与阻抗控制的重要区别
+\item 导纳控制使用当前状态来计算期望加速度，而不是使用误差
+\end{itemize}
+
+求解得到期望加速度：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx). \tag{11.66}
+\end{equation}
+
+\subsection{转换为关节加速度}
+
+对于雅可比矩阵$J(\theta)$，其中$\dot{x} = J(\theta)\dot{\theta}$，期望的关节加速度为：
+\begin{equation}
+\ddot{\theta}_d = J^{\dagger}(\theta)(\ddot{x}_d - \dot{J}(\theta)\dot{\theta}), \tag{11.67}
+\end{equation}
+其中$J^{\dagger}$是雅可比矩阵的伪逆。
+
+\subsection{计算关节力矩}
+
+使用逆动力学计算指令的关节力矩：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta}_d + h(\theta, \dot{\theta}),
+\end{equation}
+其中$M(\theta)$是质量矩阵，$h(\theta, \dot{\theta})$包含科里奥利、向心力和重力项。
+
+\section{基于速度控制的导纳控制}
+
+当机器人只能控制关节速度时，我们需要修改控制算法。核心思想是：将期望加速度积分得到期望速度，然后直接控制关节速度。
+
+\subsection{方法1：直接积分加速度}
+
+\subsubsection{算法流程}
+
+\begin{enumerate}
+\item \textbf{感测外力}：使用力-力矩传感器测量$f_{\text{ext}}$
+\item \textbf{计算期望加速度}：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)
+\end{equation}
+注意：这里使用的是\textbf{当前实际状态}$x$和$\dot{x}$，不是误差项。
+\item \textbf{积分得到期望速度}：
+\begin{equation}
+\dot{x}_d(t) = \dot{x}_d(0) + \int_0^t \ddot{x}_d(\tau) d\tau
+\end{equation}
+或者使用数值积分：
+\begin{equation}
+\dot{x}_d(k+1) = \dot{x}_d(k) + \ddot{x}_d(k) \Delta t
+\end{equation}
+其中$\Delta t$是控制周期。
+
+\item \textbf{转换为关节速度}：
+\begin{equation}
+\dot{\theta}_d = J^{\dagger}(\theta)\dot{x}_d
+\end{equation}
+注意：这里不需要$\dot{J}$项，因为我们直接计算速度而不是加速度。
+
+\item \textbf{控制关节速度}：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d
+\end{equation}
+\end{enumerate}
+
+\subsubsection{完整控制律}
+
+将上述步骤合并，得到基于速度控制的导纳控制律：
+\begin{equation}
+\dot{\theta} = J^{\dagger}(\theta) \left[ \dot{x}_d(0) + \int_0^t M^{-1}(f_{\text{ext}}(\tau) - B\dot{x}(\tau) - Kx(\tau)) d\tau \right]
+\end{equation}
+
+\subsubsection{离散时间实现}
+
+在实际实现中，使用离散时间形式：
+\begin{align}
+\ddot{x}_d(k) &= M^{-1}(f_{\text{ext}}(k) - B\dot{x}(k) - Kx(k)) \\
+\dot{x}_d(k+1) &= \dot{x}_d(k) + \ddot{x}_d(k) \Delta t \\
+\dot{\theta}_d(k+1) &= J^{\dagger}(\theta(k))\dot{x}_d(k+1) \\
+\dot{\theta}(k+1) &= \dot{\theta}_d(k+1)
+\end{align}
+
+\subsection{方法2：直接从阻抗模型计算速度}
+
+对于某些简化的阻抗模型（例如，仅包含阻尼和弹簧，无质量项），可以直接计算期望速度。
+
+\subsubsection{纯阻尼-弹簧模型}
+
+如果$M = 0$（忽略质量项），阻抗模型简化为：
+\begin{equation}
+B\dot{x}_d + Kx = f_{\text{ext}}
+\end{equation}
+
+注意：这里$Kx$中的$x$是\textbf{当前实际位置}，不是误差项。
+
+直接求解期望速度：
+\begin{equation}
+\dot{x}_d = B^{-1}(f_{\text{ext}} - Kx)
+\end{equation}
+
+然后转换为关节速度：
+\begin{equation}
+\dot{\theta}_d = J^{\dagger}(\theta) B^{-1}(f_{\text{ext}} - Kx)
+\end{equation}
+
+\subsubsection{纯阻尼模型}
+
+如果仅模拟阻尼（$M = 0, K = 0$）：
+\begin{equation}
+B\dot{x}_d = f_{\text{ext}} \quad \Rightarrow \quad \dot{x}_d = B^{-1}f_{\text{ext}}
+\end{equation}
+
+\subsubsection{纯弹簧模型}
+
+如果仅模拟弹簧（$M = 0, B = 0$），需要引入阻尼以避免振荡：
+\begin{equation}
+B_{\text{eff}}\dot{x}_d + Kx = f_{\text{ext}}
+\end{equation}
+其中$B_{\text{eff}}$是有效阻尼，用于稳定系统。
+
+\subsection{方法3：带位置反馈的速度控制}
+
+为了改善跟踪性能和稳定性，可以在速度控制中加入位置反馈项。
+
+\subsubsection{控制律}
+
+\begin{equation}
+\dot{\theta} = J^{\dagger}(\theta)\left[\dot{x}_d + K_p(x_d - x)\right]
+\end{equation}
+其中：
+\begin{itemize}
+\item $\dot{x}_d$: 由导纳控制计算的期望速度
+\item $x_d$: 期望位置（可以通过积分$\dot{x}_d$得到，或由其他方式指定）
+\item $K_p$: 正定位置反馈增益矩阵
+\end{itemize}
+
+\subsubsection{期望位置的计算}
+
+期望位置可以通过积分期望速度得到：
+\begin{equation}
+x_d(t) = x_d(0) + \int_0^t \dot{x}_d(\tau) d\tau
+\end{equation}
+
+离散时间形式：
+\begin{equation}
+x_d(k+1) = x_d(k) + \dot{x}_d(k) \Delta t
+\end{equation}
+
+\section{关节空间实现}
+
+如果直接在关节空间实现导纳控制，可以避免雅可比矩阵的计算。
+
+\subsection{关节空间阻抗模型}
+
+将任务空间阻抗模型转换到关节空间：
+\begin{equation}
+M_{\theta}\ddot{\theta}_d + B_{\theta}\dot{\theta} + K_{\theta}(\theta_d - \theta) = J^T(\theta) f_{\text{ext}}
+\end{equation}
+其中：
+\begin{itemize}
+\item $M_{\theta}, B_{\theta}, K_{\theta}$: 关节空间的虚拟质量、阻尼和刚度矩阵
+\item $\theta_d$: 期望关节位置
+\end{itemize}
+
+\subsection{速度控制实现}
+
+对于速度控制，计算期望关节速度：
+\begin{equation}
+\dot{\theta}_d = M_{\theta}^{-1}\left[J^T(\theta) f_{\text{ext}} - B_{\theta}\dot{\theta} - K_{\theta}(\theta_d - \theta)\right]
+\end{equation}
+
+如果$M_{\theta} = 0$（忽略质量项）：
+\begin{equation}
+\dot{\theta}_d = B_{\theta}^{-1}\left[J^T(\theta) f_{\text{ext}} - K_{\theta}(\theta_d - \theta)\right]
+\end{equation}
+
+\section{关键区别和注意事项}
+
+\subsection{力矩控制 vs. 速度控制}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{方面} & \textbf{力矩控制} & \textbf{速度控制} \\
+\hline
+控制输入 & 关节力矩$\tau$ & 关节速度$\dot{\theta}$ \\
+\hline
+计算步骤 & 加速度 $\to$ 力矩 & 加速度 $\to$ 速度 \\
+\hline
+需要逆动力学 & 是 & 否 \\
+\hline
+需要$\dot{J}$ & 是（加速度转换） & 否（速度转换） \\
+\hline
+积分需求 & 否 & 是（加速度积分） \\
+\hline
+\end{tabular}
+\caption{力矩控制与速度控制的对比}
+\end{table}
+
+\subsection{实现注意事项}
+
+\begin{enumerate}
+\item \textbf{数值积分}：
+\begin{itemize}
+\item 使用数值积分时，需要选择合适的积分方法（欧拉法、梯形法等）
+\item 注意积分误差的累积
+\item 考虑使用带限幅的积分器防止积分饱和
+\end{itemize}
+
+\item \textbf{初始条件}：
+\begin{itemize}
+\item 需要设置初始期望速度$\dot{x}_d(0)$
+\item 通常设置为当前实际速度：$\dot{x}_d(0) = \dot{x}(0)$
+\end{itemize}
+
+\item \textbf{力传感器噪声}：
+\begin{itemize}
+\item 力传感器噪声会被积分放大
+\item 建议对力读数进行低通滤波
+\item 考虑使用带死区的积分器
+\end{itemize}
+
+\item \textbf{奇异性}：
+\begin{itemize}
+\item 当雅可比矩阵奇异时，$J^{\dagger}$可能不稳定
+\item 需要处理奇异性（例如，使用阻尼最小二乘法）
+\end{itemize}
+
+\item \textbf{稳定性}：
+\begin{itemize}
+\item 速度控制通常比力矩控制更容易实现，但可能对参数误差更敏感
+\item 建议加入位置反馈以提高稳定性
+\end{itemize}
+\end{enumerate}
+
+\section{简化实现示例}
+
+\subsection{仅阻尼-弹簧模型（任务空间）}
+
+\begin{align}
+\dot{x}_d &= B^{-1}(f_{\text{ext}} - Kx) \\
+\dot{\theta}_d &= J^{\dagger}(\theta)\dot{x}_d \\
+\dot{\theta} &= \dot{\theta}_d
+\end{align}
+
+\textbf{假设}：
+\begin{itemize}
+\item $M = 0$（忽略质量项）
+\item 雅可比矩阵$J(\theta)$可逆或使用伪逆
+\item 力传感器可用
+\end{itemize}
+
+\subsection{仅阻尼模型（关节空间）}
+
+\begin{align}
+\dot{\theta}_d &= B_{\theta}^{-1}J^T(\theta) f_{\text{ext}} \\
+\dot{\theta} &= \dot{\theta}_d
+\end{align}
+
+\textbf{假设}：
+\begin{itemize}
+\item $M_{\theta} = 0, K_{\theta} = 0$（仅阻尼）
+\item 力传感器可用
+\end{itemize}
+
+\section{完整算法伪代码}
+
+\begin{verbatim}
+// 初始化
+x_d = x(0)  // 初始期望位置
+x_dot_d = x_dot(0)  // 初始期望速度
+
+// 主循环
+while (控制运行) {
+    // 1. 读取传感器
+    f_ext = 读取力传感器()
+    x = 读取位置()
+    x_dot = 读取速度()
+    theta = 读取关节角度()
+    
+    // 2. 计算期望加速度（任务空间）
+    x_ddot_d = M^(-1) * (f_ext - B * x_dot - K * x)
+    
+    // 3. 积分得到期望速度
+    x_dot_d = x_dot_d + x_ddot_d * dt
+    
+    // 4. 积分得到期望位置（可选，用于位置反馈）
+    x_d = x_d + x_dot_d * dt
+    
+    // 5. 计算雅可比矩阵
+    J = 计算雅可比矩阵(theta)
+    
+    // 6. 转换为关节速度
+    theta_dot_d = 伪逆(J) * x_dot_d
+    
+    // 7. 可选：加入位置反馈
+    theta_dot_d = theta_dot_d + K_p * (theta_d - theta)
+    其中 theta_d 通过逆运动学从 x_d 计算
+    
+    // 8. 发送速度指令
+    设置关节速度(theta_dot_d)
+    
+    // 等待下一个控制周期
+    等待(dt)
+}
+\end{verbatim}
+
+\section{总结}
+
+基于速度控制的导纳控制算法主要步骤：
+
+\begin{enumerate}
+\item 感测外力$f_{\text{ext}}$
+\item 根据阻抗模型计算期望加速度：$\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)$
+\item 积分得到期望速度：$\dot{x}_d = \int \ddot{x}_d dt$
+\item 转换为关节速度：$\dot{\theta}_d = J^{\dagger}\dot{x}_d$
+\item 直接控制关节速度：$\dot{\theta} = \dot{\theta}_d$
+\end{enumerate}
+
+\textbf{关键优势}：
+\begin{itemize}
+\item 不需要逆动力学计算
+\item 不需要计算$\dot{J}$
+\item 实现相对简单
+\end{itemize}
+
+\textbf{关键挑战}：
+\begin{itemize}
+\item 需要数值积分，可能累积误差
+\item 力传感器噪声会被积分放大
+\item 需要处理雅可比矩阵的奇异性
+\end{itemize}
+
+\textbf{改进建议}：
+\begin{itemize}
+\item 对力读数进行低通滤波
+\item 加入位置反馈提高稳定性
+\item 使用带限幅的积分器
+\item 对于简化模型（如仅阻尼-弹簧），可以直接计算速度，避免积分
+\end{itemize}
+
+\end{document}
+

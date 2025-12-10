@@ -1,0 +1,754 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{array}
+
+\geometry{margin=2.5cm}
+
+\title{第11章\quad 机器人控制公式总结}
+\author{现代机器人学：力学、规划与控制\\
+Kevin M. Lynch 和 Frank C. Park\\
+中文翻译}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{误差动力学}
+
+\subsection{基本定义}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.1) & $\theta_e(t) = \theta_d(t) - \theta(t)$ & 
+\textbf{关节误差定义} \\
+& & $\theta_d(t)$: 期望关节位置 \\
+& & $\theta(t)$: 实际关节位置 \\
+& & \textbf{假设}: 无特殊假设 \\
+\hline
+
+(11.2) & $\text{超调} = \frac{\theta_{e,\min} - e_{ss}}{\theta_e(0) - e_{ss}} \times 100\%$ & 
+\textbf{超调定义} \\
+& & $\theta_{e,\min}$: 误差达到的最小正值 \\
+& & $e_{ss}$: 稳态误差 \\
+& & \textbf{假设}: 误差响应最初超过最终稳态误差 \\
+\hline
+
+(11.3) & $a_p \theta_e^{(p)} + a_{p-1} \theta_e^{(p-1)} + \cdots + a_2 \ddot{\theta}_e + a_1 \dot{\theta}_e + a_0 \theta_e = c$ & 
+\textbf{线性误差动力学（一般形式）} \\
+& & $a_i$: 常数系数 \\
+& & $p$: 微分方程的阶数 \\
+& & $c$: 常数项（$c=0$为齐次，$c \neq 0$为非齐次） \\
+& & \textbf{假设}: 线性系统 \\
+\hline
+
+(11.4) & $m\ddot{\theta}_e + b\dot{\theta}_e + k\theta_e = f$ & 
+\textbf{质量-弹簧-阻尼器模型} \\
+& & $m$: 质量 \\
+& & $b$: 阻尼常数 \\
+& & $k$: 弹簧常数 \\
+& & $f$: 外部力 \\
+& & \textbf{假设}: 线性系统，无特殊约束 \\
+\hline
+
+(11.5) & $b\dot{\theta}_e + k\theta_e = f$ & 
+\textbf{一阶误差动力学} \\
+& & \textbf{假设}: 质量$m$接近零的极限情况 \\
+\hline
+
+(11.6) & $\dot{\theta}_e(t) + \frac{1}{\tau}\theta_e(t) = 0$ & 
+\textbf{一阶齐次误差动力学} \\
+& & $\tau = b/k$: 时间常数 \\
+& & \textbf{假设}: $f = 0$（齐次），$b, k > 0$ \\
+\hline
+
+(11.7) & $\theta_e(t) = e^{-t/\tau}\theta_e(0)$ & 
+\textbf{一阶误差响应解} \\
+& & \textbf{假设}: 齐次情况，$b, k > 0$ \\
+\hline
+
+(11.8) & $\ddot{\theta}_e(t) + 2\zeta\omega_n \dot{\theta}_e(t) + \omega_n^2 \theta_e(t) = 0$ & 
+\textbf{标准二阶误差动力学} \\
+& & $\omega_n = \sqrt{k/m}$: 自然频率 \\
+& & $\zeta = b/(2\sqrt{km})$: 阻尼比 \\
+& & \textbf{假设}: 齐次情况（$f = 0$），$b, k > 0$ \\
+\hline
+
+(11.9) & $s^2 + 2\zeta\omega_n s + \omega_n^2 = 0$ & 
+\textbf{二阶系统特征方程} \\
+& & $s$: 复频率变量 \\
+& & \textbf{假设}: 二阶线性系统 \\
+\hline
+
+(11.10) & $s_{1,2} = -\zeta\omega_n \pm \omega_n\sqrt{\zeta^2 - 1}$ & 
+\textbf{特征方程的根} \\
+& & \textbf{假设}: 二阶系统 \\
+\hline
+
+\end{longtable}
+
+\subsection{二阶系统解的三种情况}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{情况} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{情况} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+过阻尼 & $\theta_e(t) = c_1 e^{s_1 t} + c_2 e^{s_2 t}$ & 
+\textbf{过阻尼响应}（$\zeta > 1$） \\
+& & $c_1, c_2$: 由初始条件确定 \\
+& & \textbf{假设}: $\zeta > 1$，根为实且不同 \\
+\hline
+
+临界阻尼 & $\theta_e(t) = (c_1 + c_2 t)e^{-\omega_n t}$ & 
+\textbf{临界阻尼响应}（$\zeta = 1$） \\
+& & \textbf{假设}: $\zeta = 1$，根为实且相等 \\
+\hline
+
+欠阻尼 & $\theta_e(t) = e^{-\zeta\omega_n t}(c_1 \cos(\omega_d t) + c_2 \sin(\omega_d t))$ & 
+\textbf{欠阻尼响应}（$\zeta < 1$） \\
+& & $\omega_d = \omega_n\sqrt{1 - \zeta^2}$: 阻尼自然频率 \\
+& & \textbf{假设}: $\zeta < 1$，根为复共轭 \\
+\hline
+
+\end{longtable}
+
+\section{速度输入的运动控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.11) & $\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)$ & 
+\textbf{关节空间速度控制} \\
+& & $K_p$: 正定增益矩阵 \\
+& & $\dot{\theta}_d$: 期望关节速度 \\
+& & \textbf{假设}: 速度控制执行器，精确位置反馈 \\
+\hline
+
+(11.12) & $\dot{\theta} = J^{-1}(\theta)\left(\dot{x}_d + K_p(x_d - x)\right)$ & 
+\textbf{任务空间速度控制} \\
+& & $J(\theta)$: 雅可比矩阵（可逆） \\
+& & $x_d$: 期望末端执行器位置 \\
+& & $x$: 实际位置 \\
+& & \textbf{假设}: 雅可比矩阵可逆，无奇异性 \\
+\hline
+
+\end{longtable}
+
+\section{力矩或力输入的运动控制}
+
+\subsection{单关节动力学}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.19) & $\tau = M\ddot{\theta} + mgr\cos\theta$ & 
+\textbf{单关节动力学（无摩擦）} \\
+& & $M$: 连杆关于旋转轴的标量惯性 \\
+& & $m$: 连杆质量 \\
+& & $r$: 从轴到质心的距离 \\
+& & $g$: 重力加速度 \\
+& & \textbf{假设}: 无耗散，无摩擦 \\
+\hline
+
+(11.20) & $\tau_{\text{fric}} = b\dot{\theta}$ & 
+\textbf{粘性摩擦模型} \\
+& & $b > 0$: 粘性摩擦系数 \\
+& & \textbf{假设}: 线性粘性摩擦 \\
+\hline
+
+(11.21) & $\tau = M\ddot{\theta} + mgr\cos\theta + b\dot{\theta}$ & 
+\textbf{单关节动力学（含摩擦）} \\
+& & \textbf{假设}: 线性粘性摩擦模型 \\
+\hline
+
+(11.22) & $\tau = M\ddot{\theta} + h(\theta, \dot{\theta})$ & 
+\textbf{单关节动力学（紧凑形式）} \\
+& & $h(\theta, \dot{\theta})$: 包含所有非加速度项（重力、摩擦等） \\
+& & \textbf{假设}: 无特殊假设 \\
+\hline
+
+\end{longtable}
+
+\subsection{PID控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.23) & $\tau = K_p\theta_e + K_i\int_0^t\theta_e(t)dt + K_d\dot{\theta}_e$ & 
+\textbf{PID控制器} \\
+& & $K_p$: 比例增益（正） \\
+& & $K_i$: 积分增益（正） \\
+& & $K_d$: 微分增益（正） \\
+& & $\theta_e = \theta_d - \theta$: 位置误差 \\
+& & \textbf{假设}: 线性控制器 \\
+\hline
+
+(11.24) & $M\ddot{\theta} + b\dot{\theta} = K_p(\theta_d - \theta) + K_d(\dot{\theta}_d - \dot{\theta})$ & 
+\textbf{PD控制下的动力学} \\
+& & \textbf{假设}: $K_i = 0$（PD控制），$g = 0$（水平面） \\
+\hline
+
+(11.25) & $M\ddot{\theta}_e + (b + K_d)\dot{\theta}_e + K_p\theta_e = 0$ & 
+\textbf{PD控制误差动力学（设定点）} \\
+& & \textbf{假设}: 设定点控制（$\dot{\theta}_d = \ddot{\theta}_d = 0$），$g = 0$ \\
+\hline
+
+(11.26) & $\zeta = \frac{b + K_d}{2\sqrt{K_p M}}, \quad \omega_n = \sqrt{\frac{K_p}{M}}$ & 
+\textbf{PD控制的阻尼比和自然频率} \\
+& & \textbf{假设}: PD控制，设定点控制 \\
+\hline
+
+(11.27) & $M\ddot{\theta}_e + (b + K_d)\dot{\theta}_e + K_p\theta_e = mgr\cos\theta$ & 
+\textbf{PD控制误差动力学（含重力）} \\
+& & \textbf{假设}: 设定点控制，$g > 0$（垂直平面） \\
+\hline
+
+(11.28) & $M\ddot{\theta}_e + (b + K_d)\dot{\theta}_e + K_p\theta_e + K_i\int_0^t\theta_e(t)dt = \tau_{\text{dist}}$ & 
+\textbf{PID控制误差动力学} \\
+& & $\tau_{\text{dist}}$: 干扰力矩（如重力） \\
+& & \textbf{假设}: 设定点控制，$K_i > 0$ \\
+\hline
+
+(11.29) & $M\theta_e^{(3)} + (b + K_d)\ddot{\theta}_e + K_p\dot{\theta}_e + K_i\theta_e = \dot{\tau}_{\text{dist}}$ & 
+\textbf{三阶误差动力学} \\
+& & \textbf{假设}: 对(11.28)求导，$\tau_{\text{dist}}$为常数时右边为零 \\
+\hline
+
+(11.30) & $s^3 + \frac{b + K_d}{M}s^2 + \frac{K_p}{M}s + \frac{K_i}{M} = 0$ & 
+\textbf{PID控制特征方程} \\
+& & \textbf{假设}: $\tau_{\text{dist}}$为常数 \\
+\hline
+
+(11.31) & $K_d > -b, \quad K_p > 0, \quad \frac{(b + K_d)K_p}{M} > K_i > 0$ & 
+\textbf{PID控制稳定性条件} \\
+& & \textbf{假设}: 三阶系统稳定性要求 \\
+\hline
+
+\end{longtable}
+
+\subsection{前馈和计算力矩控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.32) & $\tau = \tilde{M}(\theta)\ddot{\theta} + \tilde{h}(\theta, \dot{\theta})$ & 
+\textbf{控制器动力学模型} \\
+& & $\tilde{M}, \tilde{h}$: 模型参数 \\
+& & \textbf{假设}: 模型可能不完美 \\
+\hline
+
+(11.33) & $\tau(t) = \tilde{M}(\theta_d(t))\ddot{\theta}_d(t) + \tilde{h}(\theta_d(t), \dot{\theta}_d(t))$ & 
+\textbf{前馈控制} \\
+& & \textbf{假设}: 精确模型和初始状态时，可精确跟踪 \\
+\hline
+
+(11.34) & $\ddot{\theta}_e + K_d\dot{\theta}_e + K_p\theta_e + K_i\int_0^t\theta_e(t)dt = c$ & 
+\textbf{期望误差动力学} \\
+& & \textbf{假设}: 线性误差动力学 \\
+\hline
+
+(11.35) & $\ddot{\theta} = \ddot{\theta}_d + K_d\dot{\theta}_e + K_p\theta_e + K_i\int_0^t\theta_e(t)dt$ & 
+\textbf{指令加速度} \\
+& & \textbf{假设}: 为实现误差动力学(11.34) \\
+\hline
+
+(11.36) & $\tau = \tilde{M}(\theta)\left(\ddot{\theta}_d + K_p\theta_e + K_i\int_0^t\theta_e(t)dt + K_d\dot{\theta}_e\right) + \tilde{h}(\theta, \dot{\theta})$ & 
+\textbf{计算力矩控制器（前馈+反馈线性化）} \\
+& & \textbf{假设}: 结合前馈和反馈，实现线性误差动力学 \\
+\hline
+
+\end{longtable}
+
+\subsection{多关节机器人控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.37) & $\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})$ & 
+\textbf{多关节动力学（一般形式）} \\
+& & $M(\theta)$: $n \times n$正定质量矩阵 \\
+& & $h(\theta, \dot{\theta})$: 包含科里奥利、向心力和重力 \\
+& & \textbf{假设}: $n$关节机器人 \\
+\hline
+
+(11.38) & $\tau = \tilde{M}(\theta)\left(\ddot{\theta}_d + K_p\theta_e + K_i\int_0^t\theta_e(t)dt + K_d\dot{\theta}_e\right) + \tilde{h}(\theta, \dot{\theta})$ & 
+\textbf{集中式多关节计算力矩控制} \\
+& & $K_p, K_i, K_d$: 正定增益矩阵 \\
+& & \textbf{假设}: 完整状态信息可用 \\
+\hline
+
+(11.39) & $\tau = K_p\theta_e + K_i\int_0^t\theta_e(t)dt + K_d\dot{\theta}_e + \tilde{g}(\theta)$ & 
+\textbf{PID控制+重力补偿（近似）} \\
+& & $\tilde{g}(\theta)$: 重力补偿模型 \\
+& & \textbf{假设}: 期望速度和加速度很小 \\
+\hline
+
+(11.40) & $M(\theta)\ddot{\theta} + C(\theta, \dot{\theta})\dot{\theta} = K_p\theta_e - K_d\dot{\theta}$ & 
+\textbf{PD控制下的多关节动力学} \\
+& & $C(\theta, \dot{\theta})\dot{\theta}$: 科里奥利和向心项 \\
+& & \textbf{假设}: 零摩擦，完美重力补偿，PD设定点控制（$K_i = 0$，$\dot{\theta}_d = \ddot{\theta}_d = 0$） \\
+\hline
+
+(11.41) & $V(\theta_e, \dot{\theta}_e) = \frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e$ & 
+\textbf{误差能量函数（Lyapunov函数）} \\
+& & \textbf{假设}: 设定点控制（$\dot{\theta}_d = 0$） \\
+\hline
+
+(11.42) & $V(\theta_e, \dot{\theta}) = \frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$ & 
+\textbf{误差能量函数（简化形式）} \\
+& & \textbf{假设}: $\dot{\theta}_d = 0$ \\
+\hline
+
+(11.43) & $\dot{V} = -\dot{\theta}^T K_d\dot{\theta} \leq 0$ & 
+\textbf{误差能量变化率} \\
+& & \textbf{假设}: 零摩擦，完美重力补偿，PD设定点控制 \\
+\hline
+
+\end{longtable}
+
+\subsection{任务空间运动控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.44) & $\theta(t) = T^{-1}(X(t))$ & 
+\textbf{位置逆运动学} \\
+& & $T(\theta)$: 正运动学函数 \\
+& & $X \in SE(3)$: 末端执行器配置 \\
+& & \textbf{假设}: 逆运动学存在且唯一 \\
+\hline
+
+(11.45) & $\dot{\theta}(t) = J_b^{\dagger}(\theta(t))V_b(t)$ & 
+\textbf{速度逆运动学} \\
+& & $J_b(\theta)$: 体雅可比矩阵 \\
+& & $J_b^{\dagger}$: 伪逆 \\
+& & $V_b$: 体坐标系中的twist \\
+& & \textbf{假设}: 雅可比矩阵已知 \\
+\hline
+
+(11.46) & $\ddot{\theta}(t) = J_b^{\dagger}(\theta(t))\left(\dot{V}_b(t) - \dot{J}_b(\theta(t))\dot{\theta}(t)\right)$ & 
+\textbf{加速度逆运动学} \\
+& & $\dot{J}_b$: 雅可比矩阵的时间导数 \\
+& & \textbf{假设}: 可计算$\dot{J}_b$ \\
+\hline
+
+(11.47) & $F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b)$ & 
+\textbf{任务空间动力学} \\
+& & $\Lambda(\theta)$: 任务空间质量矩阵 \\
+& & $\eta(\theta, V_b)$: 任务空间科里奥利和重力项 \\
+& & \textbf{假设}: 任务空间动力学模型 \\
+\hline
+
+(11.48) & $\tau = J_b^T(\theta)\left(\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e\right) + \tilde{\eta}(\theta, V_b)$ & 
+\textbf{任务空间计算力矩控制} \\
+& & $[Ad_{X^{-1}X_d}]$: 伴随变换 \\
+& & $X_e$: 配置误差（$[X_e] = \log(X^{-1}X_d)$） \\
+& & $V_e$: 速度误差 \\
+& & $\{\tilde{\Lambda}, \tilde{\eta}\}$: 控制器动力学模型 \\
+& & \textbf{假设}: 任务空间控制，wrench和twist在体坐标系中表示 \\
+\hline
+
+(11.49) & $V_e = [Ad_{X^{-1}X_d}]V_d - V$ & 
+\textbf{速度误差} \\
+& & \textbf{假设}: 速度在相同坐标系中表示 \\
+\hline
+
+\end{longtable}
+
+\section{力控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.50) & $M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) + b(\dot{\theta}) + J^T(\theta)F_{\text{tip}} = \tau$ & 
+\textbf{含末端执行器力的机器人动力学} \\
+& & $F_{\text{tip}}$: 机器人施加到环境的wrench \\
+& & $J(\theta)$: 雅可比矩阵 \\
+& & \textbf{假设}: $F_{\text{tip}}$和$J(\theta)$在同一坐标系中 \\
+\hline
+
+(11.51) & $g(\theta) + J^T(\theta)F_{\text{tip}} = \tau$ & 
+\textbf{力控制简化动力学} \\
+& & \textbf{假设}: 机器人移动缓慢或静止（忽略加速度和速度项） \\
+\hline
+
+(11.52) & $\tau = \tilde{g}(\theta) + J^T(\theta)F_d$ & 
+\textbf{开环力控制} \\
+& & $\tilde{g}(\theta)$: 重力力矩模型 \\
+& & $F_d$: 期望wrench \\
+& & \textbf{假设}: 无直接力测量，需要精确重力模型和力矩控制 \\
+\hline
+
+(11.53) & $\tau = \tilde{g}(\theta) + J^T(\theta)\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right)$ & 
+\textbf{PI力控制器} \\
+& & $F_e = F_d - F_{\text{tip}}$: 力误差 \\
+& & $K_{fp}$: 正定比例增益矩阵 \\
+& & $K_{fi}$: 正定积分增益矩阵 \\
+& & \textbf{假设}: 有六轴力-力矩传感器 \\
+\hline
+
+(11.54) & $K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt = 0$ & 
+\textbf{PI力控制误差动力学（完美重力）} \\
+& & \textbf{假设}: 完美重力建模 \\
+\hline
+
+(11.55) & $K_{fp}\dot{F}_e + K_{fi}F_e = 0$ & 
+\textbf{PI力控制误差动力学（恒定干扰）} \\
+& & \textbf{假设}: 存在非零但恒定的力干扰（如重力模型不准确） \\
+\hline
+
+(11.56) & $\tau = \tilde{g}(\theta) + J^T(\theta)\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right) - K_{\text{damp}}V$ & 
+\textbf{PI力控制+速度阻尼} \\
+& & $K_{\text{damp}}$: 正定阻尼矩阵 \\
+& & \textbf{假设}: 限制加速度，防止无接触时加速 \\
+\hline
+
+\end{longtable}
+
+\section{混合运动-力控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.57) & $A(\theta)V = 0$ & 
+\textbf{Pfaffian约束} \\
+& & $A(\theta) \in \mathbb{R}^{k \times 6}$: 约束矩阵 \\
+& & $V \in \mathbb{R}^6$: twist \\
+& & $k$: 约束数量 \\
+& & \textbf{假设}: 刚性环境，$k$个方向无限刚性 \\
+\hline
+
+(11.58) & $F = \Lambda(\theta)\dot{V} + \eta(\theta, V)$ & 
+\textbf{无约束任务空间动力学} \\
+& & \textbf{假设}: 无约束情况 \\
+\hline
+
+(11.59) & $F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda$ & 
+\textbf{约束任务空间动力学} \\
+& & $\lambda \in \mathbb{R}^k$: 拉格朗日乘数 \\
+& & $F_{\text{tip}} = A^T(\theta)\lambda$: 施加到约束的wrench \\
+& & \textbf{假设}: 有约束，$F_d$在$A^T(\theta)$的列空间中 \\
+\hline
+
+(11.60) & $A(\theta)\dot{V} + \dot{A}(\theta)V = 0$ & 
+\textbf{约束的时间导数} \\
+& & \textbf{假设}: 约束在所有时间都满足 \\
+\hline
+
+(11.61) & $\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})$ & 
+\textbf{拉格朗日乘数} \\
+& & \textbf{假设}: 从约束动力学求解得到 \\
+\hline
+
+(11.62) & $P(\theta)F = P(\theta)(\Lambda(\theta)\dot{V} + \eta(\theta, V))$ & 
+\textbf{投影后的运动方程} \\
+& & $P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$: 投影矩阵 \\
+& & \textbf{假设}: $P$的秩为$n-k$，投影到运动子空间 \\
+\hline
+
+(11.63) & $P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$ & 
+\textbf{投影矩阵定义} \\
+& & \textbf{假设}: $P$投影到运动子空间，$I-P$投影到力子空间 \\
+\hline
+
+(11.64) & $\tau = J_b^T(\theta)\Bigg[P(\theta)\left(\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e\right) + (I - P(\theta))\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right) + \tilde{\eta}(\theta, V_b)\Bigg]$ & 
+\textbf{混合运动-力控制器} \\
+& & 第一项: 运动控制（投影到运动子空间） \\
+& & 第二项: 力控制（投影到力子空间） \\
+& & 第三项: 科里奥利和重力补偿 \\
+& & \textbf{假设}: wrench和twist在体坐标系$\{b\}$中表示，约束已知 \\
+\hline
+
+\end{longtable}
+
+\section{阻抗控制}
+
+\begin{longtable}{|p{0.15\textwidth}|p{0.35\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endfirsthead
+\hline
+\textbf{公式编号} & \textbf{公式} & \textbf{描述和假设条件} \\
+\hline
+\endhead
+\hline
+\endfoot
+\hline
+\endlastfoot
+
+(11.65) & $m\ddot{x} + b\dot{x} + kx = f$ & 
+\textbf{单自由度阻抗模型} \\
+& & $x$: 位置 \\
+& & $m$: 质量 \\
+& & $b$: 阻尼 \\
+& & $k$: 刚度 \\
+& & $f$: 用户施加的力 \\
+& & \textbf{假设}: 线性阻抗模型 \\
+\hline
+
+(11.66) & $(ms^2 + bs + k)X(s) = F(s)$ & 
+\textbf{阻抗拉普拉斯变换} \\
+& & $Z(s) = F(s)/X(s)$: 阻抗传递函数 \\
+& & $Y(s) = X(s)/F(s)$: 导纳传递函数 \\
+& & \textbf{假设}: 线性系统 \\
+\hline
+
+(11.67) & $M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}}$ & 
+\textbf{任务空间阻抗控制目标} \\
+& & $x \in \mathbb{R}^n$: 任务空间配置 \\
+& & $M, B, K$: 正定虚拟质量、阻尼、刚度矩阵 \\
+& & $f_{\text{ext}}$: 施加到机器人的力 \\
+& & \textbf{假设}: 恒定阻抗参数 \\
+\hline
+
+(11.68) & $\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right)$ & 
+\textbf{阻抗控制算法} \\
+& & $\{\tilde{\Lambda}, \tilde{\eta}\}$: 任务空间动力学模型 \\
+& & \textbf{假设}: 直接测量$\ddot{x}$、$\dot{x}$、$x$，无手腕力传感器 \\
+\hline
+
+(11.69) & $M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}$ & 
+\textbf{导纳控制期望加速度方程} \\
+& & \textbf{假设}: 感测$f_{\text{ext}}$，计算期望加速度 \\
+\hline
+
+(11.70) & $\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)$ & 
+\textbf{导纳控制期望加速度} \\
+& & \textbf{假设}: 从(11.69)求解得到 \\
+\hline
+
+(11.71) & $\ddot{\theta}_d = J^{\dagger}(\theta)(\ddot{x}_d - \dot{J}(\theta)\dot{\theta})$ & 
+\textbf{导纳控制关节加速度} \\
+& & \textbf{假设}: $x = J(\theta)\dot{\theta}$，使用逆动力学计算$\tau$ \\
+\hline
+
+\end{longtable}
+
+\section{重要假设条件总结}
+
+\subsection{通用假设}
+
+\begin{itemize}
+\item \textbf{理想传感器}: 传感器提供精确的位置、速度和力测量
+\item \textbf{理想执行器}: 执行器能够精确产生请求的力矩或力
+\item \textbf{连续时间控制}: 忽略采样时间，视为连续时间系统
+\item \textbf{线性系统}: 大多数分析基于线性误差动力学
+\end{itemize}
+
+\subsection{特定控制方法的假设}
+
+\begin{itemize}
+\item \textbf{速度输入控制}: 
+  \begin{itemize}
+  \item 速度控制执行器可用
+  \item 精确位置反馈
+  \item 雅可比矩阵可逆（任务空间）
+  \end{itemize}
+
+\item \textbf{PD控制}: 
+  \begin{itemize}
+  \item 水平面运动（$g = 0$）或完美重力补偿
+  \item 设定点控制（$\dot{\theta}_d = \ddot{\theta}_d = 0$）
+  \item 零摩擦或已知摩擦模型
+  \end{itemize}
+
+\item \textbf{PID控制}: 
+  \begin{itemize}
+  \item 恒定干扰力矩
+  \item 稳定性条件满足：$K_d > -b$，$K_p > 0$，$\frac{(b + K_d)K_p}{M} > K_i > 0$
+  \end{itemize}
+
+\item \textbf{计算力矩控制}: 
+  \begin{itemize}
+  \item 精确或近似准确的动力学模型
+  \item 完整状态信息可用（集中式控制）
+  \end{itemize}
+
+\item \textbf{力控制}: 
+  \begin{itemize}
+  \item 机器人移动缓慢或静止（忽略加速度和速度项）
+  \item 六轴力-力矩传感器可用（PI控制）
+  \item 完美重力补偿或恒定干扰
+  \end{itemize}
+
+\item \textbf{混合运动-力控制}: 
+  \begin{itemize}
+  \item 刚性环境
+  \item 约束矩阵$A(\theta)$已知
+  \item 自然约束和人工约束不冲突
+  \end{itemize}
+
+\item \textbf{阻抗/导纳控制}: 
+  \begin{itemize}
+  \item 直接测量位置、速度、加速度（阻抗控制）
+  \item 力-力矩传感器可用（导纳控制）
+  \item 恒定阻抗参数
+  \end{itemize}
+\end{itemize}
+
+\section{符号说明}
+
+\subsection{通用符号}
+
+\begin{itemize}
+\item $\theta, \theta_d, \theta_e$: 实际、期望、误差关节位置
+\item $\dot{\theta}, \dot{\theta}_d, \dot{\theta}_e$: 实际、期望、误差关节速度
+\item $\ddot{\theta}, \ddot{\theta}_d$: 实际、期望关节加速度
+\item $\tau$: 关节力矩/力
+\item $M(\theta)$: 质量矩阵
+\item $h(\theta, \dot{\theta})$: 包含科里奥利、向心力和重力的项
+\item $C(\theta, \dot{\theta})$: 科里奥利和向心力矩阵
+\item $g(\theta)$: 重力项
+\item $b(\dot{\theta})$: 摩擦项
+\end{itemize}
+
+\subsection{控制增益}
+
+\begin{itemize}
+\item $K_p, K_i, K_d$: 比例、积分、微分增益（标量或矩阵）
+\item $K_{fp}, K_{fi}$: 力控制比例、积分增益矩阵
+\item $K_{\text{damp}}$: 速度阻尼矩阵
+\end{itemize}
+
+\subsection{任务空间符号}
+
+\begin{itemize}
+\item $X, X_d, X_e$: 实际、期望、误差配置（$SE(3)$）
+\item $V_b, V_d, V_e$: 体坐标系中的实际、期望、误差twist
+\item $F_b, F_d, F_e$: 体坐标系中的实际、期望、误差wrench
+\item $J_b(\theta)$: 体雅可比矩阵
+\item $\Lambda(\theta)$: 任务空间质量矩阵
+\item $\eta(\theta, V_b)$: 任务空间科里奥利和重力项
+\item $[Ad_X]$: 伴随变换
+\end{itemize}
+
+\subsection{误差动力学符号}
+
+\begin{itemize}
+\item $\omega_n$: 自然频率
+\item $\zeta$: 阻尼比
+\item $\omega_d$: 阻尼自然频率
+\item $\tau$: 时间常数
+\item $e_{ss}$: 稳态误差
+\end{itemize}
+
+\end{document}
+

@@ -1,0 +1,291 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{导纳控制中$x$和$\dot{x}$的含义：当前状态 vs. 误差项}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{关键问题}
+
+在导纳控制中，公式为：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+\textbf{重要问题}：公式中的$x$和$\dot{x}$是什么？
+
+\textbf{答案}：它们是\textbf{当前实际状态}，不是误差项！
+
+\section{导纳控制公式的详细解释}
+
+\subsection{公式(11.64)的含义}
+
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{各项的含义}：
+\begin{itemize}
+\item $x$: \textbf{当前实际}末端执行器位置（由编码器测量）
+\item $\dot{x}$: \textbf{当前实际}末端执行器速度（由编码器或转速计测量）
+\item $\ddot{x}_d$: \textbf{期望的}末端执行器加速度（这是要计算的）
+\item $M, B, K$: 虚拟质量、阻尼和刚度矩阵
+\item $f_{\text{ext}}$: 感测到的外力（由力-力矩传感器测量）
+\end{itemize}
+
+\subsection{为什么使用当前状态？}
+
+导纳控制的核心思想是：
+\begin{itemize}
+\item \textbf{感测外力}：测量用户施加的力$f_{\text{ext}}$
+\item \textbf{根据当前状态计算响应}：基于当前位置$x$和速度$\dot{x}$，计算期望加速度$\ddot{x}_d$
+\item \textbf{实现阻抗行为}：使机器人表现得像具有特定阻抗的系统
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $Kx$: 虚拟弹簧力，与\textbf{当前位置}成正比
+\item $B\dot{x}$: 虚拟阻尼力，与\textbf{当前速度}成正比
+\item $M\ddot{x}_d$: 虚拟惯性力，与\textbf{期望加速度}成正比
+\item 这些力的总和等于外力$f_{\text{ext}}$
+\end{itemize}
+
+\section{与阻抗控制的区别}
+
+\subsection{阻抗控制}
+
+在阻抗控制中，控制律可能是：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right)
+\end{equation}
+
+这里：
+\begin{itemize}
+\item $x, \dot{x}, \ddot{x}$: 也是当前实际状态
+\item 但控制目标是产生力，使系统呈现阻抗特性
+\end{itemize}
+
+\subsection{导纳控制}
+
+在导纳控制中：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+这里：
+\begin{itemize}
+\item $x, \dot{x}$: \textbf{当前实际状态}（测量值）
+\item $\ddot{x}_d$: \textbf{期望加速度}（计算值）
+\item 控制目标是产生运动，使系统呈现导纳特性
+\end{itemize}
+
+\section{为什么不是误差项？}
+
+\subsection{常见误解}
+
+有人可能认为公式应该是：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \quad \text{（错误！）}
+\end{equation}
+
+\textbf{这是错误的！}原因如下：
+
+\subsection{正确的理解}
+
+导纳控制的目标是：\textbf{使机器人表现得像具有特定阻抗的系统}。
+
+\textbf{阻抗系统的特性}：
+\begin{itemize}
+\item 弹簧力：$F_{\text{spring}} = Kx$（与当前位置成正比）
+\item 阻尼力：$F_{\text{damp}} = B\dot{x}$（与当前速度成正比）
+\item 惯性力：$F_{\text{inertia}} = M\ddot{x}$（与当前加速度成正比）
+\end{itemize}
+
+\textbf{注意}：这些力都是基于\textbf{当前状态}，不是基于误差！
+
+\subsection{物理类比}
+
+想象一个质量-弹簧-阻尼器系统：
+\begin{equation}
+m\ddot{x} + b\dot{x} + kx = f
+\end{equation}
+
+这里：
+\begin{itemize}
+\item $x$: 质量的\textbf{当前位置}
+\item $\dot{x}$: 质量的\textbf{当前速度}
+\item $\ddot{x}$: 质量的\textbf{当前加速度}
+\item 这些都是实际状态，不是误差
+\end{itemize}
+
+导纳控制就是要让机器人表现得像这样的系统，所以使用当前状态是合理的。
+
+\section{具体例子}
+
+\subsection{例子1：用户推机器人}
+
+\textbf{场景}：
+\begin{itemize}
+\item 机器人当前位置：$x = 0.1$ m
+\item 机器人当前速度：$\dot{x} = 0$ m/s
+\item 用户施加力：$f_{\text{ext}} = 10$ N
+\item 虚拟参数：$M = 1$ kg，$B = 2$ N·s/m，$K = 100$ N/m
+\end{itemize}
+
+\textbf{计算期望加速度}：
+\begin{align}
+M\ddot{x}_d + B\dot{x} + Kx &= f_{\text{ext}} \\
+1 \cdot \ddot{x}_d + 2 \cdot 0 + 100 \cdot 0.1 &= 10 \\
+\ddot{x}_d + 10 &= 10 \\
+\ddot{x}_d &= 0 \text{ m/s}^2
+\end{align}
+
+\textbf{解释}：
+\begin{itemize}
+\item 虚拟弹簧力$Kx = 100 \times 0.1 = 10$ N（与当前位置成正比）
+\item 虚拟阻尼力$B\dot{x} = 2 \times 0 = 0$ N（与当前速度成正比）
+\item 外力$f_{\text{ext}} = 10$ N
+\item 弹簧力正好抵消外力，所以期望加速度为0
+\end{itemize}
+
+\textbf{注意}：这里使用的是\textbf{当前实际位置}$x = 0.1$ m，不是误差！
+
+\subsection{例子2：机器人运动中的响应}
+
+\textbf{场景}：
+\begin{itemize}
+\item 机器人当前位置：$x = 0.2$ m
+\item 机器人当前速度：$\dot{x} = 0.5$ m/s（向右运动）
+\item 用户施加力：$f_{\text{ext}} = 5$ N（向右）
+\item 虚拟参数：$M = 1$ kg，$B = 2$ N·s/m，$K = 100$ N/m
+\end{itemize}
+
+\textbf{计算期望加速度}：
+\begin{align}
+M\ddot{x}_d + B\dot{x} + Kx &= f_{\text{ext}} \\
+1 \cdot \ddot{x}_d + 2 \cdot 0.5 + 100 \cdot 0.2 &= 5 \\
+\ddot{x}_d + 1 + 20 &= 5 \\
+\ddot{x}_d &= -16 \text{ m/s}^2
+\end{align}
+
+\textbf{解释}：
+\begin{itemize}
+\item 虚拟弹簧力$Kx = 100 \times 0.2 = 20$ N（向左，因为$x > 0$）
+\item 虚拟阻尼力$B\dot{x} = 2 \times 0.5 = 1$ N（向左，因为$\dot{x} > 0$）
+\item 外力$f_{\text{ext}} = 5$ N（向右）
+\item 净力：$5 - 20 - 1 = -16$ N（向左）
+\item 所以期望加速度为$-16$ m/s$^2$（向左减速）
+\end{itemize}
+
+\textbf{注意}：这里使用的是\textbf{当前实际状态}$x = 0.2$ m和$\dot{x} = 0.5$ m/s！
+
+\section{如果使用误差项会怎样？}
+
+\subsection{错误的公式}
+
+如果错误地使用误差项：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \quad \text{（错误！）}
+\end{equation}
+
+\textbf{问题}：
+\begin{enumerate}
+\item \textbf{缺少参考点}：$x_d$是什么？在导纳控制中，通常没有明确的期望位置$x_d$
+\item \textbf{物理意义不清}：这不再是阻抗系统的行为
+\item \textbf{控制目标不同}：这变成了轨迹跟踪，而不是阻抗模拟
+\end{enumerate}
+
+\subsection{正确的理解}
+
+导纳控制的目标是：
+\begin{itemize}
+\item \textbf{不是}跟踪特定轨迹（所以不需要$x_d$）
+\item \textbf{而是}响应外力，表现得像阻抗系统
+\item 因此使用当前状态是合理的
+\end{itemize}
+
+\section{与轨迹跟踪控制的对比}
+
+\subsection{轨迹跟踪控制}
+
+在轨迹跟踪控制中，我们使用误差项：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)
+\end{equation}
+
+这里：
+\begin{itemize}
+\item $\theta_d$: 期望位置（由轨迹规划给出）
+\item $\theta$: 实际位置
+\item $\theta_d - \theta$: 位置误差
+\end{itemize}
+
+\textbf{目标}：跟踪期望轨迹。
+
+\subsection{导纳控制}
+
+在导纳控制中，我们使用当前状态：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+这里：
+\begin{itemize}
+\item $x$: 当前实际位置（不是误差）
+\item $\dot{x}$: 当前实际速度（不是误差）
+\item 没有明确的期望位置$x_d$
+\end{itemize}
+
+\textbf{目标}：响应外力，呈现阻抗特性。
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{导纳控制中使用当前状态}：
+\begin{itemize}
+\item $x$: 当前实际位置
+\item $\dot{x}$: 当前实际速度
+\item 不是误差项（不是$x_d - x$）
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 使机器人表现得像阻抗系统
+\item 阻抗系统的力基于当前状态
+\item 因此使用当前状态是合理的
+\end{itemize}
+
+\item \textbf{与轨迹跟踪的区别}：
+\begin{itemize}
+\item 轨迹跟踪：使用误差项，目标是跟踪期望轨迹
+\item 导纳控制：使用当前状态，目标是响应外力
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式记忆}
+
+\textbf{导纳控制公式}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{记忆方法}：
+\begin{itemize}
+\item $x$和$\dot{x}$是\textbf{当前实际状态}（测量值）
+\item $\ddot{x}_d$是\textbf{期望加速度}（计算值）
+\item 公式表示：虚拟力（基于当前状态）等于外力
+\end{itemize}
+
+\end{document}
+

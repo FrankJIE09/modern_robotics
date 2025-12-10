@@ -1,0 +1,175 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{矩阵$A$形式的证明}
+\author{第11章补充材料}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{proof}{证明}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+考虑$p$阶线性齐次微分方程：
+\begin{equation}
+a_p \theta_e^{(p)} + a_{p-1} \theta_e^{(p-1)} + \cdots + a_2 \ddot{\theta}_e + a_1 \dot{\theta}_e + a_0 \theta_e = 0,
+\end{equation}
+其中$\theta_e^{(k)}$表示$\theta_e$的$k$阶导数。
+
+将其重写为：
+\begin{equation}
+\theta_e^{(p)} = -\frac{1}{a_p}(a_{p-1} \theta_e^{(p-1)} + \cdots + a_2 \ddot{\theta}_e + a_1 \dot{\theta}_e + a_0 \theta_e) = -a'_0 \theta_e^{(p-1)} - \cdots - a'_2 \ddot{\theta}_e - a'_1 \dot{\theta}_e - a'_0 \theta_e,
+\end{equation}
+其中$a'_i = a_i/a_p$，$i = 0, 1, \ldots, p-1$。
+
+定义状态向量$\mathbf{x} = (x_1, x_2, \ldots, x_p)^T$，其中：
+\begin{align}
+x_1 &= \theta_e, \\
+x_2 &= \dot{x}_1 = \dot{\theta}_e, \\
+x_3 &= \dot{x}_2 = \ddot{\theta}_e, \\
+&\vdots \\
+x_p &= \dot{x}_{p-1} = \theta_e^{(p-1)}.
+\end{align}
+
+\section{矩阵$A$的形式}
+
+\begin{theorem}
+将$p$阶微分方程(1)转换为状态空间形式$\dot{\mathbf{x}} = A\mathbf{x}$，其中矩阵$A$的形式为：
+\begin{equation}
+A = \begin{bmatrix}
+0 & 1 & 0 & \cdots & 0 & 0 \\
+0 & 0 & 1 & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & 0 & 1 \\
+-a'_0 & -a'_1 & -a'_2 & \cdots & -a'_{p-2} & -a'_{p-1}
+\end{bmatrix} \in \mathbb{R}^{p \times p}.
+\end{equation}
+\end{theorem}
+
+\section{证明}
+
+\begin{proof}
+根据状态变量的定义(3)-(6)，我们可以直接写出每个状态变量的导数：
+
+对于$i = 1, 2, \ldots, p-1$，有：
+\begin{equation}
+\dot{x}_i = x_{i+1},
+\end{equation}
+这直接来自于状态变量的定义：$x_{i+1} = \dot{x}_i$。
+
+对于最后一个状态变量$x_p$，根据方程(2)，有：
+\begin{equation}
+\dot{x}_p = \theta_e^{(p)} = -a'_0 \theta_e - a'_1 \dot{\theta}_e - a'_2 \ddot{\theta}_e - \cdots - a'_{p-1} \theta_e^{(p-1)}.
+\end{equation}
+
+将状态变量的定义代入方程(8)，得到：
+\begin{equation}
+\dot{x}_p = -a'_0 x_1 - a'_1 x_2 - a'_2 x_3 - \cdots - a'_{p-1} x_p.
+\end{equation}
+
+现在，我们将所有状态方程写成矩阵形式。根据方程(7)和(9)，完整的系统为：
+\begin{align}
+\dot{x}_1 &= x_2, \\
+\dot{x}_2 &= x_3, \\
+&\vdots \\
+\dot{x}_{p-1} &= x_p, \\
+\dot{x}_p &= -a'_0 x_1 - a'_1 x_2 - \cdots - a'_{p-1} x_p.
+\end{align}
+
+写成矩阵形式$\dot{\mathbf{x}} = A\mathbf{x}$，其中$\mathbf{x} = [x_1, x_2, \ldots, x_p]^T$，我们得到：
+\begin{equation}
+\begin{bmatrix} \dot{x}_1 \\ \dot{x}_2 \\ \vdots \\ \dot{x}_{p-1} \\ \dot{x}_p \end{bmatrix} = \begin{bmatrix}
+0 & 1 & 0 & \cdots & 0 & 0 \\
+0 & 0 & 1 & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & 0 & 1 \\
+-a'_0 & -a'_1 & -a'_2 & \cdots & -a'_{p-2} & -a'_{p-1}
+\end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_{p-1} \\ x_p \end{bmatrix}.
+\end{equation}
+
+为了验证这个矩阵形式的正确性，我们展开矩阵乘法$A\mathbf{x}$：
+\begin{align}
+A\mathbf{x} &= \begin{bmatrix}
+0 & 1 & 0 & \cdots & 0 & 0 \\
+0 & 0 & 1 & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & 0 & 1 \\
+-a'_0 & -a'_1 & -a'_2 & \cdots & -a'_{p-2} & -a'_{p-1}
+\end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ \vdots \\ x_{p-1} \\ x_p \end{bmatrix} \\
+&= \begin{bmatrix}
+0 \cdot x_1 + 1 \cdot x_2 + 0 \cdot x_3 + \cdots + 0 \cdot x_p \\
+0 \cdot x_1 + 0 \cdot x_2 + 1 \cdot x_3 + \cdots + 0 \cdot x_p \\
+\vdots \\
+0 \cdot x_1 + 0 \cdot x_2 + 0 \cdot x_3 + \cdots + 1 \cdot x_p \\
+(-a'_0) \cdot x_1 + (-a'_1) \cdot x_2 + (-a'_2) \cdot x_3 + \cdots + (-a'_{p-1}) \cdot x_p
+\end{bmatrix} \\
+&= \begin{bmatrix}
+x_2 \\
+x_3 \\
+\vdots \\
+x_p \\
+-a'_0 x_1 - a'_1 x_2 - a'_2 x_3 - \cdots - a'_{p-1} x_p
+\end{bmatrix}.
+\end{align}
+
+这正好对应了状态方程(10)-(13)的右侧，因此：
+\begin{equation}
+A\mathbf{x} = \dot{\mathbf{x}},
+\end{equation}
+从而证明了矩阵$A$的形式(4)是正确的。
+\end{proof}
+
+\section{具体例子}
+
+\subsection{二阶系统（$p=2$）}
+
+对于二阶系统，矩阵$A$为：
+\begin{equation}
+A = \begin{bmatrix}
+0 & 1 \\
+-a'_0 & -a'_1
+\end{bmatrix}.
+\end{equation}
+
+验证：
+\begin{align}
+A\mathbf{x} &= \begin{bmatrix} 0 & 1 \\ -a'_0 & -a'_1 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \end{bmatrix} \\
+&= \begin{bmatrix} x_2 \\ -a'_0 x_1 - a'_1 x_2 \end{bmatrix} = \begin{bmatrix} \dot{x}_1 \\ \dot{x}_2 \end{bmatrix} = \dot{\mathbf{x}}.
+\end{align}
+
+\subsection{三阶系统（$p=3$）}
+
+对于三阶系统，矩阵$A$为：
+\begin{equation}
+A = \begin{bmatrix}
+0 & 1 & 0 \\
+0 & 0 & 1 \\
+-a'_0 & -a'_1 & -a'_2
+\end{bmatrix}.
+\end{equation}
+
+验证：
+\begin{align}
+A\mathbf{x} &= \begin{bmatrix} 0 & 1 & 0 \\ 0 & 0 & 1 \\ -a'_0 & -a'_1 & -a'_2 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} \\
+&= \begin{bmatrix} x_2 \\ x_3 \\ -a'_0 x_1 - a'_1 x_2 - a'_2 x_3 \end{bmatrix} = \begin{bmatrix} \dot{x}_1 \\ \dot{x}_2 \\ \dot{x}_3 \end{bmatrix} = \dot{\mathbf{x}}.
+\end{align}
+
+\section{结论}
+
+我们证明了将$p$阶线性齐次微分方程转换为状态空间形式时，系统矩阵$A$具有伴随形式（Companion Form），其特点是：
+\begin{itemize}
+\item 前$p-1$行的上对角元素为1，其余元素为0
+\item 最后一行包含所有系数的负值：$-a'_0, -a'_1, \ldots, -a'_{p-1}$
+\item 这种形式也称为能控标准型（Controllable Canonical Form）
+\end{itemize}
+
+\end{document}
+

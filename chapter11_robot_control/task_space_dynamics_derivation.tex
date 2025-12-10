@@ -1,0 +1,304 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{任务空间动力学方程$F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b)$的推导}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题背景}
+
+任务空间动力学方程：
+\begin{equation}
+F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b),
+\end{equation}
+其中：
+\begin{itemize}
+\item $F_b$：在末端执行器坐标系$\{b\}$中表示的wrench（力和力矩）
+\item $\Lambda(\theta)$：任务空间质量矩阵
+\item $\dot{V}_b$：末端执行器加速度（体坐标系twist的导数）
+\item $\eta(\theta, V_b)$：任务空间的科里奥利力、向心力和重力项
+\end{itemize}
+
+这个方程是从关节空间动力学转换到任务空间动力学的。
+
+\section{起点：关节空间动力学}
+
+机器人在关节空间的动力学方程为：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}), \tag{8.82}
+\end{equation}
+其中：
+\begin{itemize}
+\item $\tau \in \mathbb{R}^n$：关节力矩向量
+\item $M(\theta) \in \mathbb{R}^{n \times n}$：关节空间质量矩阵
+\item $\ddot{\theta} \in \mathbb{R}^n$：关节加速度向量
+\item $h(\theta, \dot{\theta})$：包含科里奥利力、向心力和重力项
+\end{itemize}
+
+为了简化，我们假设$n = 6$（6自由度机器人），且暂时忽略末端执行器外力$F_{\text{tip}}$。
+
+\section{速度关系}
+
+末端执行器的twist $V$（可以是空间坐标系twist $V_s$或体坐标系twist $V_b$）与关节速度的关系为：
+\begin{equation}
+V = J(\theta)\dot{\theta}, \tag{8.83}
+\end{equation}
+其中$J(\theta)$是雅可比矩阵，与$V$在同一坐标系中表示。
+
+\textbf{注意}：在本文档中，我们使用体坐标系，所以$V = V_b$，$J = J_b$。
+
+\section{加速度关系}
+
+对速度关系(8.83)求时间导数：
+\begin{equation}
+\dot{V} = \frac{d}{dt}[J(\theta)\dot{\theta}] = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}. \tag{8.84}
+\end{equation}
+
+\textbf{关键点}：这里使用了乘积法则，$\dot{J}(\theta)$是雅可比矩阵对时间的导数。
+
+\section{求解关节加速度}
+
+从方程(8.84)中求解$\ddot{\theta}$。假设$J(\theta)$可逆（即机器人不在奇异点），我们有：
+\begin{equation}
+\ddot{\theta} = J^{-1}(\theta)\dot{V} - J^{-1}(\theta)\dot{J}(\theta)\dot{\theta}. \tag{8.86}
+\end{equation}
+
+进一步，从$V = J\dot{\theta}$可以得到$\dot{\theta} = J^{-1}V$，代入上式：
+\begin{equation}
+\ddot{\theta} = J^{-1}(\theta)\dot{V} - J^{-1}(\theta)\dot{J}(\theta)J^{-1}(\theta)V. \tag{8.86'}
+\end{equation}
+
+\section{代入关节空间动力学}
+
+将$\dot{\theta} = J^{-1}V$和$\ddot{\theta}$的表达式代入关节空间动力学方程(8.82)：
+\begin{align}
+\tau &= M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \\
+     &= M(\theta)\left[J^{-1}\dot{V} - J^{-1}\dot{J}J^{-1}V\right] + h(\theta, J^{-1}V) \\
+     &= M(\theta)J^{-1}\dot{V} - M(\theta)J^{-1}\dot{J}J^{-1}V + h(\theta, J^{-1}V). \tag{8.87}
+\end{align}
+
+\section{虚功原理：从关节力矩到任务空间wrench}
+
+\textbf{虚功原理}告诉我们，关节空间和任务空间之间的功率是守恒的：
+\begin{equation}
+\tau^T\dot{\theta} = F^T V,
+\end{equation}
+其中$F$是任务空间wrench。
+
+由于$V = J\dot{\theta}$，我们有：
+\begin{equation}
+\tau^T\dot{\theta} = F^T J\dot{\theta}.
+\end{equation}
+
+这个关系对所有$\dot{\theta}$都成立，因此：
+\begin{equation}
+\tau^T = F^T J \quad \Rightarrow \quad \tau = J^T F.
+\end{equation}
+
+\textbf{等价地}：
+\begin{equation}
+F = J^{-T}\tau, \tag{8.51}
+\end{equation}
+其中$J^{-T} = (J^{-1})^T = (J^T)^{-1}$。
+
+\section{转换到任务空间}
+
+将方程(8.87)两边同时左乘$J^{-T}$：
+\begin{align}
+J^{-T}\tau &= J^{-T}M(\theta)J^{-1}\dot{V} - J^{-T}M(\theta)J^{-1}\dot{J}J^{-1}V + J^{-T}h(\theta, J^{-1}V). \tag{8.88}
+\end{align}
+
+根据虚功原理，$J^{-T}\tau = F$，因此：
+\begin{equation}
+F = J^{-T}M(\theta)J^{-1}\dot{V} - J^{-T}M(\theta)J^{-1}\dot{J}J^{-1}V + J^{-T}h(\theta, J^{-1}V). \tag{8.89}
+\end{equation}
+
+\section{定义任务空间动力学参数}
+
+我们定义：
+
+\begin{enumerate}
+\item \textbf{任务空间质量矩阵}：
+\begin{equation}
+\Lambda(\theta) = J^{-T}(\theta)M(\theta)J^{-1}(\theta). \tag{8.90}
+\end{equation}
+
+\item \textbf{任务空间科里奥利、向心力和重力项}：
+\begin{equation}
+\eta(\theta, V) = J^{-T}(\theta)h(\theta, J^{-1}V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V. \tag{8.91}
+\end{equation}
+\end{enumerate}
+
+\section{最终结果}
+
+将定义代入方程(8.89)，我们得到任务空间动力学方程：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V). \tag{8.89'}
+\end{equation}
+
+对于体坐标系，这可以写成：
+\begin{equation}
+F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b).
+\end{equation}
+
+\section{各项的物理意义}
+
+\subsection{任务空间质量矩阵$\Lambda(\theta)$}
+
+\begin{equation}
+\Lambda(\theta) = J_b^{-T}(\theta)M(\theta)J_b^{-1}(\theta)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 这是末端执行器的\textbf{有效惯性}
+\item 描述了在任务空间中产生单位加速度所需的wrench
+\item 依赖于关节配置$\theta$，因为雅可比矩阵$J_b(\theta)$依赖于配置
+\item 即使关节空间质量矩阵$M(\theta)$是对角的，任务空间质量矩阵$\Lambda(\theta)$通常也是非对角的
+\end{itemize}
+
+\textbf{性质}：
+\begin{itemize}
+\item $\Lambda(\theta)$是$6 \times 6$对称正定矩阵
+\item 在奇异点附近，$\Lambda(\theta)$会变得很大（因为$J_b^{-1}$变得很大）
+\end{itemize}
+
+\subsection{任务空间科里奥利项$\eta(\theta, V_b)$}
+
+\begin{equation}
+\eta(\theta, V_b) = J_b^{-T}(\theta)h(\theta, J_b^{-1}V_b) - \Lambda(\theta)\dot{J}_b(\theta)J_b^{-1}(\theta)V_b
+\end{equation}
+
+\textbf{组成}：
+\begin{enumerate}
+\item \textbf{第一项}：$J_b^{-T}h(\theta, J_b^{-1}V_b)$
+\begin{itemize}
+\item 这是关节空间的科里奥利力、向心力和重力项转换到任务空间
+\item 包括重力在任务空间中的表现
+\end{itemize}
+
+\item \textbf{第二项}：$-\Lambda(\theta)\dot{J}_b(\theta)J_b^{-1}(\theta)V_b$
+\begin{itemize}
+\item 这是由雅可比矩阵的变化产生的"额外"项
+\item 即使关节空间的科里奥利项为零，这个项也可能非零
+\item 反映了任务空间和关节空间之间的耦合
+\end{itemize}
+\end{enumerate}
+
+\section{完整推导流程总结}
+
+\begin{enumerate}
+\item \textbf{起点}：关节空间动力学
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\item \textbf{速度关系}：
+\begin{equation}
+V_b = J_b(\theta)\dot{\theta}
+\end{equation}
+
+\item \textbf{加速度关系}：
+\begin{equation}
+\dot{V}_b = \dot{J}_b(\theta)\dot{\theta} + J_b(\theta)\ddot{\theta}
+\end{equation}
+
+\item \textbf{求解关节加速度}：
+\begin{equation}
+\ddot{\theta} = J_b^{-1}\dot{V}_b - J_b^{-1}\dot{J}_b J_b^{-1}V_b
+\end{equation}
+
+\item \textbf{代入关节空间动力学}：
+\begin{equation}
+\tau = M J_b^{-1}\dot{V}_b - M J_b^{-1}\dot{J}_b J_b^{-1}V_b + h(\theta, J_b^{-1}V_b)
+\end{equation}
+
+\item \textbf{应用虚功原理}：
+\begin{equation}
+F_b = J_b^{-T}\tau
+\end{equation}
+
+\item \textbf{定义任务空间参数}：
+\begin{align}
+\Lambda(\theta) &= J_b^{-T}M J_b^{-1} \\
+\eta(\theta, V_b) &= J_b^{-T}h(\theta, J_b^{-1}V_b) - \Lambda\dot{J}_b J_b^{-1}V_b
+\end{align}
+
+\item \textbf{最终结果}：
+\begin{equation}
+F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b)
+\end{equation}
+\end{enumerate}
+
+\section{重要注意事项}
+
+\subsection{雅可比矩阵必须可逆}
+
+\begin{itemize}
+\item 推导过程要求$J_b(\theta)$可逆
+\item 这意味着关节速度和末端执行器twist之间必须是一对一映射
+\item 在奇异点，$J_b$不可逆，任务空间动力学无法定义
+\item 对于冗余机器人（$n > 6$），需要使用伪逆$J_b^{\dagger}$而不是$J_b^{-1}$
+\end{itemize}
+
+\subsection{依赖于关节配置}
+
+\begin{itemize}
+\item $\Lambda(\theta)$和$\eta(\theta, V_b)$都依赖于$\theta$，而不仅仅是末端执行器位姿$X$
+\item 这是因为不同的关节配置可能对应相同的末端执行器位姿（逆运动学的多解性）
+\item 动力学依赖于具体的关节配置，而不仅仅是末端执行器位置
+\end{itemize}
+
+\subsection{与关节空间动力学的对应关系}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{关节空间} & \textbf{任务空间} \\
+\hline
+$\tau$（关节力矩） & $F_b$（末端执行器wrench） \\
+\hline
+$\ddot{\theta}$（关节加速度） & $\dot{V}_b$（末端执行器加速度） \\
+\hline
+$M(\theta)$（关节空间质量矩阵） & $\Lambda(\theta)$（任务空间质量矩阵） \\
+\hline
+$h(\theta, \dot{\theta})$（科里奥利等项） & $\eta(\theta, V_b)$（任务空间科里奥利等项） \\
+\hline
+\end{tabular}
+\caption{关节空间与任务空间动力学对应关系}
+\end{table}
+
+\section{应用：任务空间控制}
+
+任务空间动力学方程使得我们可以直接在任务空间中设计控制器，而不需要先转换到关节空间。例如，任务空间计算力矩控制器：
+
+\begin{equation}
+\tau = J_b^T(\theta)\left[\Lambda(\theta)\dot{V}_{d,b} + \eta(\theta, V_b) + K_p X_e + K_d V_e\right],
+\end{equation}
+其中$V_{d,b}$是期望的末端执行器加速度，$X_e$和$V_e$是位置和速度误差。
+
+\section{总结}
+
+任务空间动力学方程$F_b = \Lambda(\theta)\dot{V}_b + \eta(\theta, V_b)$是通过以下步骤从关节空间动力学推导出来的：
+
+\begin{enumerate}
+\item 使用速度关系$V_b = J_b\dot{\theta}$和加速度关系$\dot{V}_b = \dot{J}_b\dot{\theta} + J_b\ddot{\theta}$
+\item 求解关节加速度$\ddot{\theta}$并代入关节空间动力学
+\item 应用虚功原理$F_b = J_b^{-T}\tau$将关节力矩转换为任务空间wrench
+\item 定义任务空间质量矩阵$\Lambda(\theta) = J_b^{-T}M J_b^{-1}$和科里奥利项$\eta(\theta, V_b)$
+\item 整理得到最终的任务空间动力学方程
+\end{enumerate}
+
+这个方程使得我们可以直接在任务空间中分析和设计控制器，这对于与环境交互的机器人特别有用。
+
+\end{document}
+

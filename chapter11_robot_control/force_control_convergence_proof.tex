@@ -1,0 +1,327 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{力控制误差收敛性证明：$K_{fp}\dot{F}_e + K_{fi}F_e = 0$}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+在力控制中，当存在非零但恒定的力干扰时（例如，由于重力模型$\tilde{g}(\theta)$不准确），误差动力学方程为：
+\begin{equation}
+K_{fp}\dot{F}_e + K_{fi}F_e = 0, \tag{67}
+\end{equation}
+其中：
+\begin{itemize}
+\item $F_e = F_d - F_{\text{tip}}$是力误差（期望力减去实际力）
+\item $K_{fp}$是正定比例增益矩阵
+\item $K_{fi}$是正定积分增益矩阵
+\end{itemize}
+
+我们需要证明：对于正定的$K_{fp}$和$K_{fi}$，$F_e$会收敛到零。
+
+\section{背景：误差动力学方程的推导}
+
+\subsection{完美重力建模的情况}
+
+在完美重力建模的情况下，力控制器为：
+\begin{equation}
+\tau = \tilde{g}(\theta) + J^T(\theta)\left[F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right],
+\end{equation}
+其中$\tilde{g}(\theta)$是重力补偿项。
+
+代入动力学方程（忽略加速度和速度项）：
+\begin{equation}
+g(\theta) + J^T(\theta)F_{\text{tip}} = \tau,
+\end{equation}
+我们得到误差动力学：
+\begin{equation}
+K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt = 0. \tag{11.52}
+\end{equation}
+
+\subsection{存在恒定干扰的情况}
+
+当重力模型不准确时，存在恒定干扰$d$（常数向量），误差动力学变为：
+\begin{equation}
+K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt = d, \tag{11.52'}
+\end{equation}
+其中$d$是恒定向量（例如，$d = g(\theta) - \tilde{g}(\theta)$在稳态时的值）。
+
+\subsection{求导得到微分方程}
+
+对方程(11.52')两边求时间导数：
+\begin{equation}
+\frac{d}{dt}\left[K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right] = \frac{d}{dt}[d].
+\end{equation}
+
+由于$d$是常数，$\frac{d}{dt}[d] = 0$，且$\frac{d}{dt}\int_0^t F_e(t)dt = F_e$，我们得到：
+\begin{equation}
+K_{fp}\dot{F}_e + K_{fi}F_e = 0. \tag{67}
+\end{equation}
+
+\section{证明：$F_e$收敛到零}
+
+\subsection{方法1：直接求解微分方程}
+
+方程(67)是一个一阶线性齐次微分方程。为了求解，我们首先将其写成标准形式。
+
+\subsubsection{标量情况（简化理解）}
+
+首先考虑标量情况，其中$K_{fp}$和$K_{fi}$是正标量：
+\begin{equation}
+K_{fp}\dot{F}_e + K_{fi}F_e = 0.
+\end{equation}
+
+重写为：
+\begin{equation}
+\dot{F}_e = -\frac{K_{fi}}{K_{fp}}F_e.
+\end{equation}
+
+这是一个标准的一阶线性齐次微分方程，解为：
+\begin{equation}
+F_e(t) = F_e(0)e^{-\frac{K_{fi}}{K_{fp}}t}.
+\end{equation}
+
+\textbf{收敛性}：
+\begin{itemize}
+\item 由于$K_{fp} > 0$和$K_{fi} > 0$，我们有$\frac{K_{fi}}{K_{fp}} > 0$
+\item 因此$e^{-\frac{K_{fi}}{K_{fp}}t} \to 0$当$t \to \infty$
+\item 所以$F_e(t) \to 0$当$t \to \infty$
+\end{itemize}
+
+\subsubsection{向量情况（一般情况）}
+
+对于向量情况，方程(67)是矩阵微分方程：
+\begin{equation}
+K_{fp}\dot{F}_e + K_{fi}F_e = 0,
+\end{equation}
+其中$K_{fp}$和$K_{fi}$是正定矩阵，$F_e \in \mathbb{R}^6$。
+
+重写为：
+\begin{equation}
+\dot{F}_e = -K_{fp}^{-1}K_{fi}F_e. \tag{67'}
+\end{equation}
+
+\textbf{关键观察}：矩阵$-K_{fp}^{-1}K_{fi}$的特征值决定了系统的稳定性。
+
+\subsection{方法2：使用Lyapunov稳定性理论}
+
+我们构造一个Lyapunov函数来证明稳定性。
+
+\subsubsection{构造Lyapunov函数}
+
+定义Lyapunov函数：
+\begin{equation}
+V(F_e) = \frac{1}{2}F_e^T K_{fp}^{-1}K_{fi}F_e.
+\end{equation}
+
+\textbf{正定性}：
+\begin{itemize}
+\item 由于$K_{fp}$和$K_{fi}$都是正定矩阵，$K_{fp}^{-1}$也是正定的
+\item 两个正定矩阵的乘积$K_{fp}^{-1}K_{fi}$的特征值都是正的（虽然矩阵本身可能不对称）
+\item 更准确地说，$K_{fp}^{-1}K_{fi}$是正定的（可以通过相似变换证明）
+\item 因此$V(F_e) \geq 0$，且$V(F_e) = 0$当且仅当$F_e = 0$
+\end{itemize}
+
+实际上，更简单的方法是使用：
+\begin{equation}
+V(F_e) = \frac{1}{2}F_e^T K_{fp}F_e.
+\end{equation}
+
+这个函数显然是正定的，因为$K_{fp}$是正定矩阵。
+
+\subsubsection{计算$\dot{V}$}
+
+对$V$求时间导数：
+\begin{align}
+\dot{V} &= \frac{d}{dt}\left[\frac{1}{2}F_e^T K_{fp}F_e\right] \\
+        &= \frac{1}{2}\dot{F}_e^T K_{fp}F_e + \frac{1}{2}F_e^T K_{fp}\dot{F}_e \\
+        &= F_e^T K_{fp}\dot{F}_e \quad \text{（因为$K_{fp}$是对称的）}
+\end{align}
+
+从方程(67)，我们有$K_{fp}\dot{F}_e = -K_{fi}F_e$，因此：
+\begin{equation}
+\dot{V} = F_e^T(-K_{fi}F_e) = -F_e^T K_{fi}F_e.
+\end{equation}
+
+\subsubsection{证明$\dot{V} \leq 0$}
+
+由于$K_{fi}$是正定矩阵，对于任何非零向量$F_e$，我们有：
+\begin{equation}
+F_e^T K_{fi}F_e > 0.
+\end{equation}
+
+因此：
+\begin{equation}
+\dot{V} = -F_e^T K_{fi}F_e \leq 0,
+\end{equation}
+且$\dot{V} = 0$当且仅当$F_e = 0$。
+
+\subsubsection{应用Lyapunov稳定性定理}
+
+根据Lyapunov稳定性定理：
+\begin{itemize}
+\item $V(F_e) > 0$对所有$F_e \neq 0$成立，且$V(0) = 0$
+\item $\dot{V}(F_e) < 0$对所有$F_e \neq 0$成立，且$\dot{V}(0) = 0$
+\end{itemize}
+
+因此，平衡点$F_e = 0$是\textbf{全局渐近稳定}的，即：
+\begin{equation}
+\lim_{t \to \infty} F_e(t) = 0,
+\end{equation}
+从任何初始条件$F_e(0)$开始。
+
+\subsection{方法3：特征值分析}
+
+从方程(67')：
+\begin{equation}
+\dot{F}_e = -K_{fp}^{-1}K_{fi}F_e = -A F_e,
+\end{equation}
+其中$A = K_{fp}^{-1}K_{fi}$。
+
+\subsubsection{矩阵$A$的性质}
+
+\textbf{关键性质}：虽然$A = K_{fp}^{-1}K_{fi}$本身可能不对称，但我们可以证明它的所有特征值都有正实部。
+
+考虑广义特征值问题：
+\begin{equation}
+K_{fi}v = \lambda K_{fp}v,
+\end{equation}
+其中$\lambda$是广义特征值，$v$是广义特征向量。
+
+这等价于：
+\begin{equation}
+K_{fp}^{-1}K_{fi}v = \lambda v,
+\end{equation}
+即$\lambda$是$A = K_{fp}^{-1}K_{fi}$的特征值。
+
+\textbf{正定性}：
+\begin{itemize}
+\item 由于$K_{fp}$和$K_{fi}$都是正定矩阵
+\item 广义特征值$\lambda$都是正的（这是正定矩阵对的标准性质）
+\item 因此$A$的所有特征值都是正的
+\end{itemize}
+
+\subsubsection{系统矩阵的特征值}
+
+系统矩阵是$-A = -K_{fp}^{-1}K_{fi}$，其特征值是$A$的特征值的负值。
+
+由于$A$的所有特征值都是正的，$-A$的所有特征值都是负的。
+
+\subsubsection{收敛性结论}
+
+对于线性系统$\dot{F}_e = -A F_e$，如果$-A$的所有特征值都有负实部，则系统是稳定的，且：
+\begin{equation}
+F_e(t) = e^{-At}F_e(0) \to 0 \quad \text{当} \quad t \to \infty.
+\end{equation}
+
+更准确地说，如果$-A$的所有特征值$\lambda_i$都满足$\text{Re}(\lambda_i) < 0$，则：
+\begin{equation}
+\|F_e(t)\| \leq Ce^{-\alpha t}\|F_e(0)\|,
+\end{equation}
+其中$C > 0$是常数，$\alpha = \min_i \text{Re}(-\lambda_i) > 0$。
+
+因此$F_e(t)$指数收敛到零。
+
+\subsection{方法4：能量耗散观点}
+
+从物理角度看，方程(67)描述了一个能量耗散过程。
+
+\subsubsection{能量函数}
+
+定义"误差能量"：
+\begin{equation}
+E(t) = \frac{1}{2}F_e^T(t)K_{fp}F_e(t).
+\end{equation}
+
+\subsubsection{能量变化率}
+
+\begin{align}
+\dot{E} &= F_e^T K_{fp}\dot{F}_e \\
+        &= F_e^T(-K_{fi}F_e) \quad \text{（从方程(67)）} \\
+        &= -F_e^T K_{fi}F_e \leq 0.
+\end{align}
+
+\subsubsection{能量耗散}
+
+\begin{itemize}
+\item 能量$E(t)$单调递减：$\dot{E} \leq 0$
+\item 能量有下界：$E(t) \geq 0$
+\item 因此能量收敛到某个值：$\lim_{t \to \infty} E(t) = E_{\infty} \geq 0$
+\end{itemize}
+
+\subsubsection{证明$E_{\infty} = 0$}
+
+假设$E_{\infty} > 0$，则$F_e(t)$不收敛到零，即存在$\epsilon > 0$使得$\|F_e(t)\| \geq \epsilon$对所有$t$成立。
+
+那么：
+\begin{equation}
+\dot{E} = -F_e^T K_{fi}F_e \leq -\lambda_{\min}(K_{fi})\|F_e\|^2 \leq -\lambda_{\min}(K_{fi})\epsilon^2 < 0,
+\end{equation}
+其中$\lambda_{\min}(K_{fi}) > 0$是$K_{fi}$的最小特征值。
+
+这意味着能量以恒定速率减少，与$E(t)$有下界矛盾。因此$E_{\infty} = 0$，即$F_e(t) \to 0$。
+
+\section{收敛速率}
+
+\subsection{指数收敛}
+
+从特征值分析，我们知道$F_e(t)$指数收敛到零：
+\begin{equation}
+\|F_e(t)\| \leq Ce^{-\alpha t}\|F_e(0)\|,
+\end{equation}
+其中收敛速率$\alpha$取决于$K_{fp}$和$K_{fi}$的选择。
+
+\subsection{时间常数}
+
+对于标量情况，时间常数为：
+\begin{equation}
+\tau = \frac{K_{fp}}{K_{fi}}.
+\end{equation}
+
+误差在时间$t = \tau$时衰减到初始值的$1/e \approx 37\%$。
+
+\subsection{设计考虑}
+
+\begin{itemize}
+\item \textbf{快速收敛}：增大$K_{fi}$或减小$K_{fp}$可以加快收敛
+\item \textbf{稳定性}：但过大的$K_{fi}$可能导致系统不稳定（在实际系统中，由于延迟、噪声等因素）
+\item \textbf{平衡}：需要在收敛速度和稳定性之间找到平衡
+\end{itemize}
+
+\section{总结}
+
+我们通过多种方法证明了：对于正定的$K_{fp}$和$K_{fi}$，误差动力学方程
+\begin{equation}
+K_{fp}\dot{F}_e + K_{fi}F_e = 0
+\end{equation}
+的解$F_e(t)$会\textbf{全局渐近收敛到零}，即：
+\begin{equation}
+\lim_{t \to \infty} F_e(t) = 0.
+\end{equation}
+
+\textbf{证明方法}：
+\begin{enumerate}
+\item \textbf{直接求解}：标量情况下直接求解，向量情况下使用矩阵指数
+\item \textbf{Lyapunov方法}：构造Lyapunov函数$V = \frac{1}{2}F_e^T K_{fp}F_e$，证明$\dot{V} < 0$
+\item \textbf{特征值分析}：证明系统矩阵的所有特征值都有负实部
+\item \textbf{能量耗散}：从能量角度证明能量单调递减到零
+\end{enumerate}
+
+\textbf{关键条件}：
+\begin{itemize}
+\item $K_{fp}$必须是正定矩阵
+\item $K_{fi}$必须是正定矩阵
+\item 这两个条件保证了系统的全局渐近稳定性
+\end{itemize}
+
+\end{document}
+

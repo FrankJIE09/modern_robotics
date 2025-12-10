@@ -1,0 +1,580 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{结合轨迹跟踪的导纳控制中添加积分项的详细方法}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+结合轨迹跟踪的导纳控制公式：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \tag{*}
+\end{equation}
+
+在稳态时存在误差：$x_{e,ss} = f_{\text{ext}}/K$。
+
+为了消除稳态误差，可以添加积分项，类似于PID控制中的积分项。本文将详细介绍如何添加积分项。
+
+\section{为什么需要积分项？}
+
+\subsection{稳态误差问题}
+
+从稳态分析：
+\begin{equation}
+K(x_d - x_{ss}) = f_{\text{ext}} \quad \Rightarrow \quad x_{e,ss} = \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果$f_{\text{ext}} \neq 0$，则$x_{e,ss} \neq 0$
+\item 位置精度受到影响
+\item 增大$K$可以减少误差，但系统变"硬"
+\end{itemize}
+
+\subsection{积分项的作用}
+
+积分项的作用是：
+\begin{itemize}
+\item \textbf{累积误差}：$\int_0^t (x_d - x) d\tau$随时间累积位置误差
+\item \textbf{提供持续修正}：即使误差很小，积分项也能提供修正力
+\item \textbf{消除稳态误差}：在稳态时，积分项提供必要的力来抵消外力
+\end{itemize}
+
+\textbf{类比}：类似于PID控制中的积分项，用于消除持续干扰引起的稳态误差。
+
+\section{添加积分项的方法}
+
+\subsection{基本公式}
+
+在公式(*)中添加积分项：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}} \tag{1}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $K_i$: 积分增益（正定矩阵或正标量）
+\item $\int_0^t (x_d - x) d\tau$: 位置误差的积分
+\end{itemize}
+
+\subsection{误差形式}
+
+定义位置误差：$x_e = x_d - x$
+
+公式(1)可以写成：
+\begin{equation}
+M\ddot{x}_d + B\dot{x}_e + Kx_e + K_i \int_0^t x_e(\tau) d\tau = f_{\text{ext}} \tag{2}
+\end{equation}
+
+\subsection{求解期望加速度}
+
+从公式(1)或(2)求解$\ddot{x}_d$：
+\begin{equation}
+\ddot{x}_d = M^{-1}\left[f_{\text{ext}} - B(\dot{x}_d - \dot{x}) - K(x_d - x) - K_i \int_0^t (x_d - x) d\tau\right] \tag{3}
+\end{equation}
+
+或者：
+\begin{equation}
+\ddot{x}_d = M^{-1}\left[f_{\text{ext}} - B\dot{x}_e - Kx_e - K_i \int_0^t x_e(\tau) d\tau\right] \tag{4}
+\end{equation}
+
+\section{稳态误差分析}
+
+\subsection{稳态条件}
+
+在稳态时，假设：
+\begin{itemize}
+\item 期望位置和速度恒定：$\dot{x}_d = 0$，$\ddot{x}_d = 0$
+\item 实际速度为零：$\dot{x} = 0$
+\item 外力恒定：$f_{\text{ext}} = f_0$（常数）
+\end{itemize}
+
+\subsection{稳态方程}
+
+在稳态条件下，公式(1)简化为：
+\begin{equation}
+B \cdot 0 + K(x_d - x_{ss}) + K_i \int_0^t (x_d - x_{ss}) d\tau = f_0
+\end{equation}
+
+即：
+\begin{equation}
+K x_{e,ss} + K_i \int_0^t x_{e,ss} d\tau = f_0 \tag{5}
+\end{equation}
+
+\subsection{稳态误差为零的证明}
+
+对公式(5)两边求时间导数：
+\begin{equation}
+K \dot{x}_{e,ss} + K_i x_{e,ss} = 0
+\end{equation}
+
+在稳态时，$\dot{x}_{e,ss} = 0$（误差不再变化），因此：
+\begin{equation}
+K_i x_{e,ss} = 0
+\end{equation}
+
+由于$K_i > 0$（正定），必须有：
+\begin{equation}
+x_{e,ss} = 0 \tag{6}
+\end{equation}
+
+\textbf{结论}：积分项可以消除稳态误差！
+
+\subsection{积分项的稳态值}
+
+从公式(5)和(6)：
+\begin{equation}
+K \cdot 0 + K_i \int_0^t x_{e,ss} d\tau = f_0
+\end{equation}
+
+即：
+\begin{equation}
+K_i \int_0^t x_{e,ss} d\tau = f_0
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 在稳态时，积分项提供力$K_i \int x_e d\tau = f_0$
+\item 这个力正好抵消外力$f_{\text{ext}}$
+\item 因此位置误差为零
+\end{itemize}
+
+\section{误差动力学分析}
+
+\subsection{误差动力学方程}
+
+定义位置误差：$x_e = x_d - x$
+
+对时间求导：
+\begin{equation}
+\dot{x}_e = \dot{x}_d - \dot{x}
+\end{equation}
+
+从公式(1)，在设定点控制时（$\dot{x}_d = 0$，$\ddot{x}_d = 0$）：
+\begin{equation}
+B\dot{x}_e + Kx_e + K_i \int_0^t x_e(\tau) d\tau = f_{\text{ext}}
+\end{equation}
+
+对时间求导：
+\begin{equation}
+B\ddot{x}_e + K\dot{x}_e + K_i x_e = \dot{f}_{\text{ext}} \tag{7}
+\end{equation}
+
+如果$f_{\text{ext}}$是常数，$\dot{f}_{\text{ext}} = 0$，则：
+\begin{equation}
+B\ddot{x}_e + K\dot{x}_e + K_i x_e = 0 \tag{8}
+\end{equation}
+
+\subsection{特征方程}
+
+方程(8)的特征方程为：
+\begin{equation}
+Bs^2 + Ks + K_i = 0 \tag{9}
+\end{equation}
+
+特征值：
+\begin{equation}
+s = \frac{-K \pm \sqrt{K^2 - 4BK_i}}{2B} \tag{10}
+\end{equation}
+
+\subsection{稳定性条件}
+
+系统稳定的条件是所有特征值都有负实部。
+
+\textbf{必要条件}：
+\begin{itemize}
+\item $B > 0$（阻尼为正）
+\item $K > 0$（刚度为负）
+\item $K_i > 0$（积分增益为正）
+\end{itemize}
+
+\textbf{充分条件}：
+\begin{itemize}
+\item 如果$K^2 - 4BK_i < 0$（欠阻尼），特征值是复共轭，实部为$-K/(2B) < 0$，系统稳定
+\item 如果$K^2 - 4BK_i \geq 0$（过阻尼或临界阻尼），特征值是实数，都为负，系统稳定
+\end{itemize}
+
+\textbf{结论}：只要$B, K, K_i > 0$，系统就是稳定的。
+
+\subsection{阻尼比和自然频率}
+
+将特征方程(9)写成标准形式：
+\begin{equation}
+s^2 + 2\zeta\omega_n s + \omega_n^2 = 0
+\end{equation}
+
+其中：
+\begin{align}
+\omega_n &= \sqrt{\frac{K_i}{B}} \quad \text{（自然频率）} \tag{11} \\
+\zeta &= \frac{K}{2\sqrt{BK_i}} \quad \text{（阻尼比）} \tag{12}
+\end{align}
+
+\textbf{稳定性要求}：
+\begin{itemize}
+\item $\omega_n > 0$：要求$K_i > 0$
+\item $\zeta > 0$：要求$K > 0$
+\item 系统总是稳定的（如果$B, K, K_i > 0$）
+\end{itemize}
+
+\section{参数选择}
+
+\subsection{设计目标}
+
+\begin{enumerate}
+\item \textbf{消除稳态误差}：需要$K_i > 0$
+\item \textbf{快速响应}：需要较大的$\omega_n = \sqrt{K_i/B}$
+\item \textbf{无超调}：需要$\zeta \geq 1$（临界阻尼或过阻尼）
+\item \textbf{稳定性}：需要$B, K, K_i > 0$
+\end{enumerate}
+
+\subsection{参数选择策略}
+
+\textbf{方法1：先选择$K$和$B$，再选择$K_i$}
+
+\begin{enumerate}
+\item 选择$K$和$B$以获得良好的瞬态响应（不考虑积分项）
+\item 选择$K_i$足够小，不影响稳定性
+\item 验证$\zeta = K/(2\sqrt{BK_i}) \geq 1$（临界阻尼）
+\end{enumerate}
+
+\textbf{方法2：基于阻尼比和自然频率设计}
+
+\begin{enumerate}
+\item 选择期望的阻尼比$\zeta$（如$\zeta = 1$，临界阻尼）
+\item 选择期望的自然频率$\omega_n$（决定响应速度）
+\item 计算参数：
+\begin{align}
+K_i &= B\omega_n^2 \\
+K &= 2\zeta\sqrt{BK_i} = 2\zeta B\omega_n
+\end{align}
+\end{enumerate}
+
+\subsection{参数约束}
+
+\textbf{稳定性约束}：
+\begin{equation}
+K_i > 0, \quad K > 0, \quad B > 0
+\end{equation}
+
+\textbf{临界阻尼约束}（$\zeta = 1$）：
+\begin{equation}
+K = 2\sqrt{BK_i} \quad \Rightarrow \quad K^2 = 4BK_i
+\end{equation}
+
+\textbf{过阻尼约束}（$\zeta > 1$）：
+\begin{equation}
+K > 2\sqrt{BK_i} \quad \Rightarrow \quad K^2 > 4BK_i
+\end{equation}
+
+\textbf{欠阻尼约束}（$\zeta < 1$，有超调）：
+\begin{equation}
+K < 2\sqrt{BK_i} \quad \Rightarrow \quad K^2 < 4BK_i
+\end{equation}
+
+\section{实现方法}
+
+\subsection{离散时间实现}
+
+在实际实现中，使用离散时间形式：
+
+\textbf{定义积分项}：
+\begin{equation}
+I(k) = \int_0^{k\Delta t} x_e(\tau) d\tau \approx \sum_{i=0}^{k-1} x_e(i) \Delta t
+\end{equation}
+
+\textbf{递推公式}：
+\begin{equation}
+I(k+1) = I(k) + x_e(k) \Delta t \tag{13}
+\end{equation}
+
+\textbf{完整控制算法}：
+
+\begin{enumerate}
+\item 读取当前状态：$x(k)$, $\dot{x}(k)$
+\item 读取期望状态：$x_d(k)$, $\dot{x}_d(k)$
+\item 计算误差：
+\begin{align}
+x_e(k) &= x_d(k) - x(k) \\
+\dot{x}_e(k) &= \dot{x}_d(k) - \dot{x}(k)
+\end{align}
+\item 更新积分项：
+\begin{equation}
+I(k+1) = I(k) + x_e(k) \Delta t
+\end{equation}
+\item 计算期望加速度：
+\begin{equation}
+\ddot{x}_d(k) = M^{-1}[f_{\text{ext}}(k) - B\dot{x}_e(k) - Kx_e(k) - K_i I(k+1)]
+\end{equation}
+\item 转换为关节加速度或速度（根据控制方式）
+\end{enumerate}
+
+\subsection{初始化}
+
+\textbf{积分项初始化}：
+\begin{equation}
+I(0) = 0
+\end{equation}
+
+或者，如果有先验信息：
+\begin{equation}
+I(0) = \frac{f_{\text{ext,estimated}}}{K_i}
+\end{equation}
+
+\section{积分器抗饱和}
+
+\subsection{问题：积分饱和}
+
+如果误差持续存在且很大，积分项可能变得很大：
+\begin{equation}
+I(t) = \int_0^t x_e(\tau) d\tau \to \infty \quad \text{（如果$x_e$持续非零）}
+\end{equation}
+
+\textbf{问题}：
+\begin{itemize}
+\item 积分项过大可能导致系统不稳定
+\item 系统响应变慢
+\item 需要很长时间才能恢复
+\end{itemize}
+
+\subsection{解决方法1：积分限幅}
+
+限制积分项的大小：
+\begin{equation}
+I_{\max} = \frac{\tau_{\max}}{K_i}
+\end{equation}
+
+其中$\tau_{\max}$是最大允许力矩。
+
+\textbf{实现}：
+\begin{equation}
+I(k+1) = \text{clip}(I(k) + x_e(k) \Delta t, -I_{\max}, I_{\max})
+\end{equation}
+
+\subsection{解决方法2：条件积分}
+
+只在误差较小时积分：
+\begin{equation}
+I(k+1) = \begin{cases}
+I(k) + x_e(k) \Delta t & \text{如果} |x_e(k)| < x_{e,\max} \\
+I(k) & \text{否则}
+\end{cases}
+\end{equation}
+
+\subsection{解决方法3：积分重置}
+
+当误差符号改变时重置积分：
+\begin{equation}
+I(k+1) = \begin{cases}
+0 & \text{如果} x_e(k) \cdot x_e(k-1) < 0 \text{（符号改变）} \\
+I(k) + x_e(k) \Delta t & \text{否则}
+\end{cases}
+\end{equation}
+
+\subsection{解决方法4：泄漏积分}
+
+使用泄漏积分（leaky integrator）：
+\begin{equation}
+I(k+1) = \alpha I(k) + x_e(k) \Delta t
+\end{equation}
+
+其中$0 < \alpha < 1$是泄漏系数。
+
+\textbf{优点}：
+\begin{itemize}
+\item 防止积分项无限增长
+\item 保持对持续误差的响应
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 可能无法完全消除稳态误差
+\item 需要权衡
+\end{itemize}
+
+\section{数值例子}
+
+\subsection{例子1：参数设计}
+
+\textbf{给定参数}：
+\begin{itemize}
+\item $B = 10$ N·s/m（阻尼）
+\item 期望：$\zeta = 1$（临界阻尼），$\omega_n = 2$ rad/s
+\end{itemize}
+
+\textbf{计算参数}：
+\begin{align}
+K_i &= B\omega_n^2 = 10 \times 4 = 40 \text{ N/(m·s)} \\
+K &= 2\zeta\sqrt{BK_i} = 2 \times 1 \times \sqrt{10 \times 40} = 40 \text{ N/m}
+\end{align}
+
+\textbf{验证}：
+\begin{align}
+\omega_n &= \sqrt{\frac{K_i}{B}} = \sqrt{\frac{40}{10}} = 2 \text{ rad/s} \quad \checkmark \\
+\zeta &= \frac{K}{2\sqrt{BK_i}} = \frac{40}{2 \times 20} = 1 \quad \checkmark
+\end{align}
+
+\subsection{例子2：稳态误差消除}
+
+\textbf{初始条件}：
+\begin{itemize}
+\item 期望位置：$x_d = 0.5$ m
+\item 外力：$f_{\text{ext}} = 10$ N
+\item 参数：$K = 40$ N/m，$K_i = 40$ N/(m·s)，$B = 10$ N·s/m
+\end{itemize}
+
+\textbf{无积分项时}（$K_i = 0$）：
+\begin{equation}
+x_{e,ss} = \frac{10}{40} = 0.25 \text{ m}
+\end{equation}
+
+\textbf{有积分项时}（$K_i = 40$）：
+\begin{equation}
+x_{e,ss} = 0 \text{ m}
+\end{equation}
+
+\textbf{积分项稳态值}：
+\begin{equation}
+I_{ss} = \frac{f_{\text{ext}}}{K_i} = \frac{10}{40} = 0.25 \text{ m·s}
+\end{equation}
+
+\subsection{例子3：离散时间实现}
+
+\textbf{参数}：
+\begin{itemize}
+\item 采样时间：$\Delta t = 0.01$ s
+\item $K = 40$ N/m，$K_i = 40$ N/(m·s)，$B = 10$ N·s/m
+\item 初始：$I(0) = 0$，$x_e(0) = 0.25$ m
+\end{itemize}
+
+\textbf{前几步计算}：
+
+$k = 0$：
+\begin{align}
+I(1) &= I(0) + x_e(0) \Delta t = 0 + 0.25 \times 0.01 = 0.0025 \text{ m·s} \\
+\ddot{x}_d(0) &= M^{-1}[f_{\text{ext}} - B\dot{x}_e(0) - Kx_e(0) - K_i I(1)] \\
+              &= M^{-1}[10 - 0 - 40 \times 0.25 - 40 \times 0.0025] \\
+              &= M^{-1}[10 - 10 - 0.1] = -0.1M^{-1}
+\end{align}
+
+$k = 1$：
+\begin{align}
+x_e(1) &\approx x_e(0) + \dot{x}_e(0) \Delta t \quad \text{（假设）} \\
+I(2) &= I(1) + x_e(1) \Delta t
+\end{align}
+
+（继续迭代...）
+
+\section{与PID控制的类比}
+
+\subsection{PID控制}
+
+标准PID控制：
+\begin{equation}
+\tau = K_p e + K_i \int_0^t e(\tau) d\tau + K_d \dot{e}
+\end{equation}
+
+其中$e = \theta_d - \theta$是误差。
+
+\subsection{导纳控制中的对应}
+
+结合轨迹跟踪的导纳控制（带积分项）：
+\begin{equation}
+M\ddot{x}_d + B\dot{x}_e + Kx_e + K_i \int_0^t x_e(\tau) d\tau = f_{\text{ext}}
+\end{equation}
+
+\textbf{对应关系}：
+\begin{itemize}
+\item $K$: 对应$K_p$（比例项）
+\item $K_i$: 对应$K_i$（积分项）
+\item $B$: 对应$K_d$（微分项，但这里是速度误差）
+\item $M$: 对应惯性项（PID中没有直接对应）
+\end{itemize}
+
+\section{实际应用注意事项}
+
+\subsection{何时使用积分项？}
+
+\textbf{适合使用}：
+\begin{itemize}
+\item 需要高位置精度
+\item 存在持续外力干扰
+\item 可以接受稍慢的响应
+\end{itemize}
+
+\textbf{不适合使用}：
+\begin{itemize}
+\item 纯人机交互（允许位置误差）
+\item 需要快速响应
+\item 系统对稳定性要求极高
+\end{itemize}
+
+\subsection{参数调整建议}
+
+\begin{enumerate}
+\item \textbf{从小开始}：
+\begin{itemize}
+\item 先选择较小的$K_i$
+\item 观察系统响应
+\item 逐步增大
+\end{itemize}
+
+\item \textbf{监控积分项}：
+\begin{itemize}
+\item 检查积分项是否饱和
+\item 如果饱和，使用抗饱和方法
+\end{itemize}
+
+\item \textbf{测试不同场景}：
+\begin{itemize}
+\item 测试阶跃响应
+\item 测试正弦输入
+\item 测试外力干扰
+\end{itemize}
+\end{enumerate}
+
+\section{总结}
+
+\subsection{核心公式}
+
+\textbf{带积分项的控制}：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}}
+\end{equation}
+
+\textbf{求解期望加速度}：
+\begin{equation}
+\ddot{x}_d = M^{-1}\left[f_{\text{ext}} - B\dot{x}_e - Kx_e - K_i \int_0^t x_e(\tau) d\tau\right]
+\end{equation}
+
+\subsection{关键特性}
+
+\begin{enumerate}
+\item \textbf{消除稳态误差}：$x_{e,ss} = 0$
+\item \textbf{稳定性}：只要$B, K, K_i > 0$，系统稳定
+\item \textbf{参数设计}：基于阻尼比和自然频率
+\item \textbf{实现}：使用离散时间积分，注意抗饱和
+\end{enumerate}
+
+\subsection{设计步骤}
+
+\begin{enumerate}
+\item 选择$B$（阻尼）
+\item 选择$\zeta$和$\omega_n$（阻尼比和自然频率）
+\item 计算$K$和$K_i$
+\item 实现离散时间算法
+\item 添加积分器抗饱和
+\item 测试和调整
+\end{enumerate}
+
+\end{document}
+

@@ -1,0 +1,237 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{矩阵指数解与稳定性证明}
+\author{第11章补充材料}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+\newtheorem{proof}{证明}
+\newtheorem{corollary}{推论}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+考虑向量微分方程：
+\begin{equation}
+\dot{\mathbf{x}}(t) = A\mathbf{x}(t), \quad \mathbf{x}(0) = \mathbf{x}_0,
+\end{equation}
+其中$\mathbf{x}(t) \in \mathbb{R}^n$，$A \in \mathbb{R}^{n \times n}$是常数矩阵。
+
+我们要证明：
+\begin{enumerate}
+\item 方程(1)的解为$\mathbf{x}(t) = e^{At}\mathbf{x}_0$，其中$e^{At}$是矩阵指数。
+\item 如果矩阵$A$的所有特征值具有负实部，则解$\mathbf{x}(t)$从任何初始条件$\mathbf{x}_0$收敛到平衡点$\mathbf{0}$。
+\end{enumerate}
+
+\section{标量情况的类比}
+
+首先，我们回顾标量一阶微分方程：
+\begin{equation}
+\dot{x}(t) = ax(t), \quad x(0) = x_0,
+\end{equation}
+其中$a \in \mathbb{R}$是常数。
+
+通过分离变量法，我们可以求解这个方程：
+\begin{align}
+\frac{dx}{x} &= a \, dt, \\
+\int_{x_0}^{x(t)} \frac{dx}{x} &= \int_0^t a \, d\tau, \\
+\ln\left(\frac{x(t)}{x_0}\right) &= at, \\
+x(t) &= x_0 e^{at}.
+\end{align}
+
+因此，标量微分方程(2)的解为：
+\begin{equation}
+x(t) = e^{at}x_0.
+\end{equation}
+
+\section{矩阵指数的定义}
+
+为了将标量情况推广到向量情况，我们需要定义矩阵指数。
+
+\begin{definition}[矩阵指数]
+对于矩阵$A \in \mathbb{R}^{n \times n}$，矩阵指数$e^{At}$定义为：
+\begin{equation}
+e^{At} = I + At + \frac{(At)^2}{2!} + \frac{(At)^3}{3!} + \cdots = \sum_{k=0}^{\infty} \frac{(At)^k}{k!},
+\end{equation}
+其中$I$是$n \times n$单位矩阵。
+\end{definition}
+
+这个级数对所有矩阵$A$和所有$t \in \mathbb{R}$都收敛。
+
+\section{矩阵指数的性质}
+
+\begin{lemma}
+矩阵指数$e^{At}$满足以下性质：
+\begin{enumerate}
+\item $e^{A \cdot 0} = I$
+\item $\frac{d}{dt}e^{At} = Ae^{At} = e^{At}A$
+\item $e^{A(t+s)} = e^{At}e^{As}$（半群性质）
+\item 如果$AB = BA$，则$e^{(A+B)t} = e^{At}e^{Bt}$
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+\begin{enumerate}
+\item 直接代入定义(8)，当$t=0$时，所有$k \geq 1$的项都为零，只剩下$I$。
+
+\item 对级数(8)逐项求导：
+\begin{align}
+\frac{d}{dt}e^{At} &= \frac{d}{dt}\sum_{k=0}^{\infty} \frac{(At)^k}{k!} \\
+&= \sum_{k=1}^{\infty} \frac{kA(At)^{k-1}}{k!} \\
+&= A\sum_{k=1}^{\infty} \frac{(At)^{k-1}}{(k-1)!} \\
+&= A\sum_{j=0}^{\infty} \frac{(At)^j}{j!} = Ae^{At}.
+\end{align}
+由于矩阵乘法满足结合律，且$A$与$e^{At}$可交换（因为$A$与自己的幂次可交换），所以$Ae^{At} = e^{At}A$。
+
+\item 利用级数展开和Cauchy乘积公式可以证明。
+
+\item 当$AB = BA$时，可以利用二项式定理展开$(A+B)^k$来证明。
+\end{enumerate}
+\end{proof}
+
+\section{向量微分方程的解}
+
+\begin{theorem}
+向量微分方程(1)的解为：
+\begin{equation}
+\mathbf{x}(t) = e^{At}\mathbf{x}_0.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+我们需要验证$\mathbf{x}(t) = e^{At}\mathbf{x}_0$满足微分方程(1)和初始条件。
+
+\textbf{验证初始条件：}
+根据引理1的性质(1)，$e^{A \cdot 0} = I$，因此：
+\begin{equation}
+\mathbf{x}(0) = e^{A \cdot 0}\mathbf{x}_0 = I\mathbf{x}_0 = \mathbf{x}_0,
+\end{equation}
+满足初始条件。
+
+\textbf{验证微分方程：}
+对$\mathbf{x}(t) = e^{At}\mathbf{x}_0$关于$t$求导，利用引理1的性质(2)：
+\begin{align}
+\dot{\mathbf{x}}(t) &= \frac{d}{dt}\left(e^{At}\mathbf{x}_0\right) \\
+&= \frac{d}{dt}\left(e^{At}\right)\mathbf{x}_0 \\
+&= Ae^{At}\mathbf{x}_0 \\
+&= A\mathbf{x}(t),
+\end{align}
+这正好是微分方程(1)的右侧。因此，$\mathbf{x}(t) = e^{At}\mathbf{x}_0$是方程(1)的解。
+\end{proof}
+
+\section{稳定性分析}
+
+现在我们来分析解的稳定性，即何时$\mathbf{x}(t) \to \mathbf{0}$当$t \to \infty$。
+
+\subsection{特征值与特征向量}
+
+设矩阵$A$有$n$个特征值$\lambda_1, \lambda_2, \ldots, \lambda_n$（可能重复），对应的特征向量为$\mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n$。如果$A$可以对角化，则存在可逆矩阵$P$使得：
+\begin{equation}
+A = P\Lambda P^{-1},
+\end{equation}
+其中$\Lambda = \text{diag}(\lambda_1, \lambda_2, \ldots, \lambda_n)$是对角矩阵。
+
+\subsection{矩阵指数的特征值分解}
+
+\begin{lemma}
+如果$A = P\Lambda P^{-1}$，则：
+\begin{equation}
+e^{At} = Pe^{\Lambda t}P^{-1} = P\text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t})P^{-1}.
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+利用矩阵指数的级数定义：
+\begin{align}
+e^{At} &= \sum_{k=0}^{\infty} \frac{(At)^k}{k!} \\
+&= \sum_{k=0}^{\infty} \frac{(P\Lambda P^{-1}t)^k}{k!} \\
+&= \sum_{k=0}^{\infty} \frac{P(\Lambda t)^k P^{-1}}{k!} \\
+&= P\left(\sum_{k=0}^{\infty} \frac{(\Lambda t)^k}{k!}\right)P^{-1} \\
+&= Pe^{\Lambda t}P^{-1}.
+\end{align}
+
+由于$\Lambda$是对角矩阵，$e^{\Lambda t}$也是对角矩阵，其对角线元素为$e^{\lambda_i t}$。
+\end{proof}
+
+\subsection{稳定性定理}
+
+\begin{theorem}[稳定性定理]
+向量微分方程(1)的解$\mathbf{x}(t) = e^{At}\mathbf{x}_0$从任何初始条件$\mathbf{x}_0$收敛到平衡点$\mathbf{0}$，当且仅当矩阵$A$的所有特征值具有负实部。
+\end{theorem}
+
+\begin{proof}
+假设$A$可以对角化（对于不能对角化的情况，可以使用Jordan标准型，证明类似）。
+
+根据引理2，解可以写成：
+\begin{equation}
+\mathbf{x}(t) = e^{At}\mathbf{x}_0 = Pe^{\Lambda t}P^{-1}\mathbf{x}_0 = P\text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t})P^{-1}\mathbf{x}_0.
+\end{equation}
+
+设$\mathbf{y} = P^{-1}\mathbf{x}_0$，则：
+\begin{equation}
+\mathbf{x}(t) = P\text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t})\mathbf{y}.
+\end{equation}
+
+\textbf{充分性（如果所有特征值具有负实部，则解收敛）：}
+
+如果对所有$i$，$\text{Re}(\lambda_i) < 0$，则：
+\begin{equation}
+|e^{\lambda_i t}| = e^{\text{Re}(\lambda_i) t} \to 0 \quad \text{当} \quad t \to \infty.
+\end{equation}
+
+因此，$\text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t}) \to \mathbf{0}$（零矩阵），从而：
+\begin{equation}
+\mathbf{x}(t) = P\text{diag}(e^{\lambda_1 t}, e^{\lambda_2 t}, \ldots, e^{\lambda_n t})\mathbf{y} \to P \cdot \mathbf{0} \cdot \mathbf{y} = \mathbf{0}.
+\end{equation}
+
+\textbf{必要性（如果解收敛，则所有特征值具有负实部）：}
+
+如果$\mathbf{x}(t) \to \mathbf{0}$对所有初始条件$\mathbf{x}_0$成立，特别地，对于$\mathbf{x}_0 = P\mathbf{e}_i$（其中$\mathbf{e}_i$是第$i$个标准基向量），我们有：
+\begin{equation}
+\mathbf{x}(t) = Pe^{\Lambda t}P^{-1}P\mathbf{e}_i = Pe^{\Lambda t}\mathbf{e}_i = P(e^{\lambda_i t}\mathbf{e}_i) = e^{\lambda_i t}P\mathbf{e}_i.
+\end{equation}
+
+由于$\mathbf{x}(t) \to \mathbf{0}$且$P\mathbf{e}_i \neq \mathbf{0}$，必须有$e^{\lambda_i t} \to 0$，这意味着$\text{Re}(\lambda_i) < 0$。
+
+因此，对所有$i$，$\text{Re}(\lambda_i) < 0$。
+\end{proof}
+
+\section{标量情况的对应}
+
+对于标量微分方程$\dot{x}(t) = ax(t)$：
+\begin{itemize}
+\item 解为$x(t) = e^{at}x_0$
+\item 如果$a < 0$，则$x(t) \to 0$当$t \to \infty$
+\item 如果$a > 0$，则$|x(t)| \to \infty$当$t \to \infty$
+\item 如果$a = 0$，则$x(t) = x_0$（常数）
+\end{itemize}
+
+这与向量情况的结论完全对应：标量$a$对应矩阵$A$的特征值，负的$a$对应具有负实部的特征值。
+
+\section{结论}
+
+我们证明了：
+\begin{enumerate}
+\item 向量微分方程$\dot{\mathbf{x}}(t) = A\mathbf{x}(t)$的解为$\mathbf{x}(t) = e^{At}\mathbf{x}_0$，这是标量情况$x(t) = e^{at}x_0$的自然推广。
+
+\item 解的稳定性完全由矩阵$A$的特征值决定：
+   \begin{itemize}
+   \item 如果所有特征值具有负实部，则解从任何初始条件收敛到$\mathbf{0}$（系统是稳定的）。
+   \item 如果至少有一个特征值具有正实部，则存在初始条件使得解发散（系统是不稳定的）。
+   \item 如果所有特征值具有非正实部，且具有零实部的特征值对应的Jordan块都是一阶的，则解有界但不一定收敛（系统是临界稳定的）。
+   \end{itemize}
+\end{enumerate}
+
+这些结果构成了线性系统稳定性理论的基础。
+
+\end{document}
+

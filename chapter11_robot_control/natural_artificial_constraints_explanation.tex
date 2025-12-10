@@ -1,0 +1,493 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{自然约束和人工约束的通俗解释}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在混合运动-力控制中，有两个重要概念：
+\begin{itemize}
+\item \textbf{自然约束}（Natural Constraints）
+\item \textbf{人工约束}（Artificial Constraints）
+\end{itemize}
+
+这两个概念是什么意思？它们有什么区别？本文用通俗的语言来解释。
+
+\section{基本思想：环境告诉我们什么能做，什么不能做}
+
+\subsection{类比：在房间里走路}
+
+想象你在一个房间里走路：
+
+\textbf{自然约束}（环境告诉你的）：
+\begin{itemize}
+\item 你不能穿过墙壁（墙壁是刚性的）
+\item 你不能掉到地板下面（地板支撑你）
+\item 你不能飞到天花板上面（重力把你拉下来）
+\end{itemize}
+
+\textbf{人工约束}（你自己选择的）：
+\begin{itemize}
+\item 你可以选择走多快（速度）
+\item 你可以选择走哪个方向（在允许的方向上）
+\item 你可以选择用多大的力推门（在允许的方向上）
+\end{itemize}
+
+\subsection{关键区别}
+
+\textbf{自然约束}：
+\begin{itemize}
+\item 由\textbf{环境}决定
+\item 我们\textbf{无法改变}
+\item 告诉我们"什么不能做"
+\end{itemize}
+
+\textbf{人工约束}：
+\begin{itemize}
+\item 由\textbf{我们}决定
+\item 我们\textbf{可以自由选择}
+\item 告诉我们"要做什么"
+\item 但必须在自然约束允许的范围内
+\end{itemize}
+
+\section{自然约束：环境强加的约束}
+
+\subsection{定义}
+
+\textbf{自然约束}是环境强加给机器人的物理约束，我们无法改变。
+
+\textbf{特点}：
+\begin{enumerate}
+\item \textbf{由环境决定}：环境的物理特性（如刚性、摩擦等）决定了这些约束
+\item \textbf{无法改变}：我们无法通过控制来改变这些约束
+\item \textbf{必须遵守}：机器人必须遵守这些约束，否则会损坏环境或机器人
+\end{enumerate}
+
+\subsection{例子1：在水平面上移动}
+
+\textbf{场景}：物体在水平面上移动
+
+\textbf{自然约束}（由环境决定）：
+\begin{itemize}
+\item \textbf{运动约束}：不能向下穿透平面
+\begin{itemize}
+\item $v_z = 0$（垂直速度必须为零）
+\end{itemize}
+\item \textbf{力约束}：如果平面无摩擦，不能施加水平力
+\begin{itemize}
+\item $f_x = 0$（水平$x$方向力为零）
+\item $f_y = 0$（水平$y$方向力为零）
+\end{itemize}
+\end{itemize}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境（平面）告诉我们："你不能向下运动，也不能在水平方向施加力"
+\item 这是物理规律，我们无法改变
+\end{itemize}
+
+\subsection{例子2：在黑板上写字}
+
+\textbf{场景}：机器人在黑板上用粉笔写字
+
+\textbf{自然约束}（由环境决定）：
+\begin{itemize}
+\item \textbf{运动约束}：不能穿透黑板
+\begin{itemize}
+\item $v_{\text{normal}} = 0$（垂直于黑板的速度为零）
+\end{itemize}
+\item \textbf{力约束}：平面内的力由运动决定（如果黑板是刚性的）
+\begin{itemize}
+\item 平面内的力不能独立控制
+\end{itemize}
+\end{itemize}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境（黑板）告诉我们："你不能穿透黑板"
+\item 这是物理规律，我们无法改变
+\end{itemize}
+
+\subsection{例子3：擦黑板}
+
+\textbf{场景}：机器人用橡皮擦擦黑板（$n = 6$维任务空间）
+
+\textbf{自然约束}（由环境决定）：
+
+\textbf{运动约束}（$k = 3$个）：
+\begin{align}
+\omega_x &= 0 \quad \text{（不能绕$x$轴旋转，即不能倾斜）} \\
+\omega_y &= 0 \quad \text{（不能绕$y$轴旋转，即不能倾斜）} \\
+v_z &= 0 \quad \text{（不能沿$z$轴运动，即不能穿透黑板）}
+\end{align}
+
+\textbf{力约束}（$6-k = 3$个）：
+\begin{align}
+m_z &= 0 \quad \text{（绕$z$轴的力矩为零）} \\
+f_x &= 0 \quad \text{（沿$x$轴的力为零，假设无摩擦）} \\
+f_y &= 0 \quad \text{（沿$y$轴的力为零，假设无摩擦）}
+\end{align}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境（黑板）告诉我们：
+\begin{itemize}
+\item "你不能倾斜橡皮擦"（$\omega_x = 0, \omega_y = 0$）
+\item "你不能穿透黑板"（$v_z = 0$）
+\item "你不能在水平方向施加力"（$f_x = 0, f_y = 0$，假设无摩擦）
+\end{itemize}
+\item 这些是物理规律，我们无法改变
+\end{itemize}
+
+\section{人工约束：我们自由选择的目标}
+
+\subsection{定义}
+
+\textbf{人工约束}是我们在自然约束允许的范围内，自由选择的运动和力目标。
+
+\textbf{特点}：
+\begin{enumerate}
+\item \textbf{由我们决定}：我们可以根据任务需求自由选择
+\item \textbf{可以改变}：我们可以随时改变这些约束
+\item \textbf{必须满足自然约束}：必须在自然约束允许的范围内
+\end{enumerate}
+
+\subsection{关键原则}
+
+\textbf{互补原则}：
+\begin{itemize}
+\item 如果自然约束限制了某个方向的\textbf{运动}，我们就可以自由控制该方向的\textbf{力}
+\item 如果自然约束限制了某个方向的\textbf{力}，我们就可以自由控制该方向的\textbf{运动}
+\end{itemize}
+
+\textbf{原因}：
+\begin{itemize}
+\item 在同一个方向上，不能同时独立控制力和运动
+\item 如果环境限制了运动，我们就控制力
+\item 如果环境限制了力，我们就控制运动
+\end{itemize}
+
+\subsection{例子1：在水平面上移动}
+
+\textbf{自然约束}（回顾）：
+\begin{itemize}
+\item 运动约束：$v_z = 0$（不能向下运动）
+\item 力约束：$f_x = 0, f_y = 0$（不能施加水平力）
+\end{itemize}
+
+\textbf{人工约束}（我们可以自由选择）：
+\begin{itemize}
+\item \textbf{运动控制}（在自由方向上）：
+\begin{itemize}
+\item $v_x = v_{x,d}$（选择水平$x$方向的速度）
+\item $v_y = v_{y,d}$（选择水平$y$方向的速度）
+\item $\omega_x, \omega_y, \omega_z$（选择旋转速度）
+\end{itemize}
+\item \textbf{力控制}（在约束方向上）：
+\begin{itemize}
+\item $f_z = f_{z,d}$（选择垂直方向的力，如保持接触）
+\end{itemize}
+\end{itemize}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境说："你不能向下运动，也不能在水平方向施加力"
+\item 我们说："好的，那我就在水平方向控制运动，在垂直方向控制力"
+\item 这是我们的选择，可以根据任务需求改变
+\end{itemize}
+
+\subsection{例子2：在黑板上写字}
+
+\textbf{自然约束}（回顾）：
+\begin{itemize}
+\item 运动约束：$v_{\text{normal}} = 0$（不能穿透黑板）
+\end{itemize}
+
+\textbf{人工约束}（我们可以自由选择）：
+\begin{itemize}
+\item \textbf{力控制}（在约束方向上）：
+\begin{itemize}
+\item $f_{\text{normal}} = f_d$（选择垂直于黑板的力，控制粉笔与黑板的接触力）
+\end{itemize}
+\item \textbf{运动控制}（在自由方向上）：
+\begin{itemize}
+\item $x, y$（选择粉笔在黑板平面内的位置）
+\item $\omega_x, \omega_y, \omega_z$（选择粉笔的方向）
+\end{itemize}
+\end{itemize}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境说："你不能穿透黑板"
+\item 我们说："好的，那我就在垂直方向控制力（保持合适的接触力），在平面内控制运动（写字）"
+\item 这是我们的选择，可以根据任务需求改变
+\end{itemize}
+
+\subsection{例子3：擦黑板（详细）}
+
+\textbf{自然约束}（回顾）：
+
+\textbf{运动约束}（$k = 3$个）：
+\begin{align}
+\omega_x &= 0 \\
+\omega_y &= 0 \\
+v_z &= 0
+\end{align}
+
+\textbf{力约束}（$6-k = 3$个）：
+\begin{align}
+m_z &= 0 \\
+f_x &= 0 \\
+f_y &= 0
+\end{align}
+
+\textbf{人工约束}（我们可以自由选择）：
+
+根据互补原则：
+\begin{itemize}
+\item 自然约束限制了运动的方向 $\to$ 我们控制这些方向的力
+\item 自然约束限制了力的方向 $\to$ 我们控制这些方向的运动
+\end{itemize}
+
+\textbf{人工约束表格}：
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{自然约束} & \textbf{人工约束} \\
+\hline
+$\omega_x = 0$（不能绕$x$轴旋转） & $m_x = 0$（控制绕$x$轴的力矩为零） \\
+$\omega_y = 0$（不能绕$y$轴旋转） & $m_y = 0$（控制绕$y$轴的力矩为零） \\
+$m_z = 0$（绕$z$轴力矩为零） & $\omega_z = 0$（控制绕$z$轴旋转为零，或选择其他值） \\
+$f_x = 0$（沿$x$轴力为零） & $v_x = k_1$（控制沿$x$轴的速度） \\
+$f_y = 0$（沿$y$轴力为零） & $v_y = 0$（控制沿$y$轴的速度为零，或选择其他值） \\
+$v_z = 0$（不能沿$z$轴运动） & $f_z = k_2 < 0$（控制沿$z$轴的力，保持接触） \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{通俗解释}：
+\begin{itemize}
+\item 环境说：
+\begin{itemize}
+\item "你不能倾斜"（$\omega_x = 0, \omega_y = 0$）
+\item "你不能穿透黑板"（$v_z = 0$）
+\item "你不能在水平方向施加力"（$f_x = 0, f_y = 0$）
+\end{itemize}
+\item 我们说：
+\begin{itemize}
+\item "好的，那我就在这些被限制的方向上控制力或力矩"
+\item "在自由的方向上控制运动"
+\item "比如：以速度$v_x = k_1$擦黑板，同时保持力$f_z = k_2$与黑板接触"
+\end{itemize}
+\item 这是我们的选择，可以根据任务需求改变
+\end{itemize}
+
+\section{为什么需要人工约束？}
+
+\subsection{完成任务}
+
+\textbf{目的}：人工约束让我们能够完成具体的任务。
+
+\textbf{例子}（擦黑板）：
+\begin{itemize}
+\item 如果我们不指定人工约束，机器人不知道要做什么
+\item 通过指定$v_x = k_1$，我们告诉机器人："以这个速度擦黑板"
+\item 通过指定$f_z = k_2$，我们告诉机器人："用这个力压住黑板"
+\end{itemize}
+
+\subsection{实现期望行为}
+
+\textbf{目的}：人工约束让我们能够实现期望的机器人行为。
+
+\textbf{例子}（在黑板上写字）：
+\begin{itemize}
+\item 通过指定平面内的运动，我们控制粉笔画出期望的轨迹
+\item 通过指定垂直方向的力，我们控制粉笔与黑板的接触力（不要太轻，也不要太重）
+\end{itemize}
+
+\section{自然约束和人工约束的关系}
+
+\subsection{互补关系}
+
+\textbf{关键原则}：
+\begin{itemize}
+\item 自然约束和人工约束是\textbf{互补}的
+\item 在同一个方向上：
+\begin{itemize}
+\item 如果自然约束限制了\textbf{运动}，人工约束就控制\textbf{力}
+\item 如果自然约束限制了\textbf{力}，人工约束就控制\textbf{运动}
+\end{itemize}
+\end{itemize}
+
+\subsection{约束数量}
+
+\textbf{总数}：
+\begin{itemize}
+\item 自然约束：$n$个（$k$个运动约束 + $(n-k)$个力约束）
+\item 人工约束：$n$个（$(n-k)$个运动约束 + $k$个力约束）
+\item 总共：$2n$个约束
+\end{itemize}
+
+\textbf{自由度}：
+\begin{itemize}
+\item 我们只能自由指定$n$个量（人工约束）
+\item 其他$n$个由环境决定（自然约束）
+\item 总共：$2n$个量（$n$个运动 + $n$个力）
+\end{itemize}
+
+\subsection{例子：擦黑板}
+
+\textbf{任务空间}：$n = 6$
+
+\textbf{自然约束}：
+\begin{itemize}
+\item 运动约束：$k = 3$个（$\omega_x = 0, \omega_y = 0, v_z = 0$）
+\item 力约束：$n-k = 3$个（$m_z = 0, f_x = 0, f_y = 0$）
+\item 总共：$3 + 3 = 6$个
+\end{itemize}
+
+\textbf{人工约束}：
+\begin{itemize}
+\item 运动约束：$n-k = 3$个（$\omega_z, v_x, v_y$）
+\item 力约束：$k = 3$个（$m_x, m_y, f_z$）
+\item 总共：$3 + 3 = 6$个
+\end{itemize}
+
+\textbf{验证}：
+\begin{itemize}
+\item 自然约束 + 人工约束 = $6 + 6 = 12 = 2n$个约束
+\item 这正好对应$2n$个量（$6$个运动 + $6$个力）
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{设计控制器的步骤}
+
+\begin{enumerate}
+\item \textbf{识别自然约束}：
+\begin{itemize}
+\item 分析环境特性
+\item 确定哪些方向的运动被限制
+\item 确定哪些方向的力被限制
+\end{itemize}
+
+\item \textbf{设计人工约束}：
+\begin{itemize}
+\item 根据任务需求，在自由方向上选择运动目标
+\item 在约束方向上选择力目标
+\item 确保人工约束与自然约束互补
+\end{itemize}
+
+\item \textbf{实现控制器}：
+\begin{itemize}
+\item 在运动控制方向上使用运动控制器
+\item 在力控制方向上使用力控制器
+\item 使用投影矩阵将控制律投影到相应的子空间
+\end{itemize}
+\end{enumerate}
+
+\subsection{例子：擦黑板控制器}
+
+\textbf{步骤1：识别自然约束}
+\begin{itemize}
+\item 环境：无摩擦黑板
+\item 运动约束：$\omega_x = 0, \omega_y = 0, v_z = 0$
+\item 力约束：$m_z = 0, f_x = 0, f_y = 0$
+\end{itemize}
+
+\textbf{步骤2：设计人工约束}
+\begin{itemize}
+\item 运动控制：$v_x = k_1$（擦除速度），$v_y = 0$（不横向移动），$\omega_z = 0$（不旋转）
+\item 力控制：$f_z = k_2 < 0$（保持接触力），$m_x = 0, m_y = 0$（保持水平）
+\end{itemize}
+
+\textbf{步骤3：实现控制器}
+\begin{itemize}
+\item 在运动控制子空间（$v_x, v_y, \omega_z$）使用运动控制器
+\item 在力控制子空间（$f_z, m_x, m_y$）使用力控制器
+\item 使用投影矩阵$P$和$I-P$分离两个控制器
+\end{itemize}
+
+\section{总结}
+
+\subsection{自然约束}
+
+\textbf{定义}：由环境强加的物理约束，我们无法改变。
+
+\textbf{特点}：
+\begin{itemize}
+\item 由环境决定
+\item 无法改变
+\item 必须遵守
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 不能穿透墙壁
+\item 不能掉到地板下面
+\item 不能在无摩擦表面上施加水平力
+\end{itemize}
+
+\subsection{人工约束}
+
+\textbf{定义}：我们在自然约束允许的范围内，自由选择的运动和力目标。
+
+\textbf{特点}：
+\begin{itemize}
+\item 由我们决定
+\item 可以改变
+\item 必须满足自然约束
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 选择走多快
+\item 选择走哪个方向
+\item 选择用多大的力推门
+\end{itemize}
+
+\subsection{关键关系}
+
+\begin{enumerate}
+\item \textbf{互补关系}：
+\begin{itemize}
+\item 自然约束限制运动 $\to$ 人工约束控制力
+\item 自然约束限制力 $\to$ 人工约束控制运动
+\end{itemize}
+
+\item \textbf{约束数量}：
+\begin{itemize}
+\item 自然约束：$n$个
+\item 人工约束：$n$个
+\item 总共：$2n$个约束，对应$2n$个量
+\end{itemize}
+
+\item \textbf{控制自由度}：
+\begin{itemize}
+\item 我们只能自由指定$n$个量（人工约束）
+\item 其他$n$个由环境决定（自然约束）
+\end{itemize}
+\end{enumerate}
+
+\subsection{实际意义}
+
+理解自然约束和人工约束对于设计混合运动-力控制器至关重要：
+\begin{itemize}
+\item 帮助我们理解环境的限制
+\item 帮助我们设计合适的控制策略
+\item 帮助我们实现期望的机器人行为
+\end{itemize}
+
+\end{document}
+

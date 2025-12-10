@@ -1,0 +1,796 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{混合运动-力控制器详解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+本文档通俗地讲解"混合运动-力控制器"这一节，并详细论证其中的所有公式。我们将从先验知识开始，逐步推导出混合控制器的完整形式。
+
+\section{先验知识回顾}
+
+\subsection{任务空间动力学方程}
+
+\textbf{无约束情况下的任务空间动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{11.55}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F \in \mathbb{R}^6$：任务空间wrench（力和力矩）
+\item $\Lambda(\theta) \in \mathbb{R}^{6 \times 6}$：任务空间质量矩阵
+\item $\dot{V} \in \mathbb{R}^6$：末端执行器加速度（twist的导数）
+\item $\eta(\theta, V) \in \mathbb{R}^6$：任务空间的科里奥利力、向心力和重力项
+\end{itemize}
+
+\textbf{推导过程}（简要）：
+\begin{enumerate}
+\item 从关节空间动力学：$\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})$
+\item 使用速度关系：$V = J(\theta)\dot{\theta}$
+\item 使用加速度关系：$\dot{V} = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}$
+\item 应用虚功原理：$F = J^{-T}\tau$
+\item 定义：$\Lambda(\theta) = J^{-T}M(\theta)J^{-1}$，$\eta(\theta, V) = J^{-T}h(\theta, J^{-1}V) - \Lambda\dot{J}J^{-1}V$
+\end{enumerate}
+
+详细推导见文档：\texttt{task\_space\_dynamics\_derivation.tex}
+
+\subsection{Pfaffian约束}
+
+\textbf{环境约束}：
+\begin{equation}
+A(\theta)V = 0 \tag{11.54}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $A(\theta) \in \mathbb{R}^{k \times 6}$：约束矩阵（$k$个约束）
+\item $V \in \mathbb{R}^6$：末端执行器twist（速度）
+\item $k$：约束的数量
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 环境在$k$个方向上限制了末端执行器的运动
+\item 这些约束限制了速度$V$，使其必须满足$A(\theta)V = 0$
+\end{itemize}
+
+\section{约束动力学的推导}
+
+\subsection{问题：如何考虑约束？}
+
+\textbf{无约束动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{问题}：当有约束$A(\theta)V = 0$时，动力学方程如何修改？
+
+\textbf{答案}：使用拉格朗日乘数法！
+
+\subsection{拉格朗日乘数法}
+
+\textbf{基本思想}：
+\begin{itemize}
+\item 约束$A(\theta)V = 0$限制了系统的运动
+\item 约束会产生约束力$F_{\text{constraint}}$
+\item 约束力与约束方向垂直（或平行，取决于定义）
+\end{itemize}
+
+\textbf{约束动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + F_{\text{constraint}} \tag{11.56}
+\end{equation}
+
+\textbf{约束力的形式}：
+\begin{itemize}
+\item 约束力必须与约束方向相关
+\item 使用拉格朗日乘数：$F_{\text{constraint}} = A^T(\theta)\lambda$
+\item 其中$\lambda \in \mathbb{R}^k$是拉格朗日乘数向量
+\end{itemize}
+
+\textbf{最终形式}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda \tag{11.56}
+\end{equation}
+
+\textbf{为什么是$A^T(\theta)$？}
+\begin{itemize}
+\item 约束$A(\theta)V = 0$定义了约束子空间
+\item 约束力$F_{\text{constraint}}$必须在约束子空间的正交补空间中
+\item $A^T(\theta)$的列空间就是约束子空间的正交补空间
+\item 因此$F_{\text{constraint}} = A^T(\theta)\lambda$是合理的
+\end{itemize}
+
+\subsection{约束的时间导数}
+
+\textbf{约束必须在所有时间满足}：
+\begin{equation}
+A(\theta)V = 0 \quad \text{（对所有时间$t$）}
+\end{equation}
+
+\textbf{对时间求导}：
+\begin{align}
+\frac{d}{dt}[A(\theta)V] &= 0 \\
+\dot{A}(\theta)V + A(\theta)\dot{V} &= 0
+\end{align}
+
+\textbf{结果}：
+\begin{equation}
+A(\theta)\dot{V} + \dot{A}(\theta)V = 0 \tag{11.57}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果速度满足约束，加速度也必须满足约束
+\item 这确保了约束在所有时间都满足
+\end{itemize}
+
+\section{拉格朗日乘数的求解}
+
+\subsection{问题：如何求解$\lambda$？}
+
+\textbf{已知}：
+\begin{itemize}
+\item 约束动力学：$F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda$
+\item 约束的时间导数：$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+\end{itemize}
+
+\textbf{目标}：求解$\lambda$
+
+\subsection{求解步骤}
+
+\textbf{步骤1：从约束动力学求解$\dot{V}$}
+
+从方程(11.56)：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda
+\end{equation}
+
+求解$\dot{V}$：
+\begin{align}
+\Lambda(\theta)\dot{V} &= F - \eta(\theta, V) - A^T(\theta)\lambda \\
+\dot{V} &= \Lambda^{-1}(\theta)[F - \eta(\theta, V) - A^T(\theta)\lambda] \tag{1}
+\end{align}
+
+\textbf{步骤2：代入约束的时间导数}
+
+将方程(1)代入约束的时间导数(11.57)：
+\begin{align}
+A(\theta)\dot{V} + \dot{A}(\theta)V &= 0 \\
+A(\theta)\Lambda^{-1}(\theta)[F - \eta(\theta, V) - A^T(\theta)\lambda] + \dot{A}(\theta)V &= 0
+\end{align}
+
+\textbf{步骤3：展开并整理}
+
+展开：
+\begin{align}
+A(\theta)\Lambda^{-1}(\theta)F - A(\theta)\Lambda^{-1}(\theta)\eta(\theta, V) - A(\theta)\Lambda^{-1}(\theta)A^T(\theta)\lambda + \dot{A}(\theta)V &= 0
+\end{align}
+
+整理关于$\lambda$的项：
+\begin{align}
+A(\theta)\Lambda^{-1}(\theta)A^T(\theta)\lambda &= A(\theta)\Lambda^{-1}(\theta)[F - \eta(\theta, V)] + \dot{A}(\theta)V
+\end{align}
+
+\textbf{步骤4：求解$\lambda$}
+
+假设$A(\theta)\Lambda^{-1}(\theta)A^T(\theta)$可逆（通常成立，因为约束是独立的），我们有：
+\begin{equation}
+\lambda = [A(\theta)\Lambda^{-1}(\theta)A^T(\theta)]^{-1}\left\{A(\theta)\Lambda^{-1}(\theta)[F - \eta(\theta, V)] + \dot{A}(\theta)V\right\} \tag{2}
+\end{equation}
+
+\textbf{步骤5：简化}
+
+从约束$A(\theta)V = 0$，我们知道$\dot{A}(\theta)V = -A(\theta)\dot{V}$（从约束的时间导数）。
+
+但更直接地，我们可以使用：
+\begin{equation}
+\dot{A}(\theta)V = -A(\theta)\dot{V}
+\end{equation}
+
+代入方程(2)：
+\begin{align}
+\lambda &= [A(\theta)\Lambda^{-1}(\theta)A^T(\theta)]^{-1}\left\{A(\theta)\Lambda^{-1}(\theta)[F - \eta(\theta, V)] - A(\theta)\dot{V}\right\} \\
+        &= [A(\theta)\Lambda^{-1}(\theta)A^T(\theta)]^{-1}\left\{A(\theta)\Lambda^{-1}(\theta)[F - \eta(\theta, V)] - A(\theta)\dot{V}\right\}
+\end{align}
+
+\textbf{最终结果}：
+\begin{equation}
+\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V}) \tag{11.58}
+\end{equation}
+
+其中为了简洁，我们省略了$(\theta)$和$(V)$的依赖关系。
+
+\subsection{约束力的计算}
+
+\textbf{机器人施加到约束上的wrench}：
+\begin{equation}
+F_{\text{tip}} = A^T(\theta)\lambda \tag{11.59}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $F_{\text{tip}}$是机器人施加到环境上的力
+\item 这个力与约束方向相关
+\item 由拉格朗日乘数$\lambda$决定
+\end{itemize}
+
+\section{投影矩阵的推导}
+
+\subsection{问题：如何分离运动子空间和力子空间？}
+
+\textbf{目标}：
+\begin{itemize}
+\item 将$n$维力空间划分为两个子空间
+\item 运动控制子空间：维度$n-k$（自由运动方向）
+\item 力控制子空间：维度$k$（约束方向）
+\end{itemize}
+
+\textbf{方法}：使用投影矩阵
+
+\subsection{投影矩阵的定义}
+
+\textbf{投影矩阵$P$}：
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} \tag{11.60}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item $P$的秩为$n-k$（假设$n=6$，则秩为$6-k$）
+\item $P$将任意wrench $F$投影到运动控制子空间
+\item $I - P$将任意wrench $F$投影到力控制子空间
+\end{itemize}
+
+\subsection{投影矩阵的推导}
+
+\textbf{目标}：从约束动力学中消除约束力项
+
+\textbf{步骤1：从约束动力学求解$\lambda$}
+
+从方程(11.56)：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda
+\end{equation}
+
+我们已经知道：
+\begin{equation}
+\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})
+\end{equation}
+
+\textbf{步骤2：代入约束动力学}
+
+将$\lambda$代入：
+\begin{align}
+F &= \Lambda\dot{V} + \eta + A^T\lambda \\
+  &= \Lambda\dot{V} + \eta + A^T(A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})
+\end{align}
+
+\textbf{步骤3：展开}
+
+展开$A^T\lambda$项：
+\begin{align}
+A^T\lambda &= A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}(F - \eta) - A^T(A\Lambda^{-1}A^T)^{-1}A\dot{V}
+\end{align}
+
+代入：
+\begin{align}
+F &= \Lambda\dot{V} + \eta + A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}(F - \eta) - A^T(A\Lambda^{-1}A^T)^{-1}A\dot{V}
+\end{align}
+
+\textbf{步骤4：整理}
+
+将关于$F$的项移到左边：
+\begin{align}
+F - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}F &= \Lambda\dot{V} + \eta - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}\eta - A^T(A\Lambda^{-1}A^T)^{-1}A\dot{V}
+\end{align}
+
+左边：
+\begin{align}
+[I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}]F &= PF
+\end{align}
+
+右边：
+\begin{align}
+&\Lambda\dot{V} + \eta - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}\eta - A^T(A\Lambda^{-1}A^T)^{-1}A\dot{V} \\
+&= [I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}](\Lambda\dot{V} + \eta) \\
+&= P(\Lambda\dot{V} + \eta)
+\end{align}
+
+\textbf{最终结果}：
+\begin{equation}
+P(\theta)F = P(\theta)(\Lambda(\theta)\dot{V} + \eta(\theta, V)) \tag{11.61}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 左边：投影后的力（运动控制子空间）
+\item 右边：投影后的动力学（运动控制子空间）
+\item 约束力项$A^T\lambda$被投影消除了
+\end{itemize}
+
+\subsection{投影矩阵的性质}
+
+\textbf{性质1：$P$是投影矩阵}
+
+验证$P^2 = P$：
+\begin{align}
+P^2 &= [I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}]^2 \\
+    &= I - 2A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} + A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} \\
+    &= I - 2A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} + A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} \\
+    &= I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1} = P
+\end{align}
+
+因此$P$是投影矩阵。
+
+\textbf{性质2：$P$和$I-P$正交}
+
+验证$P(I-P) = 0$：
+\begin{align}
+P(I-P) &= P - P^2 = P - P = 0
+\end{align}
+
+因此$P$和$I-P$是正交的投影矩阵。
+
+\textbf{性质3：$P$的秩}
+
+\begin{itemize}
+\item $A(\theta) \in \mathbb{R}^{k \times n}$，秩为$k$
+\item $A^T(\theta) \in \mathbb{R}^{n \times k}$，秩为$k$
+\item $A\Lambda^{-1}A^T \in \mathbb{R}^{k \times k}$，秩为$k$（假设约束独立）
+\item $A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$的秩为$k$
+\item 因此$P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$的秩为$n-k$
+\end{itemize}
+
+\section{混合控制器的构建}
+
+\subsection{基本思想}
+
+\textbf{目标}：
+\begin{itemize}
+\item 在运动控制子空间（自由方向）使用运动控制器
+\item 在力控制子空间（约束方向）使用力控制器
+\item 将两者组合起来
+\end{itemize}
+
+\subsection{运动控制器}
+
+\textbf{任务空间运动控制器}（从计算力矩控制律(11.47)导出）：
+\begin{equation}
+F_{\text{motion}} = \tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $X_d$：期望的末端执行器位姿
+\item $V_d$：期望的末端执行器速度
+\item $X_e = \log(X^{-1}X_d)$：位置误差
+\item $V_e$：速度误差
+\item $K_p, K_i, K_d$：控制增益矩阵
+\end{itemize}
+
+\textbf{投影到运动子空间}：
+\begin{equation}
+F_{\text{motion,proj}} = P(\theta)F_{\text{motion}}
+\end{equation}
+
+\subsection{力控制器}
+
+\textbf{任务空间力控制器}（公式(11.51)）：
+\begin{equation}
+F_{\text{force}} = F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F_d$：期望的力
+\item $F_e = F_d - F_{\text{tip}}$：力误差
+\item $K_{fp}, K_{fi}$：控制增益矩阵
+\end{itemize}
+
+\textbf{投影到力子空间}：
+\begin{equation}
+F_{\text{force,proj}} = (I - P(\theta))F_{\text{force}}
+\end{equation}
+
+\subsection{组合控制器}
+
+\textbf{完整的混合控制器}：
+\begin{equation}
+F = F_{\text{motion,proj}} + F_{\text{force,proj}} + \text{补偿项}
+\end{equation}
+
+展开：
+\begin{align}
+F &= P(\theta)F_{\text{motion}} + (I - P(\theta))F_{\text{force}} + \tilde{\eta}(\theta, V_b) \\
+  &= P(\theta)\left[\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e\right] \\
+  &\quad + (I - P(\theta))\left[F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right] + \tilde{\eta}(\theta, V_b)
+\end{align}
+
+\textbf{转换到关节空间}：
+
+使用虚功原理：$\tau = J_b^T(\theta)F$
+
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\left(\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e\right) + (I - P(\theta))\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right) + \tilde{\eta}(\theta, V_b)\Bigg] \tag{11.61}
+\end{equation}
+
+\section{控制器的解耦性}
+
+\subsection{为什么两个控制器是解耦的？}
+
+\textbf{关键}：投影矩阵$P$和$I-P$是正交的
+
+\textbf{证明}：
+\begin{itemize}
+\item $P(I-P) = 0$（已证明）
+\item 因此$P$和$I-P$投影到正交的子空间
+\item 运动控制器和力控制器作用在不同的子空间上
+\item 因此它们是解耦的
+\end{itemize}
+
+\textbf{结果}：
+\begin{itemize}
+\item 运动控制器的误差动力学和稳定性分析独立于力控制器
+\item 力控制器的误差动力学和稳定性分析独立于运动控制器
+\item 混合控制器继承了各自子空间上单个控制器的性质
+\end{itemize}
+
+\section{总结}
+
+\subsection{推导流程}
+
+\begin{enumerate}
+\item \textbf{先验知识}：
+\begin{itemize}
+\item 任务空间动力学：$F = \Lambda(\theta)\dot{V} + \eta(\theta, V)$
+\item Pfaffian约束：$A(\theta)V = 0$
+\end{itemize}
+
+\item \textbf{约束动力学}：
+\begin{itemize}
+\item 使用拉格朗日乘数法：$F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda$
+\item 约束的时间导数：$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+\end{itemize}
+
+\item \textbf{拉格朗日乘数}：
+\begin{itemize}
+\item 求解$\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})$
+\end{itemize}
+
+\item \textbf{投影矩阵}：
+\begin{itemize}
+\item 定义$P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}$
+\item 投影后的动力学：$PF = P(\Lambda\dot{V} + \eta)$
+\end{itemize}
+
+\item \textbf{混合控制器}：
+\begin{itemize}
+\item 运动控制器投影到运动子空间：$PF_{\text{motion}}$
+\item 力控制器投影到力子空间：$(I-P)F_{\text{force}}$
+\item 组合：$\tau = J_b^T[PF_{\text{motion}} + (I-P)F_{\text{force}} + \eta]$
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+\begin{enumerate}
+\item \textbf{约束动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda
+\end{equation}
+
+\item \textbf{拉格朗日乘数}：
+\begin{equation}
+\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})
+\end{equation}
+
+\item \textbf{投影矩阵}：
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}
+\end{equation}
+
+\item \textbf{混合控制器}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)F_{\text{motion}} + (I - P(\theta))F_{\text{force}} + \tilde{\eta}(\theta, V_b)\Bigg]
+\end{equation}
+\end{enumerate}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item \textbf{约束动力学}：考虑环境约束对系统动力学的影响
+\item \textbf{拉格朗日乘数}：表示约束力的大小
+\item \textbf{投影矩阵}：分离运动子空间和力子空间
+\item \textbf{混合控制器}：在不同方向上分别使用运动控制和力控制
+\end{itemize}
+
+\section{通俗解释}
+
+\subsection{核心思想}
+
+\textbf{类比}：想象你在推一个箱子：
+
+\begin{itemize}
+\item \textbf{水平方向}（自由运动）：你可以控制箱子的位置和速度
+\item \textbf{垂直方向}（有约束）：箱子被地面支撑，你不能控制垂直位置，但可以控制垂直力（推多用力）
+\end{itemize}
+
+\textbf{混合控制}：
+\begin{itemize}
+\item 在水平方向：使用运动控制（控制位置和速度）
+\item 在垂直方向：使用力控制（控制力的大小）
+\item 两者同时进行，互不干扰
+\end{itemize}
+
+\subsection{为什么需要投影？}
+
+\textbf{问题}：如何确保运动控制器只影响自由方向，力控制器只影响约束方向？
+
+\textbf{答案}：使用投影矩阵！
+
+\begin{itemize}
+\item \textbf{投影矩阵$P$}：将力投影到自由运动方向
+\item \textbf{投影矩阵$I-P$}：将力投影到约束方向
+\item 两者正交，互不干扰
+\end{itemize}
+
+\textbf{结果}：
+\begin{itemize}
+\item 运动控制器产生的力被投影到自由方向
+\item 力控制器产生的力被投影到约束方向
+\item 两者可以同时工作，不会冲突
+\end{itemize}
+
+\section{详细例子：擦黑板}
+
+\subsection{场景设置}
+
+\textbf{任务}：机器人用橡皮擦擦黑板
+
+\textbf{约束}：
+\begin{itemize}
+\item 不能倾斜：$\omega_x = 0, \omega_y = 0$
+\item 不能穿透：$v_z = 0$
+\item 总共$k = 3$个约束
+\end{itemize}
+
+\textbf{约束矩阵}：
+\begin{equation}
+A(\theta) = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\subsection{控制目标}
+
+\textbf{运动控制}（在自由方向）：
+\begin{itemize}
+\item $v_x = k_1$（水平移动速度）
+\item $v_y = 0$（不横向移动）
+\item $\omega_z = 0$（不旋转）
+\end{itemize}
+
+\textbf{力控制}（在约束方向）：
+\begin{itemize}
+\item $f_z = k_2 < 0$（保持与黑板的接触力）
+\item $m_x = 0, m_y = 0$（保持水平）
+\end{itemize}
+
+\subsection{控制器实现}
+
+\textbf{步骤1：计算投影矩阵}
+
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}
+\end{equation}
+
+\textbf{步骤2：设计运动控制器}
+
+在运动子空间（$PF_{\text{motion}}$）：
+\begin{itemize}
+\item 控制$v_x, v_y, \omega_z$
+\item 使用PID控制器跟踪期望轨迹
+\end{itemize}
+
+\textbf{步骤3：设计力控制器}
+
+在力子空间（$(I-P)F_{\text{force}}$）：
+\begin{itemize}
+\item 控制$f_z, m_x, m_y$
+\item 使用PI控制器跟踪期望力
+\end{itemize}
+
+\textbf{步骤4：组合}
+
+\begin{equation}
+\tau = J_b^T[PF_{\text{motion}} + (I-P)F_{\text{force}} + \eta]
+\end{equation}
+
+\section{实现注意事项}
+
+\subsection{约束矩阵的确定}
+
+\textbf{问题}：如何知道约束矩阵$A(\theta)$？
+
+\textbf{方法}：
+\begin{enumerate}
+\item \textbf{环境建模}：根据环境特性确定约束
+\item \textbf{实时估计}：使用力反馈识别约束方向
+\item \textbf{低增益控制}：使用低反馈增益，使控制器对约束不确定性更容忍
+\end{enumerate}
+
+\subsection{奇异点问题}
+
+\textbf{问题}：在奇异点，雅可比矩阵$J_b(\theta)$不可逆
+
+\textbf{影响}：
+\begin{itemize}
+\item 任务空间质量矩阵$\Lambda(\theta)$变得很大
+\item 投影矩阵计算可能不稳定
+\end{itemize}
+
+\textbf{解决方法}：
+\begin{itemize}
+\item 避免奇异配置
+\item 使用伪逆$J_b^{\dagger}$代替$J_b^{-1}$
+\item 添加阻尼项
+\end{itemize}
+
+\subsection{被动柔顺性}
+
+\textbf{问题}：关节和连杆中的柔顺性不可避免
+
+\textbf{影响}：
+\begin{itemize}
+\item 实际约束不是完全刚性的
+\item 约束矩阵$A(\theta)$可能不准确
+\end{itemize}
+
+\textbf{解决方法}：
+\begin{itemize}
+\item 在机器人结构中构建被动柔顺性
+\item 使用低反馈增益
+\item 实时估计约束方向
+\end{itemize}
+
+\section{数学细节补充}
+
+\subsection{约束时间导数的详细推导}
+
+\textbf{约束}：
+\begin{equation}
+A(\theta)V = 0
+\end{equation}
+
+\textbf{对时间求导}：
+\begin{align}
+\frac{d}{dt}[A(\theta)V] &= \frac{d}{dt}[A(\theta)]V + A(\theta)\frac{dV}{dt} \\
+&= \dot{A}(\theta)V + A(\theta)\dot{V} = 0
+\end{align}
+
+\textbf{关键点}：
+\begin{itemize}
+\item $\dot{A}(\theta)$是约束矩阵对时间的导数
+\item 由于$A(\theta)$依赖于$\theta$，而$\theta$依赖于时间，所以$\dot{A}(\theta) = \frac{\partial A}{\partial \theta}\dot{\theta}$
+\item 这反映了约束可能随着机器人配置的变化而变化
+\end{itemize}
+
+\subsection{投影矩阵的几何意义}
+
+\textbf{力空间的分解}：
+
+$n$维力空间可以分解为两个正交子空间：
+\begin{itemize}
+\item \textbf{运动控制子空间}：维度$n-k$，由$P$投影
+\item \textbf{力控制子空间}：维度$k$，由$I-P$投影
+\end{itemize}
+
+\textbf{几何解释}：
+\begin{itemize}
+\item 运动控制子空间是约束子空间的正交补空间
+\item 力控制子空间是约束子空间本身
+\item 两个子空间正交，因此投影是解耦的
+\end{itemize}
+
+\subsection{拉格朗日乘数的物理意义}
+
+\textbf{拉格朗日乘数$\lambda$}：
+\begin{equation}
+\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $\lambda$表示约束力的大小
+\item 约束力$F_{\text{tip}} = A^T\lambda$是机器人施加到环境上的力
+\item $\lambda$的大小取决于：
+\begin{itemize}
+\item 外部力$F$
+\item 科里奥利项$\eta$
+\item 加速度$\dot{V}$
+\end{itemize}
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心概念}
+
+\begin{enumerate}
+\item \textbf{约束动力学}：考虑环境约束对系统动力学的影响
+\item \textbf{拉格朗日乘数}：表示约束力的大小
+\item \textbf{投影矩阵}：分离运动子空间和力子空间
+\item \textbf{混合控制器}：在不同方向上分别使用运动控制和力控制
+\end{enumerate}
+
+\subsection{关键公式总结}
+
+\begin{enumerate}
+\item \textbf{约束动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda
+\end{equation}
+
+\item \textbf{约束的时间导数}：
+\begin{equation}
+A(\theta)\dot{V} + \dot{A}(\theta)V = 0
+\end{equation}
+
+\item \textbf{拉格朗日乘数}：
+\begin{equation}
+\lambda = (A\Lambda^{-1}A^T)^{-1}(A\Lambda^{-1}(F - \eta) - A\dot{V})
+\end{equation}
+
+\item \textbf{投影矩阵}：
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}
+\end{equation}
+
+\item \textbf{投影后的动力学}：
+\begin{equation}
+PF = P(\Lambda\dot{V} + \eta)
+\end{equation}
+
+\item \textbf{混合控制器}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)F_{\text{motion}} + (I - P(\theta))F_{\text{force}} + \tilde{\eta}(\theta, V_b)\Bigg]
+\end{equation}
+\end{enumerate}
+
+\subsection{实际应用}
+
+混合运动-力控制器适用于：
+\begin{itemize}
+\item 与环境接触的任务（如装配、打磨、写字）
+\item 需要在不同方向上分别控制运动和力的任务
+\item 有明确约束方向的任务
+\end{itemize}
+
+\subsection{设计步骤}
+
+\begin{enumerate}
+\item \textbf{识别约束}：确定环境约束矩阵$A(\theta)$
+\item \textbf{计算投影}：计算投影矩阵$P$和$I-P$
+\item \textbf{设计控制器}：
+\begin{itemize}
+\item 在运动子空间设计运动控制器
+\item 在力子空间设计力控制器
+\end{itemize}
+\item \textbf{组合实现}：将两个控制器组合，并转换到关节空间
+\item \textbf{补偿项}：添加科里奥利和重力补偿
+\end{enumerate}
+
+\end{document}

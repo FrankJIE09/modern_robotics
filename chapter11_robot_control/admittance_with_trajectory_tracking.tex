@@ -1,0 +1,438 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{导纳控制与轨迹跟踪的结合方法}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+标准的导纳控制只响应外力，不跟踪特定轨迹。但在实际应用中，我们可能需要：
+\begin{itemize}
+\item 既跟踪期望轨迹（如沿路径移动）
+\item 又对外力做出响应（如遇到障碍物时让路）
+\end{itemize}
+
+\textbf{问题}：有没有将导纳控制和轨迹跟踪结合的方法？名称是什么？
+
+\section{方法名称}
+
+将导纳控制与轨迹跟踪结合的方法在文献中有多种名称：
+
+\begin{enumerate}
+\item \textbf{带轨迹跟踪的导纳控制}（Admittance Control with Trajectory Tracking）
+\item \textbf{混合导纳控制}（Hybrid Admittance Control）
+\item \textbf{基于轨迹的导纳控制}（Trajectory-Based Admittance Control）
+\item \textbf{导纳控制结合位置控制}（Admittance Control with Position Control）
+\end{enumerate}
+
+最常用的名称是\textbf{"带轨迹跟踪的导纳控制"（Admittance Control with Trajectory Tracking）}。
+
+\section{标准导纳控制回顾}
+
+\subsection{标准导纳控制公式}
+
+标准导纳控制使用当前状态：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x, \dot{x}$: 当前实际位置和速度
+\item 没有明确的期望轨迹$x_d$
+\item 只响应外力$f_{\text{ext}}$
+\end{itemize}
+
+\subsection{标准导纳控制的特点}
+
+\begin{itemize}
+\item \textbf{优点}：对外力响应自然，适合人机交互
+\item \textbf{缺点}：不跟踪特定轨迹，位置可能漂移
+\end{itemize}
+
+\section{结合轨迹跟踪的导纳控制}
+
+\subsection{基本思想}
+
+将导纳控制公式修改为包含期望轨迹：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \tag{*}
+\end{equation}
+
+或者写成：
+\begin{equation}
+M\ddot{x}_d + B\dot{x}_e + Kx_e = f_{\text{ext}} \tag{**}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x_d, \dot{x}_d$: 期望位置和速度（由轨迹规划给出）
+\item $x_e = x_d - x$: 位置误差
+\item $\dot{x}_e = \dot{x}_d - \dot{x}$: 速度误差
+\item $f_{\text{ext}}$: 感测到的外力
+\end{itemize}
+
+\subsection{物理意义}
+
+公式(*)可以理解为：
+\begin{itemize}
+\item \textbf{虚拟弹簧}：$K(x_d - x)$，试图将机器人拉向期望位置
+\item \textbf{虚拟阻尼}：$B(\dot{x}_d - \dot{x})$，试图使速度误差为零
+\item \textbf{虚拟惯性}：$M\ddot{x}_d$，提供期望加速度
+\item \textbf{外力}：$f_{\text{ext}}$，允许用户或环境影响运动
+\end{itemize}
+
+\textbf{平衡}：虚拟力（弹簧+阻尼+惯性）等于外力。
+
+\subsection{求解期望加速度}
+
+从公式(*)求解$\ddot{x}_d$：
+\begin{equation}
+\ddot{x}_d = M^{-1}[f_{\text{ext}} - B(\dot{x}_d - \dot{x}) - K(x_d - x)]
+\end{equation}
+
+或者：
+\begin{equation}
+\ddot{x}_d = M^{-1}[f_{\text{ext}} - B\dot{x}_e - Kx_e]
+\end{equation}
+
+\section{控制算法实现}
+
+\subsection{力矩控制实现}
+
+\begin{enumerate}
+\item \textbf{轨迹规划}：给定期望轨迹$x_d(t), \dot{x}_d(t), \ddot{x}_d(t)$
+\item \textbf{感测外力}：测量$f_{\text{ext}}$
+\item \textbf{计算位置和速度误差}：
+\begin{align}
+x_e &= x_d - x \\
+\dot{x}_e &= \dot{x}_d - \dot{x}
+\end{align}
+\item \textbf{计算期望加速度}：
+\begin{equation}
+\ddot{x}_d = M^{-1}[f_{\text{ext}} - B\dot{x}_e - Kx_e]
+\end{equation}
+\item \textbf{转换为关节加速度}：
+\begin{equation}
+\ddot{\theta}_d = J^{\dagger}(\theta)(\ddot{x}_d - \dot{J}(\theta)\dot{\theta})
+\end{equation}
+\item \textbf{计算关节力矩}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta}_d + h(\theta, \dot{\theta})
+\end{equation}
+\end{enumerate}
+
+\subsection{速度控制实现}
+
+如果只能控制速度：
+
+\begin{enumerate}
+\item \textbf{计算期望加速度}（同上）
+\item \textbf{积分得到期望速度}：
+\begin{equation}
+\dot{x}_d(t) = \dot{x}_d(0) + \int_0^t \ddot{x}_d(\tau) d\tau
+\end{equation}
+\item \textbf{转换为关节速度}：
+\begin{equation}
+\dot{\theta}_d = J^{\dagger}(\theta)\dot{x}_d
+\end{equation}
+\item \textbf{控制关节速度}：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d
+\end{equation}
+\end{enumerate}
+
+\section{与标准导纳控制的对比}
+
+\subsection{标准导纳控制}
+
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 使用当前状态$x, \dot{x}$
+\item 没有期望轨迹$x_d$
+\item 只响应外力
+\item 位置可能漂移
+\end{itemize}
+
+\subsection{结合轨迹跟踪的导纳控制}
+
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 使用误差项$x_e = x_d - x, \dot{x}_e = \dot{x}_d - \dot{x}$
+\item 有明确的期望轨迹$x_d$
+\item 既跟踪轨迹，又响应外力
+\item 位置不会漂移（有期望位置）
+\end{itemize}
+
+\section{参数选择的影响}
+
+\subsection{高刚度$K$的情况}
+
+如果$K$很大：
+\begin{itemize}
+\item 虚拟弹簧力$K(x_d - x)$很大
+\item 系统"硬"，强烈跟踪期望轨迹
+\item 对外力的响应较小
+\item 接近纯轨迹跟踪控制
+\end{itemize}
+
+\subsection{低刚度$K$的情况}
+
+如果$K$很小：
+\begin{itemize}
+\item 虚拟弹簧力$K(x_d - x)$很小
+\item 系统"软"，允许偏离期望轨迹
+\item 对外力的响应较大
+\item 接近标准导纳控制
+\end{itemize}
+
+\subsection{平衡选择}
+
+在实际应用中，需要平衡：
+\begin{itemize}
+\item \textbf{轨迹跟踪精度}：需要较大的$K$
+\item \textbf{对外力的响应}：需要较小的$K$
+\item \textbf{稳定性}：需要适当的$B$和$M$
+\end{itemize}
+
+\section{应用场景}
+
+\subsection{适合的应用}
+
+\begin{enumerate}
+\item \textbf{人机协作}：
+\begin{itemize}
+\item 机器人沿路径移动（轨迹跟踪）
+\item 但允许操作员推拉调整（导纳响应）
+\end{itemize}
+
+\item \textbf{装配任务}：
+\begin{itemize}
+\item 机器人跟踪装配路径（轨迹跟踪）
+\item 但遇到阻力时调整（导纳响应）
+\end{itemize}
+
+\item \textbf{医疗机器人}：
+\begin{itemize}
+\item 机器人跟踪手术路径（轨迹跟踪）
+\item 但允许医生干预（导纳响应）
+\end{itemize}
+\end{enumerate}
+
+\subsection{不适合的应用}
+
+\begin{itemize}
+\item 纯轨迹跟踪任务（不需要外力响应）
+\item 纯导纳控制任务（不需要跟踪特定轨迹）
+\end{itemize}
+
+\section{与其他控制方法的对比}
+
+\subsection{与混合运动-力控制的对比}
+
+\textbf{混合运动-力控制}（Hybrid Motion-Force Control）：
+\begin{itemize}
+\item 在不同方向上分别控制运动和力
+\item 使用投影矩阵分离运动子空间和力子空间
+\item 适用于有明确约束的情况
+\end{itemize}
+
+\textbf{结合轨迹跟踪的导纳控制}：
+\begin{itemize}
+\item 在同一方向上同时考虑轨迹跟踪和力响应
+\item 通过阻抗参数平衡两者
+\item 适用于无明确约束的情况
+\end{itemize}
+
+\subsection{与阻抗控制的对比}
+
+\textbf{阻抗控制}：
+\begin{itemize}
+\item 感测运动，产生力
+\item 实现从运动到力的传递函数
+\end{itemize}
+
+\textbf{导纳控制（结合轨迹跟踪）}：
+\begin{itemize}
+\item 感测力，产生运动
+\item 实现从力到运动的传递函数
+\item 同时考虑期望轨迹
+\end{itemize}
+
+\section{数学分析}
+
+\subsection{误差动力学}
+
+定义位置误差：$x_e = x_d - x$
+
+对时间求导：
+\begin{equation}
+\dot{x}_e = \dot{x}_d - \dot{x}
+\end{equation}
+
+从控制公式：
+\begin{equation}
+M\ddot{x}_d + B\dot{x}_e + Kx_e = f_{\text{ext}}
+\end{equation}
+
+如果期望轨迹是常数（设定点控制），$\ddot{x}_d = 0$，则：
+\begin{equation}
+B\dot{x}_e + Kx_e = f_{\text{ext}}
+\end{equation}
+
+这是标准的导纳控制误差动力学。
+
+\subsection{稳定性分析}
+
+对于线性系统，如果$M, B, K$都是正定的，系统是稳定的。
+
+特征方程：
+\begin{equation}
+Ms^2 + Bs + K = 0
+\end{equation}
+
+特征值：
+\begin{equation}
+s = \frac{-B \pm \sqrt{B^2 - 4MK}}{2M}
+\end{equation}
+
+如果$B^2 - 4MK < 0$，系统是欠阻尼的，有振荡。
+如果$B^2 - 4MK \geq 0$，系统是过阻尼或临界阻尼的。
+
+\section{实现注意事项}
+
+\subsection{轨迹规划}
+
+\begin{itemize}
+\item 需要提供平滑的期望轨迹$x_d(t), \dot{x}_d(t), \ddot{x}_d(t)$
+\item 轨迹应该是连续可微的
+\item 避免突然的加速度变化
+\end{itemize}
+
+\subsection{参数调整}
+
+\begin{itemize}
+\item \textbf{刚度$K$}：控制轨迹跟踪的"硬度"
+\item \textbf{阻尼$B$}：控制系统的响应速度
+\item \textbf{质量$M$}：控制系统的惯性
+\item 需要根据应用场景调整
+\end{itemize}
+
+\subsection{外力处理}
+
+\begin{itemize}
+\item 对力传感器读数进行滤波（低通滤波）
+\item 设置死区，忽略小的力
+\item 限制最大响应速度，避免突然运动
+\end{itemize}
+
+\section{完整控制律示例}
+
+\subsection{任务空间控制律}
+
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{\Lambda}(\theta)\ddot{x}_d + \tilde{\eta}(\theta, \dot{x}) + K_p x_e + K_d \dot{x}_e\right]
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\ddot{x}_d = M^{-1}[f_{\text{ext}} - B\dot{x}_e - Kx_e]$（由导纳控制计算）
+\item $K_p, K_d$: 额外的位置和速度反馈增益（可选）
+\item $\tilde{\Lambda}, \tilde{\eta}$: 任务空间动力学模型
+\end{itemize}
+
+\subsection{简化版本}
+
+如果忽略动力学补偿：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{M}\ddot{x}_d + \tilde{B}\dot{x}_e + \tilde{K}x_e\right]
+\end{equation}
+
+其中$\tilde{M}, \tilde{B}, \tilde{K}$是虚拟阻抗参数。
+
+\section{总结}
+
+\subsection{方法名称}
+
+\textbf{最常用的名称}：
+\begin{itemize}
+\item \textbf{带轨迹跟踪的导纳控制}（Admittance Control with Trajectory Tracking）
+\item \textbf{混合导纳控制}（Hybrid Admittance Control）
+\end{itemize}
+
+\subsection{核心公式}
+
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+或者：
+\begin{equation}
+M\ddot{x}_d + B\dot{x}_e + Kx_e = f_{\text{ext}}
+\end{equation}
+
+\subsection{关键特点}
+
+\begin{enumerate}
+\item \textbf{结合两种控制目标}：
+\begin{itemize}
+\item 轨迹跟踪（通过误差项$x_e, \dot{x}_e$）
+\item 导纳响应（通过响应外力$f_{\text{ext}}$）
+\end{itemize}
+
+\item \textbf{通过参数平衡}：
+\begin{itemize}
+\item 高$K$：强调轨迹跟踪
+\item 低$K$：强调外力响应
+\end{itemize}
+
+\item \textbf{适用场景}：
+\begin{itemize}
+\item 需要跟踪轨迹，但允许外力调整
+\item 人机协作任务
+\item 装配和医疗应用
+\end{itemize}
+\end{enumerate}
+
+\subsection{与标准导纳控制的区别}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{方面} & \textbf{标准导纳控制} & \textbf{结合轨迹跟踪} \\
+\hline
+公式 & $M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}$ & $M\ddot{x}_d + B\dot{x}_e + Kx_e = f_{\text{ext}}$ \\
+\hline
+使用状态 & 当前状态$x, \dot{x}$ & 误差$x_e, \dot{x}_e$ \\
+\hline
+期望轨迹 & 无 & 有$x_d, \dot{x}_d$ \\
+\hline
+位置漂移 & 可能 & 不会 \\
+\hline
+应用 & 纯人机交互 & 协作任务 \\
+\hline
+\end{tabular}
+\caption{标准导纳控制与结合轨迹跟踪的对比}
+\end{table}
+
+\end{document}
+

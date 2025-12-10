@@ -1,0 +1,483 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{非周期信号中相位差导致的滞后}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+对于周期信号，我们知道了相位差导致的时域滞后：
+\begin{equation}
+\Delta t = \frac{|\Delta \phi|}{\omega} = \frac{|\Delta \phi| \cdot T}{2\pi}
+\end{equation}
+
+但对于\textbf{非周期信号}，情况更复杂。本文将详细分析非周期信号中相位差的影响。
+
+\section{非周期信号的频率分析}
+
+\subsection{傅里叶变换}
+
+非周期信号可以通过傅里叶变换分解为连续频率分量：
+\begin{equation}
+x(t) = \frac{1}{2\pi} \int_{-\infty}^{\infty} X(j\omega) e^{j\omega t} d\omega
+\end{equation}
+
+其中$X(j\omega)$是信号的频谱。
+
+\subsection{系统响应}
+
+对于线性时不变系统$G(j\omega)$，输出为：
+\begin{equation}
+y(t) = \frac{1}{2\pi} \int_{-\infty}^{\infty} G(j\omega) X(j\omega) e^{j\omega t} d\omega
+\end{equation}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 每个频率分量$\omega$有不同的相位滞后$\angle G(j\omega)$
+\item 不同频率分量的滞后不同
+\item 输出信号是所有这些分量的叠加
+\end{itemize}
+
+\section{积分器对非周期信号的影响}
+
+\subsection{积分器的频率响应}
+
+对于积分器$G(s) = 1/s$：
+\begin{equation}
+G(j\omega) = \frac{1}{j\omega} = \frac{1}{\omega} e^{-j\pi/2}
+\end{equation}
+
+\textbf{特性}：
+\begin{itemize}
+\item 相位滞后：$-90^\circ$（对所有频率）
+\item 幅值：$1/\omega$（随频率变化）
+\end{itemize}
+
+\subsection{不同频率分量的滞后}
+
+对于频率为$\omega$的分量：
+\begin{equation}
+\Delta t(\omega) = \frac{\pi/2}{\omega} = \frac{T(\omega)}{4}
+\end{equation}
+
+其中$T(\omega) = 2\pi/\omega$是该频率分量的周期。
+
+\textbf{关键问题}：
+\begin{itemize}
+\item 不同频率分量有不同的滞后
+\item 低频分量：滞后大（因为周期大）
+\item 高频分量：滞后小（因为周期小）
+\end{itemize}
+
+\section{典型非周期信号的分析}
+
+\subsection{阶跃信号}
+
+\textbf{输入}：单位阶跃信号
+\begin{equation}
+x(t) = \begin{cases}
+0 & t < 0 \\
+1 & t \geq 0
+\end{cases}
+\end{equation}
+
+\textbf{频谱}：
+\begin{equation}
+X(j\omega) = \pi \delta(\omega) + \frac{1}{j\omega}
+\end{equation}
+
+\textbf{积分器输出}：
+\begin{equation}
+y(t) = \int_0^t x(\tau) d\tau = \begin{cases}
+0 & t < 0 \\
+t & t \geq 0
+\end{cases}
+\end{equation}
+
+\textbf{分析}：
+\begin{itemize}
+\item 阶跃信号包含所有频率分量（从0到$\infty$）
+\item 每个频率分量有不同的滞后
+\item 但输出是简单的斜坡函数，没有明显的"滞后"
+\item 这是因为阶跃信号的特性：所有频率分量同时开始
+\end{itemize}
+
+\subsection{脉冲信号}
+
+\textbf{输入}：单位脉冲（Dirac delta）
+\begin{equation}
+x(t) = \delta(t)
+\end{equation}
+
+\textbf{频谱}：
+\begin{equation}
+X(j\omega) = 1 \quad \text{（所有频率分量幅值相同）}
+\end{equation}
+
+\textbf{积分器输出}：
+\begin{equation}
+y(t) = \int_{-\infty}^t \delta(\tau) d\tau = u(t) = \begin{cases}
+0 & t < 0 \\
+1 & t \geq 0
+\end{cases}
+\end{equation}
+
+\textbf{分析}：
+\begin{itemize}
+\item 脉冲包含所有频率分量
+\item 积分器将脉冲转换为阶跃
+\item 没有明显的"滞后"，因为脉冲是瞬时的
+\end{itemize}
+
+\subsection{斜坡信号}
+
+\textbf{输入}：斜坡信号
+\begin{equation}
+x(t) = \begin{cases}
+0 & t < 0 \\
+t & t \geq 0
+\end{cases}
+\end{equation}
+
+\textbf{积分器输出}：
+\begin{equation}
+y(t) = \int_0^t \tau d\tau = \frac{t^2}{2} \quad t \geq 0
+\end{equation}
+
+\textbf{分析}：
+\begin{itemize}
+\item 输出是二次函数
+\item 没有明显的"滞后"概念
+\end{itemize}
+
+\section{实际应用：导纳控制中的非周期信号}
+
+\subsection{用户施加的力}
+
+在实际应用中，用户施加的力$f_{\text{ext}}(t)$通常是非周期的：
+\begin{itemize}
+\item 可能是突然的推拉（类似阶跃）
+\item 可能是缓慢变化（类似斜坡）
+\item 可能是复杂的时变信号
+\end{itemize}
+
+\subsection{导纳控制响应}
+
+导纳控制计算：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)
+\end{equation}
+
+然后积分：
+\begin{equation}
+\dot{x}_d(t) = \dot{x}_d(0) + \int_0^t \ddot{x}_d(\tau) d\tau
+\end{equation}
+
+\subsection{滞后的表现}
+
+对于非周期信号，相位滞后的表现：
+
+\begin{enumerate}
+\item \textbf{阶跃力输入}：
+\begin{itemize}
+\item 用户突然施加力（阶跃）
+\item 系统响应有延迟
+\item 延迟主要来自系统的动态响应，而不是相位滞后
+\end{itemize}
+
+\item \textbf{缓慢变化的力}：
+\begin{itemize}
+\item 如果力变化很慢（低频），可以近似为周期信号
+\item 相位滞后$\Delta t \approx T/4$，其中$T$是"有效周期"
+\item 对于非常慢的变化，滞后可能很大
+\end{itemize}
+
+\item \textbf{快速变化的力}：
+\begin{itemize}
+\item 如果力变化很快（高频），滞后较小
+\item 但系统可能跟不上快速变化
+\end{itemize}
+\end{enumerate}
+
+\section{线性相位系统}
+
+\subsection{定义}
+
+如果系统的相位响应是频率的线性函数：
+\begin{equation}
+\angle G(j\omega) = -\tau \omega
+\end{equation}
+
+其中$\tau$是常数，称为\textbf{群延迟}（group delay）。
+
+\subsection{时域滞后}
+
+对于线性相位系统：
+\begin{equation}
+\Delta t(\omega) = \frac{|\angle G(j\omega)|}{\omega} = \frac{\tau \omega}{\omega} = \tau
+\end{equation}
+
+\textbf{关键特性}：
+\begin{itemize}
+\item 所有频率分量的时域滞后相同：$\Delta t = \tau$
+\item 信号只是平移，形状不变
+\item 这是理想情况
+\end{itemize}
+
+\subsection{积分器不是线性相位系统}
+
+对于积分器$G(s) = 1/s$：
+\begin{equation}
+\angle G(j\omega) = -\frac{\pi}{2} \quad \text{（恒定，不是$\omega$的线性函数）}
+\end{equation}
+
+因此：
+\begin{equation}
+\Delta t(\omega) = \frac{\pi/2}{\omega} = \frac{T(\omega)}{4}
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 不同频率分量有不同的滞后
+\item 低频分量滞后大
+\item 高频分量滞后小
+\item 信号形状会改变（不仅仅是平移）
+\end{itemize}
+
+\section{信号失真的原因}
+
+\subsection{为什么信号形状会改变？}
+
+对于非周期信号，如果不同频率分量有不同的滞后：
+\begin{itemize}
+\item 低频分量滞后大
+\item 高频分量滞后小
+\item 输出信号是这些不同滞后分量的叠加
+\item 因此信号形状会改变
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 输入：方波（包含基频和谐波）
+\item 积分后：三角波（形状改变）
+\item 不同频率分量的滞后不同，导致形状改变
+\end{itemize}
+
+\subsection{群延迟 vs. 相位延迟}
+
+\textbf{相位延迟}（Phase Delay）：
+\begin{equation}
+\tau_p(\omega) = -\frac{\angle G(j\omega)}{\omega}
+\end{equation}
+每个频率分量的延迟。
+
+\textbf{群延迟}（Group Delay）：
+\begin{equation}
+\tau_g(\omega) = -\frac{d\angle G(j\omega)}{d\omega}
+\end{equation}
+信号包络的延迟。
+
+\textbf{对于积分器}：
+\begin{itemize}
+\item 相位延迟：$\tau_p(\omega) = \frac{\pi/2}{\omega}$（随频率变化）
+\item 群延迟：$\tau_g(\omega) = \frac{\pi/2}{\omega}$（也随频率变化）
+\item 两者都随频率变化，因此信号会失真
+\end{itemize}
+
+\section{实际测量和估计}
+
+\subsection{如何测量滞后？}
+
+对于非周期信号，滞后的定义更复杂：
+
+\begin{enumerate}
+\item \textbf{峰值滞后}：
+\begin{itemize}
+\item 测量输入和输出峰值之间的时间差
+\item 适用于有明显峰值的信号
+\end{itemize}
+
+\item \textbf{上升时间滞后}：
+\begin{itemize}
+\item 测量从10\%到90\%上升时间的中点
+\item 适用于阶跃响应
+\end{itemize}
+
+\item \textbf{相关性分析}：
+\begin{itemize}
+\item 计算输入和输出的互相关函数
+\item 峰值位置对应滞后
+\end{itemize}
+\end{enumerate}
+
+\subsection{有效滞后}
+
+对于非周期信号，可以定义\textbf{有效滞后}：
+
+\begin{equation}
+\Delta t_{\text{eff}} = \frac{\int_0^{\infty} \omega \cdot \Delta t(\omega) \cdot |X(j\omega)|^2 d\omega}{\int_0^{\infty} \omega \cdot |X(j\omega)|^2 d\omega}
+\end{equation}
+
+这是加权平均滞后，权重是信号的能量分布。
+
+\section{数值例子}
+
+\subsection{例子1：缓慢变化的力}
+
+假设用户施加的力缓慢变化，可以近似为正弦波：
+\begin{equation}
+f_{\text{ext}}(t) = F_0 \sin(0.1t) \quad \text{（频率$f = 0.1/(2\pi) \approx 0.016$ Hz）}
+\end{equation}
+
+\textbf{周期}：$T = 2\pi/0.1 \approx 62.8$ s
+
+\textbf{相位滞后}：$-90^\circ$
+
+\textbf{时域滞后}：
+\begin{equation}
+\Delta t = \frac{T}{4} = \frac{62.8}{4} \approx 15.7 \text{ s}
+\end{equation}
+
+\textbf{结论}：对于缓慢变化的信号，滞后很大。
+
+\subsection{例子2：快速变化的力}
+
+假设力快速变化：
+\begin{equation}
+f_{\text{ext}}(t) = F_0 \sin(10t) \quad \text{（频率$f = 10/(2\pi) \approx 1.59$ Hz）}
+\end{equation}
+
+\textbf{周期}：$T = 2\pi/10 \approx 0.628$ s
+
+\textbf{时域滞后}：
+\begin{equation}
+\Delta t = \frac{T}{4} = \frac{0.628}{4} \approx 0.157 \text{ s}
+\end{equation}
+
+\textbf{结论}：对于快速变化的信号，滞后较小。
+
+\subsection{例子3：阶跃力}
+
+假设用户突然施加恒力：
+\begin{equation}
+f_{\text{ext}}(t) = \begin{cases}
+0 & t < 0 \\
+F_0 & t \geq 0
+\end{cases}
+\end{equation}
+
+\textbf{分析}：
+\begin{itemize}
+\item 阶跃包含所有频率分量
+\item 低频分量滞后大（如$f = 0.1$ Hz，滞后$\approx 2.5$ s）
+\item 高频分量滞后小（如$f = 10$ Hz，滞后$\approx 0.025$ s）
+\item 系统响应是这些分量的叠加
+\item 实际滞后取决于系统的主要频率成分
+\end{itemize}
+
+\section{减少滞后的方法}
+
+\subsection{方法1：预测补偿}
+
+使用预测来补偿滞后：
+\begin{equation}
+\dot{x}_d(t) = \int_0^t \ddot{x}_d(\tau) d\tau + \alpha \ddot{x}_d(t)
+\end{equation}
+
+其中$\alpha$是预测系数。
+
+\subsection{方法2：高通滤波}
+
+对输入信号进行高通滤波，减少低频分量：
+\begin{itemize}
+\item 低频分量滞后大
+\item 减少低频分量可以减少平均滞后
+\item 但可能丢失重要信息
+\end{itemize}
+
+\subsection{方法3：自适应控制}
+
+根据信号特性调整控制参数：
+\begin{itemize}
+\item 对于快速变化：使用较小的$M$（减少惯性）
+\item 对于缓慢变化：使用较大的$B$（增加阻尼）
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心结论}
+
+\begin{enumerate}
+\item \textbf{非周期信号的复杂性}：
+\begin{itemize}
+\item 包含多个频率分量
+\item 每个分量有不同的滞后
+\item 信号形状可能改变
+\end{itemize}
+
+\item \textbf{滞后的估计}：
+\begin{itemize}
+\item 对于缓慢变化：可以近似为周期信号，滞后$\approx T/4$
+\item 对于快速变化：滞后较小
+\item 对于阶跃等：滞后取决于主要频率成分
+\end{itemize}
+
+\item \textbf{实际影响}：
+\begin{itemize}
+\item 低频分量滞后大（可能几秒到几十秒）
+\item 高频分量滞后小（可能几毫秒）
+\item 平均滞后取决于信号的能量分布
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+对于频率为$\omega$的分量：
+\begin{equation}
+\Delta t(\omega) = \frac{\pi/2}{\omega} = \frac{T(\omega)}{4}
+\end{equation}
+
+对于非周期信号，有效滞后：
+\begin{equation}
+\Delta t_{\text{eff}} \approx \frac{T_{\text{dominant}}}{4}
+\end{equation}
+
+其中$T_{\text{dominant}}$是信号主要频率分量的周期。
+
+\subsection{实际建议}
+
+\begin{enumerate}
+\item \textbf{对于缓慢变化的信号}：
+\begin{itemize}
+\item 滞后可能很大（秒级）
+\item 需要考虑这个影响
+\item 可以使用预测补偿
+\end{itemize}
+
+\item \textbf{对于快速变化的信号}：
+\begin{itemize}
+\item 滞后较小（毫秒级）
+\item 但系统可能跟不上
+\item 需要提高系统带宽
+\end{itemize}
+
+\item \textbf{对于阶跃等瞬态信号}：
+\begin{itemize}
+\item 滞后取决于系统响应
+\item 主要受系统动态特性影响
+\item 相位滞后是次要因素
+\end{itemize}
+\end{enumerate}
+
+\end{document}
+

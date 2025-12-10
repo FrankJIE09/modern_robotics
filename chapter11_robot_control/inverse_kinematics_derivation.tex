@@ -1,0 +1,305 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{从任务空间到关节空间的转换公式推导}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题背景}
+
+在任务空间控制中，我们已知末端执行器的轨迹$(X(t), V_b(t))$，需要计算对应的关节空间轨迹$(\theta(t), \dot{\theta}(t), \ddot{\theta}(t))$。
+
+这三个公式是：
+\begin{align}
+\theta(t) &= T^{-1}(X(t)), \tag{56} \\
+\dot{\theta}(t) &= J_b^{\dagger}(\theta(t))V_b(t), \tag{57} \\
+\ddot{\theta}(t) &= J_b^{\dagger}(\theta(t))\left(\dot{V}_b(t) - \dot{J}_b(\theta(t))\dot{\theta}(t)\right). \tag{58}
+\end{align}
+
+\section{基础：正运动学}
+
+首先回顾正运动学关系：
+
+\begin{enumerate}
+\item \textbf{位置正运动学}：
+\begin{equation}
+X(t) = T(\theta(t)),
+\end{equation}
+其中$T(\theta)$是正运动学函数，将关节角度$\theta$映射到末端执行器位姿$X \in SE(3)$。
+
+\item \textbf{速度正运动学}：
+\begin{equation}
+V_b(t) = J_b(\theta(t))\dot{\theta}(t),
+\end{equation}
+其中$J_b(\theta)$是体雅可比矩阵（body Jacobian），$V_b$是体坐标系twist。
+\end{enumerate}
+
+\section{公式(56)：逆运动学}
+
+\subsection{推导}
+
+从正运动学关系：
+\begin{equation}
+X(t) = T(\theta(t)).
+\end{equation}
+
+要得到$\theta(t)$，我们需要\textbf{求逆}：
+\begin{equation}
+\theta(t) = T^{-1}(X(t)). \tag{56}
+\end{equation}
+
+\subsection{说明}
+
+\begin{itemize}
+\item $T^{-1}$是逆运动学函数
+\item 对于大多数机器人，逆运动学没有解析解，需要使用数值方法（如第6章讨论的Newton-Raphson方法）
+\item 可能存在多个解（如"左臂"和"右臂"配置）
+\item 在奇异点附近，逆运动学可能不稳定
+\end{itemize}
+
+\section{公式(57)：逆速度运动学}
+
+\subsection{推导}
+
+从速度正运动学关系：
+\begin{equation}
+V_b(t) = J_b(\theta(t))\dot{\theta}(t).
+\end{equation}
+
+要得到$\dot{\theta}(t)$，我们需要\textbf{求解线性方程组}。
+
+\subsubsection{情况1：雅可比矩阵可逆（非冗余机器人）}
+
+如果$J_b(\theta)$是方阵且可逆（即机器人有6个关节，且不在奇异点），则：
+\begin{equation}
+\dot{\theta}(t) = J_b^{-1}(\theta(t))V_b(t).
+\end{equation}
+
+\subsubsection{情况2：冗余机器人或接近奇异点}
+
+对于冗余机器人（关节数$n > 6$）或接近奇异点的情况，$J_b$不是方阵或不可逆，需要使用\textbf{伪逆}（Moore-Penrose pseudoinverse）：
+\begin{equation}
+\dot{\theta}(t) = J_b^{\dagger}(\theta(t))V_b(t). \tag{57}
+\end{equation}
+
+其中$J_b^{\dagger}$是$J_b$的伪逆，定义为：
+\begin{equation}
+J_b^{\dagger} = \begin{cases}
+J_b^{-1} & \text{如果$J_b$是方阵且可逆} \\
+(J_b^T J_b)^{-1}J_b^T & \text{如果$J_b$是"高"矩阵（$n > 6$，冗余）} \\
+J_b^T(J_b J_b^T)^{-1} & \text{如果$J_b$是"宽"矩阵（$n < 6$，欠驱动）}
+\end{cases}
+\end{equation}
+
+\subsection{伪逆的物理意义}
+
+\begin{itemize}
+\item \textbf{冗余机器人}：伪逆给出最小范数解，即满足$V_b = J_b\dot{\theta}$的所有$\dot{\theta}$中，$\|\dot{\theta}\|$最小的那个
+\item \textbf{奇异点附近}：伪逆提供数值稳定的近似解
+\item \textbf{一般情况}：伪逆是最小二乘解
+\end{itemize}
+
+\section{公式(58)：逆加速度运动学}
+
+\subsection{推导}
+
+这是最复杂的公式。我们从速度正运动学开始：
+\begin{equation}
+V_b(t) = J_b(\theta(t))\dot{\theta}(t).
+\end{equation}
+
+\subsubsection{第一步：对时间求导}
+
+对两边同时求时间导数：
+\begin{equation}
+\dot{V}_b(t) = \frac{d}{dt}[J_b(\theta(t))\dot{\theta}(t)].
+\end{equation}
+
+\subsubsection{第二步：应用乘积法则}
+
+使用乘积法则展开右边：
+\begin{equation}
+\frac{d}{dt}[J_b(\theta(t))\dot{\theta}(t)] = \dot{J}_b(\theta(t))\dot{\theta}(t) + J_b(\theta(t))\ddot{\theta}(t),
+\end{equation}
+其中$\dot{J}_b(\theta(t))$是雅可比矩阵对时间的导数。
+
+\textbf{注意}：$\dot{J}_b$的计算：
+\begin{equation}
+\dot{J}_b(\theta(t)) = \frac{\partial J_b}{\partial \theta_1}\dot{\theta}_1 + \frac{\partial J_b}{\partial \theta_2}\dot{\theta}_2 + \cdots + \frac{\partial J_b}{\partial \theta_n}\dot{\theta}_n = \sum_{i=1}^{n}\frac{\partial J_b}{\partial \theta_i}\dot{\theta}_i.
+\end{equation}
+
+\subsubsection{第三步：整理方程}
+
+因此：
+\begin{equation}
+\dot{V}_b(t) = \dot{J}_b(\theta(t))\dot{\theta}(t) + J_b(\theta(t))\ddot{\theta}(t).
+\end{equation}
+
+\subsubsection{第四步：求解$\ddot{\theta}(t)$}
+
+将$\ddot{\theta}(t)$项移到左边，其他项移到右边：
+\begin{equation}
+J_b(\theta(t))\ddot{\theta}(t) = \dot{V}_b(t) - \dot{J}_b(\theta(t))\dot{\theta}(t).
+\end{equation}
+
+\subsubsection{第五步：使用伪逆求解}
+
+两边同时左乘$J_b^{\dagger}(\theta(t))$：
+\begin{equation}
+\ddot{\theta}(t) = J_b^{\dagger}(\theta(t))\left(\dot{V}_b(t) - \dot{J}_b(\theta(t))\dot{\theta}(t)\right). \tag{58}
+\end{equation}
+
+\subsection{物理意义}
+
+这个公式表明，关节加速度$\ddot{\theta}$由两部分组成：
+
+\begin{enumerate}
+\item \textbf{直接加速度项}：$J_b^{\dagger}\dot{V}_b$
+\begin{itemize}
+\item 这是由末端执行器加速度$\dot{V}_b$直接产生的关节加速度
+\item 如果雅可比矩阵是常数（即机器人不动），这就是唯一的项
+\end{itemize}
+
+\item \textbf{耦合加速度项}：$-J_b^{\dagger}\dot{J}_b\dot{\theta}$
+\begin{itemize}
+\item 这是由雅可比矩阵的变化产生的"额外"加速度
+\item 即使末端执行器加速度为零，如果关节在运动，雅可比矩阵会变化，从而产生耦合加速度
+\item 负号表示这是一个"补偿"项，用于抵消雅可比变化的影响
+\end{itemize}
+\end{enumerate}
+
+\subsection{详细解释耦合项}
+
+\textbf{为什么需要耦合项？}
+
+考虑一个简单的例子：一个2D平面机器人，当关节角度变化时，雅可比矩阵也会变化。
+
+\begin{itemize}
+\item 即使末端执行器速度$V_b$保持不变，关节速度$\dot{\theta}$的变化会导致雅可比矩阵$J_b(\theta)$变化
+\item 为了保持$V_b = J_b\dot{\theta}$，当$J_b$变化时，$\dot{\theta}$也必须相应调整
+\item 这个调整就是耦合项$-J_b^{\dagger}\dot{J}_b\dot{\theta}$
+\end{itemize}
+
+\section{完整推导流程总结}
+
+\begin{enumerate}
+\item \textbf{已知}：任务空间轨迹$(X(t), V_b(t), \dot{V}_b(t))$
+
+\item \textbf{步骤1}：通过逆运动学计算$\theta(t)$
+\begin{equation}
+\theta(t) = T^{-1}(X(t))
+\end{equation}
+
+\item \textbf{步骤2}：通过逆速度运动学计算$\dot{\theta}(t)$
+\begin{equation}
+\dot{\theta}(t) = J_b^{\dagger}(\theta(t))V_b(t)
+\end{equation}
+
+\item \textbf{步骤3}：计算$\dot{J}_b(\theta(t))$
+\begin{equation}
+\dot{J}_b(\theta(t)) = \sum_{i=1}^{n}\frac{\partial J_b}{\partial \theta_i}\dot{\theta}_i
+\end{equation}
+
+\item \textbf{步骤4}：通过逆加速度运动学计算$\ddot{\theta}(t)$
+\begin{equation}
+\ddot{\theta}(t) = J_b^{\dagger}(\theta(t))\left(\dot{V}_b(t) - \dot{J}_b(\theta(t))\dot{\theta}(t)\right)
+\end{equation}
+\end{enumerate}
+
+\section{数值实现注意事项}
+
+\subsection{计算复杂度}
+
+\begin{itemize}
+\item \textbf{逆运动学}：通常需要迭代求解，计算成本高
+\item \textbf{伪逆计算}：$J_b^{\dagger}$的计算需要矩阵求逆或SVD分解
+\item \textbf{雅可比导数}：$\dot{J}_b$的计算需要计算所有偏导数$\frac{\partial J_b}{\partial \theta_i}$，对于$n$关节机器人，这需要计算$n$个$6 \times n$矩阵
+\end{itemize}
+
+\subsection{数值稳定性}
+
+\begin{itemize}
+\item \textbf{奇异点}：当$J_b$接近奇异时，$J_b^{\dagger}$的计算可能不稳定
+\item \textbf{阻尼伪逆}：可以使用阻尼伪逆$J_b^{\dagger} = (J_b^T J_b + \lambda I)^{-1}J_b^T$来提高数值稳定性
+\item \textbf{实时性}：这些计算需要在每个控制周期完成，对计算能力要求高
+\end{itemize}
+
+\section{示例：2R平面机器人}
+
+考虑一个2R平面机器人（两个旋转关节），末端执行器在2D平面中运动。
+
+\subsection{正运动学}
+
+\begin{align}
+X &= \begin{bmatrix}
+\cos(\theta_1 + \theta_2) & -\sin(\theta_1 + \theta_2) & L_1\cos\theta_1 + L_2\cos(\theta_1+\theta_2) \\
+\sin(\theta_1 + \theta_2) & \cos(\theta_1 + \theta_2) & L_1\sin\theta_1 + L_2\sin(\theta_1+\theta_2) \\
+0 & 0 & 1
+\end{bmatrix}
+\end{align}
+
+\subsection{体雅可比矩阵}
+
+对于2D情况，体雅可比矩阵是$2 \times 2$矩阵：
+\begin{equation}
+J_b(\theta) = \begin{bmatrix}
+-L_2\sin\theta_2 & 0 \\
+L_1 + L_2\cos\theta_2 & L_2
+\end{bmatrix}
+\end{equation}
+
+\subsection{逆速度运动学}
+
+如果$J_b$可逆：
+\begin{equation}
+\dot{\theta} = J_b^{-1}V_b = \frac{1}{-L_1L_2\sin\theta_2}\begin{bmatrix}
+L_2 & 0 \\
+-(L_1 + L_2\cos\theta_2) & -L_2\sin\theta_2
+\end{bmatrix}V_b
+\end{equation}
+
+\textbf{注意}：当$\sin\theta_2 = 0$时，机器人处于奇异配置，$J_b$不可逆。
+
+\subsection{雅可比导数}
+
+\begin{equation}
+\dot{J}_b = \begin{bmatrix}
+-L_2\cos\theta_2\dot{\theta}_2 & 0 \\
+-L_2\sin\theta_2\dot{\theta}_2 & 0
+\end{bmatrix}
+\end{equation}
+
+\subsection{逆加速度运动学}
+
+\begin{equation}
+\ddot{\theta} = J_b^{-1}\left(\dot{V}_b - \dot{J}_b\dot{\theta}\right)
+\end{equation}
+
+\section{总结}
+
+这三个公式建立了从任务空间到关节空间的完整映射：
+
+\begin{enumerate}
+\item \textbf{位置映射}（公式56）：$\theta = T^{-1}(X)$
+\item \textbf{速度映射}（公式57）：$\dot{\theta} = J_b^{\dagger}V_b$
+\item \textbf{加速度映射}（公式58）：$\ddot{\theta} = J_b^{\dagger}(\dot{V}_b - \dot{J}_b\dot{\theta})$
+\end{enumerate}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 加速度公式包含耦合项，这是由雅可比矩阵的变化引起的
+\item 所有公式都依赖于当前关节配置$\theta(t)$
+\item 计算复杂度高，需要实时数值计算
+\item 在奇异点附近需要特殊处理
+\end{itemize}
+
+\end{document}
+

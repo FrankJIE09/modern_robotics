@@ -1,0 +1,563 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{积分项 vs. 预设期望力：消除稳态误差的方法比较}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在结合轨迹跟踪的导纳控制中，有两种方法可以消除稳态误差：
+
+\begin{enumerate}
+\item \textbf{方法1：使用积分项}
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}}
+\end{equation}
+
+\item \textbf{方法2：预设期望力$F_d$}
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} - F_d
+\end{equation}
+
+其中$F_d$是预设的期望力，用于抵消预期的外力。
+\end{enumerate}
+
+\textbf{问题}：这两种方法有什么区别？哪个更好？
+
+\section{方法1：使用积分项}
+
+\subsection{基本原理}
+
+积分项通过累积位置误差来提供修正力：
+\begin{equation}
+F_{\text{integral}} = K_i \int_0^t (x_d - x) d\tau
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item \textbf{自适应}：根据实际误差自动调整
+\item \textbf{不需要先验知识}：不需要知道外力的大小
+\item \textbf{自动收敛}：误差越大，积分项增长越快
+\end{itemize}
+
+\subsection{稳态分析}
+
+在稳态时（$\dot{x}_d = 0$，$\ddot{x}_d = 0$，$\dot{x} = 0$，$f_{\text{ext}} = f_0$）：
+\begin{equation}
+K x_{e,ss} + K_i \int_0^t x_{e,ss} d\tau = f_0
+\end{equation}
+
+对时间求导：
+\begin{equation}
+K \dot{x}_{e,ss} + K_i x_{e,ss} = 0
+\end{equation}
+
+在稳态时，$\dot{x}_{e,ss} = 0$，因此：
+\begin{equation}
+K_i x_{e,ss} = 0 \quad \Rightarrow \quad x_{e,ss} = 0
+\end{equation}
+
+\textbf{结论}：积分项可以消除稳态误差。
+
+\subsection{优点}
+
+\begin{enumerate}
+\item \textbf{自适应性强}：
+\begin{itemize}
+\item 自动适应不同的外力
+\item 不需要预先知道外力大小
+\item 对外力变化有自动响应
+\end{itemize}
+
+\item \textbf{鲁棒性好}：
+\begin{itemize}
+\item 对模型误差不敏感
+\item 对参数变化有适应性
+\end{itemize}
+
+\item \textbf{实现简单}：
+\begin{itemize}
+\item 只需要积分位置误差
+\item 不需要额外的传感器或估计
+\end{itemize}
+\end{enumerate}
+
+\subsection{缺点}
+
+\begin{enumerate}
+\item \textbf{响应较慢}：
+\begin{itemize}
+\item 需要时间累积误差
+\item 初始阶段修正力较小
+\item 可能需要较长时间才能消除误差
+\end{itemize}
+
+\item \textbf{可能不稳定}：
+\begin{itemize}
+\item 积分项可能饱和
+\item 需要积分器抗饱和
+\item 参数选择需要谨慎
+\end{itemize}
+
+\item \textbf{对噪声敏感}：
+\begin{itemize}
+\item 位置误差的噪声会被积分
+\item 可能导致积分项漂移
+\item 需要滤波
+\end{itemize}
+
+\item \textbf{相位滞后}：
+\begin{itemize}
+\item 积分器引入$90^\circ$相位滞后
+\item 可能影响动态响应
+\end{itemize}
+\end{enumerate}
+
+\section{方法2：预设期望力$F_d$}
+
+\subsection{基本原理}
+
+预设期望力$F_d$直接抵消预期的外力：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} - F_d
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item \textbf{前馈补偿}：预先提供补偿力
+\item \textbf{需要先验知识}：需要知道或估计外力
+\item \textbf{立即生效}：不需要等待误差累积
+\end{itemize}
+
+\subsection{稳态分析}
+
+在稳态时：
+\begin{equation}
+K(x_d - x_{ss}) = f_0 - F_d
+\end{equation}
+
+如果$F_d = f_0$（完美匹配），则：
+\begin{equation}
+K(x_d - x_{ss}) = 0 \quad \Rightarrow \quad x_{e,ss} = 0
+\end{equation}
+
+\textbf{结论}：如果$F_d$准确等于外力，可以消除稳态误差。
+
+\subsection{优点}
+
+\begin{enumerate}
+\item \textbf{响应快速}：
+\begin{itemize}
+\item 立即提供补偿力
+\item 不需要等待误差累积
+\item 动态响应好
+\end{itemize}
+
+\item \textbf{无相位滞后}：
+\begin{itemize}
+\item 前馈项不引入相位滞后
+\item 不影响系统动态特性
+\end{itemize}
+
+\item \textbf{稳定性好}：
+\begin{itemize}
+\item 不改变系统阶数
+\item 不引入额外的动态
+\item 稳定性更容易保证
+\end{itemize}
+
+\item \textbf{对噪声不敏感}：
+\begin{itemize}
+\item 不依赖误差积分
+\item 不受位置噪声影响
+\end{itemize}
+\end{enumerate}
+
+\subsection{缺点}
+
+\begin{enumerate}
+\item \textbf{需要先验知识}：
+\begin{itemize}
+\item 需要知道或估计外力$f_{\text{ext}}$
+\item 如果外力未知或变化，难以设定
+\end{itemize}
+
+\item \textbf{鲁棒性差}：
+\begin{itemize}
+\item 如果$F_d \neq f_{\text{ext}}$，仍有稳态误差
+\item 对外力变化不敏感
+\item 需要实时更新$F_d$
+\end{itemize}
+
+\item \textbf{实现复杂}：
+\begin{itemize}
+\item 需要力传感器或估计算法
+\item 需要实时计算或更新$F_d$
+\end{itemize}
+
+\item \textbf{模型依赖}：
+\begin{itemize}
+\item 如果外力估计不准确，效果差
+\item 需要良好的模型或传感器
+\end{itemize}
+\end{enumerate}
+
+\section{详细对比}
+
+\subsection{稳态误差}
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 稳态误差：$x_{e,ss} = 0$（理论上）
+\item 不依赖外力大小
+\item 自动适应
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 稳态误差：$x_{e,ss} = (f_{\text{ext}} - F_d)/K$
+\item 如果$F_d = f_{\text{ext}}$，则$x_{e,ss} = 0$
+\item 如果$F_d \neq f_{\text{ext}}$，仍有误差
+\end{itemize}
+
+\subsection{响应速度}
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 初始响应慢（需要累积误差）
+\item 误差越大，响应越快
+\item 可能需要几秒到几十秒
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 立即响应（前馈）
+\item 无延迟
+\item 动态响应好
+\end{itemize}
+
+\subsection{鲁棒性}
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 对外力变化自动适应
+\item 对模型误差不敏感
+\item 鲁棒性好
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 如果外力变化，需要更新$F_d$
+\item 对估计误差敏感
+\item 鲁棒性较差
+\end{itemize}
+
+\subsection{稳定性}
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 增加系统阶数（从2阶到3阶）
+\item 可能影响稳定性
+\item 需要仔细设计参数
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 不改变系统阶数
+\item 不影响稳定性
+\item 更容易保证稳定
+\end{itemize}
+
+\subsection{实现复杂度}
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 实现简单：只需要积分误差
+\item 不需要额外传感器
+\item 计算量小
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 需要力传感器或估计算法
+\item 需要实时计算$F_d$
+\item 实现较复杂
+\end{itemize}
+
+\section{混合方法：积分项 + 预设力}
+
+\subsection{基本思想}
+
+结合两种方法的优点：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}} - F_d \tag{混合}
+\end{equation}
+
+\textbf{分工}：
+\begin{itemize}
+\item $F_d$：提供主要的前馈补偿（快速响应）
+\item 积分项：消除剩余误差（高精度）
+\end{itemize}
+
+\subsection{优点}
+
+\begin{enumerate}
+\item \textbf{快速响应}：$F_d$提供立即补偿
+\item \textbf{高精度}：积分项消除剩余误差
+\item \textbf{鲁棒性好}：即使$F_d$不准确，积分项也能补偿
+\end{enumerate}
+
+\subsection{稳态分析}
+
+在稳态时：
+\begin{equation}
+K x_{e,ss} + K_i \int_0^t x_{e,ss} d\tau = f_0 - F_d
+\end{equation}
+
+对时间求导：
+\begin{equation}
+K \dot{x}_{e,ss} + K_i x_{e,ss} = 0
+\end{equation}
+
+在稳态时，$\dot{x}_{e,ss} = 0$，因此：
+\begin{equation}
+K_i x_{e,ss} = 0 \quad \Rightarrow \quad x_{e,ss} = 0
+\end{equation}
+
+\textbf{结论}：即使$F_d \neq f_{\text{ext}}$，积分项也能消除剩余误差。
+
+\section{应用场景选择}
+
+\subsection{适合使用积分项的情况}
+
+\begin{enumerate}
+\item \textbf{外力未知或变化}：
+\begin{itemize}
+\item 不知道外力大小
+\item 外力随时间变化
+\item 需要自适应补偿
+\end{itemize}
+
+\item \textbf{实现简单优先}：
+\begin{itemize}
+\item 没有力传感器
+\item 计算资源有限
+\item 需要快速实现
+\end{itemize}
+
+\item \textbf{精度要求高}：
+\begin{itemize}
+\item 需要消除稳态误差
+\item 可以接受较慢的响应
+\end{itemize}
+\end{enumerate}
+
+\subsection{适合使用预设$F_d$的情况}
+
+\begin{enumerate}
+\item \textbf{外力已知或可估计}：
+\begin{itemize}
+\item 知道外力大小（如重力）
+\item 可以准确估计外力
+\item 有力传感器
+\end{itemize}
+
+\item \textbf{快速响应优先}：
+\begin{itemize}
+\item 需要立即补偿
+\item 不能等待误差累积
+\item 动态性能要求高
+\end{itemize}
+
+\item \textbf{稳定性要求高}：
+\begin{itemize}
+\item 不希望增加系统阶数
+\item 需要保证稳定性
+\item 参数调整困难
+\end{itemize}
+\end{enumerate}
+
+\subsection{适合使用混合方法的情况}
+
+\begin{enumerate}
+\item \textbf{既有先验知识，又需要高精度}：
+\begin{itemize}
+\item 可以估计主要外力
+\item 但估计可能有误差
+\item 需要消除剩余误差
+\end{itemize}
+
+\item \textbf{既要快速响应，又要高精度}：
+\begin{itemize}
+\item $F_d$提供快速响应
+\item 积分项提供高精度
+\end{itemize}
+\end{enumerate}
+
+\section{数值例子}
+
+\subsection{例子1：外力未知}
+
+\textbf{场景}：用户施加未知大小的力
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 初始：$F_{\text{integral}} = 0$，误差$= 0.1$ m
+\item 随时间：$F_{\text{integral}}$增长，误差减小
+\item 稳态：$F_{\text{integral}} = f_{\text{ext}}$，误差$= 0$
+\item 时间：可能需要$5-10$秒
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item 如果$F_d = 0$（不知道外力）：误差$= f_{\text{ext}}/K$
+\item 如果$F_d = f_{\text{ext}}$（完美估计）：误差$= 0$（立即）
+\item 如果$F_d \neq f_{\text{ext}}$：误差$= (f_{\text{ext}} - F_d)/K$
+\end{itemize}
+
+\textbf{结论}：方法1更适合（外力未知）
+
+\subsection{例子2：重力补偿}
+
+\textbf{场景}：机器人需要补偿重力（已知）
+
+\textbf{方法1（积分项）}：
+\begin{itemize}
+\item 初始：误差存在
+\item 需要时间累积
+\item 稳态：误差$= 0$
+\end{itemize}
+
+\textbf{方法2（预设$F_d$）}：
+\begin{itemize}
+\item $F_d = mg$（重力）
+\item 立即补偿
+\item 稳态：误差$= 0$（如果$F_d$准确）
+\end{itemize}
+
+\textbf{结论}：方法2更适合（重力已知）
+
+\subsection{例子3：混合方法}
+
+\textbf{场景}：重力已知，但还有其他未知外力
+
+\textbf{混合方法}：
+\begin{itemize}
+\item $F_d = mg$（补偿重力）
+\item 积分项补偿其他未知外力
+\item 快速响应 + 高精度
+\end{itemize}
+
+\textbf{结论}：混合方法最优
+
+\section{实际实现建议}
+
+\subsection{方法1：纯积分项}
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item 初始化：$I(0) = 0$
+\item 每个控制周期：
+\begin{align}
+x_e(k) &= x_d(k) - x(k) \\
+I(k+1) &= I(k) + x_e(k) \Delta t \\
+\ddot{x}_d(k) &= M^{-1}[f_{\text{ext}}(k) - B\dot{x}_e(k) - Kx_e(k) - K_i I(k+1)]
+\end{align}
+\item 添加积分器抗饱和
+\end{enumerate}
+
+\subsection{方法2：预设$F_d$}
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item 估计或测量外力：$\hat{f}_{\text{ext}}$
+\item 设定：$F_d = \hat{f}_{\text{ext}}$
+\item 每个控制周期：
+\begin{equation}
+\ddot{x}_d(k) = M^{-1}[f_{\text{ext}}(k) - F_d - B\dot{x}_e(k) - Kx_e(k)]
+\end{equation}
+\item 可选：实时更新$F_d$（如果外力变化）
+\end{enumerate}
+
+\subsection{混合方法}
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item 估计主要外力：$\hat{f}_{\text{main}}$（如重力）
+\item 设定：$F_d = \hat{f}_{\text{main}}$
+\item 初始化：$I(0) = 0$
+\item 每个控制周期：
+\begin{align}
+x_e(k) &= x_d(k) - x(k) \\
+I(k+1) &= I(k) + x_e(k) \Delta t \\
+\ddot{x}_d(k) &= M^{-1}[f_{\text{ext}}(k) - F_d - B\dot{x}_e(k) - Kx_e(k) - K_i I(k+1)]
+\end{align}
+\end{enumerate}
+
+\section{总结和建议}
+
+\subsection{方法对比总结}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{方面} & \textbf{积分项} & \textbf{预设$F_d$} & \textbf{混合方法} \\
+\hline
+响应速度 & 慢 & 快 & 快 \\
+\hline
+精度 & 高 & 取决于$F_d$准确性 & 高 \\
+\hline
+鲁棒性 & 好 & 差 & 好 \\
+\hline
+稳定性 & 需注意 & 好 & 需注意 \\
+\hline
+实现复杂度 & 简单 & 复杂 & 中等 \\
+\hline
+需要先验知识 & 否 & 是 & 部分 \\
+\hline
+\end{tabular}
+\caption{三种方法的对比}
+\end{table}
+
+\subsection{选择建议}
+
+\begin{enumerate}
+\item \textbf{外力未知或变化} $\to$ 使用积分项
+\item \textbf{外力已知且恒定} $\to$ 使用预设$F_d$
+\item \textbf{既有已知外力，又有未知外力} $\to$ 使用混合方法
+\item \textbf{快速响应优先} $\to$ 使用预设$F_d$或混合方法
+\item \textbf{高精度优先} $\to$ 使用积分项或混合方法
+\item \textbf{实现简单优先} $\to$ 使用积分项
+\end{enumerate}
+
+\subsection{最佳实践}
+
+\textbf{推荐方案}：混合方法
+\begin{itemize}
+\item 使用$F_d$补偿已知外力（如重力）
+\item 使用积分项消除剩余误差
+\item 兼顾快速响应和高精度
+\item 鲁棒性好
+\end{itemize}
+
+\textbf{实现建议}：
+\begin{itemize}
+\item 如果只有重力：$F_d = mg$（重力补偿）
+\item 如果有其他已知力：$F_d = \sum f_{\text{known}}$
+\item 积分项处理未知或变化的力
+\item 添加积分器抗饱和
+\end{itemize}
+
+\end{document}
+

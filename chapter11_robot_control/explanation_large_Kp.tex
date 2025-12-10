@@ -1,0 +1,261 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么大Kp值会导致问题？}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题背景}
+
+考虑速度输入的运动控制律：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta),
+\end{equation}
+其中$K_p$是比例增益。当$K_p$取值很大时，会出现两个主要问题：
+
+\begin{enumerate}
+\item 真实关节有速度限制，可能阻止实现与大的$K_p$相关的大指令速度
+\item 大的$K_p$值在离散时间数字控制器实现时可能导致不稳定
+\end{enumerate}
+
+\section{问题1：速度限制}
+
+\subsection{理论分析}
+
+从控制律(1)可以看出，指令速度$\dot{\theta}$由两部分组成：
+\begin{equation}
+\dot{\theta} = \underbrace{\dot{\theta}_d}_{\text{前馈项}} + \underbrace{K_p(\theta_d - \theta)}_{\text{反馈项}}
+\end{equation}
+
+当误差$\theta_e = \theta_d - \theta$较大时，反馈项$K_p \theta_e$会变得很大。如果$K_p$很大，即使误差较小，反馈项也可能产生很大的速度指令。
+
+\subsection{物理限制}
+
+真实机器人关节存在物理速度限制：
+\begin{itemize}
+\item \textbf{电机限制：} 电机有最大转速限制，由电机设计参数决定
+\item \textbf{传动限制：} 齿轮箱和传动装置有最大允许速度
+\item \textbf{安全限制：} 为防止损坏，系统通常设置最大速度上限
+\end{itemize}
+
+\subsection{数学描述}
+
+设关节的最大允许速度为$\dot{\theta}_{\max}$，则实际执行的速度为：
+\begin{equation}
+\dot{\theta}_{\text{实际}} = \begin{cases}
+\dot{\theta}_d + K_p(\theta_d - \theta) & \text{如果 } |\dot{\theta}_d + K_p(\theta_d - \theta)| \leq \dot{\theta}_{\max} \\
+\text{sign}(\dot{\theta}_d + K_p(\theta_d - \theta)) \cdot \dot{\theta}_{\max} & \text{否则}
+\end{cases}
+\end{equation}
+
+当速度被限制时，控制律(1)的理想行为被破坏，系统无法按照设计意图工作。
+
+\subsection{示例}
+
+假设：
+\begin{itemize}
+\item $\theta_d = 1$ rad（期望位置）
+\item $\theta = 0$ rad（当前位置）
+\item $\dot{\theta}_d = 0$ rad/s（期望速度）
+\item $K_p = 100$ rad/s/rad
+\item $\dot{\theta}_{\max} = 10$ rad/s（最大速度限制）
+\end{itemize}
+
+理想指令速度：
+\begin{equation}
+\dot{\theta} = 0 + 100 \times (1 - 0) = 100 \text{ rad/s}
+\end{equation}
+
+但实际只能达到：
+\begin{equation}
+\dot{\theta}_{\text{实际}} = 10 \text{ rad/s}
+\end{equation}
+
+因此，大$K_p$值产生的速度指令无法被物理系统实现，导致控制性能下降。
+
+\section{问题2：离散时间数字控制器的不稳定性}
+
+\subsection{连续时间 vs 离散时间}
+
+在连续时间控制理论中，控制律(1)可以表示为：
+\begin{equation}
+\dot{\theta}_e = -K_p \theta_e,
+\end{equation}
+其解为$\theta_e(t) = e^{-K_p t}\theta_e(0)$。只要$K_p > 0$，误差就会指数衰减到零，系统是稳定的。
+
+但在实际数字控制器中，系统是离散的：
+\begin{itemize}
+\item 控制器以固定采样周期$T_s$（例如1ms）运行
+\item 在每个采样时刻$k$，控制器读取传感器数据$\theta[k]$
+\item 控制器计算控制指令$\dot{\theta}[k]$
+\item 控制指令在下一个采样周期内保持常数
+\end{itemize}
+
+\subsection{离散时间模型}
+
+离散化后的控制律变为：
+\begin{equation}
+\dot{\theta}[k] = \dot{\theta}_d[k] + K_p(\theta_d[k] - \theta[k])
+\end{equation}
+
+在采样周期$T_s$内，速度保持常数，因此位置变化为：
+\begin{equation}
+\theta[k+1] = \theta[k] + \dot{\theta}[k] \cdot T_s
+\end{equation}
+
+假设$\dot{\theta}_d = 0$（跟踪固定位置），则：
+\begin{align}
+\theta[k+1] &= \theta[k] + K_p(\theta_d - \theta[k]) \cdot T_s \\
+&= \theta[k] + K_p T_s \theta_d - K_p T_s \theta[k] \\
+&= (1 - K_p T_s)\theta[k] + K_p T_s \theta_d
+\end{align}
+
+误差动力学为：
+\begin{equation}
+\theta_e[k+1] = \theta_d - \theta[k+1] = (1 - K_p T_s)\theta_e[k]
+\end{equation}
+
+\subsection{稳定性条件}
+
+对于离散时间系统$\theta_e[k+1] = a \theta_e[k]$，稳定性要求$|a| < 1$。
+
+因此，稳定性条件为：
+\begin{equation}
+|1 - K_p T_s| < 1
+\end{equation}
+
+这等价于：
+\begin{equation}
+-1 < 1 - K_p T_s < 1
+\end{equation}
+
+即：
+\begin{equation}
+0 < K_p T_s < 2
+\end{equation}
+
+或者：
+\begin{equation}
+0 < K_p < \frac{2}{T_s}
+\end{equation}
+
+\subsection{大Kp导致的问题}
+
+当$K_p$很大时，可能出现以下情况：
+
+\subsubsection{情况1：$K_p T_s > 2$（不稳定）}
+
+如果$K_p T_s > 2$，则$1 - K_p T_s < -1$，误差会振荡发散：
+\begin{equation}
+\theta_e[k+1] = (1 - K_p T_s)\theta_e[k] = -|1 - K_p T_s|\theta_e[k]
+\end{equation}
+
+误差在每次采样时改变符号，且幅度增大，系统不稳定。
+
+\subsubsection{情况2：$K_p T_s$接近2（临界不稳定）}
+
+即使$K_p T_s < 2$，如果接近2，系统响应会振荡，超调很大。
+
+\subsubsection{情况3：传感器数据过时问题}
+
+这是用户问题中提到的关键点。考虑以下场景：
+
+\begin{enumerate}
+\item 在时刻$t_0$，控制器读取传感器数据$\theta(t_0)$，计算控制指令
+\item 控制指令$\dot{\theta} = K_p(\theta_d - \theta(t_0))$在时间段$[t_0, t_0 + T_s]$内执行
+\item 由于$K_p$很大，指令速度很大，关节在$[t_0, t_0 + T_s]$内移动了很大距离
+\item 在时刻$t_0 + T_s$，控制器再次读取传感器数据$\theta(t_0 + T_s)$
+\item 但此时的位置$\theta(t_0 + T_s)$与计算控制指令时使用的$\theta(t_0)$已经相差很大
+\end{enumerate}
+
+\subsection{数学分析}
+
+假设在时刻$t_0$，误差为$\theta_e(t_0)$，控制指令为：
+\begin{equation}
+\dot{\theta} = K_p \theta_e(t_0)
+\end{equation}
+
+在采样周期$T_s$内，位置变化为：
+\begin{equation}
+\Delta \theta = K_p \theta_e(t_0) \cdot T_s
+\end{equation}
+
+在时刻$t_0 + T_s$，新的误差为：
+\begin{equation}
+\theta_e(t_0 + T_s) = \theta_e(t_0) - \Delta \theta = \theta_e(t_0) - K_p \theta_e(t_0) T_s = (1 - K_p T_s)\theta_e(t_0)
+\end{equation}
+
+如果$K_p T_s$很大（接近或超过2），则：
+\begin{itemize}
+\item 误差在单个采样周期内变化很大
+\item 控制器在周期后期执行的控制动作是基于"过时"的传感器数据
+\item 这导致控制器"反应过度"，产生振荡或不稳定
+\end{itemize}
+
+\subsection{示例}
+
+设：
+\begin{itemize}
+\item $T_s = 0.001$ s（1ms采样周期）
+\item $K_p = 3000$ rad/s/rad
+\item 初始误差$\theta_e[0] = 0.1$ rad
+\end{itemize}
+
+则：
+\begin{align}
+K_p T_s &= 3000 \times 0.001 = 3 > 2 \quad \text{（不稳定！）} \\
+\theta_e[1] &= (1 - 3) \times 0.1 = -0.2 \text{ rad} \\
+\theta_e[2] &= (1 - 3) \times (-0.2) = 0.4 \text{ rad} \\
+\theta_e[3] &= (1 - 3) \times 0.4 = -0.8 \text{ rad}
+\end{align}
+
+误差振荡发散，系统不稳定。
+
+即使$K_p = 1500$（$K_p T_s = 1.5 < 2$），虽然稳定，但：
+\begin{align}
+\theta_e[1] &= (1 - 1.5) \times 0.1 = -0.05 \text{ rad} \\
+\theta_e[2] &= (1 - 1.5) \times (-0.05) = 0.025 \text{ rad}
+\end{align}
+
+误差在正负之间振荡，响应不理想。
+
+\section{解决方案}
+
+\subsection{针对速度限制}
+
+\begin{enumerate}
+\item \textbf{限制增益：} 选择$K_p$使得最大可能的速度指令不超过$\dot{\theta}_{\max}$
+\item \textbf{使用速度前馈：} 如果$\dot{\theta}_d$已知，可以提前补偿
+\item \textbf{自适应增益：} 根据误差大小动态调整$K_p$
+\end{enumerate}
+
+\subsection{针对离散时间不稳定}
+
+\begin{enumerate}
+\item \textbf{满足稳定性条件：} 确保$K_p < \frac{2}{T_s}$
+\item \textbf{增加采样频率：} 减小$T_s$可以允许更大的$K_p$
+\item \textbf{使用预测控制：} 预测未来状态，减少传感器数据过时的影响
+\item \textbf{使用更高级的控制方法：} 如模型预测控制(MPC)或自适应控制
+\end{enumerate}
+
+\section{总结}
+
+大$K_p$值导致问题的根本原因：
+
+\begin{enumerate}
+\item \textbf{速度限制：} 大$K_p$产生大的速度指令，但物理系统无法实现，导致控制性能下降
+\item \textbf{离散时间不稳定：} 在数字控制器中，大$K_p$使得误差在单个采样周期内变化过大，导致控制器基于过时数据工作，产生振荡或不稳定
+\end{enumerate}
+
+因此，在实际应用中，需要根据系统的物理限制和采样周期合理选择$K_p$值，而不是简单地追求大增益。
+
+\end{document}
+

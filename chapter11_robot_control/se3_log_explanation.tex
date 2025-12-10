@@ -1,0 +1,216 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{SE(3)群上的对数映射：$[X_e] = \log(X^{-1} X_d)$的理解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+\textbf{如何理解$[X_e] = \log(X^{-1} X_d)$中的$\log$？}
+
+这个公式出现在任务空间控制中，用于计算SE(3)群上的误差。
+
+\section{SE(3)群回顾}
+
+\subsection{定义}
+
+SE(3)是特殊欧氏群，元素是4×4齐次变换矩阵：
+\begin{equation}
+X = \begin{bmatrix}
+R & p \\
+0 & 1
+\end{bmatrix} \in SE(3)
+\end{equation}
+其中：
+\begin{itemize}
+\item $R \in SO(3)$是3×3旋转矩阵
+\item $p \in \mathbb{R}^3$是平移向量
+\end{itemize}
+
+\subsection{SE(3)的性质}
+
+\begin{itemize}
+\item 群乘法：$X_1 X_2 = \begin{bmatrix} R_1 R_2 & R_1 p_2 + p_1 \\ 0 & 1 \end{bmatrix}$
+\item 逆：$X^{-1} = \begin{bmatrix} R^T & -R^T p \\ 0 & 1 \end{bmatrix}$
+\item 单位元：$I_4 = \begin{bmatrix} I_3 & 0 \\ 0 & 1 \end{bmatrix}$
+\end{itemize}
+
+\section{李代数se(3)}
+
+\subsection{定义}
+
+se(3)是SE(3)的李代数，元素是4×4反对称矩阵（twist）：
+\begin{equation}
+[\xi] = \begin{bmatrix}
+[\omega] & v \\
+0 & 0
+\end{bmatrix} \in se(3)
+\end{equation}
+其中：
+\begin{itemize}
+\item $[\omega] \in so(3)$是3×3反对称矩阵，对应角速度向量$\omega \in \mathbb{R}^3$
+\item $v \in \mathbb{R}^3$是线速度向量
+\end{itemize}
+
+\subsection{反对称矩阵}
+
+对于向量$\omega = [\omega_1, \omega_2, \omega_3]^T$，反对称矩阵为：
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_3 & \omega_2 \\
+\omega_3 & 0 & -\omega_1 \\
+-\omega_2 & \omega_1 & 0
+\end{bmatrix}
+\end{equation}
+
+\section{对数映射$\log: SE(3) \to se(3)$}
+
+\subsection{定义}
+
+对于$X = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix} \in SE(3)$，对数映射$\log(X)$计算对应的twist $[\xi]$。
+
+\subsection{计算步骤}
+
+\textbf{步骤1：提取旋转和平移}
+\begin{equation}
+R = X[1:3, 1:3], \quad p = X[1:3, 4]
+\end{equation}
+
+\textbf{步骤2：计算旋转的对数映射}
+
+对于旋转矩阵$R$，使用SO(3)的对数映射：
+\begin{equation}
+[\omega] = \log(R) \in so(3)
+\end{equation}
+
+SO(3)的对数映射公式：
+\begin{align}
+\theta &= \arccos\left(\frac{\text{tr}(R) - 1}{2}\right) \\
+[\omega] &= \begin{cases}
+\frac{\theta}{2\sin\theta}(R - R^T) & \text{如果} \theta \neq 0 \\
+0 & \text{如果} \theta = 0
+\end{cases}
+\end{align}
+
+从$[\omega]$提取角速度向量$\omega$（反对称矩阵的"vee"操作）。
+
+\textbf{步骤3：计算平移部分}
+
+\begin{equation}
+v = \left(\frac{1}{\theta^2}\left(I - \frac{[\omega]}{2}\right) - \frac{[\omega]^2}{2\theta\sin\theta}\right) p
+\end{equation}
+
+当$\theta \to 0$时（小角度近似）：
+\begin{equation}
+v \approx p
+\end{equation}
+
+\textbf{步骤4：组合成twist}
+
+\begin{equation}
+[\xi] = \begin{bmatrix}
+[\omega] & v \\
+0 & 0
+\end{bmatrix}
+\end{equation}
+
+或者表示为6维向量：
+\begin{equation}
+\xi = \begin{bmatrix} \omega \\ v \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\section{误差表示$[X_e] = \log(X^{-1} X_d)$}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item $X$：实际末端执行器位姿
+\item $X_d$：期望末端执行器位姿
+\item $X^{-1} X_d$：从实际位姿到期望位姿的相对变换
+\item $\log(X^{-1} X_d)$：将这个相对变换映射到李代数se(3)
+\item $[X_e]$：误差的twist表示
+\end{itemize}
+
+\subsection{为什么使用$X^{-1} X_d$而不是$X_d - X$？}
+
+\begin{enumerate}
+\item \textbf{SE(3)不是向量空间：}不能直接做减法
+\item \textbf{群结构：}使用群乘法$X^{-1} X_d$表示相对变换
+\item \textbf{对数映射：}将群元素映射到向量空间（李代数），可以线性化
+\end{enumerate}
+
+\subsection{误差的6维向量表示}
+
+通常将twist表示为6维向量：
+\begin{equation}
+X_e = \begin{bmatrix} \omega_e \\ v_e \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+其中：
+\begin{itemize}
+\item $\omega_e \in \mathbb{R}^3$：旋转误差（角速度）
+\item $v_e \in \mathbb{R}^3$：平移误差（线速度）
+\end{itemize}
+
+\section{小角度近似}
+
+当误差很小时，可以简化计算：
+
+\textbf{小角度近似：}
+\begin{equation}
+X^{-1} X_d \approx I + [X_e]
+\end{equation}
+
+其中$[X_e]$是小的twist。
+
+在这种情况下：
+\begin{equation}
+X_e \approx \begin{bmatrix}
+\text{vee}(\log(R^T R_d)) \\
+R^T(p_d - p)
+\end{bmatrix}
+\end{equation}
+
+\section{在控制中的应用}
+
+在任务空间控制中，误差$X_e$用于计算控制律：
+
+\begin{equation}
+\dot{\theta} = J^{-1}(\theta)\left(\dot{x}_d + K_p X_e\right)
+\end{equation}
+
+其中$X_e$是6维误差向量。
+
+\section{总结}
+
+\textbf{关键点：}
+
+\begin{enumerate}
+\item $\log$是李群SE(3)到李代数se(3)的映射
+\item $X^{-1} X_d$表示从实际位姿到期望位姿的相对变换
+\item $[X_e] = \log(X^{-1} X_d)$将相对变换映射为twist（误差表示）
+\item 这个误差可以表示为6维向量$X_e = [\omega_e^T, v_e^T]^T$
+\item 在控制中，这个误差用于反馈控制律
+\end{enumerate}
+
+\textbf{与标量情况的类比：}
+
+在标量情况下，误差是$e = x_d - x$（直接减法）。
+
+在SE(3)群中，不能直接减法，所以使用：
+\begin{equation}
+X_e = \log(X^{-1} X_d)
+\end{equation}
+
+这相当于"群上的减法"。
+
+\end{document}
+

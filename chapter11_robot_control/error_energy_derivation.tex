@@ -1,0 +1,207 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{误差能量函数$V(\theta_e, \dot{\theta}_e)$的推导}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{公式回顾}
+
+我们考虑以下误差能量函数：
+\begin{equation}
+V(\theta_e, \dot{\theta}_e) = \frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e,
+\end{equation}
+其中：
+\begin{itemize}
+\item $\theta_e = \theta_d - \theta$是关节误差向量
+\item $K_p$是正定对角比例增益矩阵
+\item $M(\theta)$是质量矩阵
+\item $\dot{\theta}_e = \dot{\theta}_d - \dot{\theta}$是速度误差向量
+\end{itemize}
+
+\section{公式的物理来源}
+
+这个公式来源于\textbf{Lyapunov稳定性理论}中的能量函数概念。它由两部分组成：
+
+\subsection{第一部分：误差势能}
+
+\begin{equation}
+V_{\text{potential}} = \frac{1}{2}\theta_e^T K_p\theta_e
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 这部分表示存储在\textbf{虚拟弹簧}中的势能
+\item PD控制器中的比例项$\tau_p = K_p\theta_e$可以看作是一个虚拟弹簧，试图将关节拉回到期望位置
+\item 当误差$\theta_e$越大时，虚拟弹簧存储的能量越多
+\item 这与物理弹簧的势能公式$V = \frac{1}{2}kx^2$类似，其中$k$是弹簧常数，$x$是位移
+\end{itemize}
+
+\textbf{数学推导}：
+对于线性弹簧，力与位移的关系为$F = kx$，势能为：
+\begin{equation}
+V = \int_0^x F \, dx = \int_0^x kx \, dx = \frac{1}{2}kx^2.
+\end{equation}
+
+对于多关节系统，虚拟弹簧产生的力矩为$\tau_p = K_p\theta_e$，对应的势能为：
+\begin{equation}
+V_{\text{potential}} = \int_0^{\theta_e} \tau_p^T d\theta_e = \int_0^{\theta_e} (K_p\theta_e)^T d\theta_e = \frac{1}{2}\theta_e^T K_p\theta_e,
+\end{equation}
+其中利用了$K_p$是对称矩阵（通常是对角矩阵）的性质。
+
+\subsection{第二部分：误差动能}
+
+\begin{equation}
+V_{\text{kinetic}} = \frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 这部分表示机器人系统的\textbf{动能}
+\item 在设定点控制中，$\dot{\theta}_d = 0$，因此$\dot{\theta}_e = -\dot{\theta}$
+\item 机器人的总动能为$T = \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$
+\item 由于$\dot{\theta}_e = -\dot{\theta}$，我们有$\dot{\theta}_e^T M(\theta)\dot{\theta}_e = \dot{\theta}^T M(\theta)\dot{\theta}$
+\end{itemize}
+
+\textbf{数学推导}：
+机器人的动能由质量矩阵定义：
+\begin{equation}
+T = \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}.
+\end{equation}
+
+在设定点控制中，$\dot{\theta}_d = 0$，因此：
+\begin{align}
+\dot{\theta}_e &= \dot{\theta}_d - \dot{\theta} = -\dot{\theta}, \\
+\dot{\theta} &= -\dot{\theta}_e.
+\end{align}
+
+将$\dot{\theta} = -\dot{\theta}_e$代入动能表达式：
+\begin{align}
+T &= \frac{1}{2}(-\dot{\theta}_e)^T M(\theta)(-\dot{\theta}_e) \\
+  &= \frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e = V_{\text{kinetic}}.
+\end{align}
+
+因此，误差动能就是机器人的实际动能。
+
+\section{完整公式的推导}
+
+将两部分组合，我们得到完整的误差能量函数：
+\begin{equation}
+V(\theta_e, \dot{\theta}_e) = V_{\text{potential}} + V_{\text{kinetic}} = \frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e.
+\end{equation}
+
+\section{在设定点控制中的简化}
+
+在设定点控制中，$\dot{\theta}_d = 0$，因此$\dot{\theta}_e = -\dot{\theta}$。误差能量函数可以写成：
+\begin{equation}
+V(\theta_e, \dot{\theta}) = \frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}.
+\end{equation}
+
+这个形式更清楚地表明：
+\begin{itemize}
+\item 第一项是虚拟弹簧的势能（依赖于位置误差）
+\item 第二项是机器人的实际动能（依赖于实际速度）
+\end{itemize}
+
+\section{为什么使用这个能量函数？}
+
+这个能量函数被用作\textbf{Lyapunov函数}来证明PD控制器的稳定性。关键性质是：
+
+\subsection{正定性}
+
+\begin{itemize}
+\item $V(\theta_e, \dot{\theta}_e) \geq 0$对所有$(\theta_e, \dot{\theta}_e)$成立
+\item $V(\theta_e, \dot{\theta}_e) = 0$当且仅当$\theta_e = 0$且$\dot{\theta}_e = 0$（即$\theta = \theta_d$且$\dot{\theta} = 0$）
+\end{itemize}
+
+这是因为：
+\begin{itemize}
+\item $K_p$是正定矩阵，所以$\theta_e^T K_p\theta_e \geq 0$，且等于零当且仅当$\theta_e = 0$
+\item $M(\theta)$是正定矩阵，所以$\dot{\theta}_e^T M(\theta)\dot{\theta}_e \geq 0$，且等于零当且仅当$\dot{\theta}_e = 0$
+\end{itemize}
+
+\subsection{能量耗散}
+
+通过计算$\dot{V}$，可以证明：
+\begin{equation}
+\dot{V} = -\dot{\theta}^T K_d\dot{\theta} \leq 0,
+\end{equation}
+其中$K_d$是正定微分增益矩阵。
+
+\textbf{推导过程}：
+
+首先，对$V$求时间导数：
+\begin{align}
+\dot{V} &= \frac{d}{dt}\left[\frac{1}{2}\theta_e^T K_p\theta_e + \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}\right] \\
+        &= \theta_e^T K_p\dot{\theta}_e + \frac{1}{2}\dot{\theta}^T \dot{M}(\theta)\dot{\theta} + \dot{\theta}^T M(\theta)\ddot{\theta}.
+\end{align}
+
+在设定点控制中，$\dot{\theta}_d = 0$，因此$\dot{\theta}_e = -\dot{\theta}$，$\theta_e = \theta_d - \theta$，所以：
+\begin{equation}
+\dot{V} = -\theta_e^T K_p\dot{\theta} + \frac{1}{2}\dot{\theta}^T \dot{M}(\theta)\dot{\theta} + \dot{\theta}^T M(\theta)\ddot{\theta}.
+\end{equation}
+
+从受控动力学方程(11.39)：
+\begin{equation}
+M(\theta)\ddot{\theta} + C(\theta, \dot{\theta})\dot{\theta} = K_p\theta_e - K_d\dot{\theta},
+\end{equation}
+我们可以解出$M(\theta)\ddot{\theta}$：
+\begin{equation}
+M(\theta)\ddot{\theta} = K_p\theta_e - K_d\dot{\theta} - C(\theta, \dot{\theta})\dot{\theta}.
+\end{equation}
+
+将其代入$\dot{V}$的表达式：
+\begin{align}
+\dot{V} &= -\theta_e^T K_p\dot{\theta} + \frac{1}{2}\dot{\theta}^T \dot{M}(\theta)\dot{\theta} + \dot{\theta}^T[K_p\theta_e - K_d\dot{\theta} - C(\theta, \dot{\theta})\dot{\theta}] \\
+        &= -\theta_e^T K_p\dot{\theta} + \frac{1}{2}\dot{\theta}^T \dot{M}(\theta)\dot{\theta} + \dot{\theta}^T K_p\theta_e - \dot{\theta}^T K_d\dot{\theta} - \dot{\theta}^T C(\theta, \dot{\theta})\dot{\theta} \\
+        &= \frac{1}{2}\dot{\theta}^T[\dot{M}(\theta) - 2C(\theta, \dot{\theta})]\dot{\theta} - \dot{\theta}^T K_d\dot{\theta}.
+\end{align}
+
+利用质量矩阵的一个重要性质：$\dot{M}(\theta) - 2C(\theta, \dot{\theta})$是\textbf{反对称矩阵}（这是机器人动力学的一个基本性质，见第8章命题8.1.2），因此：
+\begin{equation}
+\dot{\theta}^T[\dot{M}(\theta) - 2C(\theta, \dot{\theta})]\dot{\theta} = 0.
+\end{equation}
+
+因此：
+\begin{equation}
+\dot{V} = -\dot{\theta}^T K_d\dot{\theta} \leq 0,
+\end{equation}
+因为$K_d$是正定矩阵。
+
+\subsection{稳定性结论}
+
+由于：
+\begin{itemize}
+\item $V \geq 0$且$V = 0$当且仅当系统处于平衡点
+\item $\dot{V} \leq 0$（能量不增加）
+\item 当$\dot{\theta} = 0$但$\theta \neq \theta_d$时，虚拟弹簧会产生非零力矩，使系统继续运动
+\end{itemize}
+
+根据\textbf{Krasovskii-LaSalle不变性原理}，系统从任何初始状态都会收敛到平衡点$\theta = \theta_d$，$\dot{\theta} = 0$。
+
+\section{总结}
+
+误差能量函数$V(\theta_e, \dot{\theta}_e)$的构造基于以下思想：
+
+\begin{enumerate}
+\item \textbf{虚拟弹簧势能}：PD控制器中的比例项$K_p\theta_e$可以看作虚拟弹簧，存储势能$\frac{1}{2}\theta_e^T K_p\theta_e$
+
+\item \textbf{系统动能}：机器人的实际动能$\frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$，在设定点控制中等于$\frac{1}{2}\dot{\theta}_e^T M(\theta)\dot{\theta}_e$
+
+\item \textbf{Lyapunov函数}：总能量函数$V$作为Lyapunov函数，通过证明$\dot{V} \leq 0$来证明系统的稳定性
+
+\item \textbf{能量耗散}：微分项$K_d\dot{\theta}$提供能量耗散，确保系统最终收敛到平衡点
+\end{enumerate}
+
+这个公式是机器人控制理论中一个重要的结果，它提供了PD控制器稳定性的严格数学证明。
+
+\end{document}
+

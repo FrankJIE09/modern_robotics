@@ -1,0 +1,162 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\geometry{a4paper, margin=2.5cm}
+
+\title{任务空间控制中的坐标系记号说明}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题：$X$是什么？}
+
+在第432行提到：
+\begin{quote}
+设末端执行器轨迹由$(X(t), V_b(t))$指定，其中$X \in SE(3)$且$[V_b] = X^{-1}\dot{X}$，即twist $V_b$在末端执行器坐标系$\{b\}$中表示。
+\end{quote}
+
+\textbf{答案}：$X$是从\textbf{空间坐标系$\{s\}$}到\textbf{体坐标系$\{b\}$}（末端执行器坐标系）的变换矩阵，即$X = X_{sb}$。
+
+\section{标准记号}
+
+在现代机器人学中，通常使用以下记号：
+
+\begin{itemize}
+\item $X_{ab}$：从坐标系$\{a\}$到坐标系$\{b\}$的齐次变换矩阵
+\item $\{s\}$：空间坐标系（space frame），通常是固定坐标系
+\item $\{b\}$：体坐标系（body frame），这里指末端执行器坐标系
+\end{itemize}
+
+因此：
+\begin{equation}
+X = X_{sb} = \begin{bmatrix}
+R_{sb} & p_{sb} \\
+0 & 1
+\end{bmatrix} \in SE(3),
+\end{equation}
+其中：
+\begin{itemize}
+\item $R_{sb} \in SO(3)$：从$\{s\}$到$\{b\}$的旋转矩阵
+\item $p_{sb} \in \mathbb{R}^3$：从$\{s\}$到$\{b\}$的平移向量
+\end{itemize}
+
+\section{为什么使用$X$而不是$X_{sb}$？}
+
+在任务空间控制的上下文中，为了\textbf{记号简洁}，通常省略下标，直接用$X$表示末端执行器相对于空间坐标系的配置。这是常见的约定，因为：
+
+\begin{enumerate}
+\item 在任务空间控制中，我们主要关心末端执行器的位姿
+\item 空间坐标系$\{s\}$通常是固定的参考坐标系
+\item 体坐标系$\{b\}$是末端执行器坐标系
+\item 省略下标使公式更简洁易读
+\end{enumerate}
+
+\section{从上下文确认}
+
+\subsection{第432行的上下文}
+
+\begin{quote}
+设末端执行器轨迹由$(X(t), V_b(t))$指定，其中$X \in SE(3)$且$[V_b] = X^{-1}\dot{X}$，即twist $V_b$在末端执行器坐标系$\{b\}$中表示。
+\end{quote}
+
+\textbf{关键信息}：
+\begin{itemize}
+\item $V_b$是体坐标系twist（body-frame twist）
+\item $[V_b] = X^{-1}\dot{X}$是体坐标系twist的标准定义
+\item 这明确表明$X$是从空间坐标系到体坐标系的变换
+\end{itemize}
+
+\subsection{第434行的确认}
+
+\begin{quote}
+正运动学是$X = T(\theta)$和$V_b = J_b(\theta)\dot{\theta}$。
+\end{quote}
+
+\textbf{说明}：
+\begin{itemize}
+\item $T(\theta)$是正运动学函数，计算末端执行器相对于基座（空间坐标系）的位姿
+\item $J_b(\theta)$是体雅可比矩阵（body Jacobian），计算体坐标系twist
+\item 这进一步确认$X$是相对于空间坐标系的配置
+\end{itemize}
+
+\subsection{第513行的明确说明}
+
+在混合运动-力控制部分，有更明确的说明：
+\begin{quote}
+设$X(t) \in SE(3)$是块的坐标系$\{b\}$相对于空间坐标系$\{s\}$的配置。
+\end{quote}
+
+这\textbf{明确}说明了$X$是从$\{s\}$到$\{b\}$的变换。
+
+\section{体坐标系Twist的定义}
+
+体坐标系twist $V_b$的定义为：
+\begin{equation}
+[V_b] = X^{-1}\dot{X} = X_{sb}^{-1}\dot{X}_{sb}.
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $V_b$表示末端执行器的瞬时运动（角速度和线速度）
+\item 这些速度在末端执行器自身的坐标系$\{b\}$中表示
+\item $X^{-1}\dot{X}$是从变换矩阵的时间导数计算体坐标系twist的标准方法
+\end{itemize}
+
+\section{与空间坐标系Twist的关系}
+
+空间坐标系twist $V_s$定义为：
+\begin{equation}
+[V_s] = \dot{X}X^{-1} = \dot{X}_{sb}X_{sb}^{-1}.
+\end{equation}
+
+\textbf{关系}：
+\begin{equation}
+V_s = [Ad_X]V_b,
+\end{equation}
+其中$[Ad_X]$是伴随表示（adjoint representation），用于在不同坐标系之间转换twist。
+
+\section{总结}
+
+\begin{enumerate}
+\item \textbf{$X$的含义}：$X = X_{sb}$，从空间坐标系$\{s\}$到体坐标系$\{b\}$（末端执行器坐标系）的变换矩阵
+
+\item \textbf{记号约定}：在任务空间控制中，为了简洁，通常省略下标，直接用$X$表示
+
+\item \textbf{体坐标系twist}：$V_b$是体坐标系twist，通过$[V_b] = X^{-1}\dot{X}$计算
+
+\item \textbf{正运动学}：$X = T(\theta)$表示末端执行器相对于基座（空间坐标系）的位姿
+
+\item \textbf{上下文确认}：从多个地方的上下文可以确认$X$就是$X_{sb}$
+\end{enumerate}
+
+\section{常见记号对照}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{完整记号} & \textbf{简化记号（本文档）} \\
+\hline
+$X_{sb}$ & $X$ \\
+\hline
+$V_b$（体坐标系twist） & $V_b$ \\
+\hline
+$V_s$（空间坐标系twist） & $V_s$ \\
+\hline
+$F_b$（体坐标系wrench） & $F_b$ \\
+\hline
+$F_s$（空间坐标系wrench） & $F_s$ \\
+\hline
+\end{tabular}
+\caption{坐标系记号对照表}
+\end{table}
+
+\textbf{注意}：虽然$X$省略了下标，但$V_b$、$F_b$等仍然保留下标，因为它们明确表示在哪个坐标系中。
+
+\end{document}
+

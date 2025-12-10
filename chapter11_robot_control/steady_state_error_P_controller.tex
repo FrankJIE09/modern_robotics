@@ -1,0 +1,328 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么P控制器存在稳态误差？}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+\textbf{为什么P控制器（比例控制器）在时间$t \to \infty$时，误差$e$不为0？}
+
+\section{P控制器回顾}
+
+P控制器的控制律为：
+\begin{equation}
+\tau = K_p(\theta_d - \theta) = K_p \theta_e
+\end{equation}
+其中：
+\begin{itemize}
+\item $\tau$是控制力矩
+\item $K_p > 0$是比例增益
+\item $\theta_d$是期望位置
+\item $\theta$是实际位置
+\item $\theta_e = \theta_d - \theta$是位置误差
+\end{itemize}
+
+\section{稳态误差的根本原因}
+
+\subsection{关键洞察}
+
+\textbf{P控制器存在稳态误差的根本原因：}
+
+当系统达到稳态时，如果存在\textbf{持续的外部干扰}（如重力、摩擦力、负载等），P控制器需要\textbf{非零误差}来产生\textbf{非零的控制输出}以抵消这些干扰。
+
+如果误差为0，控制输出也为0，无法抵消干扰，系统无法保持平衡。
+
+\subsection{数学分析}
+
+考虑一个简单的单关节机器人系统，动力学方程为：
+\begin{equation}
+M\ddot{\theta} = \tau - mgr\cos\theta - b\dot{\theta}
+\end{equation}
+其中：
+\begin{itemize}
+\item $M$是惯性
+\item $\tau$是控制力矩
+\item $mgr\cos\theta$是重力项（持续干扰）
+\item $b\dot{\theta}$是摩擦力项
+\end{itemize}
+
+使用P控制器：
+\begin{equation}
+\tau = K_p(\theta_d - \theta) = K_p \theta_e
+\end{equation}
+
+\subsubsection{稳态分析}
+
+在稳态时（$t \to \infty$）：
+\begin{itemize}
+\item $\ddot{\theta} = 0$（加速度为零）
+\item $\dot{\theta} = 0$（速度为零，假设没有持续运动）
+\item $\theta = \theta_{ss}$（稳态位置）
+\item $\theta_e = \theta_{e,ss}$（稳态误差）
+\end{itemize}
+
+稳态时的动力学方程变为：
+\begin{equation}
+0 = \tau_{ss} - mgr\cos\theta_{ss} - 0
+\end{equation}
+
+即：
+\begin{equation}
+\tau_{ss} = mgr\cos\theta_{ss}
+\end{equation}
+
+但控制力矩为：
+\begin{equation}
+\tau_{ss} = K_p \theta_{e,ss}
+\end{equation}
+
+因此：
+\begin{equation}
+K_p \theta_{e,ss} = mgr\cos\theta_{ss}
+\end{equation}
+
+如果$\theta_{ss} \approx \theta_d$（稳态位置接近期望位置），则：
+\begin{equation}
+\theta_{e,ss} = \frac{mgr\cos\theta_d}{K_p}
+\end{equation}
+
+\textbf{结论：}稳态误差$\theta_{e,ss} \neq 0$，除非$mgr\cos\theta_d = 0$（无重力或重力被完全补偿）。
+
+\section{详细分析：不同情况}
+
+\subsection{情况1：无干扰系统}
+
+如果系统没有持续干扰（如重力、摩擦力等），P控制器可以达到零稳态误差。
+
+\textbf{动力学：}
+\begin{equation}
+M\ddot{\theta} = \tau
+\end{equation}
+
+\textbf{控制律：}
+\begin{equation}
+\tau = K_p(\theta_d - \theta)
+\end{equation}
+
+\textbf{误差动力学：}
+\begin{equation}
+M\ddot{\theta}_e = -K_p \theta_e
+\end{equation}
+
+这是一个二阶系统，如果$K_p > 0$，误差会收敛到0。
+
+\textbf{结论：}无干扰时，P控制器可以达到零稳态误差。
+
+\subsection{情况2：有持续干扰（重力）}
+
+\textbf{动力学：}
+\begin{equation}
+M\ddot{\theta} = \tau - mgr\cos\theta
+\end{equation}
+
+\textbf{控制律：}
+\begin{equation}
+\tau = K_p(\theta_d - \theta)
+\end{equation}
+
+\textbf{稳态时：}
+\begin{align}
+0 &= K_p(\theta_d - \theta_{ss}) - mgr\cos\theta_{ss} \\
+K_p(\theta_d - \theta_{ss}) &= mgr\cos\theta_{ss} \\
+K_p \theta_{e,ss} &= mgr\cos\theta_{ss}
+\end{align}
+
+如果$\theta_{ss} \approx \theta_d$，则：
+\begin{equation}
+\theta_{e,ss} \approx \frac{mgr\cos\theta_d}{K_p}
+\end{equation}
+
+\textbf{结论：}有持续干扰时，P控制器存在稳态误差，误差大小与干扰成正比，与增益$K_p$成反比。
+
+\subsection{情况3：有摩擦力}
+
+\textbf{动力学：}
+\begin{equation}
+M\ddot{\theta} = \tau - b\dot{\theta}
+\end{equation}
+
+\textbf{控制律：}
+\begin{equation}
+\tau = K_p(\theta_d - \theta)
+\end{equation}
+
+\textbf{稳态时：}
+\begin{align}
+0 &= K_p(\theta_d - \theta_{ss}) - b \cdot 0 \\
+K_p(\theta_d - \theta_{ss}) &= 0 \\
+\theta_{e,ss} &= 0
+\end{align}
+
+\textbf{结论：}如果只有速度相关的摩擦力（无静摩擦），稳态时速度为零，摩擦力也为零，P控制器可以达到零稳态误差。
+
+但如果存在\textbf{静摩擦}（Coulomb摩擦）：
+\begin{equation}
+M\ddot{\theta} = \tau - F_c \text{sign}(\dot{\theta})
+\end{equation}
+
+在稳态时，如果$\dot{\theta} = 0$，静摩擦可能不为零，需要非零控制力矩来抵消，因此存在稳态误差。
+
+\section{物理直观理解}
+
+\subsection{类比：弹簧-质量系统}
+
+想象一个弹簧-质量系统，受到持续的重力作用：
+
+\begin{itemize}
+\item 弹簧力：$F_{\text{spring}} = kx$（$x$是位移，$k$是弹簧常数）
+\item 重力：$F_{\text{gravity}} = mg$（持续向下）
+\item 平衡时：$kx = mg$，因此$x = mg/k \neq 0$
+\end{itemize}
+
+P控制器就像弹簧：控制力矩$\tau = K_p \theta_e$就像弹簧力$F = kx$。
+
+如果存在持续干扰（重力），系统会在非零误差处达到平衡，误差产生的控制力矩正好抵消干扰。
+
+\subsection{能量平衡观点}
+
+在稳态时：
+\begin{itemize}
+\item 控制力矩做的功 = 干扰力矩做的功
+\item 如果误差为0，控制力矩为0，无法抵消干扰
+\item 因此，必须存在非零误差来产生非零控制力矩
+\end{itemize}
+
+\section{稳态误差的表达式}
+
+对于一般系统，稳态误差可以表示为：
+
+\begin{equation}
+e_{ss} = \lim_{t \to \infty} e(t) = \frac{\text{持续干扰}}{K_p}
+\end{equation}
+
+更精确地，对于单位阶跃输入和持续干扰$d$：
+
+\begin{equation}
+e_{ss} = \frac{d}{K_p}
+\end{equation}
+
+\textbf{关键观察：}
+\begin{itemize}
+\item 稳态误差与持续干扰成正比
+\item 稳态误差与增益$K_p$成反比
+\item 增大$K_p$可以减小稳态误差，但不能完全消除（除非$K_p \to \infty$，这不现实）
+\end{itemize}
+
+\section{为什么增大Kp不能完全消除稳态误差？}
+
+理论上，如果$K_p \to \infty$，则$e_{ss} \to 0$。但在实际中：
+
+\begin{enumerate}
+\item \textbf{物理限制：}执行器有最大力矩限制，$K_p$不能无限大
+\item \textbf{稳定性问题：}大$K_p$可能导致系统不稳定（如离散时间系统中的问题）
+\item \textbf{噪声放大：}大$K_p$会放大传感器噪声
+\item \textbf{速度限制：}大$K_p$可能产生超出物理限制的速度指令
+\end{enumerate}
+
+因此，在实际应用中，$K_p$不能无限增大，稳态误差无法完全消除。
+
+\section{解决方案：使用PI控制器}
+
+为了消除稳态误差，需要使用\textbf{积分项}（I项）。
+
+\subsection{PI控制器}
+
+PI控制器的控制律为：
+\begin{equation}
+\tau = K_p \theta_e + K_i \int_0^t \theta_e(\tau) d\tau
+\end{equation}
+
+\textbf{为什么积分项可以消除稳态误差？}
+
+\begin{itemize}
+\item 即使误差很小，积分项会持续累积
+\item 只要误差不为零，积分项就会增长
+\item 积分项产生的控制力矩可以抵消持续干扰
+\item 当误差为零时，积分项保持常数，提供抵消干扰所需的力矩
+\end{itemize}
+
+\textbf{稳态分析：}
+
+在稳态时，如果$\theta_e = 0$，则：
+\begin{equation}
+\tau_{ss} = K_p \cdot 0 + K_i \int_0^{\infty} \theta_e(\tau) d\tau = K_i \cdot \text{常数}
+\end{equation}
+
+这个常数可以正好抵消持续干扰，使得$\theta_e = 0$成为可能的稳态。
+
+\section{数值示例}
+
+\subsection{示例1：有重力的系统}
+
+设：
+\begin{itemize}
+\item $mgr = 10$ N·m（重力力矩）
+\item $K_p = 100$ N·m/rad
+\item $\theta_d = 0$ rad
+\end{itemize}
+
+稳态误差：
+\begin{equation}
+\theta_{e,ss} = \frac{10}{100} = 0.1 \text{ rad} \approx 5.7^\circ
+\end{equation}
+
+如果增大$K_p = 1000$：
+\begin{equation}
+\theta_{e,ss} = \frac{10}{1000} = 0.01 \text{ rad} \approx 0.57^\circ
+\end{equation}
+
+误差减小了，但仍然存在。
+
+\subsection{示例2：使用PI控制器}
+
+使用PI控制器：
+\begin{equation}
+\tau = 100 \theta_e + 10 \int_0^t \theta_e(\tau) d\tau
+\end{equation}
+
+在稳态时，如果$\theta_e = 0$：
+\begin{equation}
+\tau_{ss} = 10 \int_0^{\infty} \theta_e(\tau) d\tau
+\end{equation}
+
+积分项会调整到$\tau_{ss} = 10$ N·m，正好抵消重力，使得$\theta_e = 0$。
+
+\section{总结}
+
+\textbf{为什么P控制器存在稳态误差？}
+
+\begin{enumerate}
+\item \textbf{根本原因：}当存在持续外部干扰（如重力、静摩擦）时，P控制器需要非零误差来产生非零控制力矩以抵消干扰。
+
+\item \textbf{数学表达：}稳态误差$e_{ss} = \frac{\text{持续干扰}}{K_p}$
+
+\item \textbf{物理直观：}就像弹簧-质量系统，在重力作用下，弹簧必须伸长（非零位移）才能产生抵消重力的力。
+
+\item \textbf{解决方案：}使用PI控制器（加入积分项）可以消除稳态误差，因为积分项可以在误差为零时仍提供抵消干扰所需的控制力矩。
+\end{enumerate}
+
+\textbf{关键点：}
+\begin{itemize}
+\item P控制器在无干扰系统中可以达到零稳态误差
+\item P控制器在有持续干扰的系统中必然存在稳态误差
+\item 增大$K_p$可以减小稳态误差，但不能完全消除（受物理限制）
+\item PI控制器可以消除稳态误差
+\end{itemize}
+
+\end{document}
+

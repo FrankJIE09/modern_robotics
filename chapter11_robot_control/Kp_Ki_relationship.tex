@@ -1,0 +1,351 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{PI控制器中Kp和Ki的关系}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+\textbf{为了达到稳态，$K_i$是不是还跟$K_p$有关系？}
+
+答案是：\textbf{是的！} $K_p$和$K_i$的选择确实有关系，它们共同影响系统的稳定性、瞬态响应和稳态性能。
+
+\section{PI控制器回顾}
+
+PI控制器的控制律为：
+\begin{equation}
+\tau = K_p \theta_e + K_i \int_0^t \theta_e(\tau) d\tau
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $K_p > 0$：比例增益
+\item $K_i > 0$：积分增益
+\item $\theta_e = \theta_d - \theta$：位置误差
+\end{itemize}
+
+\section{Kp和Ki的关系}
+
+\subsection{稳定性关系}
+
+对于一阶系统，PI控制器的误差动力学为：
+\begin{equation}
+\dot{\theta}_e = -K_p \theta_e - K_i \int_0^t \theta_e(\tau) d\tau
+\end{equation}
+
+定义积分状态：$x_i = \int_0^t \theta_e(\tau) d\tau$，则$\dot{x}_i = \theta_e$。
+
+状态空间表示：
+\begin{equation}
+\begin{bmatrix} \dot{\theta}_e \\ \dot{x}_i \end{bmatrix} = \begin{bmatrix} -K_p & -K_i \\ 1 & 0 \end{bmatrix} \begin{bmatrix} \theta_e \\ x_i \end{bmatrix}
+\end{equation}
+
+特征多项式：
+\begin{equation}
+\det(sI - A) = s^2 + K_p s + K_i = 0
+\end{equation}
+
+特征根：
+\begin{equation}
+s_{1,2} = \frac{-K_p \pm \sqrt{K_p^2 - 4K_i}}{2}
+\end{equation}
+
+\textbf{稳定性条件：}
+\begin{itemize}
+\item $K_p > 0$（必须）
+\item $K_i > 0$（必须）
+\item 如果$K_p^2 - 4K_i \geq 0$，系统是过阻尼或临界阻尼
+\item 如果$K_p^2 - 4K_i < 0$，系统是欠阻尼（有振荡）
+\end{itemize}
+
+\subsection{阻尼比和自然频率}
+
+将特征多项式写成标准二阶形式：
+\begin{equation}
+s^2 + 2\zeta\omega_n s + \omega_n^2 = 0
+\end{equation}
+
+对比系数：
+\begin{align}
+2\zeta\omega_n &= K_p \\
+\omega_n^2 &= K_i
+\end{align}
+
+因此：
+\begin{align}
+\omega_n &= \sqrt{K_i} \\
+\zeta &= \frac{K_p}{2\sqrt{K_i}}
+\end{align}
+
+\textbf{关键关系：}
+\begin{equation}
+\zeta = \frac{K_p}{2\sqrt{K_i}}
+\end{equation}
+
+这个关系表明$K_p$和$K_i$必须满足一定的比例关系才能达到期望的阻尼比。
+
+\subsection{设计约束}
+
+为了达到特定的阻尼比$\zeta$（如$\zeta = 0.7$），需要：
+\begin{equation}
+K_p = 2\zeta\sqrt{K_i}
+\end{equation}
+
+或者，如果给定$K_p$，则：
+\begin{equation}
+K_i = \left(\frac{K_p}{2\zeta}\right)^2
+\end{equation}
+
+\section{不同Kp和Ki组合的影响}
+
+\subsection{情况1：$K_i$太小（相对于$K_p$）}
+
+如果$K_i \ll K_p^2/4$：
+\begin{itemize}
+\item $\zeta > 1$：系统过阻尼
+\item 响应慢，无超调
+\item 积分项作用弱，消除稳态误差慢
+\end{itemize}
+
+\subsection{情况2：$K_i$太大（相对于$K_p$）}
+
+如果$K_i > K_p^2/4$：
+\begin{itemize}
+\item $\zeta < 1$：系统欠阻尼
+\item 响应快，但有振荡
+\item 积分项作用强，但可能导致不稳定
+\end{itemize}
+
+\subsection{情况3：$K_i = K_p^2/4$（临界阻尼）}
+
+\begin{itemize}
+\item $\zeta = 1$：临界阻尼
+\item 响应快，无超调
+\item 这是$K_p$和$K_i$的一个良好平衡点
+\end{itemize}
+
+\subsection{情况4：$\zeta = 0.7$（最优阻尼）}
+
+如果选择$\zeta = 0.7$：
+\begin{equation}
+K_i = \left(\frac{K_p}{2 \times 0.7}\right)^2 = \left(\frac{K_p}{1.4}\right)^2 \approx 0.51 K_p^2
+\end{equation}
+
+即：$K_i \approx 0.5 K_p^2$
+
+\section{经验设计规则}
+
+\subsection{规则1：$K_i = K_p^2/4$（临界阻尼）}
+
+\begin{equation}
+K_i = \frac{K_p^2}{4}
+\end{equation}
+
+这给出$\zeta = 1$，无超调，响应较快。
+
+\subsection{规则2：$K_i = 0.5 K_p^2$（$\zeta = 0.7$）}
+
+\begin{equation}
+K_i = 0.5 K_p^2
+\end{equation}
+
+这给出$\zeta \approx 0.7$，快速响应，轻微超调。
+
+\subsection{规则3：$K_i = K_p/T_i$（时间常数法）}
+
+另一种常见方法是：
+\begin{equation}
+K_i = \frac{K_p}{T_i}
+\end{equation}
+
+其中$T_i$是积分时间常数。通常选择$T_i = 2$到$10$倍的系统时间常数。
+
+如果系统时间常数为$\tau$，则：
+\begin{equation}
+K_i = \frac{K_p}{2\tau} \text{ 到 } \frac{K_p}{10\tau}
+\end{equation}
+
+\subsection{规则4：Ziegler-Nichols方法}
+
+对于阶跃响应，Ziegler-Nichols方法建议：
+\begin{itemize}
+\item $K_p$：根据系统响应调整
+\item $K_i = K_p / T_u$，其中$T_u$是系统的振荡周期
+\end{itemize}
+
+\section{稳态分析}
+
+\subsection{稳态误差}
+
+在稳态时，如果$\theta_e = 0$：
+\begin{equation}
+\tau_{ss} = K_i \int_0^{\infty} \theta_e(\tau) d\tau = \text{持续干扰}
+\end{equation}
+
+因此：
+\begin{equation}
+\int_0^{\infty} \theta_e(\tau) d\tau = \frac{\text{持续干扰}}{K_i}
+\end{equation}
+
+\textbf{关键点：}虽然稳态误差为零，但积分值取决于$K_i$。如果$K_i$太小，积分项需要很长时间才能累积到抵消干扰的值。
+
+\subsection{积分项的时间常数}
+
+积分项的"时间常数"可以定义为：
+\begin{equation}
+\tau_i = \frac{K_p}{K_i}
+\end{equation}
+
+如果$K_i = K_p^2/4$，则：
+\begin{equation}
+\tau_i = \frac{K_p}{K_p^2/4} = \frac{4}{K_p}
+\end{equation}
+
+如果$K_i = 0.5 K_p^2$，则：
+\begin{equation}
+\tau_i = \frac{K_p}{0.5 K_p^2} = \frac{2}{K_p}
+\end{equation}
+
+\textbf{结论：}$K_i$越大，积分项响应越快，但可能导致振荡。
+
+\section{数值示例}
+
+\subsection{示例1：临界阻尼设计}
+
+设$K_p = 100$ N·m/rad，选择临界阻尼：
+\begin{equation}
+K_i = \frac{K_p^2}{4} = \frac{100^2}{4} = 2500 \text{ N·m/(rad·s)}
+\end{equation}
+
+系统参数：
+\begin{itemize}
+\item $\omega_n = \sqrt{2500} = 50$ rad/s
+\item $\zeta = 1$（临界阻尼）
+\item 无超调，响应较快
+\end{itemize}
+
+\subsection{示例2：最优阻尼设计}
+
+设$K_p = 100$ N·m/rad，选择$\zeta = 0.7$：
+\begin{equation}
+K_i = 0.5 \times 100^2 = 5000 \text{ N·m/(rad·s)}
+\end{equation}
+
+系统参数：
+\begin{itemize}
+\item $\omega_n = \sqrt{5000} \approx 70.7$ rad/s
+\item $\zeta = 0.7$（最优阻尼）
+\item 快速响应，轻微超调（约4.6\%）
+\end{itemize}
+
+\subsection{示例3：保守设计}
+
+设$K_p = 100$ N·m/rad，选择$\zeta = 1.2$（过阻尼）：
+\begin{equation}
+K_i = \left(\frac{100}{2 \times 1.2}\right)^2 = \left(\frac{100}{2.4}\right)^2 \approx 1736 \text{ N·m/(rad·s)}
+\end{equation}
+
+系统参数：
+\begin{itemize}
+\item $\omega_n = \sqrt{1736} \approx 41.7$ rad/s
+\item $\zeta = 1.2$（过阻尼）
+\item 响应慢，但非常平滑
+\end{itemize}
+
+\section{设计建议}
+
+\subsection{设计流程}
+
+\begin{enumerate}
+\item \textbf{选择$K_p$：}根据系统响应速度和稳定性要求
+   \begin{itemize}
+   \item 从较小的$K_p$开始
+   \item 逐步增大，直到响应速度满足要求
+   \item 注意不要太大，避免不稳定
+   \end{itemize}
+
+\item \textbf{选择阻尼比$\zeta$：}
+   \begin{itemize}
+   \item 一般应用：$\zeta = 0.7$（最优）
+   \item 不能有超调：$\zeta = 1.0$（临界阻尼）
+   \item 需要平滑响应：$\zeta = 1.2 \sim 2.0$（过阻尼）
+   \end{itemize}
+
+\item \textbf{计算$K_i$：}
+   \begin{equation}
+   K_i = \left(\frac{K_p}{2\zeta}\right)^2
+   \end{equation}
+
+\item \textbf{验证和调整：}
+   \begin{itemize}
+   \item 仿真验证系统响应
+   \item 检查超调、稳定时间、稳态误差
+   \item 根据需要进行微调
+   \end{itemize}
+\end{enumerate}
+
+\subsection{经验公式总结}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{设计目标} & \textbf{阻尼比$\zeta$} & \textbf{$K_i$与$K_p$的关系} \\
+\hline
+临界阻尼 & 1.0 & $K_i = K_p^2/4$ \\
+\hline
+最优阻尼 & 0.7 & $K_i = 0.5 K_p^2$ \\
+\hline
+过阻尼 & 1.2 & $K_i = 0.17 K_p^2$ \\
+\hline
+过阻尼 & 2.0 & $K_i = 0.0625 K_p^2$ \\
+\hline
+\end{tabular}
+\caption{$K_p$和$K_i$的关系}
+\end{table}
+
+\section{总结}
+
+\textbf{关键结论：}
+
+\begin{enumerate}
+\item \textbf{$K_p$和$K_i$确实有关系：}它们通过阻尼比$\zeta = K_p/(2\sqrt{K_i})$联系在一起
+
+\item \textbf{设计约束：}为了达到特定的阻尼比，$K_i$必须满足：
+   \begin{equation}
+   K_i = \left(\frac{K_p}{2\zeta}\right)^2
+   \end{equation}
+
+\item \textbf{常见选择：}
+   \begin{itemize}
+   \item 临界阻尼：$K_i = K_p^2/4$
+   \item 最优阻尼：$K_i = 0.5 K_p^2$
+   \end{itemize}
+
+\item \textbf{稳态性能：}虽然$K_i$的选择主要影响瞬态响应，但它也影响积分项累积到抵消干扰所需的时间
+
+\item \textbf{设计建议：}先选择$K_p$，然后根据期望的阻尼比计算$K_i$
+\end{enumerate}
+
+\textbf{重要提醒：}这些关系是基于简化的二阶模型。在实际系统中，还需要考虑：
+\begin{itemize}
+\item 系统的高阶动力学
+\item 执行器限制
+\item 传感器噪声
+\item 离散时间实现的影响
+\end{itemize}
+
+因此，这些公式是设计的起点，最终需要通过仿真和实验验证。
+
+\end{document}
+
+

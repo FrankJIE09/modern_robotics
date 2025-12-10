@@ -1,0 +1,484 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{结合轨迹跟踪的导纳控制的稳态误差分析}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+结合轨迹跟踪的导纳控制公式为：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \tag{*}
+\end{equation}
+
+\textbf{关键问题}：这个公式对于位置精度来说存在稳态误差。本文将详细分析稳态误差的原因、大小和解决方法。
+
+\section{稳态误差分析}
+
+\subsection{稳态条件}
+
+在稳态时，假设：
+\begin{itemize}
+\item 期望位置和速度恒定：$\dot{x}_d = 0$，$\ddot{x}_d = 0$
+\item 实际速度为零：$\dot{x} = 0$
+\item 外力恒定：$f_{\text{ext}} = f_0$（常数）
+\end{itemize}
+
+\subsection{稳态误差方程}
+
+在稳态条件下，公式(*)简化为：
+\begin{equation}
+B \cdot 0 + K(x_d - x_{ss}) = f_0
+\end{equation}
+
+即：
+\begin{equation}
+K x_{e,ss} = f_0
+\end{equation}
+
+其中$x_{e,ss} = x_d - x_{ss}$是稳态位置误差。
+
+\textbf{稳态误差}：
+\begin{equation}
+x_{e,ss} = \frac{f_0}{K} \tag{1}
+\end{equation}
+
+\subsection{关键结论}
+
+\begin{enumerate}
+\item \textbf{存在稳态误差}：
+\begin{itemize}
+\item 如果$f_{\text{ext}} \neq 0$，则$x_{e,ss} \neq 0$
+\item 稳态误差与外力成正比
+\item 稳态误差与刚度$K$成反比
+\end{itemize}
+
+\item \textbf{误差大小}：
+\begin{itemize}
+\item 外力越大，误差越大
+\item 刚度越大，误差越小
+\item 但增大刚度可能导致系统"硬"，对外力响应不灵敏
+\end{itemize}
+\end{enumerate}
+
+\section{物理意义}
+
+\subsection{力的平衡}
+
+公式(*)可以理解为力的平衡：
+\begin{equation}
+\text{虚拟弹簧力} + \text{虚拟阻尼力} + \text{虚拟惯性力} = \text{外力}
+\end{equation}
+
+在稳态时：
+\begin{equation}
+K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 虚拟弹簧试图将机器人拉向期望位置$x_d$
+\item 但外力$f_{\text{ext}}$阻止这个运动
+\item 在平衡时，弹簧力等于外力
+\item 因此存在位置误差$x_e = f_{\text{ext}}/K$
+\end{itemize}
+
+\subsection{类比：弹簧-质量系统}
+
+想象一个弹簧-质量系统：
+\begin{itemize}
+\item 弹簧一端固定在期望位置$x_d$
+\item 质量在位置$x$
+\item 外力$f_{\text{ext}}$作用在质量上
+\end{itemize}
+
+在平衡时：
+\begin{equation}
+k(x_d - x) = f_{\text{ext}} \quad \Rightarrow \quad x_d - x = \frac{f_{\text{ext}}}{k}
+\end{equation}
+
+这就是稳态误差的来源。
+
+\section{稳态误差的影响因素}
+
+\subsection{外力$f_{\text{ext}}$的影响}
+
+从公式(1)：
+\begin{equation}
+x_{e,ss} = \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 外力越大，稳态误差越大
+\item 如果$f_{\text{ext}} = 0$，则$x_{e,ss} = 0$（无误差）
+\item 这是导纳控制的特性：允许外力影响位置
+\end{itemize}
+
+\subsection{刚度$K$的影响}
+
+\textbf{高刚度$K$}：
+\begin{itemize}
+\item 稳态误差小：$x_{e,ss} = f_{\text{ext}}/K$（小）
+\item 但系统"硬"，对外力响应不灵敏
+\item 接近纯轨迹跟踪控制
+\end{itemize}
+
+\textbf{低刚度$K$}：
+\begin{itemize}
+\item 稳态误差大：$x_{e,ss} = f_{\text{ext}}/K$（大）
+\item 但系统"软"，对外力响应灵敏
+\item 接近标准导纳控制
+\end{itemize}
+
+\textbf{权衡}：
+\begin{itemize}
+\item 需要在位置精度和力响应之间权衡
+\item 不能同时获得高精度和高灵敏度
+\end{itemize}
+
+\section{与标准导纳控制的对比}
+
+\subsection{标准导纳控制}
+
+标准导纳控制公式：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 没有期望位置$x_d$
+\item 不存在"位置误差"的概念
+\item 位置由外力和初始条件决定
+\item 可能漂移
+\end{itemize}
+
+\subsection{结合轨迹跟踪的导纳控制}
+
+公式：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 有期望位置$x_d$
+\item 存在位置误差$x_e = x_d - x$
+\item 在稳态时，误差$x_{e,ss} = f_{\text{ext}}/K$
+\item 位置不会漂移（有期望位置锚定）
+\end{itemize}
+
+\subsection{对比总结}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{方面} & \textbf{标准导纳控制} & \textbf{结合轨迹跟踪} \\
+\hline
+期望位置 & 无 & 有$x_d$ \\
+\hline
+位置误差 & 无概念 & 有$x_e = x_d - x$ \\
+\hline
+稳态误差 & 无概念 & $x_{e,ss} = f_{\text{ext}}/K$ \\
+\hline
+位置漂移 & 可能 & 不会 \\
+\hline
+\end{tabular}
+\caption{两种导纳控制的对比}
+\end{table}
+
+\section{减少稳态误差的方法}
+
+\subsection{方法1：增大刚度$K$}
+
+\textbf{优点}：
+\begin{itemize}
+\item 直接减少稳态误差：$x_{e,ss} = f_{\text{ext}}/K$
+\item 提高位置精度
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 系统变"硬"，对外力响应不灵敏
+\item 可能影响人机交互体验
+\item 可能导致系统不稳定（如果$K$太大）
+\end{itemize}
+
+\subsection{方法2：使用积分项}
+
+在控制律中加入积分项，类似于PID控制：
+
+\textbf{修改后的公式}：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}} \tag{**}
+\end{equation}
+
+\textbf{稳态分析}：
+
+在稳态时，如果$f_{\text{ext}}$是常数：
+\begin{equation}
+K x_{e,ss} + K_i \int_0^t x_{e,ss} d\tau = f_0
+\end{equation}
+
+对时间求导：
+\begin{equation}
+K \dot{x}_{e,ss} + K_i x_{e,ss} = 0
+\end{equation}
+
+如果系统稳定，$\dot{x}_{e,ss} = 0$，因此：
+\begin{equation}
+K_i x_{e,ss} = 0
+\end{equation}
+
+由于$K_i > 0$，必须有$x_{e,ss} = 0$。
+
+\textbf{结论}：积分项可以消除稳态误差！
+
+\textbf{但需要注意}：
+\begin{itemize}
+\item 积分项可能影响系统稳定性
+\item 需要适当选择$K_i$
+\item 可能需要积分器抗饱和
+\end{itemize}
+
+\subsection{方法3：前馈补偿}
+
+如果能够估计或测量外力$f_{\text{ext}}$，可以使用前馈补偿：
+
+\textbf{修改后的公式}：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} - \hat{f}_{\text{ext}}
+\end{equation}
+
+其中$\hat{f}_{\text{ext}}$是外力的估计值。
+
+\textbf{稳态分析}：
+
+如果$\hat{f}_{\text{ext}} = f_{\text{ext}}$（完美估计），则：
+\begin{equation}
+K x_{e,ss} = 0 \quad \Rightarrow \quad x_{e,ss} = 0
+\end{equation}
+
+\textbf{优点}：
+\begin{itemize}
+\item 可以消除稳态误差
+\item 不需要积分项
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 需要准确估计外力
+\item 可能难以实现
+\end{itemize}
+
+\subsection{方法4：自适应刚度}
+
+根据外力大小自适应调整刚度：
+
+\begin{equation}
+K = \begin{cases}
+K_{\text{high}} & \text{如果} |f_{\text{ext}}| < f_{\text{threshold}} \\
+K_{\text{low}} & \text{如果} |f_{\text{ext}}| \geq f_{\text{threshold}}
+\end{cases}
+\end{equation}
+
+\textbf{思路}：
+\begin{itemize}
+\item 小外力时：高刚度，高精度
+\item 大外力时：低刚度，允许偏离
+\end{itemize}
+
+\section{数值例子}
+
+\subsection{例子1：恒定外力}
+
+\textbf{参数}：
+\begin{itemize}
+\item 期望位置：$x_d = 0.5$ m
+\item 外力：$f_{\text{ext}} = 10$ N
+\item 刚度：$K = 100$ N/m
+\end{itemize}
+
+\textbf{稳态误差}：
+\begin{equation}
+x_{e,ss} = \frac{10}{100} = 0.1 \text{ m}
+\end{equation}
+
+\textbf{实际位置}：
+\begin{equation}
+x_{ss} = x_d - x_{e,ss} = 0.5 - 0.1 = 0.4 \text{ m}
+\end{equation}
+
+\textbf{结论}：机器人停在$0.4$ m处，而不是期望的$0.5$ m。
+
+\subsection{例子2：增大刚度}
+
+如果增大刚度到$K = 1000$ N/m：
+
+\textbf{稳态误差}：
+\begin{equation}
+x_{e,ss} = \frac{10}{1000} = 0.01 \text{ m} = 1 \text{ cm}
+\end{equation}
+
+\textbf{实际位置}：
+\begin{equation}
+x_{ss} = 0.5 - 0.01 = 0.49 \text{ m}
+\end{equation}
+
+\textbf{结论}：误差从$10$ cm减少到$1$ cm，但系统变"硬"。
+
+\subsection{例子3：使用积分项}
+
+如果加入积分项$K_i = 10$ N/(m·s)：
+
+\textbf{稳态误差}：
+\begin{equation}
+x_{e,ss} = 0 \text{ m}
+\end{equation}
+
+\textbf{实际位置}：
+\begin{equation}
+x_{ss} = x_d = 0.5 \text{ m}
+\end{equation}
+
+\textbf{结论}：稳态误差为零，但需要保证系统稳定。
+
+\section{实际应用考虑}
+
+\subsection{何时可以接受稳态误差？}
+
+\begin{enumerate}
+\item \textbf{人机协作任务}：
+\begin{itemize}
+\item 允许操作员推拉调整位置
+\item 稳态误差是"特性"而不是"缺陷"
+\item 误差大小可以通过刚度调整
+\end{itemize}
+
+\item \textbf{装配任务}：
+\begin{itemize}
+\item 如果外力是预期的（如装配阻力）
+\item 稳态误差可能可以接受
+\item 但如果需要高精度，需要消除误差
+\end{itemize}
+\end{enumerate}
+
+\subsection{何时需要消除稳态误差？}
+
+\begin{enumerate}
+\item \textbf{高精度定位}：
+\begin{itemize}
+\item 需要精确到达目标位置
+\item 必须消除稳态误差
+\item 可以使用积分项或前馈补偿
+\end{itemize}
+
+\item \textbf{轨迹跟踪}：
+\begin{itemize}
+\item 如果外力是干扰（非预期）
+\item 应该消除其影响
+\item 使用积分项或增大刚度
+\end{itemize}
+\end{enumerate}
+
+\section{稳定性考虑}
+
+\subsection{使用积分项时的稳定性}
+
+加入积分项后，系统变为三阶：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}}
+\end{equation}
+
+\textbf{稳定性条件}：
+\begin{itemize}
+\item 需要适当选择$K_i$
+\item $K_i$太大可能导致不稳定
+\item 可以使用Routh-Hurwitz判据分析
+\end{itemize}
+
+\subsection{增大刚度时的稳定性}
+
+\textbf{问题}：
+\begin{itemize}
+\item 高刚度可能导致系统"硬"
+\item 在接触任务中可能不稳定
+\item 需要适当的阻尼$B$
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心结论}
+
+\begin{enumerate}
+\item \textbf{存在稳态误差}：
+\begin{equation}
+x_{e,ss} = \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\item \textbf{误差特性}：
+\begin{itemize}
+\item 与外力成正比
+\item 与刚度成反比
+\item 这是导纳控制的固有特性
+\end{itemize}
+
+\item \textbf{减少误差的方法}：
+\begin{itemize}
+\item 增大刚度$K$（但系统变硬）
+\item 使用积分项（但可能影响稳定性）
+\item 前馈补偿（但需要估计外力）
+\item 自适应刚度（但实现复杂）
+\end{itemize}
+\end{enumerate}
+
+\subsection{设计权衡}
+
+\begin{itemize}
+\item \textbf{位置精度 vs. 力响应灵敏度}：
+\begin{itemize}
+\item 高精度需要高刚度，但响应不灵敏
+\item 高灵敏度需要低刚度，但精度低
+\end{itemize}
+
+\item \textbf{稳态误差 vs. 系统稳定性}：
+\begin{itemize}
+\item 使用积分项可以消除误差，但可能不稳定
+\item 需要仔细设计参数
+\end{itemize}
+
+\item \textbf{实际应用需求}：
+\begin{itemize}
+\item 根据应用需求决定是否可以接受稳态误差
+\item 人机协作可能可以接受，高精度定位不能接受
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+\textbf{稳态误差}：
+\begin{equation}
+x_{e,ss} = \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\textbf{带积分项的控制}：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) + K_i \int_0^t (x_d - x) d\tau = f_{\text{ext}}
+\end{equation}
+
+\textbf{稳态时}（如果稳定）：$x_{e,ss} = 0$
+
+\end{document}
+

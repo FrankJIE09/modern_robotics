@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{混合运动-力控制中的自由度约束详解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在混合运动-力控制中，有这样一段话：
+
+\textbf{原文}：如果任务空间是$n$维的，那么我们在任何时间$t$都可以自由指定$2n$个力和运动中的$n$个；其他$n$个由环境决定。除了这个约束，我们也不应该在"相同方向"上指定力和运动，因为那样它们不是独立的。
+
+这段话涉及几个关键概念：
+\begin{enumerate}
+\item 为什么是$2n$个量？
+\item 为什么只能自由指定$n$个？
+\item 为什么其他$n$个由环境决定？
+\item 什么是"相同方向"？
+\item 为什么不能在相同方向上同时指定力和运动？
+\end{enumerate}
+
+\section{基本概念}
+
+\subsection{任务空间的维度}
+
+\textbf{任务空间}：机器人末端执行器可以操作的空间。
+
+\textbf{维度$n$}：
+\begin{itemize}
+\item 对于平面机器人：$n = 3$（2个位置 + 1个旋转）
+\item 对于空间机器人：$n = 6$（3个位置 + 3个旋转，即SE(3)）
+\end{itemize}
+
+\subsection{2n个量是什么？}
+
+在$n$维任务空间中，我们有：
+\begin{itemize}
+\item \textbf{$n$个运动量}：位置/速度/加速度（每个维度一个）
+\item \textbf{$n$个力量}：力/力矩（每个维度一个）
+\item \textbf{总共$2n$个量}
+\end{itemize}
+
+\textbf{例子}（$n = 6$，SE(3)）：
+\begin{itemize}
+\item 运动量：$(\omega_x, \omega_y, \omega_z, v_x, v_y, v_z)$（twist，6个）
+\item 力量：$(m_x, m_y, m_z, f_x, f_y, f_z)$（wrench，6个）
+\item 总共：$2 \times 6 = 12$个量
+\end{itemize}
+
+\section{为什么只能自由指定n个？}
+
+\subsection{物理约束}
+
+\textbf{基本原理}：在$n$维空间中，我们最多只能独立控制$n$个量。
+
+\textbf{原因}：
+\begin{enumerate}
+\item \textbf{自由度限制}：机器人只有$n$个独立的控制输入（关节力矩）
+\item \textbf{物理约束}：力和运动不是完全独立的
+\item \textbf{环境约束}：环境会限制某些方向的运动或力
+\end{enumerate}
+
+\subsection{数学描述}
+
+如果我们想同时控制所有$2n$个量，我们需要$2n$个独立的控制输入。但机器人只有$n$个关节，只能提供$n$个独立的控制输入。
+
+\textbf{结论}：我们最多只能自由指定$n$个量。
+
+\section{为什么其他n个由环境决定？}
+
+\subsection{环境的作用}
+
+\textbf{环境约束}：当机器人与环境接触时，环境会：
+\begin{itemize}
+\item 限制某些方向的运动（刚性约束）
+\item 决定某些方向的力（由运动决定）
+\end{itemize}
+
+\subsection{例子1：在平面上移动的物体}
+
+\textbf{场景}：物体在水平面上移动（$n = 6$，SE(3)）
+
+\textbf{环境约束}：
+\begin{itemize}
+\item 垂直方向（$z$方向）：不能穿透平面
+\item 运动约束：$v_z = 0$（不能向下运动）
+\item 力约束：$f_x = f_y = 0$（平面无摩擦，不能施加水平力）
+\end{itemize}
+
+\textbf{可以自由指定的}：
+\begin{itemize}
+\item 水平运动：$v_x, v_y$（2个）
+\item 旋转：$\omega_x, \omega_y, \omega_z$（3个）
+\item 垂直力：$f_z$（1个）
+\item 总共：$2 + 3 + 1 = 6$个
+\end{itemize}
+
+\textbf{由环境决定的}：
+\begin{itemize}
+\item 垂直运动：$v_z = 0$（由环境约束）
+\item 水平力：$f_x = 0, f_y = 0$（由环境决定）
+\item 力矩：$m_x, m_y, m_z$（由运动决定）
+\item 总共：$1 + 2 + 3 = 6$个
+\end{itemize}
+
+\subsection{例子2：在黑板上写字}
+
+\textbf{场景}：机器人在黑板上用粉笔写字（$n = 6$）
+
+\textbf{环境约束}：
+\begin{itemize}
+\item 垂直于黑板的方向：不能穿透黑板
+\item 运动约束：$v_{\text{normal}} = 0$（不能穿透）
+\item 力约束：平面内的力由运动决定
+\end{itemize}
+
+\textbf{可以自由指定的}：
+\begin{itemize}
+\item 平面内运动：$v_x, v_y$（2个）
+\item 旋转：$\omega_x, \omega_y, \omega_z$（3个）
+\item 垂直力：$f_{\text{normal}}$（1个，控制粉笔与黑板的接触力）
+\item 总共：$6$个
+\end{itemize}
+
+\textbf{由环境决定的}：
+\begin{itemize}
+\item 垂直运动：$v_{\text{normal}} = 0$（由环境约束）
+\item 平面内力：由运动决定（5个）
+\item 总共：$6$个
+\end{itemize}
+
+\section{什么是"相同方向"？}
+
+\subsection{方向的定义}
+
+\textbf{方向}：在任务空间中，每个维度对应一个方向。
+
+\textbf{例子}（$n = 6$）：
+\begin{itemize}
+\item 方向1：绕$x$轴的旋转（$\omega_x$和$m_x$）
+\item 方向2：绕$y$轴的旋转（$\omega_y$和$m_y$）
+\item 方向3：绕$z$轴的旋转（$\omega_z$和$m_z$）
+\item 方向4：沿$x$轴的平移（$v_x$和$f_x$）
+\item 方向5：沿$y$轴的平移（$v_y$和$f_y$）
+\item 方向6：沿$z$轴的平移（$v_z$和$f_z$）
+\end{itemize}
+
+\subsection{相同方向上的力和运动}
+
+\textbf{相同方向}：在同一个维度上，既有运动量（如速度$v_x$），也有力量（如力$f_x$）。
+
+\textbf{例子}：
+\begin{itemize}
+\item $x$方向：速度$v_x$和力$f_x$是"相同方向"的
+\item $y$方向：速度$v_y$和力$f_y$是"相同方向"的
+\end{itemize}
+
+\section{为什么不能在相同方向上同时指定力和运动？}
+
+\subsection{物理原因}
+
+\textbf{基本原理}：在同一个方向上，力和运动是\textbf{耦合}的，不是独立的。
+
+\textbf{原因}：
+\begin{enumerate}
+\item \textbf{牛顿第二定律}：$F = ma$，力决定加速度，从而决定运动
+\item \textbf{环境响应}：如果指定了运动，环境会决定力；如果指定了力，环境会决定运动
+\item \textbf{控制输入限制}：我们只有$n$个控制输入，不能同时独立控制$2n$个量
+\end{enumerate}
+
+\subsection{数学描述}
+
+\textbf{动力学方程}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+这个方程表明：力和运动（加速度）是相关的，不能独立指定。
+
+\textbf{约束情况}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) + A^T(\theta)\lambda
+\end{equation}
+
+其中$A(\theta)V = 0$是环境约束。
+
+\textbf{结论}：
+\begin{itemize}
+\item 如果指定了运动$V$，力$F$由动力学方程决定
+\item 如果指定了力$F$，运动$V$由动力学方程决定
+\item 不能同时独立指定两者
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：在$x$方向上同时指定速度和力}
+
+假设我们想：
+\begin{itemize}
+\item 指定速度：$v_x = 1$ m/s
+\item 指定力：$f_x = 10$ N
+\end{itemize}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果环境是刚性的（如墙壁），$v_x = 0$（不能运动），力由接触决定
+\item 如果环境是自由的（如空气），$f_x = 0$（没有接触），速度可以自由控制
+\item 如果环境是柔性的（如弹簧），力和运动由弹簧特性决定：$f_x = k(x - x_0)$
+\end{itemize}
+
+\textbf{结论}：不能同时独立指定$v_x$和$f_x$，它们由环境和动力学耦合决定。
+
+\textbf{例子2：在垂直方向上}
+
+\textbf{场景}：物体在水平面上
+
+\textbf{尝试}：
+\begin{itemize}
+\item 指定垂直速度：$v_z = 0.1$ m/s（向下）
+\item 指定垂直力：$f_z = -10$ N（向下）
+\end{itemize}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果平面是刚性的，$v_z = 0$（不能穿透），力由接触决定
+\item 如果指定了$v_z = 0.1$ m/s，物体会穿透平面，这与刚性约束矛盾
+\item 如果指定了$f_z = -10$ N，物体会压在平面上，$v_z = 0$（由约束决定）
+\end{itemize}
+
+\textbf{结论}：不能同时独立指定$v_z$和$f_z$。
+
+\section{正确的做法：在不同方向上分别控制}
+
+\subsection{基本策略}
+
+\textbf{策略}：在不同的方向上分别控制力和运动。
+
+\textbf{方法}：
+\begin{enumerate}
+\item 识别环境约束方向（$k$个方向）
+\item 在这些方向上控制力（$k$个力）
+\item 在其余方向上控制运动（$n-k$个运动）
+\item 总共：$k + (n-k) = n$个独立控制
+\end{enumerate}
+
+\subsection{例子：在黑板上写字}
+
+\textbf{任务空间}：$n = 6$
+
+\textbf{环境约束}：
+\begin{itemize}
+\item 垂直于黑板的方向：$k = 1$（不能穿透）
+\item 运动约束：$v_{\text{normal}} = 0$
+\item 力约束：平面内力和力矩由运动决定
+\end{itemize}
+
+\textbf{控制策略}：
+\begin{itemize}
+\item \textbf{力控制方向}（$k = 1$个）：
+\begin{itemize}
+\item 垂直力：$f_{\text{normal}} = f_d$（控制粉笔与黑板的接触力）
+\end{itemize}
+\item \textbf{运动控制方向}（$n-k = 5$个）：
+\begin{itemize}
+\item 平面内位置：$x, y$（2个）
+\item 旋转：$\omega_x, \omega_y, \omega_z$（3个）
+\end{itemize}
+\end{itemize}
+
+\textbf{总共}：$1 + 5 = 6$个独立控制（$n$个）
+
+\textbf{由环境决定的}：
+\begin{itemize}
+\item 垂直运动：$v_{\text{normal}} = 0$（由环境约束）
+\item 平面内力：由运动决定（5个）
+\item 总共：$6$个
+\end{itemize}
+
+\subsection{例子：擦黑板}
+
+\textbf{任务空间}：$n = 6$
+
+\textbf{环境约束}：
+\begin{itemize}
+\item 垂直于黑板的方向：$v_z = 0$（不能穿透）
+\item 绕$x$和$y$轴的旋转：$\omega_x = 0, \omega_y = 0$（不能倾斜）
+\item 总共：$k = 3$个约束
+\end{itemize}
+
+\textbf{控制策略}：
+\begin{itemize}
+\item \textbf{力控制方向}（$k = 3$个）：
+\begin{itemize}
+\item 垂直力：$f_z = f_d$（控制与黑板的接触力）
+\item 绕$x$和$y$轴的力矩：$m_x = 0, m_y = 0$（保持水平）
+\end{itemize}
+\item \textbf{运动控制方向}（$n-k = 3$个）：
+\begin{itemize}
+\item 平面内速度：$v_x, v_y$（2个）
+\item 绕$z$轴的旋转：$\omega_z$（1个）
+\end{itemize}
+\end{itemize}
+
+\textbf{总共}：$3 + 3 = 6$个独立控制（$n$个）
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{$2n$个量}：$n$个运动量 + $n$个力量 = $2n$个量
+
+\item \textbf{只能自由指定$n$个}：
+\begin{itemize}
+\item 机器人只有$n$个独立的控制输入
+\item 物理上最多只能控制$n$个独立量
+\end{itemize}
+
+\item \textbf{其他$n$个由环境决定}：
+\begin{itemize}
+\item 环境约束某些方向的运动
+\item 环境决定某些方向的力
+\item 由动力学方程耦合决定
+\end{itemize}
+
+\item \textbf{不能在相同方向上同时指定力和运动}：
+\begin{itemize}
+\item 在同一个维度上，力和运动是耦合的
+\item 由牛顿定律和动力学方程决定
+\item 不能独立控制
+\end{itemize}
+
+\item \textbf{正确的做法}：
+\begin{itemize}
+\item 在不同方向上分别控制力和运动
+\item 在约束方向上控制力（$k$个）
+\item 在自由方向上控制运动（$n-k$个）
+\item 总共：$k + (n-k) = n$个独立控制
+\end{itemize}
+\end{enumerate}
+
+\subsection{数学表达}
+
+\textbf{约束}：
+\begin{equation}
+A(\theta)V = 0 \quad \text{（$k$个运动约束）}
+\end{equation}
+
+\textbf{控制}：
+\begin{itemize}
+\item 力控制：$k$个方向（约束方向）
+\item 运动控制：$n-k$个方向（自由方向）
+\item 总共：$n$个独立控制
+\end{itemize}
+
+\textbf{投影}：
+\begin{itemize}
+\item 运动控制子空间：$P(\theta)$（秩$n-k$）
+\item 力控制子空间：$I - P(\theta)$（秩$k$）
+\end{itemize}
+
+\subsection{实际应用}
+
+在实际应用中：
+\begin{enumerate}
+\item \textbf{识别约束}：确定环境在哪些方向上施加约束
+\item \textbf{选择控制策略}：在约束方向上控制力，在自由方向上控制运动
+\item \textbf{实现控制器}：使用投影矩阵将控制律投影到相应的子空间
+\end{enumerate}
+
+\end{document}
+

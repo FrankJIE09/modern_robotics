@@ -1,0 +1,374 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{Pfaffian约束详解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在混合运动-力控制中，我们经常看到这样的约束：
+\begin{equation}
+A(\theta)V = 0
+\end{equation}
+
+这被称为\textbf{Pfaffian约束}。什么是Pfaffian约束？为什么叫这个名字？它有什么特点？
+
+\section{什么是Pfaffian约束？}
+
+\subsection{基本定义}
+
+\textbf{Pfaffian约束}是一种线性速度约束，形式为：
+\begin{equation}
+A(q)\dot{q} = 0
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $q \in \mathbb{R}^n$是配置变量（位置）
+\item $\dot{q} \in \mathbb{R}^n$是速度
+\item $A(q) \in \mathbb{R}^{k \times n}$是约束矩阵（可能依赖于配置$q$）
+\item $k$是约束的数量
+\end{itemize}
+
+\textbf{关键特点}：
+\begin{itemize}
+\item 约束是\textbf{线性的}（关于速度$\dot{q}$）
+\item 约束矩阵$A(q)$可能依赖于配置$q$（因此是"Pfaffian形式"）
+\item 约束限制的是\textbf{速度}，而不是位置
+\end{itemize}
+
+\subsection{在机器人控制中的应用}
+
+在混合运动-力控制中，我们使用：
+\begin{equation}
+A(\theta)V = 0
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $V \in \mathbb{R}^6$是twist（末端执行器的速度）
+\item $A(\theta) \in \mathbb{R}^{k \times 6}$是约束矩阵（依赖于关节角度$\theta$）
+\item $k$是约束的数量
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 环境在$k$个方向上限制了末端执行器的运动
+\item 这些约束限制了速度$V$，使其必须满足$A(\theta)V = 0$
+\end{itemize}
+
+\section{为什么叫"Pfaffian"约束？}
+
+\subsection{历史背景}
+
+\textbf{Pfaffian}这个名字来自德国数学家Johann Friedrich Pfaff（1765-1825）。
+
+\textbf{Pfaffian形式}（Pfaffian Form）：
+\begin{itemize}
+\item 是一种微分形式（differential form）
+\item 形式为：$\omega = \sum_{i=1}^n a_i(x) dx_i$
+\item 其中$a_i(x)$是依赖于$x$的系数
+\end{itemize}
+
+\textbf{约束的Pfaffian形式}：
+\begin{itemize}
+\item 如果$\omega = 0$，则得到约束：$\sum_{i=1}^n a_i(x) dx_i = 0$
+\item 在速度空间中，这对应于：$\sum_{i=1}^n a_i(q) \dot{q}_i = 0$
+\item 写成矩阵形式：$A(q)\dot{q} = 0$
+\end{itemize}
+
+\textbf{为什么用这个名字？}
+\begin{itemize}
+\item 因为约束矩阵$A(q)$依赖于配置$q$，这是Pfaffian形式的特征
+\item 如果$A$是常数矩阵，就是普通的线性约束
+\item 如果$A$依赖于$q$，就是Pfaffian约束
+\end{itemize}
+
+\section{完整约束 vs 非完整约束}
+
+\subsection{基本概念}
+
+\textbf{完整约束}（Holonomic Constraints）：
+\begin{itemize}
+\item 可以积分得到位置约束
+\item 形式：$f(q) = 0$（只依赖于位置$q$）
+\item 对时间求导得到速度约束：$\frac{\partial f}{\partial q}\dot{q} = 0$
+\end{itemize}
+
+\textbf{非完整约束}（Nonholonomic Constraints）：
+\begin{itemize}
+\item 不能积分得到位置约束
+\item 形式：$A(q)\dot{q} = 0$（不能写成$f(q) = 0$）
+\item 只限制速度，不限制位置
+\end{itemize}
+
+\subsection{例子1：完整约束}
+
+\textbf{例子}：物体在水平面上移动
+
+\textbf{位置约束}：
+\begin{equation}
+z = 0 \quad \text{（不能穿透平面）}
+\end{equation}
+
+\textbf{速度约束}（对时间求导）：
+\begin{equation}
+\dot{z} = 0
+\end{equation}
+
+\textbf{写成Pfaffian形式}：
+\begin{equation}
+\begin{bmatrix} 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{z} \end{bmatrix} = 0
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 可以积分得到位置约束：$z = 0$
+\item 这是完整约束
+\end{itemize}
+
+\subsection{例子2：非完整约束}
+
+\textbf{例子}：轮式机器人（不能侧滑）
+
+\textbf{速度约束}：
+\begin{equation}
+\dot{x}\sin\theta - \dot{y}\cos\theta = 0
+\end{equation}
+
+其中$\theta$是机器人朝向角度。
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 机器人不能侧滑
+\item 速度方向必须与机器人朝向一致
+\end{itemize}
+
+\textbf{写成Pfaffian形式}：
+\begin{equation}
+\begin{bmatrix} \sin\theta & -\cos\theta & 0 \end{bmatrix} \begin{bmatrix} \dot{x} \\ \dot{y} \\ \dot{\theta} \end{bmatrix} = 0
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 不能积分得到位置约束（因为$\theta$依赖于时间）
+\item 这是非完整约束
+\end{itemize}
+
+\subsection{在混合控制中的应用}
+
+\textbf{文档中的说明}：
+\begin{quote}
+"这个公式包括完整约束和非完整约束。"
+\end{quote}
+
+\textbf{含义}：
+\begin{itemize}
+\item Pfaffian约束$A(\theta)V = 0$可以表示完整约束
+\item 也可以表示非完整约束
+\item 两种约束都可以用这种形式统一表示
+\end{itemize}
+
+\textbf{例子}（擦黑板）：
+\begin{itemize}
+\item 完整约束：$v_z = 0$（不能穿透黑板）
+\item 完整约束：$\omega_x = 0, \omega_y = 0$（不能倾斜）
+\item 这些都可以写成：$A(\theta)V = 0$
+\end{itemize}
+
+\section{具体例子：擦黑板}
+
+\subsection{约束描述}
+
+\textbf{场景}：机器人用橡皮擦擦黑板
+
+\textbf{自然约束}（由环境决定）：
+\begin{align}
+\omega_x &= 0 \quad \text{（不能绕$x$轴旋转）} \\
+\omega_y &= 0 \quad \text{（不能绕$y$轴旋转）} \\
+v_z &= 0 \quad \text{（不能沿$z$轴运动，即不能穿透黑板）}
+\end{align}
+
+\subsection{Pfaffian形式}
+
+\textbf{Twist}：
+\begin{equation}
+V = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \\ v_x \\ v_y \\ v_z \end{bmatrix}
+\end{equation}
+
+\textbf{约束矩阵}：
+\begin{equation}
+A(\theta) = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{Pfaffian约束}：
+\begin{equation}
+A(\theta)V = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix} \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \\ v_x \\ v_y \\ v_z \end{bmatrix} = \begin{bmatrix} \omega_x \\ \omega_y \\ v_z \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{结果}：
+\begin{align}
+\omega_x &= 0 \\
+\omega_y &= 0 \\
+v_z &= 0
+\end{align}
+
+\subsection{约束矩阵的特点}
+
+\textbf{在这个例子中}：
+\begin{itemize}
+\item $A(\theta)$是常数矩阵（不依赖于$\theta$）
+\item 因为约束是固定的（黑板是固定的）
+\item 但在一般情况下，$A(\theta)$可能依赖于$\theta$
+\end{itemize}
+
+\textbf{如果约束依赖于配置}：
+\begin{itemize}
+\item 例如：在曲面上移动
+\item $A(\theta)$会依赖于当前位置
+\item 这就是Pfaffian形式的特征
+\end{itemize}
+
+\section{Pfaffian约束的性质}
+
+\subsection{约束子空间}
+
+\textbf{约束子空间}：
+\begin{itemize}
+\item 所有满足$A(\theta)V = 0$的速度$V$构成一个子空间
+\item 这个子空间的维度是$n - k$（其中$n$是速度空间的维度，$k$是约束的数量）
+\end{itemize}
+
+\textbf{例子}（擦黑板）：
+\begin{itemize}
+\item $n = 6$（6维速度空间）
+\item $k = 3$（3个约束）
+\item 约束子空间维度：$6 - 3 = 3$
+\item 可以自由运动的方向：$\omega_z, v_x, v_y$（3个）
+\end{itemize}
+
+\subsection{约束的秩}
+
+\textbf{约束矩阵的秩}：
+\begin{itemize}
+\item $A(\theta)$的秩为$k$（假设约束是独立的）
+\item 如果约束不是独立的，秩会小于$k$
+\end{itemize}
+
+\textbf{独立性}：
+\begin{itemize}
+\item 如果约束是独立的，$A(\theta)$的行是线性无关的
+\item 这意味着每个约束都提供新的限制
+\end{itemize}
+
+\subsection{约束的时间导数}
+
+\textbf{约束必须在所有时间满足}：
+\begin{equation}
+A(\theta)V = 0 \quad \text{（对所有时间$t$）}
+\end{equation}
+
+\textbf{对时间求导}：
+\begin{equation}
+\frac{d}{dt}[A(\theta)V] = \dot{A}(\theta)V + A(\theta)\dot{V} = 0
+\end{equation}
+
+\textbf{重新整理}：
+\begin{equation}
+A(\theta)\dot{V} + \dot{A}(\theta)V = 0
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果速度满足约束，加速度也必须满足约束
+\item 这确保了约束在所有时间都满足
+\end{itemize}
+
+\section{在混合控制中的作用}
+
+\subsection{分离运动子空间和力子空间}
+
+\textbf{投影矩阵}：
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}
+\end{equation}
+
+\textbf{作用}：
+\begin{itemize}
+\item $P$将力投影到运动控制子空间（满足约束的方向）
+\item $I - P$将力投影到力控制子空间（约束方向）
+\end{itemize}
+
+\textbf{基于Pfaffian约束}：
+\begin{itemize}
+\item 投影矩阵$P$依赖于约束矩阵$A(\theta)$
+\item 通过$A(\theta)$，我们可以分离运动子空间和力子空间
+\end{itemize}
+
+\subsection{控制器的设计}
+
+\textbf{混合控制器}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\text{（运动控制）} + (I - P(\theta))\text{（力控制）} + \text{补偿项}\Bigg]
+\end{equation}
+
+\textbf{关键步骤}：
+\begin{enumerate}
+\item 识别约束：确定$A(\theta)$
+\item 计算投影：计算$P(\theta)$和$I - P(\theta)$
+\item 设计控制器：在运动子空间使用运动控制，在力子空间使用力控制
+\end{enumerate}
+
+\section{总结}
+
+\subsection{Pfaffian约束的定义}
+
+\textbf{Pfaffian约束}是形式为$A(q)\dot{q} = 0$的线性速度约束，其中约束矩阵$A(q)$可能依赖于配置$q$。
+
+\subsection{关键特点}
+
+\begin{enumerate}
+\item \textbf{线性}：关于速度$\dot{q}$是线性的
+\item \textbf{配置依赖}：约束矩阵$A(q)$可能依赖于配置$q$
+\item \textbf{速度约束}：限制的是速度，而不是位置
+\item \textbf{统一表示}：可以表示完整约束和非完整约束
+\end{enumerate}
+
+\subsection{在混合控制中的应用}
+
+\begin{enumerate}
+\item \textbf{表示环境约束}：$A(\theta)V = 0$表示环境对末端执行器的约束
+\item \textbf{分离子空间}：通过$A(\theta)$计算投影矩阵，分离运动子空间和力子空间
+\item \textbf{设计控制器}：在运动子空间使用运动控制，在力子空间使用力控制
+\end{enumerate}
+
+\subsection{实际意义}
+
+理解Pfaffian约束对于：
+\begin{itemize}
+\item 理解环境如何限制机器人运动
+\item 设计混合运动-力控制器
+\item 实现复杂的接触任务
+\end{itemize}
+
+都是至关重要的。
+
+\end{document}
+

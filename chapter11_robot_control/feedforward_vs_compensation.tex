@@ -1,0 +1,528 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+
+\geometry{margin=2.5cm}
+
+\title{前馈 vs. 前馈补偿：概念区别与系统框图}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在机器人控制中，经常听到"前馈"和"前馈补偿"这两个术语。它们有什么区别？本文将详细解释并画出系统框图。
+
+\section{基本概念}
+
+\subsection{前馈（Feedforward）}
+
+\textbf{定义}：使用期望轨迹信息（期望位置、速度、加速度）来主动生成控制信号，而不是等待误差出现后再响应。
+
+\textbf{特点}：
+\begin{itemize}
+\item 基于期望轨迹：使用$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$
+\item 开环控制：不依赖于实际状态
+\item 预测性：提前生成控制信号
+\item 提高跟踪性能：减少跟踪误差
+\end{itemize}
+
+\subsection{前馈补偿（Feedforward Compensation）}
+
+\textbf{定义}：使用模型信息（如重力、摩擦力、动力学）来补偿已知的干扰或非线性项。
+
+\textbf{特点}：
+\begin{itemize}
+\item 基于模型：使用$\tilde{g}(\theta), \tilde{M}(\theta), \tilde{h}(\theta, \dot{\theta})$
+\item 补偿干扰：抵消已知的干扰力
+\item 简化控制：减少反馈控制器的负担
+\item 提高精度：消除模型误差的影响
+\end{itemize}
+
+\section{前馈控制}
+
+\subsection{基本思想}
+
+前馈控制使用期望轨迹来生成控制信号：
+\begin{equation}
+\tau_{\text{ff}} = \tilde{M}(\theta_d)\ddot{\theta}_d + \tilde{h}(\theta_d, \dot{\theta}_d)
+\end{equation}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 使用期望状态$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$
+\item 不依赖于实际状态$\theta, \dot{\theta}$
+\item 如果模型完美且无初始误差，可以完美跟踪
+\end{itemize}
+
+\subsection{系统框图}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+% 期望轨迹
+\node[block] (traj) at (0,0) {轨迹\\生成器};
+\node[block] (ff) at (3,0) {前馈\\控制器};
+\node[block] (robot) at (6,0) {机器人\\动力学};
+\node[block] (sensor) at (6,-2) {传感器};
+
+% 信号
+\node at (-1.5,0.5) {$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$};
+\node at (4.5,0.5) {$\tau$};
+\node at (7.5,-1) {$\theta, \dot{\theta}$};
+
+% 连接
+\draw[arrow] (traj) -- (ff);
+\draw[arrow] (ff) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (robot) -- (7.5,0);
+
+% 标签
+\node at (1.5,-0.3) {期望轨迹};
+\node at (4.5,-0.3) {控制力矩};
+\node at (7.5,-1.5) {实际状态};
+
+\end{tikzpicture}
+\caption{纯前馈控制系统框图}
+\end{figure}
+
+\textbf{特点}：
+\begin{itemize}
+\item 只有前馈路径，没有反馈
+\item 如果模型不完美，会有误差
+\item 误差不会自动修正
+\end{itemize}
+
+\section{前馈补偿}
+
+\subsection{基本思想}
+
+前馈补偿使用模型来补偿已知干扰：
+\begin{equation}
+\tau_{\text{comp}} = \tilde{g}(\theta) + \tilde{M}(\theta)\ddot{\theta} + \tilde{h}(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 使用实际状态$\theta, \dot{\theta}$（或期望状态）
+\item 补偿重力、摩擦力等已知项
+\item 通常与反馈控制结合使用
+\end{itemize}
+
+\subsection{系统框图}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+% 期望轨迹
+\node[block] (traj) at (0,2) {轨迹\\生成器};
+\node[block] (fb) at (0,0) {反馈\\控制器};
+\node[block] (comp) at (3,1) {前馈\\补偿};
+\node[sum] (sum) at (5,1) {};
+\node[block] (robot) at (7,1) {机器人\\动力学};
+\node[block] (sensor) at (7,-1) {传感器};
+
+% 信号
+\node at (-1.5,2.5) {$\theta_d$};
+\node at (-1.5,0.5) {$\theta_e$};
+\node at (4,1.5) {$\tau_{\text{comp}}$};
+\node at (4,0.5) {$\tau_{\text{fb}}$};
+\node at (6,1.5) {$\tau$};
+\node at (8.5,1.5) {$\theta$};
+
+% 连接
+\draw[arrow] (traj) -- (fb);
+\draw[arrow] (fb) -- node[above] {$\tau_{\text{fb}}$} (sum);
+\draw[arrow] (comp) -- node[above] {$\tau_{\text{comp}}$} (sum);
+\draw[arrow] (sum) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[left] {$\theta$} (-1.5,-1) -- (fb);
+\draw[arrow] (sensor) -- (comp);
+\draw[arrow] (robot) -- (8.5,1);
+
+% 标签
+\node at (1.5,2.3) {期望轨迹};
+\node at (1.5,0.3) {误差反馈};
+\node at (1.5,-0.7) {实际状态};
+
+\end{tikzpicture}
+\caption{前馈补偿 + 反馈控制系统框图}
+\end{figure}
+
+\textbf{特点}：
+\begin{itemize}
+\item 前馈补偿抵消已知干扰
+\item 反馈控制处理剩余误差
+\item 两者结合使用
+\end{itemize}
+
+\section{前馈 + 前馈补偿 + 反馈}
+
+\subsection{完整控制律}
+
+计算力矩控制器结合了前馈、前馈补偿和反馈：
+\begin{equation}
+\tau = \underbrace{\tilde{M}(\theta)\ddot{\theta}_d}_{\text{前馈}} + \underbrace{\tilde{h}(\theta, \dot{\theta})}_{\text{前馈补偿}} + \underbrace{K_p\theta_e + K_d\dot{\theta}_e}_{\text{反馈}}
+\end{equation}
+
+\textbf{各项的作用}：
+\begin{itemize}
+\item \textbf{前馈项}：$\tilde{M}(\theta)\ddot{\theta}_d$ - 使用期望加速度
+\item \textbf{前馈补偿项}：$\tilde{h}(\theta, \dot{\theta})$ - 补偿重力、摩擦力等
+\item \textbf{反馈项}：$K_p\theta_e + K_d\dot{\theta}_e$ - 消除误差
+\end{itemize}
+
+\subsection{系统框图}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+% 期望轨迹
+\node[block] (traj) at (-2,3) {轨迹\\生成器};
+\node[block] (ff) at (1,3) {前馈\\$\tilde{M}\ddot{\theta}_d$};
+\node[block] (comp) at (1,1) {前馈补偿\\$\tilde{h}(\theta,\dot{\theta})$};
+\node[block] (fb) at (-2,1) {反馈\\$K_p e + K_d \dot{e}$};
+\node[sum] (sum) at (4,2) {};
+\node[block] (robot) at (7,2) {机器人\\动力学};
+\node[block] (sensor) at (7,-1) {传感器};
+
+% 信号标签
+\node at (-3.5,3.5) {$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$};
+\node at (-3.5,1.5) {$e = \theta_d - \theta$};
+\node at (3,2.5) {$\tau_{\text{ff}}$};
+\node at (3,1.5) {$\tau_{\text{comp}}$};
+\node at (3,0.5) {$\tau_{\text{fb}}$};
+\node at (5.5,2.5) {$\tau$};
+\node at (8.5,2.5) {$\theta, \dot{\theta}$};
+
+% 连接
+\draw[arrow] (traj) -- node[above] {$\ddot{\theta}_d$} (ff);
+\draw[arrow] (traj) -- node[left] {$\theta_d, \dot{\theta}_d$} (fb);
+\draw[arrow] (ff) -- node[right] {$\tau_{\text{ff}}$} (sum);
+\draw[arrow] (comp) -- node[right] {$\tau_{\text{comp}}$} (sum);
+\draw[arrow] (fb) -- node[above] {$\tau_{\text{fb}}$} (sum);
+\draw[arrow] (sum) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[left] {$\theta, \dot{\theta}$} (-3.5,-1) -- (fb);
+\draw[arrow] (sensor) -- (comp);
+\draw[arrow] (robot) -- (8.5,2);
+
+% 标签
+\node at (-0.5,3.3) {前馈};
+\node at (-0.5,1.3) {前馈补偿};
+\node at (-0.5,0.7) {反馈};
+
+\end{tikzpicture}
+\caption{前馈 + 前馈补偿 + 反馈控制系统框图}
+\end{figure}
+
+\section{详细对比}
+
+\subsection{前馈 vs. 前馈补偿}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{方面} & \textbf{前馈} & \textbf{前馈补偿} \\
+\hline
+\textbf{输入} & 期望轨迹$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$ & 实际状态$\theta, \dot{\theta}$或期望状态 \\
+\hline
+\textbf{目的} & 主动生成控制信号 & 补偿已知干扰 \\
+\hline
+\textbf{基于} & 期望轨迹信息 & 模型信息（重力、摩擦等） \\
+\hline
+\textbf{典型项} & $\tilde{M}(\theta_d)\ddot{\theta}_d$ & $\tilde{g}(\theta), \tilde{h}(\theta, \dot{\theta})$ \\
+\hline
+\textbf{开环/闭环} & 开环（基于期望） & 可以是开环或闭环 \\
+\hline
+\textbf{作用} & 提高跟踪性能 & 消除干扰影响 \\
+\hline
+\end{tabular}
+\caption{前馈与前馈补偿的对比}
+\end{table}
+
+\section{具体例子}
+
+\subsection{例子1：纯前馈控制}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = \tilde{M}(\theta_d)\ddot{\theta}_d + \tilde{h}(\theta_d, \dot{\theta}_d)
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 只使用期望状态
+\item 不依赖实际状态
+\item 如果模型完美，可以完美跟踪
+\item 但模型不完美时，误差不会修正
+\end{itemize}
+
+\subsection{例子2：前馈补偿 + 反馈}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = \underbrace{\tilde{g}(\theta)}_{\text{前馈补偿}} + \underbrace{K_p(\theta_d - \theta)}_{\text{反馈}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 前馈补偿：抵消重力$\tilde{g}(\theta)$
+\item 反馈：消除位置误差
+\item 使用实际状态$\theta$进行补偿
+\end{itemize}
+
+\subsection{例子3：完整控制（前馈 + 前馈补偿 + 反馈）}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = \underbrace{\tilde{M}(\theta)\ddot{\theta}_d}_{\text{前馈}} + \underbrace{\tilde{h}(\theta, \dot{\theta})}_{\text{前馈补偿}} + \underbrace{K_p\theta_e + K_d\dot{\theta}_e}_{\text{反馈}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 前馈：使用期望加速度$\ddot{\theta}_d$
+\item 前馈补偿：补偿重力、摩擦力等
+\item 反馈：消除跟踪误差
+\item 三者结合，性能最好
+\end{itemize}
+
+\section{在导纳控制中的应用}
+
+\subsection{导纳控制中的前馈}
+
+在导纳控制中，前馈项可能是：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)
+\end{equation}
+
+这里使用当前状态，不是期望状态，所以更准确地说是"基于当前状态的计算"，而不是传统意义上的"前馈"。
+
+\subsection{导纳控制中的前馈补偿}
+
+如果加入重力补偿：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{\Lambda}(\theta)\ddot{x}_d + \tilde{\eta}(\theta, \dot{x})\right] + \underbrace{\tilde{g}(\theta)}_{\text{前馈补偿}}
+\end{equation}
+
+这里$\tilde{g}(\theta)$是前馈补偿项，用于补偿重力。
+
+\section{术语澄清}
+
+\subsection{常见混淆}
+
+在实际应用中，这两个术语经常被混用：
+
+\begin{enumerate}
+\item \textbf{广义"前馈"}：
+\begin{itemize}
+\item 有时指所有非反馈的控制项
+\item 包括前馈和前馈补偿
+\item 这是不严格的用法
+\end{itemize}
+
+\item \textbf{严格区分}：
+\begin{itemize}
+\item 前馈：基于期望轨迹
+\item 前馈补偿：基于模型补偿干扰
+\end{itemize}
+\end{enumerate}
+
+\subsection{标准术语}
+
+在控制理论中：
+\begin{itemize}
+\item \textbf{Feedforward Control}：前馈控制（基于参考输入）
+\item \textbf{Feedforward Compensation}：前馈补偿（补偿干扰）
+\item \textbf{Feedback Control}：反馈控制（基于误差）
+\end{itemize}
+
+\section{系统框图总结}
+
+\subsection{纯反馈控制}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+\node[block] (traj) at (0,2) {$\theta_d$};
+\node[sum] (sum1) at (2,2) {};
+\node[block] (fb) at (4,2) {反馈\\控制器};
+\node[block] (robot) at (7,2) {机器人};
+\node[block] (sensor) at (7,0) {传感器};
+
+\draw[arrow] (traj) -- node[above] {$+$} (sum1);
+\draw[arrow] (sum1) -- (fb);
+\draw[arrow] (fb) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[below] {$\theta$} (0,0) -- node[left] {$-$} (sum1);
+
+\end{tikzpicture}
+\caption{纯反馈控制系统框图}
+\end{figure}
+
+\subsection{前馈 + 反馈}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+\node[block] (traj) at (0,3) {$\theta_d, \ddot{\theta}_d$};
+\node[block] (ff) at (2,3) {前馈};
+\node[block] (fb) at (2,1) {反馈};
+\node[sum] (sum) at (5,2) {};
+\node[block] (robot) at (8,2) {机器人};
+\node[block] (sensor) at (8,0) {传感器};
+
+\draw[arrow] (traj) -- (ff);
+\draw[arrow] (traj) -- (fb);
+\draw[arrow] (ff) -- node[right] {$\tau_{\text{ff}}$} (sum);
+\draw[arrow] (fb) -- node[right] {$\tau_{\text{fb}}$} (sum);
+\draw[arrow] (sum) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[below] {$\theta$} (0,0) -- (fb);
+
+\end{tikzpicture}
+\caption{前馈 + 反馈控制系统框图}
+\end{figure}
+
+\subsection{前馈补偿 + 反馈}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+\node[block] (traj) at (0,2) {$\theta_d$};
+\node[block] (fb) at (2,2) {反馈};
+\node[block] (comp) at (2,0) {前馈补偿\\$\tilde{g}(\theta)$};
+\node[sum] (sum) at (5,2) {};
+\node[block] (robot) at (8,2) {机器人};
+\node[block] (sensor) at (8,-1) {传感器};
+
+\draw[arrow] (traj) -- (fb);
+\draw[arrow] (fb) -- node[right] {$\tau_{\text{fb}}$} (sum);
+\draw[arrow] (comp) -- node[right] {$\tau_{\text{comp}}$} (sum);
+\draw[arrow] (sum) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[below] {$\theta$} (0,-1) -- (fb);
+\draw[arrow] (sensor) -- (comp);
+
+\end{tikzpicture}
+\caption{前馈补偿 + 反馈控制系统框图}
+\end{figure}
+
+\subsection{完整控制（前馈 + 前馈补偿 + 反馈）}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    block/.style={rectangle, draw, minimum width=2cm, minimum height=1cm, align=center},
+    sum/.style={circle, draw, minimum size=0.5cm},
+    arrow/.style={->,>=stealth}
+]
+
+\node[block] (traj) at (-2,3) {轨迹\\$\theta_d, \ddot{\theta}_d$};
+\node[block] (ff) at (1,3) {前馈\\$\tilde{M}\ddot{\theta}_d$};
+\node[block] (comp) at (1,1) {前馈补偿\\$\tilde{h}(\theta)$};
+\node[block] (fb) at (-2,1) {反馈\\$K_p e$};
+\node[sum] (sum) at (4,2) {};
+\node[block] (robot) at (7,2) {机器人};
+\node[block] (sensor) at (7,-1) {传感器};
+
+\draw[arrow] (traj) -- node[above] {$\ddot{\theta}_d$} (ff);
+\draw[arrow] (traj) -- node[left] {$\theta_d$} (fb);
+\draw[arrow] (ff) -- node[right] {$\tau_{\text{ff}}$} (sum);
+\draw[arrow] (comp) -- node[right] {$\tau_{\text{comp}}$} (sum);
+\draw[arrow] (fb) -- node[above] {$\tau_{\text{fb}}$} (sum);
+\draw[arrow] (sum) -- (robot);
+\draw[arrow] (robot) -- (sensor);
+\draw[arrow] (sensor) -- node[below] {$\theta$} (-2,-1) -- (fb);
+\draw[arrow] (sensor) -- (comp);
+\draw[arrow] (robot) -- (9,2);
+
+\end{tikzpicture}
+\caption{完整控制系统框图（前馈 + 前馈补偿 + 反馈）}
+\end{figure}
+
+\section{总结}
+
+\subsection{关键区别}
+
+\begin{enumerate}
+\item \textbf{前馈（Feedforward）}：
+\begin{itemize}
+\item 基于期望轨迹：$\theta_d, \dot{\theta}_d, \ddot{\theta}_d$
+\item 主动生成控制信号
+\item 开环控制
+\item 典型项：$\tilde{M}(\theta_d)\ddot{\theta}_d$
+\end{itemize}
+
+\item \textbf{前馈补偿（Feedforward Compensation）}：
+\begin{itemize}
+\item 基于模型信息：$\tilde{g}(\theta), \tilde{h}(\theta, \dot{\theta})$
+\item 补偿已知干扰
+\item 可以使用实际状态或期望状态
+\item 典型项：$\tilde{g}(\theta)$（重力补偿）
+\end{itemize}
+\end{enumerate}
+
+\subsection{关系}
+
+\begin{itemize}
+\item 两者都是"前向"控制（不依赖误差）
+\item 但输入不同：前馈用期望轨迹，前馈补偿用模型
+\item 通常结合使用，提高控制性能
+\item 与反馈控制结合，形成完整的控制系统
+\end{itemize}
+
+\subsection{实际应用}
+
+\textbf{推荐组合}：
+\begin{equation}
+\tau = \underbrace{\tilde{M}(\theta)\ddot{\theta}_d}_{\text{前馈}} + \underbrace{\tilde{h}(\theta, \dot{\theta})}_{\text{前馈补偿}} + \underbrace{K_p\theta_e + K_d\dot{\theta}_e}_{\text{反馈}}
+\end{equation}
+
+这样可以：
+\begin{itemize}
+\item 前馈：主动跟踪期望轨迹
+\item 前馈补偿：消除已知干扰
+\item 反馈：消除剩余误差
+\end{itemize}
+
+\end{document}
+

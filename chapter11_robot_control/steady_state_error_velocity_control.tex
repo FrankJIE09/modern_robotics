@@ -1,0 +1,352 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{从关节速度控制角度理解P控制器的稳态误差}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{速度输入控制回顾}
+
+在速度输入的运动控制中，控制律为：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)
+\end{equation}
+其中：
+\begin{itemize}
+\item $\dot{\theta}$是实际关节速度（控制输出）
+\item $\dot{\theta}_d$是期望关节速度
+\item $\theta_d$是期望关节位置
+\item $\theta$是实际关节位置
+\item $K_p > 0$是比例增益
+\item $\theta_e = \theta_d - \theta$是位置误差
+\end{itemize}
+
+\section{从速度角度分析稳态误差}
+
+\subsection{情况1：跟踪固定位置（$\dot{\theta}_d = 0$）}
+
+假设期望位置固定，即$\dot{\theta}_d = 0$，控制律变为：
+\begin{equation}
+\dot{\theta} = K_p(\theta_d - \theta) = K_p \theta_e
+\end{equation}
+
+\subsubsection{无干扰情况}
+
+如果系统没有持续干扰（如重力），在稳态时：
+\begin{equation}
+\dot{\theta}_{ss} = 0
+\end{equation}
+
+因此：
+\begin{equation}
+K_p \theta_{e,ss} = 0
+\end{equation}
+
+由于$K_p > 0$，必须有：
+\begin{equation}
+\theta_{e,ss} = 0
+\end{equation}
+
+\textbf{结论：}在无干扰情况下，速度输入的P控制器可以达到零稳态误差。
+
+\subsubsection{有持续干扰情况（重力）}
+
+现在考虑有重力的情况。虽然速度控制器直接控制速度，但实际系统仍然受到重力的影响。
+
+\textbf{关键问题：}速度控制器假设可以精确控制速度，但实际物理系统有动力学：
+\begin{equation}
+M\ddot{\theta} = \tau - mgr\cos\theta
+\end{equation}
+
+如果速度控制器试图维持$\dot{\theta} = 0$，但存在重力$mgr\cos\theta$，则：
+\begin{itemize}
+\item 要保持$\dot{\theta} = 0$，需要$\tau = mgr\cos\theta$
+\item 但速度控制器只根据误差$\theta_e$产生速度指令
+\item 如果$\theta_e = 0$，则$\dot{\theta} = 0$，但实际系统在重力作用下会加速
+\item 因此，系统需要非零误差来产生非零速度，以"对抗"重力
+\end{itemize}
+
+\textbf{更准确的分析：}
+
+实际系统动力学：
+\begin{equation}
+M\ddot{\theta} = \tau - mgr\cos\theta
+\end{equation}
+
+速度控制器产生速度指令：
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = K_p(\theta_d - \theta)
+\end{equation}
+
+但实际速度$\dot{\theta}$由动力学决定。在稳态时，如果$\dot{\theta} = 0$且$\ddot{\theta} = 0$：
+\begin{equation}
+0 = \tau_{ss} - mgr\cos\theta_{ss}
+\end{equation}
+
+如果速度控制器试图维持$\dot{\theta} = 0$，但$\theta_e = 0$，则$\dot{\theta}_{\text{cmd}} = 0$，无法产生抵消重力的力矩。
+
+\textbf{因此，系统会在非零误差处达到平衡：}
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = K_p \theta_{e,ss} \neq 0
+\end{equation}
+
+这个非零速度指令产生的力矩（通过执行器）正好抵消重力。
+
+\subsection{情况2：跟踪运动轨迹（$\dot{\theta}_d \neq 0$）}
+
+假设期望位置在变化，$\dot{\theta}_d \neq 0$。
+
+控制律：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)
+\end{equation}
+
+\subsubsection{理想情况：无干扰}
+
+如果系统能精确跟踪，在稳态时：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d, \quad \theta = \theta_d
+\end{equation}
+
+因此：
+\begin{equation}
+\theta_{e,ss} = 0
+\end{equation}
+
+\textbf{结论：}在理想无干扰情况下，可以跟踪运动轨迹且无稳态误差。
+
+\subsubsection{实际情况：有干扰}
+
+如果存在持续干扰（如重力），系统无法完全跟踪期望轨迹。
+
+假设期望轨迹是匀速运动：$\dot{\theta}_d = \text{常数}$，$\theta_d(t) = \theta_{d,0} + \dot{\theta}_d t$。
+
+在稳态时，如果实际速度$\dot{\theta} = \dot{\theta}_d$，但存在位置误差$\theta_e \neq 0$：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p \theta_e = \dot{\theta}_d
+\end{equation}
+
+这要求$K_p \theta_e = 0$，即$\theta_e = 0$。
+
+但如果存在重力干扰，要保持$\dot{\theta} = \dot{\theta}_d$，需要额外的力矩来抵消重力。如果$\theta_e = 0$，速度控制器无法提供这个力矩。
+
+\textbf{因此，系统会存在稳态误差：}
+\begin{equation}
+\theta_{e,ss} \neq 0
+\end{equation}
+
+这个误差产生的速度修正项$K_p \theta_{e,ss}$通过执行器转换为力矩，抵消重力。
+
+\section{具体数值示例}
+
+\subsection{示例1：固定位置跟踪（有重力）}
+
+\textbf{系统参数：}
+\begin{itemize}
+\item 期望位置：$\theta_d = 0$ rad
+\item 初始位置：$\theta(0) = 0.2$ rad
+\item 比例增益：$K_p = 10$ rad/s/rad
+\item 重力力矩：$mgr = 5$ N·m（假设在$\theta = 0$处）
+\item 执行器特性：速度指令转换为力矩，转换系数$\alpha = 2$ N·m/(rad/s)
+\end{itemize}
+
+\textbf{控制律：}
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = 10(0 - \theta) = -10\theta
+\end{equation}
+
+\textbf{稳态分析：}
+
+在稳态时，如果$\dot{\theta} = 0$，系统动力学要求：
+\begin{equation}
+\tau_{ss} = mgr = 5 \text{ N·m}
+\end{equation}
+
+速度控制器产生的速度指令为：
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = -10 \theta_{ss}
+\end{equation}
+
+这个速度指令通过执行器转换为力矩：
+\begin{equation}
+\tau_{ss} = \alpha \cdot \dot{\theta}_{\text{cmd}} = 2 \times (-10 \theta_{ss}) = -20 \theta_{ss}
+\end{equation}
+
+平衡条件：
+\begin{equation}
+-20 \theta_{ss} = 5
+\end{equation}
+
+因此：
+\begin{equation}
+\theta_{ss} = -\frac{5}{20} = -0.25 \text{ rad}
+\end{equation}
+
+稳态误差：
+\begin{equation}
+\theta_{e,ss} = 0 - (-0.25) = 0.25 \text{ rad} \approx 14.3^\circ
+\end{equation}
+
+\textbf{验证：}
+\begin{align}
+\dot{\theta}_{\text{cmd}} &= -10 \times (-0.25) = 2.5 \text{ rad/s} \\
+\tau_{ss} &= 2 \times 2.5 = 5 \text{ N·m} \quad \checkmark
+\end{align}
+
+\textbf{结论：}系统在$\theta = -0.25$ rad处达到平衡，稳态误差为$0.25$ rad。
+
+\subsection{示例2：增大增益的影响}
+
+如果增大$K_p = 50$ rad/s/rad，其他参数不变：
+
+\begin{equation}
+\tau_{ss} = 2 \times (-50 \theta_{ss}) = -100 \theta_{ss} = 5
+\end{equation}
+
+因此：
+\begin{equation}
+\theta_{ss} = -\frac{5}{100} = -0.05 \text{ rad}
+\end{equation}
+
+稳态误差：
+\begin{equation}
+\theta_{e,ss} = 0.05 \text{ rad} \approx 2.9^\circ
+\end{equation}
+
+\textbf{结论：}增大$K_p$可以减小稳态误差（从$0.25$ rad减小到$0.05$ rad），但不能完全消除。
+
+\subsection{示例3：跟踪运动轨迹}
+
+\textbf{系统参数：}
+\begin{itemize}
+\item 期望速度：$\dot{\theta}_d = 1$ rad/s（匀速运动）
+\item 期望位置：$\theta_d(t) = t$ rad
+\item 比例增益：$K_p = 10$ rad/s/rad
+\item 重力力矩：$mgr = 5$ N·m
+\item 执行器转换系数：$\alpha = 2$ N·m/(rad/s)
+\end{itemize}
+
+\textbf{控制律：}
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = 1 + 10(\theta_d - \theta)
+\end{equation}
+
+\textbf{稳态分析：}
+
+假设在稳态时，实际速度$\dot{\theta} = 1$ rad/s（跟踪期望速度），但存在位置误差$\theta_e$。
+
+速度指令：
+\begin{equation}
+\dot{\theta}_{\text{cmd}} = 1 + 10 \theta_e
+\end{equation}
+
+实际速度由动力学决定。如果$\dot{\theta} = 1$，则$\ddot{\theta} = 0$，因此：
+\begin{equation}
+\tau_{ss} = mgr = 5 \text{ N·m}
+\end{equation}
+
+速度指令产生的力矩：
+\begin{equation}
+\tau_{ss} = \alpha \cdot \dot{\theta}_{\text{cmd}} = 2(1 + 10 \theta_e) = 2 + 20 \theta_e
+\end{equation}
+
+平衡条件：
+\begin{equation}
+2 + 20 \theta_e = 5
+\end{equation}
+
+因此：
+\begin{equation}
+\theta_e = \frac{5 - 2}{20} = 0.15 \text{ rad} \approx 8.6^\circ
+\end{equation}
+
+\textbf{结论：}即使在跟踪运动轨迹时，如果存在持续干扰，P控制器也会产生稳态误差。
+
+\section{从速度角度的直观理解}
+
+\subsection{关键洞察}
+
+在速度输入控制中，P控制器的稳态误差可以这样理解：
+
+\begin{enumerate}
+\item \textbf{速度指令的作用：}控制律$\dot{\theta} = \dot{\theta}_d + K_p \theta_e$产生速度指令
+\item \textbf{速度到力矩的转换：}速度指令通过执行器转换为力矩
+\item \textbf{力矩平衡：}在稳态时，这个力矩必须抵消持续干扰（如重力）
+\item \textbf{误差的必要性：}如果$\theta_e = 0$，则速度修正项$K_p \theta_e = 0$，无法产生抵消干扰的力矩
+\item \textbf{因此：}必须存在非零误差$\theta_e \neq 0$来产生非零速度修正，进而产生抵消干扰的力矩
+\end{enumerate}
+
+\subsection{类比：水流系统}
+
+想象一个水流系统：
+\begin{itemize}
+\item 期望水位：$h_d$
+\item 实际水位：$h$
+\item 控制律：流量$Q = K_p(h_d - h)$
+\item 持续泄漏：$Q_{\text{leak}} = \text{常数}$
+\end{itemize}
+
+在稳态时，要保持水位不变，需要：
+\begin{equation}
+Q = Q_{\text{leak}}
+\end{equation}
+
+如果$h = h_d$，则$Q = 0$，无法抵消泄漏，水位会下降。
+
+因此，必须存在水位误差$h_d - h \neq 0$，使得$Q = K_p(h_d - h) = Q_{\text{leak}}$。
+
+\section{为什么速度控制中也可能有稳态误差？}
+
+虽然速度控制器直接控制速度，但：
+
+\begin{enumerate}
+\item \textbf{物理系统有动力学：}实际系统不是理想的速度源，而是有质量、惯性的动力学系统
+\item \textbf{持续干扰存在：}重力、摩擦力等持续干扰仍然作用在系统上
+\item \textbf{速度到力矩的转换：}速度指令需要通过执行器转换为力矩，才能影响系统
+\item \textbf{力矩平衡要求：}在稳态时，产生的力矩必须抵消干扰
+\item \textbf{误差的必要性：}如果误差为零，速度修正项为零，无法产生抵消干扰的力矩
+\end{enumerate}
+
+\section{总结}
+
+\textbf{从关节速度控制角度理解稳态误差：}
+
+\begin{enumerate}
+\item \textbf{控制律：}$\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)$
+
+\item \textbf{稳态误差的原因：}
+   \begin{itemize}
+   \item 存在持续干扰（如重力）
+   \item 速度修正项$K_p \theta_e$通过执行器转换为力矩
+   \item 在稳态时，这个力矩必须抵消干扰
+   \item 如果$\theta_e = 0$，则$K_p \theta_e = 0$，无法产生抵消干扰的力矩
+   \item 因此，必须存在$\theta_e \neq 0$
+   \end{itemize}
+
+\item \textbf{稳态误差表达式：}
+   \begin{equation}
+   \theta_{e,ss} \approx \frac{\text{持续干扰力矩}}{\alpha \cdot K_p}
+   \end{equation}
+   其中$\alpha$是速度到力矩的转换系数。
+
+\item \textbf{减小稳态误差的方法：}
+   \begin{itemize}
+   \item 增大$K_p$（但不能无限增大，受物理限制）
+   \item 使用PI控制器（加入积分项）
+   \item 前馈补偿干扰（如果干扰已知）
+   \end{itemize}
+\end{enumerate}
+
+\textbf{关键点：}即使在速度输入控制中，如果存在持续干扰，P控制器也会产生稳态误差，因为需要非零误差来产生抵消干扰的力矩。
+
+\end{document}
+
+

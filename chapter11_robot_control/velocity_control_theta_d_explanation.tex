@@ -1,0 +1,386 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+
+\geometry{margin=2.5cm}
+
+\title{速度控制中$\theta_d$的含义：为什么通常不是0}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{公式11.11回顾}
+
+速度输入的运动控制基本公式：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta) \tag{11.11}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\dot{\theta}$: 实际关节速度（控制输出）
+\item $\dot{\theta}_d$: 期望关节速度
+\item $\theta_d$: \textbf{期望关节位置}（这是关键！）
+\item $\theta$: 实际关节位置
+\item $K_p$: 正定比例增益矩阵
+\end{itemize}
+
+\section{关键误解：$\theta_d$通常不是0}
+
+\subsection{常见误解}
+
+很多人认为$\theta_d$应该总是0，这是不正确的。这种误解可能来自：
+
+\begin{enumerate}
+\item \textbf{混淆了设定点控制和轨迹跟踪}：
+\begin{itemize}
+\item 设定点控制：$\theta_d$是常数（可能是0，也可能是其他值）
+\item 轨迹跟踪：$\theta_d(t)$是时间的函数，随时间变化
+\end{itemize}
+
+\item \textbf{只考虑了特殊情况}：
+\begin{itemize}
+\item 如果只考虑"回到零位"的任务，$\theta_d = 0$
+\item 但大多数机器人任务需要跟踪时变轨迹
+\end{itemize}
+\end{enumerate}
+
+\subsection{$\theta_d$的实际含义}
+
+$\theta_d(t)$是\textbf{期望的关节位置轨迹}，它：
+
+\begin{itemize}
+\item \textbf{通常是时变的}：$\theta_d = \theta_d(t)$，表示期望位置随时间变化
+\item \textbf{由任务决定}：可以是任意轨迹，不一定是0
+\item \textbf{与$\dot{\theta}_d$相关}：$\dot{\theta}_d = \frac{d\theta_d}{dt}$
+\end{itemize}
+
+\section{两种控制场景}
+
+\subsection{场景1：设定点控制（Setpoint Control）}
+
+\textbf{特点}：期望位置是常数，期望速度为零。
+
+\begin{equation}
+\theta_d = \text{常数}, \quad \dot{\theta}_d = 0
+\end{equation}
+
+\textbf{控制律简化为}：
+\begin{equation}
+\dot{\theta} = K_p(\theta_d - \theta) = K_p \theta_e
+\end{equation}
+
+\textbf{例子}：
+\begin{itemize}
+\item 机器人回到零位：$\theta_d = 0$
+\item 机器人移动到特定位置：$\theta_d = \pi/2$（90度）
+\item 机器人保持当前位置：$\theta_d = \theta(0)$（初始位置）
+\end{itemize}
+
+\textbf{注意}：即使在这种情况下，$\theta_d$也不一定是0，而是我们想要达到的目标位置。
+
+\subsection{场景2：轨迹跟踪（Trajectory Tracking）}
+
+\textbf{特点}：期望位置随时间变化，期望速度非零。
+
+\begin{equation}
+\theta_d = \theta_d(t), \quad \dot{\theta}_d = \frac{d\theta_d}{dt} \neq 0
+\end{equation}
+
+\textbf{控制律}：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d + K_p(\theta_d - \theta)
+\end{equation}
+
+\textbf{例子}：
+
+\begin{enumerate}
+\item \textbf{匀速运动}：
+\begin{align}
+\theta_d(t) &= \theta_0 + v_d t \\
+\dot{\theta}_d(t) &= v_d \quad \text{（常数）}
+\end{align}
+其中$v_d$是期望速度。
+
+\item \textbf{正弦运动}：
+\begin{align}
+\theta_d(t) &= A \sin(\omega t) \\
+\dot{\theta}_d(t) &= A\omega \cos(\omega t)
+\end{align}
+其中$A$是振幅，$\omega$是角频率。
+
+\item \textbf{多项式轨迹}：
+\begin{align}
+\theta_d(t) &= a_0 + a_1 t + a_2 t^2 + a_3 t^3 \\
+\dot{\theta}_d(t) &= a_1 + 2a_2 t + 3a_3 t^2
+\end{align}
+这是常见的三次多项式轨迹。
+
+\item \textbf{点到点运动}：
+\begin{align}
+\theta_d(t) &= \begin{cases}
+\theta_1 & t < t_1 \\
+\theta_1 + \frac{\theta_2 - \theta_1}{t_2 - t_1}(t - t_1) & t_1 \leq t \leq t_2 \\
+\theta_2 & t > t_2
+\end{cases}
+\end{align}
+从位置$\theta_1$移动到$\theta_2$。
+\end{enumerate}
+
+\section{控制律的物理意义}
+
+让我们详细分析公式(11.11)的两部分：
+
+\begin{equation}
+\dot{\theta} = \underbrace{\dot{\theta}_d}_{\text{前馈项}} + \underbrace{K_p(\theta_d - \theta)}_{\text{反馈项}}
+\end{equation}
+
+\subsection{前馈项：$\dot{\theta}_d$}
+
+\begin{itemize}
+\item \textbf{作用}：提供期望速度，使系统能够跟踪运动轨迹
+\item \textbf{特点}：这是"开环"项，不依赖于实际位置
+\item \textbf{必要性}：如果没有这一项，系统只能跟踪固定位置，无法跟踪运动轨迹
+\end{itemize}
+
+\subsection{反馈项：$K_p(\theta_d - \theta)$}
+
+\begin{itemize}
+\item \textbf{作用}：根据位置误差修正速度，消除跟踪误差
+\item \textbf{特点}：这是"闭环"项，依赖于实际位置
+\item \textbf{必要性}：即使有前馈项，由于干扰、建模误差等原因，仍需要反馈来消除误差
+\end{itemize}
+
+\section{具体例子说明}
+
+\subsection{例子1：跟踪固定位置（$\theta_d = 0$的特殊情况）}
+
+\textbf{任务}：让机器人回到零位并保持。
+
+\textbf{参数}：
+\begin{itemize}
+\item $\theta_d = 0$（常数）
+\item $\dot{\theta}_d = 0$（因为位置不变）
+\item 初始位置：$\theta(0) = 0.5$ rad
+\end{itemize}
+
+\textbf{控制律}：
+\begin{equation}
+\dot{\theta} = 0 + K_p(0 - \theta) = -K_p \theta
+\end{equation}
+
+\textbf{行为}：
+\begin{itemize}
+\item 如果$\theta > 0$，则$\dot{\theta} < 0$，机器人向零位移动
+\item 如果$\theta < 0$，则$\dot{\theta} > 0$，机器人向零位移动
+\item 最终$\theta \to 0$
+\end{itemize}
+
+\textbf{注意}：这是$\theta_d = 0$的特殊情况，但$\theta_d$也可以是其他常数，比如$\theta_d = \pi/2$。
+
+\subsection{例子2：跟踪运动轨迹（$\theta_d \neq 0$且时变）}
+
+\textbf{任务}：让机器人以1 rad/s的速度匀速运动。
+
+\textbf{参数}：
+\begin{itemize}
+\item $\theta_d(t) = t$（位置随时间线性增加）
+\item $\dot{\theta}_d(t) = 1$（常数速度）
+\item 初始位置：$\theta(0) = 0$
+\end{itemize}
+
+\textbf{控制律}：
+\begin{equation}
+\dot{\theta} = 1 + K_p(t - \theta)
+\end{equation}
+
+\textbf{行为分析}：
+
+假设在某个时刻$t = 2$ s：
+\begin{itemize}
+\item 期望位置：$\theta_d(2) = 2$ rad
+\item 实际位置：$\theta(2) = 1.8$ rad（有误差）
+\item 位置误差：$\theta_e = 2 - 1.8 = 0.2$ rad
+\item 期望速度：$\dot{\theta}_d = 1$ rad/s
+\end{itemize}
+
+控制律计算：
+\begin{equation}
+\dot{\theta} = 1 + K_p \times 0.2 = 1 + 0.2K_p
+\end{equation}
+
+如果$K_p = 10$：
+\begin{equation}
+\dot{\theta} = 1 + 2 = 3 \text{ rad/s}
+\end{equation}
+
+\textbf{解释}：
+\begin{itemize}
+\item 前馈项（1 rad/s）提供基本速度
+\item 反馈项（2 rad/s）加速追赶，消除位置误差
+\item 当误差减小时，反馈项也减小，最终$\dot{\theta} \to 1$ rad/s
+\end{itemize}
+
+\subsection{例子3：跟踪正弦轨迹}
+
+\textbf{任务}：让机器人跟踪正弦运动。
+
+\textbf{参数}：
+\begin{itemize}
+\item $\theta_d(t) = 0.5 \sin(2t)$（振幅0.5 rad，频率1 rad/s）
+\item $\dot{\theta}_d(t) = \cos(2t)$
+\item 初始位置：$\theta(0) = 0$
+\end{itemize}
+
+\textbf{控制律}：
+\begin{equation}
+\dot{\theta} = \cos(2t) + K_p(0.5\sin(2t) - \theta)
+\end{equation}
+
+\textbf{行为}：
+\begin{itemize}
+\item 前馈项$\cos(2t)$提供期望速度
+\item 反馈项根据位置误差修正速度
+\item 系统跟踪正弦轨迹
+\end{itemize}
+
+\section{为什么需要$\theta_d$项？}
+
+\subsection{如果没有$\theta_d$项会怎样？}
+
+如果控制律只有：
+\begin{equation}
+\dot{\theta} = \dot{\theta}_d
+\end{equation}
+
+\textbf{问题}：
+\begin{itemize}
+\item 这是纯前馈控制，没有反馈
+\item 如果初始位置有误差，误差会一直存在
+\item 如果存在干扰，无法消除误差
+\item 系统无法收敛到期望轨迹
+\end{itemize}
+
+\subsection{如果没有$\dot{\theta}_d$项会怎样？}
+
+如果控制律只有：
+\begin{equation}
+\dot{\theta} = K_p(\theta_d - \theta)
+\end{equation}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果$\theta_d$是常数，可以工作（设定点控制）
+\item 但如果$\theta_d$在变化，系统会"滞后"
+\item 例如，如果$\theta_d(t) = t$，系统会一直"追赶"，但永远追不上
+\item 需要$\dot{\theta}_d$项来提供"预测"速度
+\end{itemize}
+
+\subsection{两个项缺一不可}
+
+\begin{itemize}
+\item \textbf{$\dot{\theta}_d$项}：使系统能够跟踪运动轨迹
+\item \textbf{$K_p(\theta_d - \theta)$项}：消除跟踪误差，提高鲁棒性
+\item \textbf{两者结合}：既能跟踪运动轨迹，又能消除误差
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{$\theta_d$通常不是0}：
+\begin{itemize}
+\item 在设定点控制中，$\theta_d$是常数（可能是0，也可能是其他值）
+\item 在轨迹跟踪中，$\theta_d(t)$是时变函数
+\end{itemize}
+
+\item \textbf{$\theta_d$由任务决定}：
+\begin{itemize}
+\item 不同的任务有不同的$\theta_d(t)$
+\item $\theta_d$可以是任意轨迹，不一定是0
+\end{itemize}
+
+\item \textbf{控制律的两部分}：
+\begin{itemize}
+\item $\dot{\theta}_d$：前馈项，提供期望速度
+\item $K_p(\theta_d - \theta)$：反馈项，消除位置误差
+\end{itemize}
+
+\item \textbf{实际应用}：
+\begin{itemize}
+\item 大多数机器人任务需要跟踪时变轨迹
+\item 因此$\theta_d(t)$通常是时间的函数，不是常数0
+\end{itemize}
+\end{enumerate}
+
+\subsection{常见错误理解}
+
+\begin{itemize}
+\item \textbf{错误}：$\theta_d$总是0
+\item \textbf{正确}：$\theta_d$由任务决定，可以是任意值或函数
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{错误}：速度控制只需要$\dot{\theta}_d$
+\item \textbf{正确}：需要$\dot{\theta}_d$和$K_p(\theta_d - \theta)$两项
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{错误}：$\theta_d$和$\dot{\theta}_d$是独立的
+\item \textbf{正确}：$\dot{\theta}_d = \frac{d\theta_d}{dt}$，两者相关
+\end{itemize}
+
+\section{数学关系}
+
+\subsection{$\theta_d$和$\dot{\theta}_d$的关系}
+
+如果$\theta_d(t)$是时间的函数，则：
+\begin{equation}
+\dot{\theta}_d(t) = \frac{d\theta_d(t)}{dt}
+\end{equation}
+
+\textbf{例子}：
+\begin{align}
+\text{如果} \quad \theta_d(t) &= t^2 \\
+\text{则} \quad \dot{\theta}_d(t) &= 2t
+\end{align}
+
+\subsection{误差动力学}
+
+定义位置误差：
+\begin{equation}
+\theta_e(t) = \theta_d(t) - \theta(t)
+\end{equation}
+
+对时间求导：
+\begin{equation}
+\dot{\theta}_e(t) = \dot{\theta}_d(t) - \dot{\theta}(t)
+\end{equation}
+
+代入控制律(11.11)：
+\begin{align}
+\dot{\theta}_e &= \dot{\theta}_d - [\dot{\theta}_d + K_p(\theta_d - \theta)] \\
+              &= -K_p(\theta_d - \theta) \\
+              &= -K_p \theta_e
+\end{align}
+
+\textbf{结论}：误差动力学是一阶系统：
+\begin{equation}
+\dot{\theta}_e + K_p \theta_e = 0
+\end{equation}
+
+解为：
+\begin{equation}
+\theta_e(t) = \theta_e(0) e^{-K_p t}
+\end{equation}
+
+这表明误差指数衰减到0，系统能够跟踪期望轨迹。
+
+\end{document}
+

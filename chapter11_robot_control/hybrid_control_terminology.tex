@@ -1,0 +1,236 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{混合运动-力控制的术语说明}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+用户问："所以这东西叫做力位混合控制么？"
+
+答案是：\textbf{基本正确，但更准确的术语是"混合运动-力控制"}。
+
+\section{术语对比}
+
+\subsection{英文术语}
+
+\textbf{标准术语}：
+\begin{itemize}
+\item \textbf{Hybrid Motion-Force Control}
+\item 直译：混合运动-力控制
+\end{itemize}
+
+\textbf{其他常见说法}：
+\begin{itemize}
+\item Hybrid Position-Force Control（混合位置-力控制）
+\item Hybrid Control（混合控制，简称）
+\end{itemize}
+
+\subsection{中文术语}
+
+\textbf{标准术语}：
+\begin{itemize}
+\item \textbf{混合运动-力控制}
+\item 这是最准确的翻译
+\end{itemize}
+
+\textbf{其他常见说法}：
+\begin{itemize}
+\item \textbf{力位混合控制}（常用，但不够准确）
+\item 混合位置-力控制
+\item 混合控制（简称）
+\end{itemize}
+
+\section{为什么叫"混合"控制？}
+
+\subsection{基本含义}
+
+\textbf{"混合"的含义}：
+\begin{itemize}
+\item 同时使用两种控制方法
+\item 在不同方向上分别使用运动控制和力控制
+\item 将两种控制策略"混合"在一起
+\end{itemize}
+
+\subsection{具体说明}
+
+\textbf{混合运动-力控制器}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\text{（运动控制）} + (I - P(\theta))\text{（力控制）} + \text{补偿项}\Bigg]
+\end{equation}
+
+\textbf{组成}：
+\begin{enumerate}
+\item \textbf{运动控制部分}：在自由方向上控制运动
+\item \textbf{力控制部分}：在约束方向上控制力
+\item \textbf{混合方式}：通过投影矩阵$P$和$I-P$将两者分离并组合
+\end{enumerate}
+
+\section{术语的准确性}
+
+\subsection{"力位混合控制" vs "混合运动-力控制"}
+
+\textbf{"力位混合控制"}：
+\begin{itemize}
+\item \textbf{优点}：简洁，常用
+\item \textbf{缺点}：
+\begin{itemize}
+\item "位"（位置）不够准确，因为不仅仅是位置，还包括速度、加速度等
+\item 应该用"运动"（motion）更准确
+\end{itemize}
+\end{itemize}
+
+\textbf{"混合运动-力控制"}：
+\begin{itemize}
+\item \textbf{优点}：
+\begin{itemize}
+\item 更准确，因为"运动"包括位置、速度、加速度等
+\item 与英文术语一致
+\item 更专业
+\end{itemize}
+\item \textbf{缺点}：稍长一些
+\end{itemize}
+
+\subsection{为什么"运动"比"位置"更准确？}
+
+\textbf{运动控制包括}：
+\begin{itemize}
+\item 位置控制：$x_d$
+\item 速度控制：$\dot{x}_d$
+\item 加速度控制：$\ddot{x}_d$
+\item 轨迹跟踪：$x_d(t)$
+\end{itemize}
+
+\textbf{位置控制只是运动控制的一种}：
+\begin{itemize}
+\item 位置控制：只控制位置
+\item 运动控制：包括位置、速度、加速度等
+\end{itemize}
+
+\textbf{在混合控制中}：
+\begin{itemize}
+\item 我们控制的是"运动"（motion），不仅仅是"位置"（position）
+\item 例如：控制速度$v_x$，而不仅仅是位置$x$
+\end{itemize}
+
+\section{术语使用建议}
+
+\subsection{正式场合}
+
+\textbf{推荐使用}：
+\begin{itemize}
+\item \textbf{混合运动-力控制}（Hybrid Motion-Force Control）
+\item 最准确，最专业
+\end{itemize}
+
+\subsection{非正式场合}
+
+\textbf{可以使用}：
+\begin{itemize}
+\item \textbf{力位混合控制}
+\item 简洁，易于理解
+\item 虽然不够准确，但广泛使用
+\end{itemize}
+
+\subsection{其他说法}
+
+\textbf{也可以使用}：
+\begin{itemize}
+\item 混合位置-力控制（Hybrid Position-Force Control）
+\item 混合控制（Hybrid Control，简称）
+\end{itemize}
+
+\section{相关术语}
+
+\subsection{控制方法分类}
+
+\begin{enumerate}
+\item \textbf{运动控制}（Motion Control）：
+\begin{itemize}
+\item 只控制运动，不控制力
+\item 适用于自由空间
+\end{itemize}
+
+\item \textbf{力控制}（Force Control）：
+\begin{itemize}
+\item 只控制力，不控制运动
+\item 适用于完全约束的环境
+\end{itemize}
+
+\item \textbf{混合运动-力控制}（Hybrid Motion-Force Control）：
+\begin{itemize}
+\item 在不同方向上分别控制运动和力
+\item 适用于部分约束的环境
+\end{itemize}
+
+\item \textbf{阻抗控制}（Impedance Control）：
+\begin{itemize}
+\item 控制机器人的阻抗特性（质量、弹簧、阻尼）
+\item 感测运动，产生力
+\end{itemize}
+
+\item \textbf{导纳控制}（Admittance Control）：
+\begin{itemize}
+\item 控制机器人的导纳特性
+\item 感测力，产生运动
+\end{itemize}
+\end{enumerate}
+
+\subsection{术语关系}
+
+\textbf{混合运动-力控制}是：
+\begin{itemize}
+\item 运动控制和力控制的\textbf{组合}
+\item 在不同方向上分别使用两种控制方法
+\item 通过投影矩阵实现"混合"
+\end{itemize}
+
+\section{总结}
+
+\subsection{术语对比表}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{中文术语} & \textbf{英文术语} & \textbf{准确性} \\
+\hline
+混合运动-力控制 & Hybrid Motion-Force Control & \checkmark 最准确 \\
+\hline
+力位混合控制 & Hybrid Position-Force Control & $\sim$ 常用但不完全准确 \\
+\hline
+混合位置-力控制 & Hybrid Position-Force Control & $\sim$ 可接受 \\
+\hline
+混合控制 & Hybrid Control & $\sim$ 简称 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{推荐使用}
+
+\begin{itemize}
+\item \textbf{正式文档}：使用"混合运动-力控制"
+\item \textbf{日常交流}：可以使用"力位混合控制"（简洁易懂）
+\item \textbf{学术论文}：使用"混合运动-力控制"或"Hybrid Motion-Force Control"
+\end{itemize}
+
+\subsection{关键理解}
+
+无论使用哪个术语，关键是要理解：
+\begin{enumerate}
+\item \textbf{混合}：同时使用两种控制方法
+\item \textbf{在不同方向上}：不是在同一个方向上
+\item \textbf{分别控制}：运动控制和力控制分别作用于不同的方向
+\item \textbf{通过投影}：使用投影矩阵实现分离和组合
+\end{enumerate}
+
+\end{document}
+
