@@ -1,0 +1,2844 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{第8章：开链动力学}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+Chapter 8
+
+Dynamics of Open Chains
+
+In this chapter we study once again the motions of open-chain robots, but this
+time taking into account the forces and torques that cause them; this is the
+subject of robot dynamics. The associated dynamic equations – also referred
+to as the equations of motion – are a set of second-order differential equations
+of the form
+\begin{equation}
+τ = M (θ)θ̈ + h(θ, θ̇),
+\label{eq:8.1}
+\end{equation}
+where θ ∈ Rn is the vector of joint variables, τ ∈ Rn is the vector of joint forces
+and torques, M (θ) ∈ Rn×n is a symmetric positive-definite mass matrix, and
+h(θ, θ̇) ∈ Rn are forces that lump together centripetal, Coriolis, gravity, and
+friction terms that depend on θ and θ̇. One should not be deceived by the
+apparent simplicity of these equations; even for “simple” open chains, e.g., those
+with joint axes that are either orthogonal or parallel to each other, M (θ) and
+h(θ, θ̇) can be extraordinarily complex.
+    Just as a distinction was made between a robot’s forward and inverse kine-
+matics, it is also customary to distinguish between a robot’s forward and in-
+verse dynamics. The forward problem is the problem of determining the
+robot’s acceleration θ̈ given the state (θ, θ̇) and the joint forces and torques,
+                                                     
+\begin{equation}
+θ̈ = M −1 (θ) τ − h(θ, θ̇) ,
+\label{eq:8.2}
+\end{equation}
+and the inverse problem is finding the joint forces and torques τ corresponding
+to the robot’s state and a desired acceleration, i.e., Equation (8.1).
+    A robot’s dynamic equations are typically derived in one of two ways: by a
+direct application of Newton’s and Euler’s dynamic equations for a rigid body
+(often called the Newton–Euler formulation) or by the Lagrangian dy-
+namics formulation derived from the kinetic and potential energy of the robot.
+
+                                        271
+272                                                                 8.1. Lagrangian Formulation
+
+The Lagrangian formalism is conceptually elegant and quite effective for robots
+with simple structures, e.g., with three or fewer degrees of freedom. The calcula-
+tions can quickly become cumbersome for robots with more degrees of freedom,
+however. For general open chains, the Newton–Euler formulation leads to effi-
+cient recursive algorithms for both the inverse and forward dynamics that can
+also be assembled into closed-form analytic expressions for, e.g., the mass matrix
+M (θ) and the other terms in the dynamics equation (8.1). The Newton–Euler
+formulation also takes advantage of tools we have already developed in this
+book.
+    In this chapter we study both the Lagrangian and Newton–Euler dynamics
+formulations for an open-chain robot. While we usually express the dynamics
+in terms of the joint space variables θ, it is sometimes convenient to express it
+in terms of the configuration, twist, and rate of change of the twist of the end-
+effector. This is the task-space dynamics, studied in Section 8.6. Sometimes
+robots are subject to a set of constraints on their motion, such as when the
+robot makes contact with a rigid environment. This leads to a formulation of
+the constrained dynamics (Section 8.7), whereby the space of joint torques and
+forces is divided into a subspace that causes motion of the robot and a subspace
+that causes forces against the constraints. The URDF file format for specifying
+robot inertial properties is described in Section 8.8. Finally, some practical
+issues that arise in the derivation of robot dynamics, such as the effect of motor
+gearing and friction, are described in Section 8.9.
+
+\section{Lagrangian Formulation}
+\subsection{Basic Concepts and Motivating Examples}
+The first step in the Lagrangian formulation of dynamics is to choose a set of
+independent coordinates q ∈ Rn that describes the system’s configuration. The
+coordinates q are called generalized coordinates. Once generalized coordi-
+nates have been chosen, these then define the generalized forces f ∈ Rn . The
+forces f and the coordinate rates q̇ are dual to each other in the sense that the
+inner product f T q̇ corresponds to power. A Lagrangian function L(q, q̇) is then
+defined as the overall system’s kinetic energy K(q, q̇) minus the potential energy
+P(q),
+                             L(q, q̇) = K(q, q̇) − P(q).
+The equations of motion can now be expressed in terms of the Lagrangian as
+follows:
+                                 d ∂L ∂L
+\begin{equation}
+f=         −    ,
+\label{eq:8.3}
+\end{equation}
+                                dt ∂ q̇   ∂q
+
+
+Chapter 8. Dynamics of Open Chains                                                                  273
+
+                                            m2
+                               L2
+                                            θ2
+                ŷ
+                                       m1                                    θ2 = π/2
+                        L1
+                             θ1                      g
+
+                                  x̂                              θ1 = 0
+
+     \begin{figure}[h]
+\centering
+\includegraphics{figure_8_1.pdf}
+\caption{(Left) A 2R open chain under gravity. (Right) At θ = (0, π/2).}
+\label{fig:8_1}
+\end{figure}
+
+These equations are also referred to as the Euler–Lagrange equations with
+external forces.1 The derivation can be found in dynamics texts.
+   We illustrate the Lagrangian dynamics formulation through two examples.
+In the first example, consider a particle of mass m constrained to move on
+a vertical line. The particle’s configuration space is this vertical line, and a
+natural choice for a generalized coordinate is the height of the particle, which
+we denote by the scalar variable x ∈ R. Suppose that the gravitational force mg
+acts downward, and an external force f is applied upward. By Newton’s second
+law, the equation of motion for the particle is
+\begin{equation}
+f − mg = mẍ.
+\label{eq:8.4}
+\end{equation}
+We now apply the Lagrangian formalism to derive the same result. The kinetic
+energy is mẋ2 /2, the potential energy is mgx, and the Lagrangian is
+                                                                 1 2
+\begin{equation}
+L(x, ẋ) = K(x, ẋ) − P(x) =               mẋ − mgx.
+\label{eq:8.5}
+\end{equation}
+                                                                 2
+The equation of motion is then given by
+                                            d ∂L ∂L
+\begin{equation}
+f=                −    = mẍ + mg,
+\label{eq:8.6}
+\end{equation}
+                                            dt ∂ ẋ   ∂x
+which matches Equation (8.4).
+    We now derive the dynamic equations for a planar 2R open chain moving
+in the presence of gravity (Figure 8.1). The chain moves in the x̂–ŷ-plane, with
+gravity g acting in the −ŷ-direction. Before the dynamics can be derived, the
+mass and inertial properties of all the links must be specified. To keep things
+simple the two links are modeled as point masses m1 and m2 concentrated at
+   1 The external force f is zero in the standard form of the Euler–Lagrange equations.
+
+
+274                                                                 8.1. Lagrangian Formulation
+
+the ends of each link. The position and velocity of the link-1 mass are then
+given by
+                                             
+                         x1           L1 cos θ1
+                               =                  ,
+                         y1           L1 sin θ1
+                                               
+                         ẋ1          −L1 sin θ1
+                               =                    θ̇1 ,
+                         ẏ1           L1 cos θ1
+while those of the link-2 mass are given by
+                                              
+      x2            L1 cos θ1 + L2 cos(θ1 + θ2 )
+             =                                     ,
+      y2            L1 sin θ1 + L2 sin(θ1 + θ2 )
+                                                                        
+      ẋ2           −L1 sin θ1 − L2 sin(θ1 + θ2 ) −L2 sin(θ1 + θ2 )      θ̇1
+             =                                                                 .
+      ẏ2            L1 cos θ1 + L2 cos(θ1 + θ2 )    L2 cos(θ1 + θ2 )    θ̇2
+We choose the joint coordinates θ = (θ1 , θ2 ) as the generalized coordinates.
+The generalized forces τ = (τ1 , τ2 ) then correspond to joint torques (since τ T θ̇
+corresponds to power). The Lagrangian L(θ, θ̇) is of the form
+                                                  2
+                                                  X
+\begin{equation}
+L(θ, θ̇) =     (Ki − Pi ),
+\label{eq:8.7}
+\end{equation}
+                                                  i=1
+
+where the link kinetic energy terms K1 and K2 are
+            1                    1
+K1    =       m1 (ẋ21 + ẏ12 ) = m1 L21 θ̇12
+            2                    2
+            1        2      2
+K2    =       m2 (ẋ2 + ẏ2 )
+            2
+            1                                                                              
+      =       m2 (L21 + 2L1 L2 cos θ2 + L22 )θ̇12 + 2(L22 + L1 L2 cos θ2 )θ̇1 θ̇2 + L22 θ̇22 ,
+            2
+and the link potential energy terms P1 and P2 are
+                   P1    = m1 gy1 = m1 gL1 sin θ1 ,
+                   P2    = m2 gy2 = m2 g(L1 sin θ1 + L2 sin(θ1 + θ2 )).
+The Euler–Lagrange equations (8.3) for this example are of the form
+                                      d ∂L       ∂L
+\begin{equation}
+τi =            −     ,        i = 1, 2.
+\label{eq:8.8}
+\end{equation}
+                                      dt ∂ θ˙i   ∂θi
+The dynamic equations for the 2R planar chain follow from explicit evaluation
+of the right-hand side of (8.8) (we omit the detailed calculations, which are
+straightforward but tedious):
+
+
+Chapter 8. Dynamics of Open Chains                                                                    275
+
+                                                                              
+       τ1   =       m1 L21 + m2 (L21 + 2L1 L2 cos θ2 + L22 ) θ̈1               
+                                                                               
+                                                                               
+                                                                               
+                                                                             2 
+              + m2 (L1 L2 cos θ2 + L2 )θ̈2 − m2 L1 L2 sin θ2 (2θ̇1 θ̇2 + θ̇2 ) 
+                                       2
+                                                                               
+                                                                               
+\begin{equation}
++ (m1 + m2 )L1 g cos θ1 + m2 gL2 cos(θ1 + θ2 ),
+\label{eq:8.9}
+\end{equation}
+                                                                               
+                                                                               
+       τ2   = m2 (L1 L2 cos θ2 + L22 )θ̈1 + m2 L22 θ̈2 + m2 L1 L2 θ̇12 sin θ2 
+                                                                               
+                                                                               
+                                                                               
+                                                                               
+              + m2 gL2 cos(θ1 + θ2 ).
+
+    We can gather terms together into an equation of the form
+\begin{equation}
+τ = M (θ)θ̈ + c(θ, θ̇) + g(θ),
+\label{eq:8.10}
+\end{equation}
+                                                |      {z     }
+                                                         h(θ,θ̇)
+
+with
+                                                                                                 
+                m1 L21 + m2 (L21 + 2L1 L2 cos θ2 + L22 ) m2 (L1 L2 cos θ2 + L22 )
+    M (θ) =                                                                                           ,
+                        m2 (L1 L2 cos θ2 + L22 )                  m2 L22
+                                                   
+                −m2 L1 L2 sin θ2 (2θ̇1 θ̇2 + θ̇22 )
+   c(θ, θ̇) =                                         ,
+                       m2 L1 L2 θ̇12 sin θ2
+                                                             
+                (m1 + m2 )L1 g cos θ1 + m2 gL2 cos(θ1 + θ2 )
+     g(θ) =                                                     ,
+                             m2 gL2 cos(θ1 + θ2 )
+
+where M (θ) is the symmetric positive-definite mass matrix, c(θ, θ̇) is the vector
+containing the Coriolis and centripetal torques, and g(θ) is the vector containing
+the gravitational torques. These reveal that the equations of motion are linear
+in θ̈, quadratic in θ̇, and trigonometric in θ. This is true in general for serial
+chains containing revolute joints, not just for the 2R robot.
+    The M (θ)θ̈ + c(θ, θ̇) terms in Equation (8.10) could have been derived by
+writing fi = mi ai for each point mass, where the accelerations ai are written
+in terms of θ, by differentiating the expressions for (ẋ1 , ẏ1 ) and (ẋ2 , ẏ2 ) given
+above:
+                                                                   
+           fx1               ẍ1                −L1 θ̇12 c1 − L1 θ̈1 s1
+\begin{equation}
+f1 =  fy1  = m1  ÿ1  = m1  −L1 θ̇12 s1 + L1 θ̈1 c1  ,
+\label{eq:8.11}
+\end{equation}
+           fz1               z̈1                           0
+                                                                                  
+               −L1 θ̇12 c1 − L2 (θ̇1 + θ̇2 )2 c12 − L1 θ̈1 s1 − L2 (θ̈1 + θ̈2 )s12
+\begin{equation}
+f2 = m2  −L1 θ̇12 s1 − L2 (θ̇1 + θ̇2 )2 s12 + L1 θ̈1 c1 + L2 (θ̈1 + θ̈2 )c12  ,
+\label{eq:8.12}
+\end{equation}
+                                                0
+
+
+276                                                                 8.1. Lagrangian Formulation
+
+where s12 indicates sin(θ1 + θ2 ), etc. Defining r11 as the vector from joint 1 to
+m1 , r12 as the vector from joint 1 to m2 , and r22 as the vector from joint 2 to
+m2 , the moments in world-aligned frames {i} attached to joints 1 and 2 can be
+expressed as m1 = r11 × f1 + r12 × f2 and m2 = r22 × f2 . (Note that joint 1
+must provide torques to move both m1 and m2 , but joint 2 only needs to provide
+torque to move m2 .) The joint torques τ1 and τ2 are just the third elements of
+m1 and m2 , i.e., the moments about the ẑi axes out of the page, respectively.
+     In (x, y) coordinates, the accelerations of the masses are written simply as
+second time-derivatives of the coordinates, e.g., (ẍ2 , ÿ2 ). This is because the
+x̂-ŷ frame is an inertial frame. The joint coordinates (θ1 , θ2 ) are not in an
+inertial frame, however, so accelerations are expressed as a sum of terms that
+are linear in the second derivatives of joint variables, θ̈, and quadratic of the
+first derivatives of joint variables, θ̇T θ̇, as seen in Equations (8.11) and (8.12).
+Quadratic terms containing θ̇i2 are called centripetal terms, and quadratic
+terms containing θ̇i θ̇j , i 6= j, are called Coriolis terms. In other words, θ̈ = 0
+does not mean zero acceleration of the masses, due to the centripetal and Coriolis
+terms.
+     To better understand the centripetal and Coriolis terms, consider the arm
+at the configuration (θ1 , θ2 ) = (0, π/2), i.e., cos θ1 = sin(θ1 + θ2 ) = 1, sin θ1 =
+cos(θ1 + θ2 ) = 0. Assuming θ̈ = 0, the acceleration (ẍ2 , ÿ2 ) of m2 from Equa-
+tion (8.12) can be written
+                                                                 
+                    ẍ2               −L1 θ̇12              0
+                            =                         +                 .
+                     ÿ2          −L2 θ̇12 − L2 θ̇22     −2L2 θ̇1 θ̇2
+                               |          {z         } |    {z        }
+                                      centripetal terms          Coriolis terms
+
+Figure 8.2 shows the centripetal acceleration acent1 = (−L1 θ̇12 , −L2 θ̇12 ) when
+θ̇2 = 0, the centripetal acceleration acent2 = (0, −L2 θ̇22 ) when θ̇1 = 0, and the
+Coriolis acceleration acor = (0, −2L2 θ̇1 θ̇2 ) when both θ̇1 and θ̇2 are positive.
+As illustrated in Figure 8.2, each centripetal acceleration acenti pulls m2 toward
+joint i to keep m2 rotating about the center of the circle defined by joint i.2
+Therefore acenti creates zero torque about joint i. The Coriolis acceleration acor
+in this example passes through joint 2, so it creates zero torque about joint 2
+but it creates negative torque about joint 1; the torque about joint 1 is negative
+because m2 gets closer to joint 1 (due to joint 2’s motion). Therefore the inertia
+due to m2 about the ẑ1 -axis is dropping, meaning that the positive momentum
+about joint 1 drops while joint 1’s speed theta ˙ 1 is constant. Therefore joint 1
+must apply a negative torque, since torque is defined as the rate of change of
+    2 Without this centripetal acceleration, and therefore centripetal force, the mass m would
+                                                                                        2
+fly off along a tangent to the circle.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  277
+
+           acent1                                                             acent1
+                                              acent2
+                                                                          acent2
+
+                                                                             acor
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_2.pdf}
+\caption{Accelerations of m2 when θ = (0, π/2) and θ̈ = 0. (Left) The centripetal}
+\label{fig:8_2}
+\end{figure}
+acceleration acent1 = (−L1 θ̇12 , −L2 θ̇12 ) of m2 when θ̇2 = 0. (Middle) The centripetal
+acceleration acent2 = (0, −L2 θ̇22 ) of m2 when θ̇1 = 0. (Right) When both joints are
+rotating with θ̇i > 0, the acceleration is the vector sum of acent1 , acent2 , and the
+Coriolis acceleration acor = (0, −2L2 θ̇1 θ̇2 ).
+
+angular momentum. Otherwise θ̇1 would increase as m2 gets closer to joint 1,
+just as a skater’s rotation speed increases as she pulls in her outstretched arms
+while doing a spin.
+
+\subsection{General Formulation}
+We now describe the Lagrangian dynamics formulation for general n-link open
+chains. The first step is to select a set of generalized coordinates θ ∈ Rn for
+the configuration space of the system. For open chains all of whose joints are
+actuated, it is convenient and always possible to choose θ to be the vector of the
+joint values. The generalized forces will be denoted τ ∈ Rn . If θi is a revolute
+joint then τi will correspond to a torque, while if θi is a prismatic joint then τi
+will correspond to a force.
+    Once θ has been chosen and the generalized forces τ identified, the next step
+is to formulate the Lagrangian L(θ, θ̇) as follows:
+\begin{equation}
+L(θ, θ̇) = K(θ, θ̇) − P(θ),
+\label{eq:8.13}
+\end{equation}
+where K(θ, θ̇) is the kinetic energy and P(θ) is the potential energy of the overall
+system. For rigid-link robots the kinetic energy can always be written in the
+form
+                                n   n
+                             1 XX                      1
+\begin{equation}
+K(θ) =             mij (θ)θ̇i θ̇j = θ̇T M (θ)θ̇,
+\label{eq:8.14}
+\end{equation}
+                             2 i=1 j=1                 2
+where mij (θ) is the (i, j)th element of the n × n mass matrix M (θ); a con-
+structive proof of this assertion is provided when we examine the Newton–Euler
+formulation.
+
+
+278                                                                     8.1. Lagrangian Formulation
+
+   The dynamic equations are analytically obtained by evaluating the right-
+hand side of
+                        d ∂L       ∂L
+\begin{equation}
+τi =           −     ,  i = 1, . . . , n.
+\label{eq:8.15}
+\end{equation}
+                        dt ∂ θ̇i   ∂θi
+With the kinetic energy expressed as in Equation (8.14), the dynamics can be
+written explicitly as
+             n
+             X                    n X
+                                  X n
+                                                                ∂P
+\begin{equation}
+τi =         mij (θ)θ̈j +             Γijk (θ)θ̇j θ̇k +       ,       i = 1, . . . , n,
+\label{eq:8.16}
+\end{equation}
+             j=1                  j=1 k=1
+                                                                ∂θi
+
+where the Γijk (θ), known as the Christoffel symbols of the first kind, are
+defined as follows:
+                                                     
+                                1 ∂mij   ∂mik    ∂mjk
+\begin{equation}
+Γijk (θ) =        +       −        .
+\label{eq:8.17}
+\end{equation}
+                                2 ∂θk     ∂θj     ∂θi
+
+This shows that the Christoffel symbols, which generate the Coriolis and cen-
+tripetal terms c(θ, θ̇), are derived from the mass matrix M (θ).
+    As we have already seen, the equations (8.16) are often gathered together in
+the form
+
+                τ = M (θ)θ̈ + c(θ, θ̇) + g(θ)            or         M (θ)θ̈ + h(θ, θ̇),
+
+where g(θ) is simply ∂P/∂θ.
+    We can see explicitly that the Coriolis and centripetal terms are quadratic
+in the velocity by using the form
+\begin{equation}
+τ = M (θ)θ̈ + θ̇T Γ(θ)θ̇ + g(θ),
+\label{eq:8.18}
+\end{equation}
+where Γ(θ) is an n×n×n matrix and the product θ̇T Γ(θ)θ̇ should be interpreted
+as follows:                          T            
+                                      θ̇ Γ1 (θ)θ̇
+                                     θ̇T Γ2 (θ)θ̇ 
+                                                  
+                       θ̇T Γ(θ)θ̇ =       ..      ,
+                                           .      
+                                                     θ̇T Γn (θ)θ̇
+where Γi (θ) is an n × n matrix with (j, k)th entry Γijk .
+  It is also common to see the dynamics written as
+
+                                  τ = M (θ)θ̈ + C(θ, θ̇)θ̇ + g(θ),
+
+
+Chapter 8. Dynamics of Open Chains                                                                  279
+
+where C(θ, θ̇) ∈ Rn×n is called the Coriolis matrix, with (i, j)th entry
+                                                    n
+                                                    X
+\begin{equation}
+cij (θ, θ̇) =         Γijk (θ)θ̇k .
+\label{eq:8.19}
+\end{equation}
+                                                    k=1
+
+The Coriolis matrix is used to prove the following passivity property (Propo-
+sition 8.1), which can be used to prove the stability of certain robot control
+laws, as we will see in Section 11.4.2.2.
+Proposition 8.1. The matrix Ṁ (θ) − 2C(θ, θ̇) ∈ Rn×n is skew symmetric,
+where M (θ) ∈ Rn×n is the mass matrix, Ṁ (θ) its time derivative, and C(θ, θ̇) ∈
+Rn×n is the Coriolis matrix as defined in Equation (8.19).
+Proof. The (i, j)th component of Ṁ − 2C is
+                                       n
+                                       X ∂mij                ∂mij       ∂mik       ∂mkj
+       ṁij (θ) − 2cij (θ, θ̇)    =                  θ̇k −        θ̇k −      θ̇k +      θ̇k
+                                              ∂θk             ∂θk        ∂θj        ∂θi
+                                       k=1
+                                       Xn
+                                             ∂mkj       ∂mik
+                                  =               θ̇k −      θ̇k .
+                                              ∂θi        ∂θj
+                                       k=1
+
+By switching the indices i and j, it can be seen that
+
+                       ṁji (θ) − 2cji (θ, θ̇) = −(ṁij (θ) − 2cij (θ, θ̇)),
+
+thus proving that (Ṁ − 2C)T = −(Ṁ − 2C) as claimed.
+
+\subsection{Understanding the Mass Matrix}
+The kinetic energy 12 θ̇T M (θ)θ̇ is a generalization of the familiar expression
+1    T
+2 mv v for a point mass. The fact that the mass matrix M (θ) is positive
+definite, meaning that θ̇T M (θ)θ̇ > 0 for all θ̇ 6= 0, is a generalization of the fact
+that the mass of a point mass is always positive, m > 0. In both cases, if the
+velocity is nonzero, the kinetic energy must be positive.
+    On the one hand, for a point mass with dynamics expressed in Cartesian
+coordinates as f = mẍ, the mass is independent of the direction of acceleration,
+and the acceleration ẍ is always “parallel” to the force, in the sense that ẍ
+is a scalar multiple of f . A mass matrix M (θ), on the other hand, presents a
+different effective mass in different acceleration directions, and θ̈ is not generally
+a scalar multiple of τ even when θ̇ = 0. To visualize the direction dependence
+of the effective mass, we can map a unit ball of joint accelerations {θ̈ | θ̈T θ̈ = 1}
+through the mass matrix M (θ) to generate a joint force–torque ellipsoid when
+
+
+280                                                                       8.1. Lagrangian Formulation
+
+           θ̈2                                                              τ2
+                                                           0.5 −0.5
+                                        M −1 (θ) =
+                                                           −0.5 1.5
+
+                         θ1 = 0◦
+                         θ2 = 90◦                           
+                                                       3 1
+                                         M (θ) =
+                                                       1 1                                      τ1
+                                  θ̈1
+
+           θ̈2
+                                                                              τ2
+
+                                                                         
+                                                            0.8  −0.11
+                                        M −1 (θ) =
+                                                           −0.11 1.01
+
+                                  θ̈1
+                                                                                                τ1
+                                                                 
+                                                      1.27    0.13
+                                        M (θ) =
+                         θ1 = 0◦                      0.13      1
+                         θ2 = 150◦
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_3.pdf}
+\caption{(Bold lines) A unit ball of accelerations in θ̈ maps through the mass}
+\label{fig:8_3}
+\end{figure}
+matrix M (θ) to a torque ellipsoid that depends on the configuration of the 2R arm.
+These torque ellipsoids may be interpreted as mass ellipsoids. The mapping is shown
+for two arm configurations: (0◦ , 90◦ ) and (0◦ , 150◦ ). (Dotted lines) A unit ball in τ
+maps through M −1 (θ) to an acceleration ellipsoid.
+
+the mechanism is at rest (θ̇ = 0). An example is shown in Figure 8.3 for
+the 2R arm of Figure 8.1, with L1 = L2 = m1 = m2 = 1, at two different
+joint configurations: (θ1 , θ2 ) = (0◦ , 90◦ ) and (θ1 , θ2 ) = (0◦ , 150◦ ). The torque
+ellipsoid can be interpreted as a direction-dependent mass ellipsoid: the same
+joint acceleration magnitude kθ̈k requires different joint torque magnitudes kτ k
+depending on the acceleration direction. The directions of the principal axes
+of the mass ellipsoid are given by the eigenvectors vi of M (θ) and the lengths
+of the principal semi-axes are given by the corresponding eigenvalues λi . The
+acceleration θ̈ is only a scalar multiple of τ when τ is along a principal axis of
+the ellipsoid.
+    It is easier to visualize the mass matrix if it is represented as an effective mass
+
+
+Chapter 8. Dynamics of Open Chains                                                                  281
+
+of the end-effector, since it is possible to feel this mass directly by grabbing and
+moving the end-effector. If you grabbed the endpoint of the 2R robot, depending
+on the direction you applied force to it, how massy would it feel? Let us denote
+the effective mass matrix at the end-effector as Λ(θ), and the velocity of the
+end-effector as V = (ẋ, ẏ). We know that the kinetic energy of the robot must
+be the same regardless of the coordinates we use, so
+                                   1 T           1
+\begin{equation}
+θ̇ M (θ)θ̇ = V T Λ(θ)V.
+\label{eq:8.20}
+\end{equation}
+                                   2             2
+\begin{equation}
+Assuming the Jacobian J(θ) satisfying V = J(θ)θ̇ is invertible, Equation
+\label{eq:8.20}
+\end{equation}
+can be rewritten as follows:
+
+                                 V T ΛV = (J −1 V )T M (J −1 V )
+                                           = V T (J −T M J −1 )V.
+
+In other words, the end-effector mass matrix is
+\begin{equation}
+Λ(θ) = J −T (θ)M (θ)J −1 (θ).
+\label{eq:8.21}
+\end{equation}
+Figure 8.4 shows the end-effector mass ellipsoids, with principal-axis directions
+given by the eigenvectors of Λ(θ) and principal semi-axis lengths given by its
+eigenvalues, for the same two 2R robot configurations as in Figure 8.3. The
+endpoint acceleration (ẍ, ÿ) is a scalar multiple of the force (fx , fy ) applied at
+the endpoint only if the force is along a principal axis of the ellipsoid. Unless
+Λ(θ) is of the form cI, where c > 0 is a scalar and I is the identity matrix, the
+mass at the endpoint feels different from a point mass.
+    The change in apparent endpoint mass as a function of the configuration of
+the robot is an issue for robots used as haptic displays. One way to reduce the
+sensation of a changing mass to the user is to make the mass of the links as
+small as possible.
+    Note that the ellipsoidal interpretations of the relationship between forces
+and accelerations defined here are only relevant at zero velocity, where there are
+no Coriolis or centripetal terms.
+
+\subsection{Lagrangian Dynamics vs. Newton–Euler Dynamics}
+In the rest of this chapter, we focus on the Newton–Euler recursive method
+for calculating robot dynamics. Using the tools we have developed so far, the
+Newton–Euler formulation allows computationally efficient computer implemen-
+tation, particularly for robots with many degrees of freedom, without the need
+
+
+282                                                                            8.1. Lagrangian Formulation
+
+                                                                                   fy
+              ÿ
+                                                                          
+                                                                  1 0
+                                       Λ−1 (θ) =
+                                                                  0 0.5
+
+                                                                                               fx
+                                                                  
+                                                          1       0
+                                ẍ     Λ(θ) =
+                                                          0       2                        θ1 = 0◦
+                                                                                           θ2 = 90◦
+
+              ÿ
+                                                                                   fy      θ1 = 0◦
+                                                                      
+                               Λ(θ) =
+                                       4    −1.73                                          θ2 = 150◦
+                                      −1.73   2
+                                                                                               fx
+                                ẍ
+                                                              
+                                                0.4       0.35
+                               Λ−1 (θ) =
+                                               0.35        0.8
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_4.pdf}
+\caption{(Bold lines) A unit ball of accelerations in (ẍ, ÿ) maps through the}
+\label{fig:8_4}
+\end{figure}
+end-effector mass matrix Λ(θ) to an end-effector force ellipsoid that depends on the
+configuration of the 2R arm. For the configuration (θ1 , θ2 ) = (0◦ , 90◦ ), a force in the
+fy -direction exactly feels both masses m1 and m2 , while a force in the fx -direction
+feels only m2 . (Dotted lines) A unit ball in f maps through Λ−1 (θ) to an acceleration
+ellipsoid. The × symbols for (θ1 , θ2 ) = (0◦ , 150◦ ) indicate an example endpoint force
+(fx , fy ) = (1, 0) and its corresponding acceleration (ẍ, ÿ) = (0.4, 0.35), showing that
+the force and acceleration at the endpoint are not aligned.
+
+for differentiation. The resulting equations of motion are, and must be, identical
+with those derived using the energy-based Lagrangian method.
+    The Newton–Euler method builds on the dynamics of a single rigid body, so
+we begin there.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  283
+
+\section{Dynamics of a Single Rigid Body}
+\subsection{Classical Formulation}
+Consider a rigid body consisting of a number of rigidly connected   P point masses,
+where point mass i has mass mi and the total mass is m = i mi . Let ri =
+(xi , yi , zi ) be the fixed location of mass i in a body frame {b}, where the origin
+of this frame is the unique point such that
+                                        X
+                                           mi ri = 0.
+                                             i
+
+This point is known as the center of mass. If some other point happens to
+be inconveniently chosen as thePorigin, then the frame {b} should be moved
+to the center of mass at (1/m) i mi ri (in the inconvenient frame) and the ri
+recalculated in the center-of-mass frame.
+    Now assume that the body is moving with a body twist Vb = (ωb , vb ), and
+let pi (t) be the time-varying position of mi , initially located at ri , in the inertial
+frame {b}. Then
+
+                          ṗi = vb + ωb × pi ,
+                                       d                  d
+                          p̈i = v̇b + ωb × pi + ωb × pi
+                                      dt                 dt
+                              = v̇b + ω̇b × pi + ωb × (vb + ωb × pi ).
+
+Substituting ri for pi on the right-hand side and using our skew-symmetric
+notation (see Equation (3.30)), we get
+
+                              p̈i = v̇b + [ω̇b ]ri + [ωb ]vb + [ωb ]2 ri .
+
+Taking as a given that fi = mi p̈i for a point mass, the force acting on mi is
+
+                           fi = mi (v̇b + [ω̇b ]ri + [ωb ]vb + [ωb ]2 ri ),
+
+which implies a moment
+                                            mi = [ri ]fi .
+The total force and moment acting on the body is expressed as the wrench Fb :
+                                       P            
+                                  mb             m
+                          Fb =          = Pi i .
+                                  fb            i fi
+                                                                       P
+   To simplify Pthe expressions for fb and mb , keep in mind that i mi ri = 0
+(and therefore i mi [ri ] = 0) and, for a, b ∈ R3 , [a] = −[a]T , [a]b = −[b]a, and
+
+
+284                                                           8.2. Dynamics of a Single Rigid Body
+
+[a][b] = ([b][a])T . Focusing on the linear dynamics,
+                    X
+              fb =     mi (v̇b + [ω̇b ]ri + [ωb ]vb + [ωb ]2 ri )
+                        i
+
+                      X                               X        *0 X               :0
+                  =         mi (v̇b + [ωb ]vb ) −          i i b+
+                                                            [r ]ω̇     i [r
+                                                                          i ][ωb ]ωb
+                                                                                    
+                                                          m          m
+                                                                                
+                                                                     
+                        i                             i          i
+                      X
+                  =         mi (v̇b + [ωb ]vb )
+                        i
+\begin{equation}
+= m(v̇b + [ωb ]vb ).
+\label{eq:8.22}
+\end{equation}
+The velocity product term m[ωb ]vb arises from the fact that, for ωb 6= 0, a
+constant vb 6= 0 corresponds to a changing linear velocity in an inertial frame.
+   Now focusing on the rotational dynamics,
+                       X
+             mb =         mi [ri ](v̇b + [ω̇b ]ri + [ωb ]vb + [ωb ]2 ri )
+                               i
+
+                              X       *0 X
+                                                                 :0
+                        =        i i b+
+                                m[r ]v̇           m i [ri ][ωb ]vb
+                                                                 
+                                   
+                                                         
+                             i X
+                                            i
+                             +    mi [ri ]([ω̇b ]ri + [ωb ]2 ri )
+                                   i
+                              X                                               
+                        =           mi −[ri ]2 ω̇b − [ri ]T [ωb ]T [ri ]ωb
+                               i
+                              X                                       
+                        =           mi −[ri ]2 ω̇b − [ωb ][ri ]2 ωb
+                               i
+                                                      !                                  !
+                                    X                                     X
+                                                  2                                  2
+                        =       −          mi [ri ]       ω̇b + [ωb ] −       mi [ri ]       ωb
+                                       i                                  i
+\begin{equation}
+= Ib ω̇b + [ωb ]Ib ωb ,
+\label{eq:8.23}
+\end{equation}
+                    P
+where Ib = − i mi [ri ]2 ∈ R3×3 is the body’s rotational inertia matrix.
+Equation (8.23) is known as Euler’s equation for a rotating rigid body.
+    In Equation (8.23), note the presence of a term linear in the angular accel-
+eration, Ib ω̇b , and a term quadratic in the angular velocities, [ωb ]Ib ωb , just as
+we saw for the mechanisms in Section 8.1. Also, Ib is symmetric and positive
+definite, just like the mass matrix for a mechanism, and the rotational kinetic
+energy is given by the quadratic
+                                                      1 T
+                                              K=       ω I b ωb .
+                                                      2 b
+
+
+Chapter 8. Dynamics of Open Chains                                                                  285
+
+One difference is that Ib is constant whereas the mass matrix M (θ) changes
+with the configuration of the mechanism.
+   Writing out the individual entries of Ib , we get
+                  P        2    2
+                                         P               P              
+                        i (yi + zi ) P
+                       mP              − mi xi yi      − P mi xi zi
+        Ib =  − P mi xi yi                   2   2
+                                         i (xi + zi ) P−
+                                        mP                  mi yi zi 
+                     − mi xi zi        − mi yi zi       mi (x2i + yi2 )
+                                    
+                    Ixx Ixy Ixz
+             =  Ixy Iyy Iyz  .
+                    Ixz Iyz Izz
+
+The summations can be replaced by volume integrals over the body B, using the
+differential volume element dV , with the point masses mi replaced by a mass
+density function ρ(x, y, z):
+                                Z                            
+                       Ixx =       (y 2 + z 2 )ρ(x, y, z) dV 
+                                                             
+                                                             
+                                 B                           
+                                                             
+                                Z                            
+                                                             
+                                                             
+                                                             
+                       Iyy =       (x + z )ρ(x, y, z) dV 
+                                      2     2
+                                                             
+                                                             
+                                 B
+                                                             
+                                                             
+                                Z                            
+                                                             
+                                                             
+                                                             
+                       Izz =       (x + y )ρ(x, y, z) dV 
+                                      2     2                
+                                                             
+                                 B
+\begin{equation}
+Z
+\label{eq:8.24}
+\end{equation}
+                                                             
+                                                             
+                       Ixy = − xyρ(x, y, z) dV               
+                                                             
+                                                             
+                                                             
+                                  ZB                         
+                                                             
+                                                             
+                                                             
+                       Ixz = − xzρ(x, y, z) dV               
+                                                             
+                                                             
+                                                             
+                                    B                        
+                                                             
+                                  Z                          
+                                                             
+                                                             
+                                                             
+                       Iyz = − yzρ(x, y, z) dV.              
+                                              B
+
+If the body has uniform density, Ib is determined exclusively by the shape of
+the rigid body (see Figure 8.5).
+    Given an inertia matrix Ib , the principal axes of inertia are given by
+the eigenvectors and eigenvalues of Ib . Let v1 , v2 , v3 be the eigenvectors of
+Ib and λ1 , λ2 , λ3 be the corresponding eigenvalues. Then the principal axes
+of inertia are in the directions of v1 , v2 , v3 , and the scalar moments of inertia
+about these axes, the principal moments of inertia, are λ1 , λ2 , λ3 > 0. One
+principal axis maximizes the moment of inertia among all axes passing through
+the center of mass, and another minimizes the moment of inertia. For bodies
+with symmetry, often the principal axes of inertia are apparent. They may not
+be unique; for a uniform-density solid sphere, for example, any three orthogonal
+axes intersecting at the center of mass constitute a set of principal axes, and
+
+
+286                                                          8.2. Dynamics of a Single Rigid Body
+
+                    ẑ                                  ẑ                               ẑ
+
+                                   h                                                c
+                                           h       r
+                              ŷ                                     ŷ       x̂     a        b     ŷ
+            x̂                                     x̂
+              w
+  rectangular parallelepiped:               circular cylinder:                  ellipsoid:
+        volume = abc,                       volume = πr2 h,                volume = 4πabc/3,
+    Ixx = m(w2 + h2 )/12,                Ixx = m(3r2 + h2 )/12,            Ixx = m(b2 + c2 )/5,
+     Iyy = m(`2 + h2 )/12,               Iyy = m(3r2 + h2 )/12,            Iyy = m(a2 + c2 )/5,
+     Izz = m(`2 + w2 )/12                      Izz = mr2 /2                Izz = m(a2 + b2 )/5
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_5.pdf}
+\caption{The principal axes and the inertia about the principal axes for uniform-}
+\label{fig:8_5}
+\end{figure}
+density bodies of mass m. Note that the x̂ and ŷ principal axes of the cylinder are not
+unique.
+
+the minimum principal moment of inertia is equal to the maximum principal
+moment of inertia.
+    If the principal axes of inertia are aligned with the axes of {b}, the off-
+diagonal terms of Ib are all zero, and the eigenvalues are the scalar moments of
+inertia Ixx , Iyy , and Izz about the x̂-, ŷ-, and ẑ-axes, respectively. In this case,
+the equations of motion (8.23) simplify to
+                                                              
+                                Ixx ω̇x + (Izz − Iyy )ωy ωz
+\begin{equation}
+mb =  Iyy ω̇y + (Ixx − Izz )ωx ωz  ,
+\label{eq:8.25}
+\end{equation}
+                                Izz ω̇z + (Iyy − Ixx )ωx ωy
+
+where ωb = (ωx , ωy , ωz ). When possible, we choose the axes of {b} to be aligned
+with the principal axes of inertia, in order to reduce the number of nonzero
+entries in Ib and to simplify the equations of motion.
+    Examples of common uniform-density solid bodies, their principal axes of
+inertia, and the principal moments of inertia obtained by solving the inte-
+grals (8.24), are given in Figure 8.5.
+    An inertia matrix Ib can be expressed in a rotated frame {c} described by
+the rotation matrix Rbc . Denoting this inertia matrix as Ic , and knowing that
+the kinetic energy of the rotating body is independent of the chosen frame, we
+
+
+Chapter 8. Dynamics of Open Chains                                                                  287
+
+have
+                            1 T                  1 T
+                             ω Ic ωc       =       ω I b ωb
+                            2 c                  2 b
+                                                 1
+                                           =       (Rbc ωc )T Ib (Rbc ωc )
+                                                 2
+                                                 1 T T
+                                           =       ω (R Ib Rbc )ωc .
+                                                 2 c bc
+In other words,
+                                                T
+\begin{equation}
+Ic = Rbc Ib Rbc .
+\label{eq:8.26}
+\end{equation}
+If the axes of {b} are not aligned with the principal axes of inertia then we can
+diagonalize the inertia matrix by expressing it instead in the rotated frame {c},
+where the columns of Rbc correspond to the eigenvalues of Ib .
+    Sometimes it is convenient to represent the inertia matrix in a frame at a
+point not at the center of mass of the body, for example at a joint. Steiner’s
+theorem can be stated as follows.
+Theorem 8.2. The inertia matrix Iq about a frame aligned with {b}, but at a
+point q = (qx , qy , qz ) in {b}, is related to the inertia matrix Ib calculated at the
+center of mass by
+\begin{equation}
+Iq = Ib + m(q T qI − qq T ),
+\label{eq:8.27}
+\end{equation}
+where I is the 3 × 3 identity matrix and m is the mass of the body.
+    Steiner’s theorem is a more general statement of the parallel-axis theorem,
+which states that the scalar inertia Id about an axis parallel to, but a distance
+d from, an axis through the center of mass is related to the scalar inertia Icm
+about the axis through the center of mass by
+\begin{equation}
+Id = Icm + md2 .
+\label{eq:8.28}
+\end{equation}
+    Equations (8.26) and (8.27) are useful for calculating the inertia of a rigid
+body consisting of component rigid bodies. First we calculate the inertia matri-
+ces of the n component bodies in terms of frames at their individual centers of
+mass. Then we choose a common frame {common} (e.g., at the center of mass
+of the composite rigid body) and use Equations (8.26) and (8.27) to express each
+inertia matrix in this common frame. Once the individual inertia matrices are
+expressed in {common}, they can be summed to get the inertia matrix Icommon
+for the composite rigid body.
+    In the case of motion confined to the x̂–ŷ-plane, where ωb = (0, 0, ωz ) and
+the inertia of the body about the ẑ-axis through the center of mass is given
+
+
+288                                                      8.2. Dynamics of a Single Rigid Body
+
+by the scalar Izz , the spatial rotational dynamics (8.23) reduces to the planar
+rotational dynamics
+                                   mz = Izz ω̇z ,
+and the rotational kinetic energy is
+                                                  1
+                                           K=       Izz ωz2 .
+                                                  2
+
+\subsection{Twist–Wrench Formulation}
+The linear dynamics (8.22) and the rotational dynamics (8.23) can be written
+in the following combined form:
+                                                       
+     mb         Ib 0        ω̇b     [ωb ]  0       Ib 0        ωb
+\begin{equation}
+=                    +                                  ,
+\label{eq:8.29}
+\end{equation}
+      fb         0 mI       v̇b       0   [ωb ]    0 mI        vb
+where I is the 3 × 3 identity matrix. With the benefit of hindsight, and also
+making use of the fact that [v]v = v × v = 0 and [v]T = −[v], we can write
+Equation (8.29) in the following equivalent form:
+                                                       
+   mb         Ib 0          ω̇b      [ωb ] [vb ]     Ib 0      ωb
+          =                      +
+    fb         0 mI         v̇b       0    [ωb ]      0 mI     vb
+                                            T              
+              Ib 0          ω̇b      [ωb ]   0         Ib 0     ωb
+\begin{equation}
+=                      −                                    .
+\label{eq:8.30}
+\end{equation}
+               0 mI         v̇b      [vb ] [ωb ]       0 mI     vb
+    Written this way, each term can now be identified with six-dimensional spa-
+tial quantities as follows:
+  (a) The vectors (ωb , vb ) and (mb , fb ) can be respectively identified with the
+      body twist Vb and body wrench Fb ,
+                                                         
+                                   ωb                   mb
+\begin{equation}
+Vb =           ,    Fb =          .
+\label{eq:8.31}
+\end{equation}
+                                   vb                   fb
+
+  (b) The spatial inertia matrix Gb ∈ R6×6 is defined as
+                                             
+                                      Ib 0
+\begin{equation}
+Gb =              .
+\label{eq:8.32}
+\end{equation}
+                                      0 mI
+       As an aside, the kinetic energy of the rigid body can be expressed in terms
+       of the spatial inertia matrix as
+                                          1 T       1         1
+\begin{equation}
+kinetic energy =        ω Ib ωb + mvbT vb = VbT Gb Vb .
+\label{eq:8.33}
+\end{equation}
+                                          2 b       2         2
+
+
+Chapter 8. Dynamics of Open Chains                                                                  289
+
+  (c) The spatial momentum Pb ∈ R6 is defined as
+                                             
+                         Ib ωb     Ib 0        ωb
+\begin{equation}
+Pb =          =                   = Gb Vb .
+\label{eq:8.34}
+\end{equation}
+                         mvb       0 mI        vb
+
+   Observe that the term involving Pb in Equation (8.30) is left-multiplied by
+the matrix                                  T
+                                 [ωb ]  0
+\begin{equation}
+−                   .
+\label{eq:8.35}
+\end{equation}
+                                 [vb ] [ωb ]
+We now explain the origin and geometric significance of this matrix. First, recall
+that the cross product of two vectors ω1 , ω2 ∈ R3 can be calculated, using the
+skew-symmetric matrix notation, as follows:
+\begin{equation}
+[ω1 × ω2 ] = [ω1 ][ω2 ] − [ω2 ][ω1 ].
+\label{eq:8.36}
+\end{equation}
+The matrix in (8.35) can be thought of as a generalization of the cross-product
+operation to six-dimensional twists. Specifically, given two twists V1 = (ω1 , v1 )
+and V2 = (ω2 , v2 ), we perform a calculation analogous to (8.36):
+                                                                             
+                            [ω1 ] v1        [ω2 ] v2          [ω2 ] v2     [ω1 ] v1
+[V1 ][V2 ] − [V2 ][V1 ] =                                −
+                             0      0          0    0           0     0     0    0
+                                                                     
+                            [ω1 ][ω2 ] − [ω2 ][ω1 ] [ω1 ]v2 − [ω2 ]v1
+                        =
+                                       0                    0
+                           0        0
+                                       
+                            [ω ] v
+                        =                ,
+                             0     0
+which can be written more compactly in vector form as
+                       0                      
+                        ω       [ω1 ]   0       ω2
+                            =                        .
+                        v0      [v1 ] [ω1 ]     v2
+This generalization of the cross product to two twists V1 and V2 is called the
+Lie bracket of V1 and V2 .
+Definition 8.3. Given two twists V1 = (ω1 , v1 ) and V2 = (ω2 , v2 ), the Lie
+bracket of V1 and V2 , written either as [adV1 ]V2 or adV1 (V2 ), is defined as
+follows:                      
+               [ω1 ]  0       ω2
+\begin{equation}
+= [adV1 ]V2 = adV1 (V2 ) ∈ R6 ,
+\label{eq:8.37}
+\end{equation}
+               [v1 ] [ω1 ]    v2
+where                                                      
+                                                [ω]    0
+\begin{equation}
+[adV ] =                       ∈ R6×6 .
+\label{eq:8.38}
+\end{equation}
+                                                [v]   [ω]
+
+
+290                                                      8.2. Dynamics of a Single Rigid Body
+
+Definition 8.4. Given a twist V = (ω, v) and a wrench F = (m, f ), define the
+mapping
+                                  T                        
+     T             T      [ω] 0          m        −[ω]m − [v]f
+\begin{equation}
+adV (F) = [adV ] F =                       =                   .
+\label{eq:8.39}
+\end{equation}
+                          [v] [ω]        f           −[ω]f
+    Using the notation and definitions above, the dynamic equations for a single
+rigid body can now be written as
+
+                                 Fb    = Gb V̇b − adT
+                                                    Vb (Pb )
+\begin{equation}
+= Gb V̇b − [adVb ]T Gb Vb .
+\label{eq:8.40}
+\end{equation}
+Note the analogy between Equation (8.40) and the moment equation for a ro-
+tating rigid body:
+\begin{equation}
+mb = Ib ω̇b − [ωb ]T Ib ωb .
+\label{eq:8.41}
+\end{equation}
+Equation (8.41) is simply the rotational component of (8.40).
+
+\subsection{Dynamics in Other Frames}
+The derivation of the dynamic equations (8.40) relies on the use of a center-of-
+mass frame {b}. It is straightforward to express the dynamics in other frames,
+however. Let’s call one such frame {a}.
+    Since the kinetic energy of the rigid body must be independent of the frame
+of representation,
+                          1 T       1
+                           V Ga Va = VbT Gb Vb
+                          2 a       2
+                                    1
+                                   = ([AdTba ]Va )T Gb [AdTba ]Va
+                                    2
+                                    1
+                                   = VaT [AdTba ]T Gb [AdTba ] Va ;
+                                    2    |        {z        }
+                                                            Ga
+
+for the adjoint representation Ad (see Definition 3.20). In other words, the
+spatial inertia matrix Ga in {a} is related to Gb by
+\begin{equation}
+Ga = [AdTba ]T Gb [AdTba ].
+\label{eq:8.42}
+\end{equation}
+This is a generalization of Steiner’s theorem.
+   Using the spatial inertia matrix Ga , the equations of motion (8.40) in the
+{b} frame can be expressed equivalently in the {a} frame as
+\begin{equation}
+Fa = Ga V̇a − [adVa ]T Ga Va ,
+\label{eq:8.43}
+\end{equation}
+Chapter 8. Dynamics of Open Chains                                                                  291
+
+where Fa and Va are the wrench and twist written in the {a} frame. (See
+Exercise 8.3.) Thus the form of the equations of motion is independent of the
+frame of representation.
+
+\section{Newton–Euler Inverse Dynamics}
+We now consider the inverse dynamics problem for an n-link open chain con-
+nected by one-dof joints. Given the joint positions θ ∈ Rn , velocities θ̇ ∈ Rn ,
+and accelerations θ̈ ∈ Rn , the objective is to calculate the right-hand side of the
+dynamics equation
+                               τ = M (θ)θ̈ + h(θ, θ̇).
+The main result is a recursive inverse dynamics algorithm consisting of a forward
+and a backward iteration stage. In the former, the positions, velocities, and
+accelerations of each link are propagated from the base to the tip while in
+the backward iterations the forces and moments experienced by each link are
+propagated from the tip to the base.
+
+\subsection{Derivation}
+A body-fixed reference frame {i} is attached to the center of mass of each link
+i, i = 1, . . . , n. The base frame is denoted {0}, and a frame at the end-effector
+is denoted {n + 1}. This frame is fixed in {n}.
+     When the manipulator is at the home position, with all joint variables zero,
+we denote the configuration of frame {j} in {i} as Mi,j ∈ SE(3), and the
+configuration of {i} in the base frame {0} using the shorthand Mi = M0,i .
+With these definitions, Mi−1,i and Mi,i−1 can be calculated as
+                            −1
+                  Mi−1,i = Mi−1 Mi              and        Mi,i−1 = Mi−1 Mi−1 .
+
+    The screw axis for joint i, expressed in the link frame {i}, is Ai . This same
+screw axis is expressed in the space frame {0} as Si , where the two are related
+by
+                                 Ai = AdM −1 (Si ).
+                                                      i
+
+Defining Ti,j ∈ SE(3) to be the configuration of frame {j} in {i} for arbitrary
+joint variables θ then Ti−1,i (θi ), the configuration of {i} relative to {i − 1} given
+                                            −1
+the joint variable θi , and Ti,i−1 (θi ) = Ti−1,i (θi ) are calculated as
+
+         Ti−1,i (θi ) = Mi−1,i e[Ai ]θi         and        Ti,i−1 (θi ) = e−[Ai ]θi Mi,i−1 .
+
+    We further adopt the following notation:
+
+
+292                                                       8.3. Newton–Euler Inverse Dynamics
+
+  (a) The twist of link frame {i}, expressed in frame-{i} coordinates, is denoted
+      Vi = (ωi , vi ).
+  (b) The wrench transmitted through joint i to link frame {i}, expressed in
+      frame-{i} coordinates, is denoted Fi = (mi , fi ).
+  (c) Let Gi ∈ R6×6 denote the spatial inertia matrix of link i, expressed relative
+      to link frame {i}. Since we are assuming that all link frames are situated
+      at the link center of mass, Gi has the block-diagonal form
+                                                  
+                                          Ii   0
+\begin{equation}
+Gi =               ,
+\label{eq:8.44}
+\end{equation}
+                                          0 mi I
+       where Ii denotes the 3 × 3 rotational inertia matrix of link i and mi is the
+       link mass.
+    With these definitions, we can recursively calculate the twist and acceleration
+of each link, moving from the base to the tip. The twist Vi of link i is the sum
+of the twist of link i − 1, but expressed in {i}, and the added twist due to the
+joint rate θ̇i :
+\begin{equation}
+Vi = Ai θ˙i + [AdTi,i−1 ]Vi−1 .
+\label{eq:8.45}
+\end{equation}
+    The accelerations V̇i can also be found recursively. Taking the time derivative
+of Equation (8.45), we get
+                                              d             
+                                                 [AdTi,i−1 ] Vi−1 .
+\begin{equation}
+V̇i = Ai θ̈i + [AdTi,i−1 ]V̇i−1 +
+\label{eq:8.46}
+\end{equation}
+                                              dt
+To calculate the final term in this equation, we express Ti,i−1 and Ai as
+                                                             
+                           Ri,i−1 p                           ω
+               Ti,i−1 =                     and     Ai =          .
+                             0      1                         v
+Then
+                                                       
+  d                     d          Ri,i−1         0
+     [AdTi,i−1 ] Vi−1 =                                     Vi−1
+  dt                    dt       [p]Ri,i−1 Ri,i−1
+                                                                              
+                                      −[ω θ̇i ]Ri,i−1                 0
+                      =                                                          Vi−1
+                           −[v θ̇i ]Ri,i−1 − [ω θ̇i ][p]Ri,i−1 −[ω θ̇i ]Ri,i−1
+                                                                      
+                           −[ω θ̇i ]      0            Ri,i−1     0
+                      =                                                    Vi−1
+                           −[v θ̇i ] −[ω θ̇i ]        [p]Ri,i−1 Ri,i−1
+                        |            {z          }|           {z         }
+                                        −[adA θ̇ ]                  [AdTi,i−1 ]
+                                                 i i
+
+                             = −[adAi θ̇i ]Vi
+                             = [adVi ]Ai θ̇i .
+
+
+Chapter 8. Dynamics of Open Chains                                                                  293
+
+                    joint
+                    axis i              V̇i
+                                                              Vi
+
+                                                 {i}
+
+              Fi
+                                                                    − AdTTi+1,i (Fi+1 )
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_6.pdf}
+\caption{Free-body diagram illustrating the moments and forces exerted on link}
+\label{fig:8_6}
+\end{figure}
+i.
+
+Substituting this result into Equation (8.46), we get
+\begin{equation}
+V̇i = Ai θ̈i + [AdTi,i−1 ]V̇i−1 + [adVi ]Ai θ̇i ,
+\label{eq:8.47}
+\end{equation}
+i.e., the acceleration of link i is the sum of three components: a component due
+to the joint acceleration θ̈i , a component due to the acceleration of link i − 1
+expressed in {i}, and a velocity-product component.
+     Once we have determined all the link twists and accelerations moving out-
+ward from the base, we can calculate the joint torques or forces by moving
+inward from the tip. The rigid-body dynamics (8.40) tells us the total wrench
+that acts on link i given Vi and V̇i . Furthermore, the total wrench acting on
+link i is the sum of the wrench Fi transmitted through joint i and the wrench
+applied to the link through joint i + 1 (or, for link n, the wrench applied to the
+link by the environment at the end-effector frame {n + 1}), expressed in the
+frame i. Therefore, we have the equality
+
+                         Gi V̇i − adT                    T
+\begin{equation}
+Vi (Gi Vi ) = Fi − AdTi+1,i (Fi+1 );
+\label{eq:8.48}
+\end{equation}
+see Figure 8.6. Solving from the tip toward the base, at each link i we solve
+for the only unknown in Equation (8.48): Fi . Since joint i has only one degree
+of freedom, five dimensions of the six-vector Fi are provided “for free” by the
+structure of the joint, and the actuator only has to provide the scalar force or
+torque in the direction of the joint’s screw axis:
+\begin{equation}
+τi = FiT Ai .
+\label{eq:8.49}
+\end{equation}
+Equation (8.49) provides the torques required at each joint, solving the inverse
+dynamics problem.
+
+
+294                                                    8.4. Dynamic Equations in Closed Form
+
+\subsection{Newton-Euler Inverse Dynamics Algorithm}
+Initialization Attach a frame {0} to the base, frames {1} to {n} to the centers
+of mass of links {1} to {n}, and a frame {n + 1} at the end-effector, fixed in the
+frame {n}. Define Mi,i−1 to be the configuration of {i − 1} in {i} when θi = 0.
+Let Ai be the screw axis of joint i expressed in {i}, and Gi be the 6 × 6 spatial
+inertia matrix of link i. Define V0 to be the twist of the base frame {0} expressed
+in {0} coordinates. (This quantity is typically zero.) Let g ∈ R3 be the gravity
+vector expressed in base-frame coordinates, and define V̇0 = (ω̇0 , v̇0 ) = (0, −g).
+(Gravity is treated as an acceleration of the base in the opposite direction.)
+Define Fn+1 = Ftip = (mtip , ftip ) to be the wrench applied to the environment
+by the end-effector, expressed in the end-effector frame {n + 1}.
+
+Forward iterations Given θ, θ̇, θ̈, for i = 1 to n do
+\begin{equation}
+Ti,i−1      = e−[Ai ]θi Mi,i−1 ,
+\label{eq:8.50}
+\end{equation}
+\begin{equation}
+Vi     =     AdTi,i−1 (Vi−1 ) + Ai θ̇i ,
+\label{eq:8.51}
+\end{equation}
+\begin{equation}
+V̇i    =     AdTi,i−1 (V̇i−1 ) + adVi (Ai )θ̇i + Ai θ̈i .
+\label{eq:8.52}
+\end{equation}
+Backward iterations For i = n to 1 do
+
+                      Fi       =    AdT                           T
+\begin{equation}
+Ti+1,i (Fi+1 ) + Gi V̇i − adVi (Gi Vi ),
+\label{eq:8.53}
+\end{equation}
+\begin{equation}
+τi      = FiT Ai .
+\label{eq:8.54}
+\end{equation}
+\section{Dynamic Equations in Closed Form}
+In this section we show how the equations in the recursive inverse dynamics
+algorithm can be organized into a closed-form set of dynamics equations τ =
+M (θ)θ̈ + c(θ, θ̇) + g(θ).
+   Before doing so, we prove our earlier assertion that the total kinetic energy
+K of the robot can be expressed as K = 21 θ̇T M (θ)θ̇. We do so by noting that K
+can be expressed as the sum of the kinetic energies of each link:
+                                                   n
+                                               1X T
+\begin{equation}
+K=         V Gi Vi ,
+\label{eq:8.55}
+\end{equation}
+                                               2 i=1 i
+
+where Vi is the twist of link frame {i} and Gi is the spatial inertia matrix
+of link i as defined by Equation (8.32) (both are expressed in link-frame-{i}
+coordinates). Let T0i (θ1 , . . . , θi ) denote the forward kinematics from the base
+
+
+Chapter 8. Dynamics of Open Chains                                                                  295
+
+frame {0} to link frame {i}, and let Jib (θ) denote the body Jacobian obtained
+        −1
+from T0i   Ṫ0i . Note that Jib as defined is a 6 × i matrix; we turn it into a 6 × n
+matrix by filling in all entries of the last n − i columns with zeros. With this
+definition of Jib , we can write
+
+                                Vi = Jib (θ)θ̇,          i = 1, . . . , n.
+
+The kinetic energy can then be written
+                                             n
+                                                                      !
+                                 1           X
+                              K = θ̇T                T
+\begin{equation}
+Jib (θ)Gi Jib (θ)     θ̇.
+\label{eq:8.56}
+\end{equation}
+                                 2            i=1
+
+The term inside the parentheses is precisely the mass matrix M (θ):
+                                              n
+                                              X
+                                                     T
+\begin{equation}
+M (θ) =           Jib (θ)Gi Jib (θ).
+\label{eq:8.57}
+\end{equation}
+                                              i=1
+
+   We now return to the original task of deriving a closed-form set of dynamic
+equations. We start by defining the following stacked vectors:
+                                         
+                                       V1
+                                         
+\begin{equation}
+V =  ...  ∈ R6n ,
+\label{eq:8.58}
+\end{equation}
+                                                    Vn
+                                                 
+                                              F1
+                                                 
+\begin{equation}
+F     =  ...  ∈ R6n .
+\label{eq:8.59}
+\end{equation}
+                                                    Fn
+
+
+296                                                   8.4. Dynamic Equations in Closed Form
+
+Further, define the following matrices:
+                                                      
+                       A1 0 · · · 0
+                    0 A2 · · · 0                      
+                                                      
+\begin{equation}
+A =  .           .. ..     ..               ∈ R6n×n ,
+\label{eq:8.60}
+\end{equation}
+                    ..       .    .    .              
+                              0    ···    ···    An
+                                                     
+                       G1          0     ···     0
+                      0           G2    ···     0    
+                                                     
+\begin{equation}
+G    =  .            ..   ..      ..    ∈ R6n×6n ,
+\label{eq:8.61}
+\end{equation}
+                      ..            .      .     .   
+                             0     ···   ···    Gn
+                                                             
+                       [adV1 ]    0         ···            0
+                        0     [adV2 ] · · ·               0  
+                                                             
+\begin{equation}
+[adV ]   =     ..       ..       ..             ..  ∈ R6n×6n ,
+\label{eq:8.62}
+\end{equation}
+                          .        .           .           . 
+                     0           ···        · · · [adVn ]
+                                                                       
+                   [adA1 θ̇1 ]           0           ···       0
+                    0          [adA2 θ̇2 ] · · ·            0        
+                                                                       
+         adAθ̇ =       ..               ..          . .        .
+\begin{equation}
+.        ∈ R6n×6n ,
+\label{eq:8.63}
+\end{equation}
+                        .                .              .      .       
+                       0               ···           · · · [adAn θ̇n ]
+                                                                            
+                      0               0           ···         0           0
+                  [AdT21 ]           0           ···         0           0 
+                                                                            
+                     0          [AdT32 ] · · ·               0           0 
+         W(θ) =                                                              ∈ R6n×6n .(8.64)
+                     ..              ..          . ..        .
+                                                              ..          .. 
+                                                                          .
+                      .               .                                     
+                                                                     
+                      0               0           · · · AdTn,n−1          0
+
+We write W(θ) to emphasize the dependence of W on θ. Finally, define the
+
+
+Chapter 8. Dynamics of Open Chains                                                                  297
+
+following stacked vectors:
+                                                  
+                                       AdT10 (V0 )
+                                          0       
+                                                  
+\begin{equation}
+Vbase    =      ..       ∈ R6n ,
+\label{eq:8.65}
+\end{equation}
+                                           .      
+                                                  0
+                                                   
+                                       AdT10 (V̇0 )
+                                          0        
+                                                   
+\begin{equation}
+V̇base   =      ..        ∈ R6n ,
+\label{eq:8.66}
+\end{equation}
+                                           .       
+                                                  0
+                                                                  
+                                                      0
+                                                     ..           
+                                                      .           
+\begin{equation}
+Ftip    =                               ∈ R6n .
+\label{eq:8.67}
+\end{equation}
+                                                     0            
+                                             AdT
+                                               Tn+1,n (Fn+1 )
+
+Note that A ∈ R6n×n and G ∈ R6n×6n are constant block-diagonal matrices,
+in which A contains only the kinematic parameters while G contains only the
+mass and inertial parameters for each link.
+   With the above definitions, our earlier recursive inverse dynamics algorithm
+can be assembled into the following set of matrix equations:
+\begin{equation}
+V    = W(θ)V + Aθ̇ + Vbase ,
+\label{eq:8.68}
+\end{equation}
+\begin{equation}
+V̇   = W(θ)V̇ + Aθ̈ − [adAθ̇ ](W(θ)V + Vbase ) + V̇base ,
+\label{eq:8.69}
+\end{equation}
+\begin{equation}
+F     = W T (θ)F + G V̇ − [adV ]T GV + Ftip ,
+\label{eq:8.70}
+\end{equation}
+\begin{equation}
+τ     = AT F.
+\label{eq:8.71}
+\end{equation}
+The matrix W(θ) has the property that W n (θ) = 0 (such a matrix is said to be
+nilpotent of order n), and one consequence verifiable through direct calculation
+is that (I −W(θ))−1 = I +W(θ)+· · ·+W n−1 (θ). Defining L(θ) = (I −W(θ))−1 ,
+it can further be verified via direct calculation that
+                                                         
+                     I          0         0      ··· 0
+                [AdT21 ]       I         0      ··· 0 
+                                                         
+                [AdT31 ] [AdT32 ]        I      ··· 0 
+\begin{equation}
+L(θ) =                                            ∈ R6n×6n .
+\label{eq:8.72}
+\end{equation}
+                     ..        ..         ..    . .   .. 
+                      .         .          .        . . 
+                       [AdTn1 ]     [AdTn2 ]    [AdTn3 ] · · ·      I
+
+We write L(θ) to emphasize the dependence of L on θ. The earlier matrix
+
+
+298                                                    8.5. Forward Dynamics of Open Chains
+
+equations can now be reorganized as follows:
+                                 
+\begin{equation}
+V = L(θ) Aθ̇ + Vbase ,
+\label{eq:8.73}
+\end{equation}
+                                                                
+\begin{equation}
+V̇ = L(θ) Aθ̈ + [adAθ̇ ]W(θ)V + [adAθ̇ ]Vbase + V̇base ,
+\label{eq:8.74}
+\end{equation}
+                                            
+\begin{equation}
+F = LT (θ) G V̇ − [adV ]T GV + Ftip ,
+\label{eq:8.75}
+\end{equation}
+                           T
+\begin{equation}
+τ    = A F.
+\label{eq:8.76}
+\end{equation}
+If the robot applies an external wrench Ftip at the end-effector, this can be
+included into the dynamics equation
+\begin{equation}
+τ = M (θ)θ̈ + c(θ, θ̇) + g(θ) + J T (θ)Ftip ,
+\label{eq:8.77}
+\end{equation}
+where J(θ) denotes the Jacobian of the forward kinematics expressed in the
+same reference frame as Ftip , and
+\begin{equation}
+M (θ) = AT LT (θ)GL(θ)A,
+\label{eq:8.78}
+\end{equation}
+                                                              
+\begin{equation}
+c(θ, θ̇) = −AT LT (θ) GL(θ) [adAθ̇ ]W(θ) + [adV ]T G L(θ)Aθ̇,
+\label{eq:8.79}
+\end{equation}
+\begin{equation}
+g(θ)     = AT LT (θ)GL(θ)V̇base .
+\label{eq:8.80}
+\end{equation}
+\section{Forward Dynamics of Open Chains}
+The forward dynamics problem involves solving
+\begin{equation}
+M (θ)θ̈ = τ (t) − h(θ, θ̇) − J T (θ)Ftip
+\label{eq:8.81}
+\end{equation}
+for θ̈, given θ, θ̇, τ , and the wrench Ftip applied by the end-effector (if ap-
+plicable). The term h(θ, θ̇) can be computed by calling the inverse dynamics
+algorithm with θ̈ = 0 and Ftip = 0. The inertia matrix M (θ) can be computed
+using Equation (8.57). An alternative is to use n calls of the inverse dynamics
+algorithm to build M (θ) column by column. In each of the n calls, set g = 0,
+θ̇ = 0, and Ftip = 0. In the first call, the column vector θ̈ is all zeros except
+for a 1 in the first row. In the second call, θ̈ is all zeros except for a 1 in the
+second row, and so on. The τ vector returned by the ith call is the ith column
+of M (θ), and after n calls the n × n matrix M (θ) is constructed.
+    With M (θ), h(θ, θ̇), and Ftip we can use any efficient algorithm for solving
+Equation (8.81), which is of the form M θ̈ = b, for θ̈.
+    The forward dynamics can be used to simulate the motion of the robot given
+its initial state, the joint forces–torques τ (t), and an optional external wrench
+
+
+Chapter 8. Dynamics of Open Chains                                                                  299
+
+Ftip (t), for t ∈ [0, tf ]. First define the function ForwardDynamics returning the
+solution to Equation (8.81), i.e.,
+
+                               θ̈ = ForwardDynamics(θ, θ̇, τ, Ftip ).
+
+Defining the variables q1 = θ, q2 = θ̇, the second-order dynamics (8.81) can be
+converted to two first-order differential equations,
+
+                         q̇1    = q2 ,
+                         q̇2    = ForwardDynamics(q1 , q2 , τ, Ftip ).
+
+The simplest method for numerically integrating a system of first-order differ-
+ential equations of the form q̇ = f (q, t), q ∈ Rn , is the first-order Euler iteration
+
+                                  q(t + δt) = q(t) + δtf (q(t), t),
+
+where the positive scalar δt denotes the timestep. The Euler integration of the
+robot dynamics is thus
+
+              q1 (t + δt) = q1 (t) + q2 (t)δt,
+              q2 (t + δt) = q2 (t) + ForwardDynamics(q1 , q2 , τ, Ftip )δt.
+
+Given a set of initial values for q1 (0) = θ(0) and q2 (0) = θ̇(0), the above equa-
+tions can be iterated forward in time to obtain the motion θ(t) = q1 (t) numeri-
+cally.
+
+Euler Integration Algorithm for Forward Dynamics
+    • Inputs: The initial conditions θ(0) and θ̇(0), the input torques τ (t) and
+      wrenches at the end-effector Ftip (t) for t ∈ [0, tf ], and the number of
+      integration steps N .
+    • Initialization: Set the timestep δt = tf /N , and set θ[0] = θ(0), θ̇[0] =
+      θ̇(0).
+    • Iteration: For k = 0 to N − 1 do
+
+                     θ̈[k]     = ForwardDynamics(θ[k], θ̇[k], τ (kδt), Ftip (kδt)),
+                θ[k + 1] = θ[k] + θ̇[k]δt,
+                θ̇[k + 1] = θ̇[k] + θ̈[k]δt.
+
+    • Output: The joint trajectory θ(kδt) = θ[k], θ̇(kδt) = θ̇[k], k = 0, . . . , N .
+
+
+300                                                            8.6. Dynamics in the Task Space
+
+    The result of the numerical integration converges to the theoretical result
+as the number of integration steps N goes to infinity. Higher-order numerical
+integration schemes, such as fourth-order Runge–Kutta, can yield a closer ap-
+proximation with fewer computations than the simple first-order Euler method.
+
+\section{Dynamics in the Task Space}
+In this section we consider how the dynamic equations change under a trans-
+formation to coordinates of the end-effector frame (task-space coordinates). To
+keep things simple we consider a six-degree-of-freedom open chain with joint-
+space dynamics
+\begin{equation}
+τ = M (θ)θ̈ + h(θ, θ̇),           θ ∈ R6 , τ ∈ R6 .
+\label{eq:8.82}
+\end{equation}
+We also ignore, for the time being, any end-effector forces Ftip . The twist
+V = (ω, v) of the end-effector is related to the joint velocity θ̇ by
+\begin{equation}
+V = J(θ)θ̇,
+\label{eq:8.83}
+\end{equation}
+with the understanding that V and J(θ) are always expressed in terms of the
+same reference frame. The time derivative V̇ is then
+                                              ˙ θ̇ + J(θ)θ̈.
+\begin{equation}
+V̇ = J(θ)
+\label{eq:8.84}
+\end{equation}
+At configurations θ where J(θ) is invertible, we have
+\begin{equation}
+θ̇   = J −1 V,
+\label{eq:8.85}
+\end{equation}
+                                  θ̈                     ˙ −1 V.
+\begin{equation}
+= J −1 V̇ − J −1 JJ
+\label{eq:8.86}
+\end{equation}
+Substituting for θ̇ and θ̈ in Equation (8.82) leads to
+                                                
+                                           ˙ −1 V + h(θ, J −1 V).
+\begin{equation}
+τ = M (θ) J −1 V̇ − J −1 JJ
+\label{eq:8.87}
+\end{equation}
+Let J −T denote (J −1 )T = (J T )−1 . Pre-multiply both sides by J −T to get
+
+                      J −T τ                                     ˙ −1 V
+                                 = J −T M J −1 V̇ − J −T M J −1 JJ
+\begin{equation}
+−T         −1
+\label{eq:8.88}
+\end{equation}
+                                   + J h(θ, J V).
+
+Expressing J −T τ as the wrench F, the above can be written
+\begin{equation}
+F = Λ(θ)V̇ + η(θ, V),
+\label{eq:8.89}
+\end{equation}
+Chapter 8. Dynamics of Open Chains                                                                  301
+
+where
+\begin{equation}
+Λ(θ) = J −T M (θ)J −1 ,
+\label{eq:8.90}
+\end{equation}
+                                                          ˙ −1 V.
+\begin{equation}
+η(θ, V) = J −T h(θ, J −1 V) − Λ(θ)JJ
+\label{eq:8.91}
+\end{equation}
+These are the dynamic equations expressed in end-effector frame coordinates.
+If an external wrench F is applied to the end-effector frame then, assuming the
+actuators provide zero forces and torques, the motion of the end-effector frame
+is governed by these equations.
+    Note that J(θ) must be invertible (i.e., there must be a one-to-one mapping
+between joint velocities and end-effector twists) in order to derive the task-
+space dynamics above. Also note the dependence of Λ(θ) and η(θ, V) on θ. In
+general, we cannot replace the dependence on θ by a dependence on the end-
+effector configuration X because there may be multiple solutions to the inverse
+kinematics, and the dynamics depends on the specific joint configuration θ.
+
+\section{Constrained Dynamics}
+Now consider the case where the n-joint robot is subject to a set of k holonomic
+or nonholonomic Pfaffian velocity constraints of the form
+\begin{equation}
+A(θ)θ̇ = 0,         A(θ) ∈ Rk×n .
+\label{eq:8.92}
+\end{equation}
+(See Section 2.4 for an introduction to Pfaffian constraints.) Such constraints
+can come from loop-closure constraints; for example, the motion of an end-
+effector rigidly holding a door handle is subject to k = 5 constraints due to the
+hinges of the door. As another example, a robot writing with a pen is subject
+to a single constraint that keeps the height of the tip of the pen above the paper
+at zero. In any case, we assume that the constraints do no work on the robot,
+i.e., the generalized forces τcon due to the constraints satisfy
+                                              T
+                                             τcon θ̇ = 0.
+
+This assumption means that τcon must be a linear combination of the columns
+of AT (θ), i.e., τcon = AT (θ)λ for some λ ∈ Rk , since these are the generalized
+forces that do no work when θ̇ is subject to the constraints (8.92):
+
+                     (AT (θ)λ)T θ̇ = λT A(θ)θ̇ = 0              for all λ ∈ Rk .
+
+For the writing-robot example, the assumption that the constraint is workless
+means that there can be no friction between the pen and the paper.
+
+
+302                                                                   8.7. Constrained Dynamics
+
+   Adding the constraint forces AT (θ)λ to the equations of motion, we can
+write the n + k constrained equations of motion in the n + k unknowns {θ̈, λ}
+(the forward dynamics) or in the n + k unknowns {τ, λ} (the inverse dynamics):
+\begin{equation}
+τ      = M (θ)θ̈ + h(θ, θ̇) + AT (θ)λ,
+\label{eq:8.93}
+\end{equation}
+\begin{equation}
+A(θ)θ̇     = 0,
+\label{eq:8.94}
+\end{equation}
+where λ is a set of Lagrange multipliers and AT (θ)λ are the joint forces and
+torques that act against the constraints. From these equations, it should be
+clear that the robot has n − k velocity freedoms and k “force freedoms” – the
+robot is free to create any generalized force of the form AT (θ)λ. (For the writing
+robot, there is an equality constraint: the robot can only apply pushing forces
+into the paper and table, not pulling forces.)
+    Often it is convenient to reduce the n + k equations in n + k unknowns to n
+equations in n unknowns, without explicitly calculating the Lagrange multipliers
+λ. To do this, we can solve for λ in terms of the other quantities and substitute
+our solution into Equation (8.93). Since the constraints are satisfied at all times,
+the time rate of change of the constraints satisfies
+\begin{equation}
+Ȧ(θ)θ̇ + A(θ)θ̈ = 0.
+\label{eq:8.95}
+\end{equation}
+Assuming that M (θ) and A(θ) are full rank, we can solve Equation (8.93) for
+θ̈, substitute into Equation (8.95), and omit the dependences on θ and θ̇ for
+conciseness, to get
+\begin{equation}
+Ȧθ̇ + AM −1 (τ − h − AT λ) = 0.
+\label{eq:8.96}
+\end{equation}
+Using Aθ̈ = −Ȧθ̇, after some manipulation, we obtain
+\begin{equation}
+λ = (AM −1 AT )−1 (AM −1 (τ − h) − Aθ̈).
+\label{eq:8.97}
+\end{equation}
+Combining Equation (8.97) with Equation (8.93) and manipulating further, we
+get
+\begin{equation}
+P τ = P (M θ̈ + h)
+\label{eq:8.98}
+\end{equation}
+where
+\begin{equation}
+P = I − AT (AM −1 AT )−1 AM −1
+\label{eq:8.99}
+\end{equation}
+and where I is the n × n identity matrix. The n × n matrix P (θ) is of rank
+n − k, and maps the joint generalized forces τ to P (θ)τ , projecting away the
+generalized force components that act on the constraints while retaining the
+generalized forces that do work on the robot. The complementary projection,
+I − P (θ), maps τ to (I − P (θ))τ , the joint forces that act on the constraints and
+do no work on the robot.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  303
+
+    Using P (θ), we can solve the inverse dynamics by evaluating the right-hand
+side of Equation (8.98). The solution P (θ)τ is a set of generalized joint forces
+that achieves the feasible components of the desired joint acceleration θ̈. To
+this solution we can add any constraint forces AT (θ)λ without changing the
+acceleration of the robot.
+    We can rearrange Equation (8.98) into the form
+\begin{equation}
+Pθ̈ θ̈ = Pθ̈ M −1 (τ − h),
+\label{eq:8.100}
+\end{equation}
+where
+\begin{equation}
+Pθ̈ = M −1 P M = I − M −1 AT (AM −1 AT )−1 A.
+\label{eq:8.101}
+\end{equation}
+The rank-(n−k) projection matrix Pθ̈ (θ) ∈ Rn×n projects away the components
+of an arbitrary joint acceleration θ̈ that violate the constraints, leaving only the
+components Pθ̈ (θ)θ̈ that satisfy the constraints. To solve the forward dynamics,
+we evaluate the right-hand side of Equation (8.100), and the resulting Pθ̈ θ̈ is
+the set of joint accelerations.
+    In Section 11.6 we discuss the related topic of hybrid motion–force control, in
+which the goal at each instant is to simultaneously achieve a desired acceleration
+satisfying Aθ̈ = 0 (consisting of n − k motion freedoms) and a desired force
+against the k constraints. In that section we use the task-space dynamics to
+represent the task-space end-effector motions and forces more naturally.
+
+\section{Robot Dynamics in the URDF}
+As described in Section 4.2 and illustrated in the UR5 Universal Robot Descrip-
+tion Format file, the inertial properties of link i are described in the URDF by
+the link elements mass, origin (the position and orientation of the center-of-
+mass frame relative to a frame attached at joint i), and inertia, which specifies
+the six elements of the symmetric rotational inertia matrix on or above the di-
+agonal. To fully write the robot’s dynamics, for joint i we need in addition the
+joint element origin, specifying the position and orientation of link i’s joint
+frame relative to link (i − 1)’s joint frame when θi = 0, and the element axis,
+which specifies the axis of motion of joint i. We leave to the exercises the trans-
+lation of these elements into the quantities needed for the Newton–Euler inverse
+dynamics algorithm.
+
+\section{Actuation, Gearing, and Friction}
+Until now we have been assuming the existence of actuators that directly provide
+commanded forces and torques. In practice there are many types of actuators
+
+
+304                                                      8.9. Actuation, Gearing, and Friction
+
+(e.g., electric, hydraulic, and pneumatic) and mechanical power transformers
+(e.g., gearheads), and the actuators can be located at the joints themselves or
+remotely, with mechanical power transmitted by cables or timing belts. Each
+combination of these has its own characteristics that can play a significant role
+in the “extended dynamics” mapping the actual control inputs (e.g., the current
+requested of amplifiers connected to electric motors) to the motion of the robot.
+    In this section we provide an introduction to some of the issues associated
+with one particular, and common, configuration: geared DC electric motors
+located at each joint. This is the configuration used in the Universal Robots
+UR5, for example.
+    Figure 8.7 shows the electrical block diagram for a typical n-joint robot
+driven by DC electric motors. For concreteness, we assume that each joint is
+revolute. A power supply converts the wall AC voltage to a DC voltage to power
+the amplifier associated with each motor. A control box takes user input, for
+example in the form of a desired trajectory, as well as position feedback from
+encoders located at each joint. Using the desired trajectory, a model of the
+robot’s dynamics, and the measured error in the current robot state relative
+to the desired robot state, the controller calculates the torque required of each
+actuator. Since DC electric motors nominally provide a torque proportional to
+the current through the motor, this torque command is equivalent to a current
+command. Each motor amplifier then uses a current sensor (shown as external to
+the amplifier in Figure 8.7, but in reality internal to the amplifier) to continually
+adjust the voltage across the motor to try to achieve the requested current.3
+The motion of the motor is sensed by the motor encoder, and the position
+information is sent back to the controller.
+    The commanded torque is typically updated at around 1000 times per second
+(1 kHz), and the amplifier’s voltage control loop may be updated at a rate ten
+times that or more.
+    Figure 8.8 is a conceptual representation of the motor and other components
+for a single axis. The motor has a single shaft extending from both ends of
+the motor: one end drives a rotary encoder, which measures the position of
+the joint, and the other end becomes the input to a gearhead. The gearhead
+increases the torque while reducing the speed, since most DC electric motors
+with an appropriate power rating provide torques that are too low to be useful
+for robotics applications. The purpose of the bearing is to support the gearhead
+output, freely transmitting torques about the gearhead axis while isolating the
+gearhead (and motor) from wrench components due to link i + 1 in the other
+five directions. The outer cases of the encoder, motor, gearhead, and bearing
+   3 The voltage is typically a time-averaged voltage achieved by the duty cycle of a voltage
+
+rapidly switching between a maximum positive voltage and a maximum negative voltage.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  305
+
+                                             position feedback
+
+                                                              I1                 I1
+                    torque/                                         current            motor 1
+                                                 amp 1
+                     current                                         sensor           + encoder
+  controller,      commands
+  dynamics
+                                                              I2                 I2
+    model                                                                              motor 2
+                                                                    current
+                                                 amp 2
+                                                                     sensor           + encoder
+  user input
+                                                                      .
+                       DC                                             .
+    power            voltage                                          .
+    supply
+                                                              In                In
+                                                                    current            motor n
+                                                 amp n
+      AC                                                             sensor           + encoder
+    voltage
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_7.pdf}
+\caption{A block diagram of a typical n-joint robot. The bold lines correspond}
+\label{fig:8_7}
+\end{figure}
+to high-power signals while the thin lines correspond to communication signals.
+
+                                current
+
+   position
+  feedback
+
+                encoder               motor                   gearhead        bearing      link i+1
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_8.pdf}
+\caption{The outer cases of the encoder, motor, gearhead, and bearing are fixed}
+\label{fig:8_8}
+\end{figure}
+in link i, while the gearhead output shaft supported by the bearing is fixed in link
+i + 1.
+
+are all fixed relative to each other and to link i. It is also common for the motor
+to have some kind of brake, not shown.
+
+\subsection{DC Motors and Gearing}
+A DC motor consists of a stator and a rotor that rotates relative to the stator.
+DC electric motors create torque by sending current through windings in a
+
+
+306                                                      8.9. Actuation, Gearing, and Friction
+
+magnetic field created by permanent magnets, where the magnets are attached
+to the stator and the windings are attached to the rotor, or vice versa. A DC
+motor has multiple windings, some of which are energized and some of which
+are inactive at any given time. The windings that are energized are chosen as a
+function of the angle of the rotor relative to the stator. This “commutation” of
+the windings occurs mechanically using brushes (brushed motors) or electrically
+using control circuitry (brushless motors). Brushless motors have the advantage
+of no brush wear and higher continuous torque, since the windings are typically
+attached to the motor housing where the heat due to the resistance of the
+windings can be more easily dissipated. In our basic introduction to DC motor
+modeling, we do not distinguish between brushed and brushless motors.
+    Figure 8.9 shows a brushed DC motor with an encoder and a gearhead.
+    The torque τ , measured in newton-meters (N m), created by a DC motor is
+governed by the equation
+                                     τ = kt I,
+where I, measured in amps (A), is the current through the windings. The
+constant kt , measured in newton-meters per amp (N m/A), is called the torque
+constant. The power dissipated as heat by the windings, measured in watts
+(W), is governed by
+                                 Pheat = I 2 R,
+where R is the resistance of the windings in ohms (Ω). To keep the motor wind-
+ings from overheating, the continuous current flowing through the motor must
+be limited. Accordingly, in continuous operation, the motor torque must be kept
+below a continuous-torque limit τcont determined by the thermal properties of
+the motor.
+    A simplified model of a DC motor, where all units are in the SI system, can
+be derived by equating the electrical power consumed by the motor Pelec = IV
+in watts (W) to the mechanical power Pmech = τ w (also in W) and other power
+produced by the motor,
+                                       dI
+          IV = τ w + I 2 R + LI           + friction and other power-loss terms,
+                                       dt
+where V is the voltage applied to the motor in volts (V), w is the angular speed
+of the motor in radians per second (1/s), and L is the inductance due to the
+windings in henries (H). The terms on the right-hand side are the mechanical
+power produced by the motor, the power lost to heating the windings due to
+the resistance of the wires, the power consumed or produced by energizing or
+de-energizing the inductance of the windings (since the energy stored in an
+inductor is 21 LI 2 , and power is the time derivative of energy), and the power
+
+
+Chapter 8. Dynamics of Open Chains                                                                  307
+
+                            Encoder
+                                        Commutator
+                                              Magnet
+                                                         Windings
+                                                                         Motor shaft
+
+                                                                           Motor output pinion
+                                                                           (input to gearhead)
+   Torsional
+   spring
+                                                                                       Planetary
+                                                                                       gearhead
+     Brush        Housing
+                  (magnetic return)
+
+                                Ball bearings
+
+                                                                                      Gearhead
+      Commutator Windings                                                             output shaft
+
+                                                   Magnet
+                                                      Shaft
+
+           Brush          Housing
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_9.pdf}
+\caption{(Top) A cutaway view of a Maxon brushed DC motor with an encoder}
+\label{fig:8_9}
+\end{figure}
+and gearhead. (Cutaway image courtesy of Maxon Precision Motors, Inc., maxonmo-
+torusa.com.) The motor’s rotor consists of the windings, commutator ring, and shaft.
+Each of the several windings connects different segments of the commutator, and as
+the motor rotates, the two brushes slide over the commutator ring and make contact
+with different segments, sending current through one or more windings. One end of the
+motor shaft turns the encoder, and the other end is input to the gearhead. (Bottom)
+A simplified cross-section of the motor only, showing the stator (brushes, housing, and
+magnets) in dark gray and the rotor (windings, commutator, and shaft) in light gray.
+
+lost to friction in bearings, etc. Dropping this last term, replacing τ w by kt Iw,
+and dividing by I, we get the voltage equation
+                                                              dI
+\begin{equation}
+V = kt w + IR + L           .
+\label{eq:8.102}
+\end{equation}
+                                                              dt
+
+
+308                                                      8.9. Actuation, Gearing, and Friction
+
+Often Equation (8.102) is written with the electrical constant ke (with units
+of V s) instead of the torque constant kt , but in SI units (V s or N m/A) the
+numerical values of the two are identical; they represent the same constant
+property of the motor. So we prefer to use kt .
+    The voltage term kt w in Equation (8.102) is called the back electromotive
+force or back-emf for short, and it is what differentiates a motor from being
+simply a resistor and inductor in series. It also allows a motor, which we usually
+think of as converting electrical power to mechanical, to be run as a generator,
+converting mechanical power to electrical. If the motor’s electrical inputs are
+disconnected (so no current can flow) and the shaft is forced to turn by some
+external torque, you can measure the back-emf voltage kt w across the motor’s
+inputs.
+    For simplicity, in the rest of this section we ignore the L dI/dt term. This as-
+sumption is exactly satisfied when the motor is operating at a constant current.
+With this assumption, Equation (8.102) can be rearranged to
+                                       1             V    R
+                                w=        (V − IR) =    − 2 τ,
+                                       kt            kt  kt
+
+expressing the speed w as a linear function of τ (with a slope of −R/kt2 ) for a con-
+stant V . Now assume that the voltage across the motor is limited to the range
+[−Vmax , +Vmax ] and the current through the motor is limited to [−Imax , +Imax ],
+perhaps by the amplifier or power supply. Then the operating region of the mo-
+tor in the torque–speed plane is as shown in Figure 8.10. Note that the signs of τ
+and w are opposite in the second and fourth quadrants of this plane, and there-
+fore the product τ w is negative. When the motor operates in these quadrants,
+it is actually consuming mechanical power, not producing mechanical power.
+The motor is acting like a damper.
+    Focusing on the first quadrant (τ ≥ 0, w ≥ 0, τ w ≥ 0), the boundary of
+the operating region is called the speed–torque curve. The no-load speed
+w0 = Vmax /kt at one end of the speed–torque curve is the speed at which
+the motor spins when it is powered by Vmax but is providing no torque. In
+this operating condition, the back-emf kt w is equal to the applied voltage, so
+there is no voltage remaining to create current (or torque). The stall torque
+τstall = kt Vmax /R at the other end of the speed–torque curve is achieved when
+the shaft is blocked from spinning, so there is no back-emf.
+    Figure 8.10 also indicates the continuous operating region where |τ | ≤ τcont .
+The motor may be operated intermittently outside the continuous operating
+region, but extended operation outside the continuous operating region raises
+the possibility that the motor will overheat.
+    The motor’s rated mechanical power is Prated = τcont wcont , where wcont is
+
+
+Chapter 8. Dynamics of Open Chains                                                                       309
+
+                                             w
+                       +V
+                        ma
+         −Imax limit
+
+                             x l
+                                   im
+                                        it
+
+                                                               rated mechanical power =
+                                                  w0            τcont wcont
+
+                                                       τcont    τstall                               τ
+
+                                                                                       +Imax limit
+                             continuous
+                              operating
+                               region                          −V
+                                                                  ma
+                                                                       x l
+                                                                             im
+                                                                                  it
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_10.pdf}
+\caption{The operating region (dark gray) of a current- and voltage-limited DC}
+\label{fig:8_10}
+\end{figure}
+electric motor, and its continuous operating region (light gray).
+
+the speed on the speed–torque curve corresponding to τcont . Even if the motor’s
+rated power is sufficient for a particular application, the torque generated by
+a DC motor is typically too low to be useful. As mentioned earlier, gearing is
+therefore used to increase the torque while also decreasing the speed. For a gear
+ratio G, the output speed of the gearhead is
+                                                       wmotor
+                                             wgear =          .
+                                                        G
+For an ideal gearhead, no power is lost in the torque conversion, so τmotor wmotor =
+τgear wgear , which implies that
+                                             τgear = Gτmotor .
+In practice, some mechanical power is lost due to friction and impacts between
+gear teeth, bearings, etc., so
+                                             τgear = ηGτmotor ,
+where η ≤ 1 is the efficiency of the gearhead.
+
+
+310                                                      8.9. Actuation, Gearing, and Friction
+
+                                           w
+
+                                                                                         τ
+
+                                                                           G=2
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_11.pdf}
+\caption{The original motor operating region, and the operating region with a}
+\label{fig:8_11}
+\end{figure}
+gear ratio G = 2 showing the increased torque and decreased speed.
+
+   Figure 8.11 shows the operating region of the motor from Figure 8.10 when
+the motor is geared by G = 2 (with η = 1). The maximum torque doubles,
+while the maximum speed shrinks by a factor of two. Since many DC motors
+are capable of no-load speeds of 10 000 rpm or more, robot joints often have
+gear ratios of 100 or more to achieve an appropriate compromise between speed
+and torque.
+
+\subsection{Apparent Inertia}
+The motor’s stator is attached to one link and the rotor is attached to another
+link, possibly through a gearhead. Therefore, when calculating the contribution
+of a motor to the masses and inertias of the links, the mass and inertia of the
+stator must be assigned to one link and the mass and inertia of the rotor must
+be assigned to the other link.
+    Consider a stationary link 0 with the stator of the joint-1 gearmotor attached
+to it. The rotational speed of joint 1, the output of the gearhead, is θ̇. Therefore
+the motor’s rotor rotates at Gθ̇. The kinetic energy of the rotor is therefore
+                                 1                 1
+                          K=       Irotor (Gθ̇)2 =          G2 Irotor      θ̇2 ,
+                                 2                 2        | {z }
+                                                        apparent inertia
+
+where Irotor is the rotor’s scalar inertia about the rotation axis and G2 Irotor is
+the apparent inertia (often called the reflected inertia) of the rotor about
+the axis. In other words, if you were to grab link 1 and rotate it manually, the
+
+
+Chapter 8. Dynamics of Open Chains                                                                  311
+
+inertia contributed by the rotor would feel as if it were a factor G2 larger than
+its actual inertia, owing to the gearhead.
+    While the inertia Irotor is typically much less than the inertia Ilink of the
+rest of the link about the rotation axis, the apparent inertia G2 Irotor may be
+on the order of, or even larger than, Ilink .
+    One consequence as the gear ratio becomes large is that the inertia seen by
+joint i becomes increasingly dominated by the apparent inertia of the rotor. In
+other words, the torque required of joint i becomes relatively more dependent
+on θ̈i than on other joint accelerations, i.e., the robot’s mass matrix becomes
+more diagonal. In the limit when the mass matrix has negligible off-diagonal
+components (and in the absence of gravity), the dynamics of the robot are
+decoupled – the dynamics at one joint has no dependence on the configuration
+or motion of the other joints.
+    As an example, consider the 2R arm of Figure 8.1 with L1 = L2 = m1 =
+m2 = 1. Now assume that each of joint 1 and joint 2 has a motor of mass 1,
+with a stator of inertia 0.005 and a rotor of inertia 0.00125, and a gear ratio G
+(with η = 1). With a gear ratio G = 10, the mass matrix is
+                                                            
+                               4.13 + 2 cos θ2 1.01 + cos θ2
+                    M (θ) =                                    .
+                                1.01 + cos θ2       1.13
+
+    With a gear ratio G = 100, the mass matrix is
+                                                         
+                            16.5 + 2 cos θ2 1.13 + cos θ2
+                  M (θ) =                                   .
+                             1.13 + cos θ2      13.5
+
+The off-diagonal components are relatively less important for this second robot.
+The available joint torques of the second robot are ten times that of the first
+robot so, despite the increases in the mass matrix elements, the second robot is
+capable of significantly higher accelerations and end-effector payloads. The top
+speed of each joint of the second robot is ten times less than that of the first
+robot, however.
+    If the apparent inertia of the rotor is non-negligible relative to the inertia
+of the rest of the link, the Newton–Euler inverse dynamics algorithm must be
+modified to account for it. One approach is to treat the link as consisting of
+two separate bodies, the geared rotor driving the link and the rest of the link,
+each with its own center of mass and inertial properties (where the link inertial
+properties include the inertial properties of the stator of any motor mounted on
+the link). In the forward iteration, the twist and acceleration of each body is
+determined while accounting for the gearhead in calculating the rotor’s motion.
+In the backward iteration, the wrench on the link is calculated as the sum of two
+
+
+312                                                      8.9. Actuation, Gearing, and Friction
+
+                          joint i axis                                − AdTT(i+1) ,i (F(i+1)L )
+                                                                                    L   L
+
+                                                    link i
+               rotor i axis
+                                      gearhead
+                                                                              {i + 1}R
+
+                  rotor                                                                 {i}L
+                 stator               motor i
+
+                                       link i − 1                    FiL
+                              (a)                                                (b)
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_12.pdf}
+\caption{(a) Schematic of a geared motor between links i − 1 and i. (b) The}
+\label{fig:8_12}
+\end{figure}
+free-body diagram for link i, which is analogous to Figure 8.6.
+
+wrenches: (i) the link wrench as given by Equation (8.53) and (ii) the reaction
+wrench from the distal rotor. The resultant wrench projected onto the joint
+axis is then the gear torque τgear ; dividing τgear by the gear ratio and adding
+to this the torque resulting from the acceleration of the rotor results in the
+required motor torque τmotor . The current command to the DC motor is then
+Icom = τmotor /(ηkt ).
+
+\subsection{Newton–Euler Inverse Dynamics Algorithm Accounting}
+            for Motor Inertias and Gearing
+We now reformulate the recursive Newton–Euler inverse dynamics algorithm
+taking into account the apparent inertias as discussed above. Figure 8.12 il-
+lustrates the setup. We assume massless gears and shafts and that the friction
+between gears as well as the friction between shafts and links is negligible.
+
+Initialization Attach a frame {0}L to the base, frames {1}L to {n}L to the
+centers of mass of links 1 to n, and frames {1}R to {n}R to the centers of mass of
+rotors 1 to n. Frame {n + 1}L is attached to the end-effector, which is assumed
+fixed with respect to frame {n}L . Define MiR ,(i−1)L and MiL ,(i−1)L to be the
+configuration of {i − 1}L in {i}R and in {i}L , respectively, when θi = 0. Let Ai
+be the screw axis of joint i expressed in {i}L . Similarly, let Ri be the screw axis
+of rotor i expressed in {i}R . Let GiL be the 6 × 6 spatial inertia matrix of link
+i that includes the inertia of the attached stator and GiR be the 6 × 6 spatial
+
+
+Chapter 8. Dynamics of Open Chains                                                                  313
+
+inertia matrix of rotor i. The gear ratio of motor i is Gi . The twists V0L and
+V̇0L and the wrench F(n+1)L are defined in the same way as V0 , V̇0 , and Fn+1
+in Section 8.3.2.
+
+Forward iterations Given θ, θ̇, θ̈, for i = 1 to n do
+\begin{equation}
+TiR ,(i−1)L     = e−[Ri ]Gi θi MiR ,(i−1)L ,
+\label{eq:8.103}
+\end{equation}
+                                    −[Ai ]θi
+\begin{equation}
+TiL ,(i−1)L   = e                  MiL ,(i−1)L ,
+\label{eq:8.104}
+\end{equation}
+\begin{equation}
+ViR    =        AdTiR ,(i−1)L (V(i−1)L ) + Ri Gi θ̇i ,
+\label{eq:8.105}
+\end{equation}
+\begin{equation}
+ViL    =        AdTiL ,(i−1)L (V(i−1)L ) + Ai θ̇i ,
+\label{eq:8.106}
+\end{equation}
+\begin{equation}
+V̇iR   =        AdTiR ,(i−1)L (V̇(i−1)L ) + adViR (Ri )Gi θ̇i + Ri Gi θ̈i ,
+\label{eq:8.107}
+\end{equation}
+\begin{equation}
+V̇iL   =        AdTiL ,(i−1)L (V̇(i−1)L ) + adViL (Ai )θ̇i + Ai θ̈i .
+\label{eq:8.108}
+\end{equation}
+Backward iterations For i = n to 1 do
+
+    FiL       =    AdT                                   T
+                     T(i+1) ,i (F(i+1)L ) + GiL V̇iL − adVi (GiL ViL )
+                               L   L                                 L
+
+                   + AdT                               T
+                       T(i+1) ,i (G(i+1)R V̇(i+1)R − adV(i+1) (G(i+1)R V(i+1)R )),(8.109)
+                                    R   L                                R
+\begin{equation}
+τi,gear     =    ATi FiL ,
+\label{eq:8.110}
+\end{equation}
+                   τi,gear                    T
+τi,motor      =            + RT
+\begin{equation}
+i (GiR V̇iR − adViR (GiR ViR )).
+\label{eq:8.111}
+\end{equation}
+                     Gi
+    In the backward iteration stage, the quantity F(n+1)L occurring in the first
+step of the backward iteration is taken to be the external wrench applied to the
+end-effector (expressed in the {n + 1}L frame), with G(n+1)R set to zero; FiL
+denotes the wrench applied to link i via the motor i gearhead (expressed in the
+{iL } frame); τi,gear is the torque generated at the motor i gearhead; and τi,motor
+is the torque at rotor i.
+    Note that if there is no gearing then no modification to the original Newton–
+Euler inverse dynamics algorithm is necessary; the stator is attached to one link
+and the rotor is attached to another link. Robots constructed with a motor at
+each axis and no gearheads are sometimes called direct-drive robots. Direct-
+drive robots have low friction, but they see limited use because typically the
+motors must be large and heavy to generate appropriate torques.
+    No modification is needed to the Lagrangian approach to the dynamics to
+handle geared motors, provided that we can correctly represent the kinetic en-
+ergy of the faster-spinning rotors.
+
+
+314                                                      8.9. Actuation, Gearing, and Friction
+
+      τfric          τfric            τfric           τfric            τfric           τfric
+
+                θ̇               θ̇              θ̇              θ̇               θ̇              θ̇
+
+         (a)             (b)              (c)             (d)             (e)              (f)
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_13.pdf}
+\caption{Examples of velocity-dependent friction models. (a) Viscous friction,}
+\label{fig:8_13}
+\end{figure}
+τfric = bviscous θ̇. (b) Coulomb friction, τfric = bstatic sgn(θ̇); τfric can take any value in
+[−bstatic , bstatic ] at zero velocity. (c) Static plus viscous friction, τfric = bstatic sgn(θ̇)+
+bviscous θ̇. (d) Static and kinetic friction, requiring τfric ≥ |bstatic | to initiate motion and
+then τfric = bkinetic sgn(θ̇) during motion, where bstatic > bkinetic . (e) Static, kinetic,
+and viscous friction. (f) A friction law exhibiting the Stribeck effect – at low velocities,
+the friction decreases as the velocity increases.
+
+\subsection{Friction}
+The Lagrangian and Newton–Euler dynamics do not account for friction at
+the joints, but the friction forces and torques in gearheads and bearings may be
+significant. Friction is a complex phenomenon that is the subject of considerable
+current research; any friction model is a gross attempt to capture the average
+behavior of the micromechanics of contact.
+    Friction models often include a static friction term and a velocity-dependent
+viscous friction term. The presence of a static friction term means that a
+nonzero torque is required to cause the joint to begin to move. The viscous fric-
+tion term indicates that the amount of friction torque increases with increasing
+velocity of the joint. See Figure 8.13 for some examples of velocity-dependent
+friction models.
+    Other factors may contribute to the friction at a joint, including the loading
+of the joint bearings, the time the joint has been at rest, the temperature, etc.
+The friction in a gearhead often increases as the gear ratio G increases.
+
+\subsection{Joint and Link Flexibility}
+In practice, a robot’s joints and links are likely to exhibit some flexibility. For
+example, the flexspline element of a harmonic drive gearhead achieves essentially
+zero backlash by being somewhat flexible. A model of a joint with harmonic
+drive gearing, then, could include a relatively stiff torsional spring between the
+motor’s rotor and the link to which the gearhead is attached.
+    Similarly, links themselves are not infinitely stiff. Their finite stiffness is
+exhibited as vibrations along the link.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  315
+
+    Flexible joints and links introduce extra states to the dynamics of the robot,
+significantly complicating the dynamics and control. While many robots are
+designed to be stiff in order to minimize these complexities, in some cases this
+is impractical owing to the extra link mass required to create the stiffness.
+
+\section{Summary}
+    • Given a set of generalized coordinates θ and generalized forces τ , the
+      Euler–Lagrange equations can be written
+                                                  d ∂L ∂L
+                                            τ=            −    ,
+                                                  dt ∂ θ̇   ∂θ
+       where L(θ, θ̇) = K(θ, θ̇) − P(θ), K is the kinetic energy of the robot, and
+       P is the potential energy of the robot.
+    • The equations of motion of a robot can be written in the following equiv-
+      alent forms:
+                                  τ    =    M (θ)θ̈ + h(θ, θ̇)
+                                       =    M (θ)θ̈ + c(θ, θ̇) + g(θ)
+                                       =    M (θ)θ̈ + θ̇T Γ(θ)θ̇ + g(θ)
+                                       =    M (θ)θ̈ + C(θ, θ̇)θ̇ + g(θ),
+       where M (θ) is the n×n symmetric positive-definite mass matrix, h(θ, θ̇) is
+       the sum of the generalized forces due to the gravity and quadratic velocity
+       terms, c(θ, θ̇) are quadratic velocity forces, g(θ) are gravitational forces,
+       Γ(θ) is an n×n×n matrix of Christoffel symbols of the first kind obtained
+       from partial derivatives of M (θ) with respect to θ, and C(θ, θ̇) is the n × n
+       Coriolis matrix whose (i, j)th entry is given by
+                                                        n
+                                                        X
+                                        cij (θ, θ̇) =         Γijk (θ)θ̇k .
+                                                        k=1
+
+       If the end-effector of the robot is applying a wrench Ftip to the environ-
+       ment, the term J T (θ)Ftip should be added to the right-hand side of the
+       robot’s dynamic equations.
+    • The symmetric positive-definite rotational inertia matrix of a rigid body
+      is                                            
+                                     Ixx Ixy Ixz
+                            Ib =  Ixy Iyy Iyz  ,
+                                     Ixz Iyz Izz
+
+
+316                                                                                  8.10. Summary
+
+        where
+                   R                                             R
+             Ixx = R B (y 2 + z 2 )ρ(x, y, z)dV,           Iyy = BR(x2 + z 2 )ρ(x, y, z)dV,
+             Izz = BR(x2 + y 2 )ρ(x, y, z)dV,              Ixy = − R B xyρ(x, y, z)dV,
+             Ixz = − B xzρ(x, y, z)dV,                     Iyz = − B yzρ(x, y, z)dV,
+        B is the volume of the body, dV is a differential volume element, and
+        ρ(x, y, z) is the density function.
+      • If Ib is defined in a frame {b} at the center of mass, with axes aligned
+        with the principal axes of inertia, then Ib is diagonal.
+      • If {b} is at the center of mass but its axes are not aligned with the principal
+        axes of inertia, there always exists a rotated frame {c} defined by the
+                                                 T
+        rotation matrix Rbc such that Ic = Rbc     Ib Rbc is diagonal.
+      • If Ib is defined in a frame {b} at the center of mass then Iq , the inertia
+        in a frame {q} aligned with {b} but displaced from the origin of {b} by
+        q ∈ R3 in {b} coordinates, is
+                                       Iq = Ib + m(q T qI − qq T ).
+
+      • The spatial inertia matrix Gb expressed in a frame {b} at the center of
+        mass is defined as the 6 × 6 matrix
+                                                  
+                                           Ib 0
+                                    Gb =             .
+                                            0 mI
+
+        In a frame {a} at a configuration Tba relative to {b}, the spatial inertia
+        matrix is
+                               Ga = [AdTba ]T Gb [AdTba ].
+
+      • The Lie bracket of two twists V1 and V2 is
+                                          adV1 (V2 ) = [adV1 ]V2 ,
+        where                                                 
+                                                   [ω]    0
+                                    [adV ] =                       ∈ R6×6 .
+                                                   [v]   [ω]
+      • The twist–wrench formulation of the rigid-body dynamics of a single rigid
+        body is
+                              Fb = Gb V̇b − [adVb ]T Gb Vb .
+        The equations have the same form if F, V, and G are all expressed in the
+        same frame, regardless of the frame.
+
+
+Chapter 8. Dynamics of Open Chains                                                                  317
+
+    • The kinetic energy of a rigid body is 12 VbT Gb Vb , and the kinetic energy of
+      an open-chain robot is 12 θ̇T M (θ)θ̇.
+    • The forward–backward Newton–Euler inverse dynamics algorithm is the
+      following:
+      Initialization: Attach a frame {0} to the base, frames {1} to {n} to the
+      centers of mass of links {1} to {n}, and a frame {n+1} at the end-effector,
+      fixed in the frame {n}. Define Mi,i−1 to be the configuration of {i − 1}
+      in {i} when θi = 0. Let Ai be the screw axis of joint i expressed in {i},
+      and Gi be the 6 × 6 spatial inertia matrix of link i. Define V0 to be the
+      twist of the base frame {0} expressed in base-frame coordinates. (This
+      quantity is typically zero.) Let g ∈ R3 be the gravity vector expressed in
+      base-frame-{0} coordinates, and define V̇0 = (0, −g). (Gravity is treated
+      as an acceleration of the base in the opposite direction.) Define Fn+1 =
+      Ftip = (mtip , ftip ) to be the wrench applied to the environment by the
+      end-effector expressed in the end-effector frame {n + 1}.
+       Forward iterations: Given θ, θ̇, θ̈, for i = 1 to n do
+
+                        Ti,i−1      = e−[Ai ]θi Mi,i−1 ,
+                             Vi     =     AdTi,i−1 (Vi−1 ) + Ai θ̇i ,
+                             V̇i    =     AdTi,i−1 (V̇i−1 ) + adVi (Ai )θ̇i + Ai θ̈i .
+
+       Backward iterations: For i = n to 1 do
+
+                          Fi       =    AdT                           T
+                                          Ti+1,i (Fi+1 ) + Gi V̇i − adVi (Gi Vi ),
+
+                           τi      = FiT Ai .
+
+    • Let Jib (θ) be the Jacobian relating θ̇ to the body twist Vi in link i’s center-
+      of-mass frame {i}. Then the mass matrix M (θ) of the manipulator can
+      be expressed as
+                                        Xn
+                                               T
+                               M (θ) =       Jib (θ)Gi Jib (θ).
+                                                  i=1
+
+    • The forward dynamics problem involves solving
+
+                                   M (θ)θ̈ = τ (t) − h(θ, θ̇) − J T (θ)Ftip
+
+       for θ̈, using any efficient solver of equations of the form Ax = b.
+
+
+318                                                                                  8.10. Summary
+
+      • The robot’s dynamics M (θ)θ̈ + h(θ, θ̇) can be expressed in the task space
+        as
+                                F = Λ(θ)V̇ + η(θ, V),
+        where F is the wrench applied to the end-effector, V is the twist of the end-
+        effector, and F, V, and the Jacobian J(θ) are all defined in the same frame.
+        The task-space mass matrix Λ(θ) and gravity and quadratic velocity forces
+        η(θ, V) are
+
+                             Λ(θ)      = J −T M (θ)J −1 ,
+                           η(θ, V)                                ˙ −1 V.
+                                       = J −T h(θ, J −1 V) − Λ(θ)JJ
+
+      • Define two n × n projection matrices of rank n − k
+
+                     P (θ) = I − AT (AM −1 AT )−1 AM −1 ,
+                     Pθ̈ (θ) = M −1 P M = I − M −1 AT (AM −1 AT )−1 A,
+
+        corresponding to the k Pfaffian constraints, A(θ)θ̇ = 0, A ∈ Rk×n , acting
+        on the robot. Then the n + k constrained equations of motion
+
+                                  τ      = M (θ)θ̈ + h(θ, θ̇) + AT (θ)λ,
+                              A(θ)θ̇     = 0
+
+        can be reduced to the following equivalent forms by eliminating the La-
+        grange multipliers λ:
+
+                                       Pτ       = P (M θ̈ + h),
+                                       Pθ̈ θ̈   = Pθ̈ M −1 (τ − h).
+
+        The matrix P projects away the joint force–torque components that act
+        on the constraints without doing work on the robot, and the matrix Pθ̈
+        projects away acceleration components that do not satisfy the constraints.
+      • An ideal gearhead (one that is 100% efficient) with a gear ratio G multi-
+        plies the torque at the output of a motor by a factor G and divides the
+        speed by the factor G, leaving the mechanical power unchanged. The in-
+        ertia of the motor’s rotor about its axis of rotation, as it appears at the
+        output of the gearhead, is G2 Irotor .
+
+
+Chapter 8. Dynamics of Open Chains                                                                  319
+
+\section{Software}
+Software functions associated with this chapter are listed below.
+adV = ad(V)
+Computes [adV ].
+taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,
+Mlist,Glist,Slist)
+Uses Newton–Euler inverse dynamics to compute the n-vector τ of the required
+joint forces–torques given θ, θ̇, θ̈, g, Ftip , a list of transforms Mi−1,i specifying
+the configuration of the center-of-mass frame of link {i} relative to {i − 1} when
+the robot is at its home position, a list of link spatial inertia matrices Gi , and a
+list of joint screw axes Si expressed in the base frame.
+M = MassMatrix(thetalist,Mlist,Glist,Slist)
+Computes the mass matrix M (θ) given the joint configuration θ, a list of trans-
+forms Mi−1,i , a list of link spatial inertia matrices Gi , and a list of joint screw
+axes Si expressed in the base frame.
+c = VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)
+Computes c(θ, θ̇) given the joint configuration θ, the joint velocities θ̇, a list of
+transforms Mi−1,i , a list of link spatial inertia matrices Gi , and a list of joint
+screw axes Si expressed in the base frame.
+grav = GravityForces(thetalist,g,Mlist,Glist,Slist)
+Computes g(θ) given the joint configuration θ, the gravity vector g, a list of
+transforms Mi−1,i , a list of link spatial inertia matrices Gi , and a list of joint
+screw axes Si expressed in the base frame.
+JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)
+Computes J T (θ)Ftip given the joint configuration θ, the wrench Ftip applied by
+the end-effector, a list of transforms Mi−1,i , a list of link spatial inertia matrices
+Gi , and a list of joint screw axes Si expressed in the base frame.
+ddthetalist = ForwardDynamics(thetalist,dthetalist,taulist,g,Ftip,
+Mlist,Glist,Slist)
+Computes θ̈ given the joint configuration θ, the joint velocities θ̇, the joint forces-
+torques τ , the gravity vector g, the wrench Ftip applied by the end-effector, a
+list of transforms Mi−1,i , a list of link spatial inertia matrices Gi , and a list of
+joint screw axes Si expressed in the base frame.
+[thetalistNext,dthetalistNext] = EulerStep(thetalist,dthetalist,
+
+
+320                                                                   8.12. Notes and References
+
+ddthetalist,dt)
+Computes a first-order Euler approximation to {θ(t + δt), θ̇(t + δt)} given the
+joint configuration θ(t), the joint velocities θ̇(t), the joint accelerations θ̈(t), and
+a timestep δt.
+taumat = InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,
+g,Ftipmat,Mlist,Glist,Slist)
+The variable thetamat is an N × n matrix of robot joint variables θ, where the
+ith row corresponds to the n-vector of joint variables θ(t) at time t = (i − 1)δt,
+where δt is the timestep. The variables dthetamat, ddthetamat, and Ftipmat
+similarly represent θ̇, θ̈, and Ftip as a function of time. Other inputs include the
+gravity vector g, a list of transforms Mi−1,i , a list of link spatial inertia matrices
+Gi , and a list of joint screw axes Si expressed in the base frame. This function
+computes an N × n matrix taumat representing the joint forces-torques τ (t)
+required to generate the trajectory specified by θ(t) and Ftip (t). Note that it is
+not necessary to specify δt. The velocities θ̇(t) and accelerations θ̈(t) should be
+consistent with θ(t).
+[thetamat,dthetamat] = ForwardDynamicsTrajectory(thetalist,
+dthetalist,taumat,g,Ftipmat,Mlist,Glist,Slist,dt,intRes)
+This function numerically integrates the robot’s equations of motion using Euler
+integration. The outputs are N × n matrices thetamat and dthetamat, where
+the ith rows correspond respectively to the n-vectors θ((i−1)δt) and θ̇((i−1)δt).
+The inputs are the initial state θ(0), θ̇(0), an N × n matrix of joint forces or
+torques τ (t), the gravity vector g, an N × n matrix of end-effector wrenches
+Ftip (t), a list of transforms Mi−1,i , a list of link spatial inertia matrices Gi , a
+list of joint screw axes Si expressed in the base frame, the timestep δt, and the
+number of integration steps to take during each timestep (a positive integer).
+
+\section{Notes and References}
+An accessible general reference on rigid-body dynamics that covers both the
+Newton–Euler and Lagrangian formulations is [51]. A more classical reference
+that covers a wide range of topics in dynamics is [193].
+    A recursive inverse dynamics algorithm for open chains using the classical
+screw-theoretic machinery of twists and wrenches was first formulated by Feath-
+erstone (the collection of twists, wrenches, and the corresponding analogues of
+accelerations, momentum, and inertias, are collectively referred to as spatial
+vector notation); this formulation, as well as more efficient extensions based on
+articulated body inertias, are described in [46, 47].
+
+
+Chapter 8. Dynamics of Open Chains                                                                  321
+
+    The recursive inverse dynamics algorithm presented in this chapter was first
+described in [133] and makes use of standard operators from the theory of Lie
+groups and Lie algebras. One of the important practical advantages of this ap-
+proach is that analytic formulas can be derived for taking first- and higher-order
+derivatives of the dynamics. This has important consequences for dynamics-
+based motion optimization: the availability of analytic gradients can greatly
+improve the convergence and robustness for motion optimization algorithms.
+These and other related issues are explored in, e.g., [88].
+    The task-space formulation was first initiated by Khatib [74], who referred
+to it as the operational space formulation. Note that the task-space formula-
+tion involves taking time derivatives of the forward kinematics Jacobian, i.e.,
+ ˙
+J(θ).  Using either the body or space Jacobian, J(θ) ˙    can in fact be evaluated
+analytically; this is explored in one of the exercises at the end this chapter.
+    A brief history of the evolution of robot dynamics algorithms, as well as
+pointers to references on the more general subject of multibody system dynamics
+(of which robot dynamics can be considered a subfield) can be found in [48].
+
+\section{Exercises}
+
+Exercise 8.1 Derive the formulas given in Figure 8.5 for:
+ (a) a rectangular parallelpiped;
+ (b) a circular cylinder;
+ (c) an ellipsoid.
+
+Exercise 8.2 Consider a cast iron dumbbell consisting of a cylinder connecting
+two solid spheres at either end of the cylinder. The density of the dumbbell is
+7500 kg/m3 . The cylinder has a diameter of 4 cm and a length of 20 cm. Each
+sphere has a diameter of 20 cm.
+  (a) Find the approximate rotational inertia matrix Ib in a frame {b} at the
+      center of mass with axes aligned with the principal axes of inertia of the
+      dumbbell.
+ (b) Write down the spatial inertia matrix Gb .
+
+Exercise 8.3 Rigid-body dynamics in an arbitrary frame.
+ (a) Show that Equation (8.42) is a generalization of Steiner’s theorem.
+ (b) Derive Equation (8.43).
+
+Exercise 8.4 The 2R open-chain robot of Figure 8.14, referred to as a ro-
+
+
+322                                                                                        8.13. Exercises
+
+                            θ1
+                            τ1       ẑs                                              θ1
+                    L1                                                                τ1
+                                               ŷs
+                               x̂s                                          L1
+             ẑ1                     {s}                                                   ẑs
+        {b1 }
+                                                                 {b } ẑ1
+                                                                    1            m1
+                                                                                                 ŷs
+          x̂     ŷ1                                                                   x̂s {s}
+       τ2 1                          rod 1
+      θ2                  L2                                        τ x̂1    ŷ1
+                                                                  θ2 2
+              ẑ2   ŷ2                    g                                     L2 g
+                                                                         ẑ2
+                                                                             ŷ2
+            x̂2 {b2 }                                                  x̂2
+                                     Zero Position                                 Zero Position
+                 rod 2                                             {b2 } m2
+
+\begin{figure}[h]
+\centering
+\includegraphics{figure_8_14.pdf}
+\caption{2R rotational inverted pendulum. (Left) Its construction; (right) the}
+\label{fig:8_14}
+\end{figure}
+model.
+
+tational inverted pendulum or Furuta pendulum, is shown in its zero position.
+Assuming that the mass of each link is concentrated at the tip and neglecting
+its thickness, the robot can be modeled as shown in the right-hand figure. As-
+sume that m1 = m2 = 2, L1 = L2 = 1, g = 10, and the link inertias I1 and I2
+(expressed in their respective link frames {b1 } and {b2 }) are
+                                                          
+                          0 0 0                    4 0 0
+                   I1 =  0 4 0  ,        I2 =  0 4 0  .
+                          0 0 4                    0 0 0
+  (a) Derive the dynamic equations and determine the input torques τ1 and τ2
+      when θ1 = θ2 = π/4 and the joint velocities and accelerations are all zero.
+  (b) Draw the torque ellipsoid for the mass matrix M (θ) when θ1 = θ2 = π/4.
+
+Exercise 8.5 Prove the following Lie bracket identity (called the Jacobi iden-
+tity) for arbitrary twists V1 , V2 , V3 :
+               adV1 (adV2 (V3 )) + adV3 (adV1 (V2 )) + adV2 (adV3 (V1 )) = 0.
+
+                                  ˙
+Exercise 8.6 The evaluation of J(θ),    the time derivative of the forward kine-
+matics Jacobian, is needed in the calculation of the frame accelerations V̇i in
+the Newton–Euler inverse dynamics algorithm and also in the formulation of
+the task-space dynamics. Letting Ji (θ) denote the ith column of J(θ), we have
+                                                           Xn
+                                               d               ∂Ji
+                                                  Ji (θ) =         θ̇j .
+                                               dt          j=1
+                                                               ∂θj
+
+
+Chapter 8. Dynamics of Open Chains                                                                  323
+
+  (a) Suppose that J(θ) is the space Jacobian. Show that
+                                  
+                           ∂Ji      adJi (Jj ) for i > j
+                               =
+                           ∂θj              0 for i ≤ j.
+  (b) Now suppose that J(θ) is the body Jacobian. Show that
+                                 
+                         ∂Ji        adJi (Jj ) for i < j
+                              =
+                         ∂θj                0 for i ≥ j.
+
+Exercise 8.7 Show that the time derivative of the mass matrix Ṁ (θ) can be
+written explicitly as
+                 Ṁ = AT LT ΓT [adAθ̇ ]T LT GLA + AT LT GL[adAθ̇ ]ΓA,
+with the matrices as defined in the closed-form dynamics formulation.
+
+Exercise 8.8 Explain intuitively the shapes of the end-effector force ellipsoids
+in Figure 8.4 on the basis of the point masses and the Jacobians.
+
+Exercise 8.9 Consider a motor with rotor inertia Irotor connected through
+a gearhead of gear ratio G to a load with scalar inertia Ilink about the rota-
+tion axis. The load and motor are said to be inertia matched if, for any
+given torque τm at the motor, the acceleration of the load is maximized. The
+acceleration of the load can be written
+                                         Gτm
+                              θ̈ =                   .
+                                   Ilink + G2 Irotor
+                                           p
+Solve for the inertia-matching gear ratio Ilink /Irotor by solving dθ̈/dG = 0.
+
+Exercise 8.10 Give the steps that rearrange Equation (8.98) to get Equa-
+tion (8.100). Remember that P (θ) is not full rank and cannot be inverted.
+
+Exercise 8.11 Program a function to calculate h(θ, θ̇) = c(θ, θ̇) + g(θ) effi-
+ciently using Newton–Euler inverse dynamics.
+
+Exercise 8.12 Give the equations that would convert the joint and link de-
+scriptions in a robot’s URDF file to the data Mlist, Glist, and Slist, suitable
+for using with the Newton–Euler algorithm InverseDynamicsTrajectory.
+
+Exercise 8.13 The efficient evaluation of M (θ).
+
+
+324                                                                                  8.13. Exercises
+
+  (a) Develop conceptually a computationally efficient algorithm for determin-
+      ing the mass matrix M (θ) using Equation (8.57).
+  (b) Implement this algorithm.
+
+Exercise 8.14 The function InverseDynamicsTrajectory requires the user
+to enter not only a time sequence of joint variables thetamat but also a time
+sequence of joint velocities dthetamat and accelerations ddthetamat. Instead,
+the function could use numerical differencing to find approximately the joint
+velocities and accelerations at each timestep, using only thetamat. Write an
+alternative InverseDynamicsTrajectory function that does not require the
+user to enter dthetamat and ddthetamat. Verify that it yields similar results.
+
+Exercise 8.15 Dynamics of the UR5 robot.
+ (a) Write the spatial inertia matrices Gi of the six links of the UR5, given
+     the center-of-mass frames and mass and inertial properties defined in the
+     URDF in Section 4.2.
+ (b) Simulate the UR5 falling under gravity with acceleration g = 9.81 m/s2
+     in the −ẑs -direction. The robot starts at its zero configuration and zero
+     joint torques are applied. Simulate the motion for three seconds, with at
+     least 100 integration steps per second. (Ignore the effects of friction and
+     the geared rotors.)
+
+
+
+\end{document}
