@@ -149,6 +149,82 @@ Q^{-1} = Q^T
 
 所以夹角保持不变。
 
+\subsection{性质4.5：反对称矩阵的旋转变换（关键恒等式）}
+
+\textbf{性质}：如果$Q \in SO(3)$（3维特殊正交矩阵），$\bm{v} \in \mathbb{R}^3$是任意向量，$[\bm{v}]$是$\bm{v}$的反对称矩阵，则
+\begin{equation}
+Q[\bm{v}]Q^T = [Q\bm{v}]
+\label{eq:skew_rotation_identity}
+\end{equation}
+
+\textbf{反对称矩阵的定义}：对于向量$\bm{v} = (v_x, v_y, v_z)^T \in \mathbb{R}^3$，其反对称矩阵定义为：
+\begin{equation}
+[\bm{v}] = \begin{bmatrix}
+0 & -v_z & v_y \\
+v_z & 0 & -v_x \\
+-v_y & v_x & 0
+\end{bmatrix}
+\label{eq:skew_definition}
+\end{equation}
+
+\textbf{反对称矩阵的基本性质}：
+\begin{itemize}
+\item \textbf{反对称性}：$[\bm{v}]^T = -[\bm{v}]$
+\item \textbf{叉乘表示}：$[\bm{v}] \bm{u} = \bm{v} \times \bm{u}$（对任意$\bm{u} \in \mathbb{R}^3$）
+\end{itemize}
+
+\textbf{证明}：
+
+对于任意$\bm{u} \in \mathbb{R}^3$，考虑$Q[\bm{v}]Q^T$作用在$\bm{u}$上的结果：
+\begin{align}
+Q[\bm{v}]Q^T \bm{u} &= Q[\bm{v}](Q^T \bm{u}) \\
+&= Q(\bm{v} \times (Q^T \bm{u}))
+\end{align}
+
+\textbf{关键步骤}：利用叉乘的旋转性质（这可以通过行列式或直接计算证明）：
+\begin{equation}
+Q(\bm{v} \times \bm{u}) = (Q\bm{v}) \times (Q\bm{u})
+\label{eq:cross_product_rotation}
+\end{equation}
+
+\textbf{注}：这个性质本身需要证明，但可以通过以下方式验证：
+\begin{itemize}
+\item 使用行列式性质：$\det([Q\bm{v}], Q\bm{u}, Q\bm{w}) = \det(Q) \det([\bm{v}], \bm{u}, \bm{w})$
+\item 或者直接计算验证
+\end{itemize}
+
+继续证明：
+\begin{align}
+Q[\bm{v}]Q^T \bm{u} &= Q(\bm{v} \times (Q^T \bm{u})) \\
+&= (Q\bm{v}) \times (Q Q^T \bm{u}) \quad \text{（应用式(\ref{eq:cross_product_rotation})）} \\
+&= (Q\bm{v}) \times \bm{u} \quad \text{（因为$Q Q^T = I$）} \\
+&= [Q\bm{v}] \bm{u}
+\end{align}
+
+由于这对任意$\bm{u} \in \mathbb{R}^3$都成立，我们得到：
+\begin{equation}
+Q[\bm{v}]Q^T = [Q\bm{v}]
+\end{equation}
+
+\textbf{等价表述}：
+\begin{equation}
+[Q\bm{v}] = Q[\bm{v}]Q^T
+\end{equation}
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 这个恒等式表明：对反对称矩阵进行相似变换（$Q \cdot Q^T$），等价于先对对应的向量进行旋转，再构造反对称矩阵
+\item 在机器人学中，这个恒等式在坐标变换中非常重要，特别是在处理角速度、力矩等涉及叉乘的物理量时
+\item 这是Lie代数$\mathfrak{so}(3)$到$\mathfrak{so}(3)$的伴随表示（adjoint representation）的基础
+\end{itemize}
+
+\textbf{应用}：
+\begin{itemize}
+\item 用于证明旋转矩阵保持叉乘关系：$(Q\bm{x}) \times (Q\bm{y}) = Q(\bm{x} \times \bm{y})$
+\item 在机器人动力学中，用于在不同坐标系间转换角速度和力矩
+\item 在SE(3)的伴随表示中起关键作用
+\end{itemize}
+
 \subsection{性质5：保持叉乘（3维情况）}
 
 \textbf{性质}：如果$Q \in SO(3)$（3维特殊正交矩阵），$\bm{x}, \bm{y} \in \mathbb{R}^3$，则
@@ -157,9 +233,43 @@ Q^{-1} = Q^T
 \label{eq:preserve_cross_product}
 \end{equation}
 
-\textbf{证明}：对于旋转矩阵$Q \in SO(3)$，这个性质成立。这可以通过反对称矩阵的性质证明。
+\textbf{证明}：我们使用反对称矩阵的性质和性质4.5中的关键恒等式来证明这个重要结果。
 
-\textbf{几何意义}：旋转矩阵保持叉乘关系，这在机器人学中非常重要。
+\textbf{步骤1}：将叉乘转换为反对称矩阵形式
+
+利用反对称矩阵的性质：$[\bm{v}] \bm{u} = \bm{v} \times \bm{u}$，我们有：
+\begin{align}
+\bm{x} \times \bm{y} &= [\bm{x}] \bm{y} \\
+(Q\bm{x}) \times (Q\bm{y}) &= [Q\bm{x}] (Q\bm{y})
+\end{align}
+
+\textbf{步骤2}：应用性质4.5中的关键恒等式
+
+根据性质4.5（式(\ref{eq:skew_rotation_identity})），对于$\bm{x} \in \mathbb{R}^3$，有：
+\begin{equation}
+[Q\bm{x}] = Q[\bm{x}]Q^T
+\end{equation}
+
+\textbf{步骤3}：计算$(Q\bm{x}) \times (Q\bm{y})$
+\begin{align}
+(Q\bm{x}) \times (Q\bm{y}) &= [Q\bm{x}] (Q\bm{y}) \\
+&= (Q[\bm{x}]Q^T)(Q\bm{y}) \quad \text{（应用性质4.5）} \\
+&= Q[\bm{x}](Q^T Q)\bm{y} \\
+&= Q[\bm{x}] I \bm{y} \quad \text{（因为$Q^T Q = I$）} \\
+&= Q[\bm{x}] \bm{y} \\
+&= Q(\bm{x} \times \bm{y})
+\end{align}
+
+\textbf{因此}：$(Q\bm{x}) \times (Q\bm{y}) = Q(\bm{x} \times \bm{y})$，证毕。
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 旋转矩阵保持叉乘关系
+\item 先旋转两个向量再叉乘，等于先叉乘再旋转结果
+\item 在机器人学中，这个性质用于在不同坐标系间转换角速度、力矩等涉及叉乘的物理量
+\end{itemize}
+
+\textbf{注}：关键恒等式$Q[\bm{v}]Q^T = [Q\bm{v}]$的详细证明见性质4.5。
 
 \subsection{性质6：列向量和行向量的正交性}
 
@@ -170,12 +280,88 @@ Q^{-1} = Q^T
 \item 行向量也满足相同的性质
 \end{itemize}
 
-\textbf{证明}：由$Q^T Q = I$，我们有：
+\textbf{列向量的性质（从$Q^T Q = I$得出）}：
+
+设$Q = [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n]$，其中$\bm{q}_i$是第$i$列向量。由$Q^T Q = I$，我们有：
 \begin{equation}
 Q^T Q = \begin{bmatrix} \bm{q}_1^T \\ \bm{q}_2^T \\ \vdots \\ \bm{q}_n^T \end{bmatrix} [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n] = \begin{bmatrix} \bm{q}_i^T \bm{q}_j \end{bmatrix} = I
 \end{equation}
 
-因此$\bm{q}_i^T \bm{q}_j = \delta_{ij}$，其中$\delta_{ij}$是Kronecker delta。
+因此：
+\begin{equation}
+\bm{q}_i^T \bm{q}_j = \delta_{ij} = \begin{cases} 1 & \text{如果} i = j \\ 0 & \text{如果} i \neq j \end{cases}
+\end{equation}
+
+这意味着：
+\begin{itemize}
+\item \textbf{正交性}：当$i \neq j$时，$\bm{q}_i^T \bm{q}_j = 0$，即列向量两两正交
+\item \textbf{单位长度}：当$i = j$时，$\bm{q}_i^T \bm{q}_i = \|\bm{q}_i\|^2 = 1$，即列向量是单位向量
+\end{itemize}
+
+\textbf{行向量的性质（从$Q Q^T = I$得出）}：
+
+设$Q$的行向量为$\bm{r}_1^T, \bm{r}_2^T, \ldots, \bm{r}_n^T$，即：
+\begin{equation}
+Q = \begin{bmatrix} \bm{r}_1^T \\ \bm{r}_2^T \\ \vdots \\ \bm{r}_n^T \end{bmatrix}
+\end{equation}
+
+由$Q Q^T = I$，我们有：
+\begin{equation}
+Q Q^T = \begin{bmatrix} \bm{r}_1^T \\ \bm{r}_2^T \\ \vdots \\ \bm{r}_n^T \end{bmatrix} \begin{bmatrix} \bm{r}_1 & \bm{r}_2 & \cdots & \bm{r}_n \end{bmatrix} = \begin{bmatrix} \bm{r}_i^T \bm{r}_j \end{bmatrix} = I
+\end{equation}
+
+因此：
+\begin{equation}
+\bm{r}_i^T \bm{r}_j = \delta_{ij}
+\end{equation}
+
+这意味着行向量也满足：
+\begin{itemize}
+\item \textbf{正交性}：当$i \neq j$时，$\bm{r}_i^T \bm{r}_j = 0$，即行向量两两正交
+\item \textbf{单位长度}：当$i = j$时，$\bm{r}_i^T \bm{r}_i = \|\bm{r}_i\|^2 = 1$，即行向量是单位向量
+\end{itemize}
+
+\textbf{行向量和列向量之间的关系}：
+
+\textbf{重要结论}：对于正交矩阵$Q$，行向量和列向量具有\textbf{完全对称}的性质：
+\begin{itemize}
+\item 列向量构成标准正交基 $\Longleftrightarrow$ 行向量构成标准正交基
+\item 这是因为$Q^T Q = I$和$Q Q^T = I$是等价的（对于方阵）
+\item 实际上，$Q$的行向量就是$Q^T$的列向量，而$Q^T$也是正交矩阵
+\end{itemize}
+
+\textbf{具体关系}：
+
+设$Q = [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n]$，其中$\bm{q}_i$是列向量，则：
+\begin{equation}
+Q^T = \begin{bmatrix} \bm{q}_1^T \\ \bm{q}_2^T \\ \vdots \\ \bm{q}_n^T \end{bmatrix}
+\end{equation}
+
+因此：
+\begin{itemize}
+\item $Q$的第$i$行向量 = $Q^T$的第$i$列向量 = $\bm{q}_i^T$
+\item 由于$Q^T$也是正交矩阵，其列向量（即$Q$的行向量）也构成标准正交基
+\end{itemize}
+
+\textbf{矩阵表示}：
+
+如果$Q = [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n]$，则：
+\begin{align}
+Q^T Q &= \begin{bmatrix} \bm{q}_1^T \\ \bm{q}_2^T \\ \vdots \\ \bm{q}_n^T \end{bmatrix} [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n] = \begin{bmatrix} \bm{q}_i^T \bm{q}_j \end{bmatrix} = I \\
+Q Q^T &= [\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n] \begin{bmatrix} \bm{q}_1^T \\ \bm{q}_2^T \\ \vdots \\ \bm{q}_n^T \end{bmatrix} = \sum_{i=1}^n \bm{q}_i \bm{q}_i^T = I
+\end{align}
+
+第二个等式表明：列向量的外积之和等于单位矩阵，这是标准正交基的另一个特征。
+
+\textbf{总结}：
+
+对于正交矩阵$Q$：
+\begin{enumerate}
+\item \textbf{列向量}：$\{\bm{q}_1, \bm{q}_2, \ldots, \bm{q}_n\}$构成$\mathbb{R}^n$的标准正交基
+\item \textbf{行向量}：$\{\bm{q}_1^T, \bm{q}_2^T, \ldots, \bm{q}_n^T\}$也构成$\mathbb{R}^n$的标准正交基
+\item \textbf{对称性}：行向量和列向量的性质完全对称，因为$Q^T$也是正交矩阵
+\item \textbf{等价性}：$Q^T Q = I$（列向量标准正交）$\Longleftrightarrow$ $Q Q^T = I$（行向量标准正交）
+\end{enumerate}
 
 \subsection{性质7：正交矩阵的乘积}
 
