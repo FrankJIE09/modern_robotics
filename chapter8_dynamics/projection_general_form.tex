@@ -1,0 +1,801 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{向量和矩阵投影的普遍形式}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+在机器人学中，我们经常需要计算向量或矩阵在某个方向或子空间上的投影。本文档将系统地介绍各种情况下的投影公式，从简单的向量投影到更一般的矩阵投影。
+
+\section{基本投影公式}
+
+\subsection{向量在向量上的投影}
+
+\subsubsection{标准形式}
+
+给定向量$\bm{F} \in \mathbb{R}^n$和向量$\bm{A} \in \mathbb{R}^n$，$\bm{F}$在$\bm{A}$方向上的投影为：
+\begin{equation}
+\text{proj}_{\bm{A}}(\bm{F}) = \frac{\bm{F}^T \bm{A}}{\|\bm{A}\|^2} \bm{A} = \frac{\bm{F}^T \bm{A}}{\bm{A}^T \bm{A}} \bm{A}
+\label{eq:vector_projection}
+\end{equation}
+
+\textbf{投影的标量大小}为：
+\begin{equation}
+\|\text{proj}_{\bm{A}}(\bm{F})\| = \frac{|\bm{F}^T \bm{A}|}{\|\bm{A}\|}
+\end{equation}
+
+\subsubsection{单位向量情况}
+
+如果$\bm{A}$是单位向量（$\|\bm{A}\| = 1$），则投影公式简化为：
+\begin{equation}
+\text{proj}_{\bm{A}}(\bm{F}) = (\bm{F}^T \bm{A}) \bm{A}
+\label{eq:unit_vector_projection}
+\end{equation}
+
+投影的标量大小为：
+\begin{equation}
+\|\text{proj}_{\bm{A}}(\bm{F})\| = |\bm{F}^T \bm{A}|
+\end{equation}
+
+\subsubsection{矩阵形式}
+
+投影可以写成矩阵形式：
+\begin{equation}
+\text{proj}_{\bm{A}}(\bm{F}) = \frac{\bm{A} \bm{A}^T}{\bm{A}^T \bm{A}} \bm{F} = P_{\bm{A}} \bm{F}
+\label{eq:projection_matrix}
+\end{equation}
+
+其中投影矩阵为：
+\begin{equation}
+P_{\bm{A}} = \frac{\bm{A} \bm{A}^T}{\bm{A}^T \bm{A}}
+\label{eq:projection_matrix_def}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item $P_{\bm{A}}^2 = P_{\bm{A}}$（幂等性）
+\item $P_{\bm{A}}^T = P_{\bm{A}}$（对称性）
+\item $\text{rank}(P_{\bm{A}}) = 1$
+\end{itemize}
+
+\subsubsection{例子1：二维向量投影}
+
+\textbf{问题}：计算向量$\bm{F} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}$在向量$\bm{A} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$方向上的投影。
+
+\textbf{步骤1}：计算内积和范数
+\begin{align}
+\bm{F}^T \bm{A} &= \begin{bmatrix} 3 & 4 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 3 + 4 = 7 \\
+\bm{A}^T \bm{A} &= \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 1 + 1 = 2 \\
+\|\bm{A}\| &= \sqrt{2}
+\end{align}
+
+\textbf{步骤2}：计算投影
+\begin{align}
+\text{proj}_{\bm{A}}(\bm{F}) &= \frac{\bm{F}^T \bm{A}}{\bm{A}^T \bm{A}} \bm{A} = \frac{7}{2} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix}
+\end{align}
+
+\textbf{验证}：
+\begin{itemize}
+\item 投影向量$\begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix}$确实在$\bm{A}$的方向上（与$\bm{A}$平行）
+\item 投影的标量大小为：$\|\text{proj}_{\bm{A}}(\bm{F})\| = \frac{7}{\sqrt{2}} = \frac{7\sqrt{2}}{2} \approx 4.95$
+\item 原始向量$\bm{F} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}$的模长为$\sqrt{9+16} = 5$
+\end{itemize}
+
+\textbf{几何解释}：在二维平面上，$\bm{F}$在$\bm{A}$方向上的投影是$\bm{F}$在通过原点和$\bm{A}$的直线上"落下"的"影子"。
+
+\subsubsection{例子2：三维向量投影（单位向量）}
+
+\textbf{问题}：计算向量$\bm{F} = \begin{bmatrix} 2 \\ 3 \\ 6 \end{bmatrix}$在单位向量$\bm{A} = \frac{1}{\sqrt{3}}\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}$方向上的投影。
+
+\textbf{步骤1}：验证$\bm{A}$是单位向量
+\begin{equation}
+\|\bm{A}\| = \sqrt{\left(\frac{1}{\sqrt{3}}\right)^2 + \left(\frac{1}{\sqrt{3}}\right)^2 + \left(\frac{1}{\sqrt{3}}\right)^2} = \sqrt{\frac{1}{3} + \frac{1}{3} + \frac{1}{3}} = 1
+\end{equation}
+
+\textbf{步骤2}：计算内积
+\begin{align}
+\bm{F}^T \bm{A} &= \begin{bmatrix} 2 & 3 & 6 \end{bmatrix} \frac{1}{\sqrt{3}}\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix} \\
+&= \frac{1}{\sqrt{3}}(2 + 3 + 6) = \frac{11}{\sqrt{3}}
+\end{align}
+
+\textbf{步骤3}：计算投影（使用单位向量公式）
+\begin{align}
+\text{proj}_{\bm{A}}(\bm{F}) &= (\bm{F}^T \bm{A}) \bm{A} = \frac{11}{\sqrt{3}} \cdot \frac{1}{\sqrt{3}}\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix} \\
+&= \frac{11}{3}\begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix} = \begin{bmatrix} \frac{11}{3} \\ \frac{11}{3} \\ \frac{11}{3} \end{bmatrix}
+\end{align}
+
+\textbf{投影的标量大小}：
+\begin{equation}
+\|\text{proj}_{\bm{A}}(\bm{F})\| = |\bm{F}^T \bm{A}| = \frac{11}{\sqrt{3}} \approx 6.35
+\end{equation}
+
+\textbf{几何解释}：在三维空间中，$\bm{F}$在单位向量$\bm{A}$方向上的投影长度为$\frac{11}{\sqrt{3}}$，方向与$\bm{A}$相同。
+
+\subsection{向量在矩阵（子空间）上的投影}
+
+\subsubsection{一般形式}
+
+给定向量$\bm{F} \in \mathbb{R}^n$和矩阵$A \in \mathbb{R}^{n \times k}$（$k \leq n$），$\bm{F}$在$A$的列空间（$\text{col}(A)$）上的投影为：
+\begin{equation}
+\text{proj}_{A}(\bm{F}) = A (A^T A)^{-1} A^T \bm{F} = P_A \bm{F}
+\label{eq:subspace_projection}
+\end{equation}
+
+其中投影矩阵为：
+\begin{equation}
+P_A = A (A^T A)^{-1} A^T
+\label{eq:subspace_projection_matrix}
+\end{equation}
+
+\textbf{前提条件}：$A$的列线性无关，即$\text{rank}(A) = k$，这样$A^T A$可逆。
+
+\subsubsection{标准正交基情况}
+
+如果$A$的列是标准正交的（$A^T A = I$），则投影公式简化为：
+\begin{equation}
+\text{proj}_{A}(\bm{F}) = A A^T \bm{F}
+\label{eq:orthonormal_projection}
+\end{equation}
+
+投影矩阵为：
+\begin{equation}
+P_A = A A^T
+\label{eq:orthonormal_projection_matrix}
+\end{equation}
+
+\subsubsection{投影矩阵的性质}
+
+对于$P_A = A (A^T A)^{-1} A^T$：
+\begin{itemize}
+\item \textbf{幂等性}：$P_A^2 = P_A$
+\item \textbf{对称性}：$P_A^T = P_A$
+\item \textbf{秩}：$\text{rank}(P_A) = \text{rank}(A) = k$
+\item \textbf{正交补投影}：$I - P_A$是到$\text{col}(A)$的正交补空间的投影
+\end{itemize}
+
+\subsubsection{例子3：向量在二维子空间上的投影}
+
+\textbf{问题}：计算向量$\bm{F} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}$在由矩阵$A = \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix}$的列张成的子空间上的投影。
+
+\textbf{步骤1}：计算$A^T A$
+\begin{align}
+A^T A &= \begin{bmatrix} 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix} \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} 1+1 & 0+1 \\ 0+1 & 1+1 \end{bmatrix} = \begin{bmatrix} 2 & 1 \\ 1 & 2 \end{bmatrix}
+\end{align}
+
+\textbf{步骤2}：计算$(A^T A)^{-1}$
+\begin{align}
+(A^T A)^{-1} &= \frac{1}{2 \cdot 2 - 1 \cdot 1} \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix} \\
+&= \frac{1}{3} \begin{bmatrix} 2 & -1 \\ -1 & 2 \end{bmatrix} = \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{bmatrix}
+\end{align}
+
+\textbf{步骤3}：计算$A^T \bm{F}$
+\begin{align}
+A^T \bm{F} &= \begin{bmatrix} 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} = \begin{bmatrix} 1+3 \\ 2+3 \end{bmatrix} = \begin{bmatrix} 4 \\ 5 \end{bmatrix}
+\end{align}
+
+\textbf{步骤4}：计算投影
+\begin{align}
+\text{proj}_{A}(\bm{F}) &= A (A^T A)^{-1} A^T \bm{F} \\
+&= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{bmatrix} \begin{bmatrix} 4 \\ 5 \end{bmatrix} \\
+&= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} \frac{2}{3} \cdot 4 - \frac{1}{3} \cdot 5 \\ -\frac{1}{3} \cdot 4 + \frac{2}{3} \cdot 5 \end{bmatrix} \\
+&= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} \frac{8-5}{3} \\ \frac{-4+10}{3} \end{bmatrix} \\
+&= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}
+\end{align}
+
+\textbf{结果}：$\text{proj}_{A}(\bm{F}) = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} = \bm{F}$
+
+\textbf{解释}：$\bm{F}$本身就在$A$的列空间中（因为$\bm{F} = A \begin{bmatrix} 1 \\ 2 \end{bmatrix}$），所以投影就是$\bm{F}$本身。
+
+\subsubsection{例子4：向量在标准正交基上的投影}
+
+\textbf{问题}：计算向量$\bm{F} = \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix}$在标准正交基$A = \begin{bmatrix} \frac{1}{\sqrt{2}} & 0 \\ \frac{1}{\sqrt{2}} & 0 \\ 0 & 1 \end{bmatrix}$上的投影。
+
+\textbf{验证标准正交性}：
+\begin{equation}
+A^T A = \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{2}} & 0 \\ \frac{1}{\sqrt{2}} & 0 \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} = I
+\end{equation}
+
+\textbf{计算投影}（使用简化公式）：
+\begin{align}
+\text{proj}_{A}(\bm{F}) &= A A^T \bm{F} \\
+&= \begin{bmatrix} \frac{1}{\sqrt{2}} & 0 \\ \frac{1}{\sqrt{2}} & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} & 0 \\ 0 & 0 & 1 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \\ 5 \end{bmatrix} \\
+&= \begin{bmatrix} \frac{1}{\sqrt{2}} & 0 \\ \frac{1}{\sqrt{2}} & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} \frac{3+4}{\sqrt{2}} \\ 5 \end{bmatrix} \\
+&= \begin{bmatrix} \frac{1}{\sqrt{2}} & 0 \\ \frac{1}{\sqrt{2}} & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} \frac{7}{\sqrt{2}} \\ 5 \end{bmatrix} \\
+&= \begin{bmatrix} \frac{7}{2} \\ \frac{7}{2} \\ 5 \end{bmatrix}
+\end{align}
+
+\textbf{解释}：投影是$\bm{F}$在$A$的两个列向量方向上的分量的和。
+
+\section{矩阵在矩阵上的投影}
+
+\subsection{一般情况}
+
+给定矩阵$F \in \mathbb{R}^{m \times n}$和矩阵$A \in \mathbb{R}^{m \times k}$，我们可以将$F$的每一列投影到$A$的列空间上。
+
+\subsubsection{列投影}
+
+$F$的每一列$\bm{f}_j$（$j = 1, \ldots, n$）在$A$的列空间上的投影为：
+\begin{equation}
+\text{proj}_{A}(\bm{f}_j) = A (A^T A)^{-1} A^T \bm{f}_j
+\end{equation}
+
+因此，整个矩阵$F$在$A$的列空间上的投影为：
+\begin{equation}
+\text{proj}_{A}(F) = A (A^T A)^{-1} A^T F = P_A F
+\label{eq:matrix_projection}
+\end{equation}
+
+其中$P_A = A (A^T A)^{-1} A^T$是投影矩阵。
+
+\subsubsection{行投影}
+
+类似地，如果考虑$F$的行在$A$的行空间上的投影，我们有：
+\begin{equation}
+\text{proj}_{A^T}(F) = F A^T (A A^T)^{-1} A
+\label{eq:row_projection}
+\end{equation}
+
+前提是$A A^T$可逆（即$A$的行线性无关）。
+
+\subsubsection{例子5：矩阵在矩阵上的投影}
+
+\textbf{问题}：计算矩阵$F = \begin{bmatrix} 1 & 4 \\ 2 & 5 \\ 3 & 6 \end{bmatrix}$在矩阵$A = \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix}$的列空间上的投影。
+
+\textbf{方法}：将$F$的每一列分别投影到$A$的列空间上。
+
+\textbf{步骤1}：我们已经知道（从例子3）：
+\begin{equation}
+(A^T A)^{-1} = \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{bmatrix}
+\end{equation}
+
+\textbf{步骤2}：计算投影矩阵
+\begin{align}
+P_A &= A (A^T A)^{-1} A^T \\
+&= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{bmatrix} \begin{bmatrix} 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix}
+\end{align}
+
+先计算中间项：
+\begin{align}
+A (A^T A)^{-1} &= \begin{bmatrix} 1 & 0 \\ 0 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{bmatrix} \\
+&= \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \\ \frac{1}{3} & \frac{1}{3} \end{bmatrix}
+\end{align}
+
+然后：
+\begin{align}
+P_A &= \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \\ \frac{1}{3} & \frac{1}{3} \end{bmatrix} \begin{bmatrix} 1 & 0 & 1 \\ 0 & 1 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} & \frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} & \frac{1}{3} \\ \frac{1}{3} & \frac{1}{3} & \frac{2}{3} \end{bmatrix}
+\end{align}
+
+\textbf{步骤3}：计算投影
+\begin{align}
+\text{proj}_{A}(F) &= P_A F \\
+&= \begin{bmatrix} \frac{2}{3} & -\frac{1}{3} & \frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} & \frac{1}{3} \\ \frac{1}{3} & \frac{1}{3} & \frac{2}{3} \end{bmatrix} \begin{bmatrix} 1 & 4 \\ 2 & 5 \\ 3 & 6 \end{bmatrix} \\
+&= \begin{bmatrix} \frac{2-2+3}{3} & \frac{8-5+6}{3} \\ \frac{-1+4+3}{3} & \frac{-4+10+6}{3} \\ \frac{1+2+6}{3} & \frac{4+5+12}{3} \end{bmatrix} \\
+&= \begin{bmatrix} 1 & 3 \\ 2 & 4 \\ 3 & 7 \end{bmatrix}
+\end{align}
+
+\textbf{解释}：$F$的每一列都被投影到$A$的列空间上，得到投影后的矩阵。
+
+\subsection{双投影（行和列）}
+
+如果我们同时考虑行和列的投影，可以使用更一般的张量积形式，但这超出了本文档的范围。
+
+\section{加权投影}
+
+\subsection{加权内积空间}
+
+在加权内积空间中，内积定义为：
+\begin{equation}
+\langle \bm{x}, \bm{y} \rangle_W = \bm{x}^T W \bm{y}
+\end{equation}
+
+其中$W \in \mathbb{R}^{n \times n}$是正定权重矩阵。
+
+\subsection{加权投影公式}
+
+给定向量$\bm{F} \in \mathbb{R}^n$和矩阵$A \in \mathbb{R}^{n \times k}$，在加权内积下的投影为：
+\begin{equation}
+\text{proj}_{A,W}(\bm{F}) = A (A^T W A)^{-1} A^T W \bm{F}
+\label{eq:weighted_projection}
+\end{equation}
+
+投影矩阵为：
+\begin{equation}
+P_{A,W} = A (A^T W A)^{-1} A^T W
+\label{eq:weighted_projection_matrix}
+\end{equation}
+
+\subsection{在机器人学中的应用}
+
+在混合运动-力控制中，使用加权投影矩阵：
+\begin{equation}
+P = I - A^T (A \Lambda^{-1} A^T)^{-1} A \Lambda^{-1}
+\label{eq:hybrid_projection}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $A \in \mathbb{R}^{k \times n}$：约束矩阵
+\item $\Lambda \in \mathbb{R}^{n \times n}$：任务空间惯性矩阵（正定）
+\item $P$：投影到运动控制子空间
+\item $I - P$：投影到力控制子空间
+\end{itemize}
+
+这个投影矩阵可以理解为在加权内积$\langle \cdot, \cdot \rangle_{\Lambda^{-1}}$下的正交补投影。
+
+\subsubsection{例子6：加权投影}
+
+\textbf{问题}：计算向量$\bm{F} = \begin{bmatrix} 2 \\ 3 \end{bmatrix}$在向量$\bm{A} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$方向上的加权投影，权重矩阵为$W = \begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix}$。
+
+\textbf{步骤1}：计算$A^T W A$（注意这里$A$是向量，所以是标量）
+\begin{align}
+A^T W A &= \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} \\
+&= \begin{bmatrix} 2 & 1 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 2 + 1 = 3
+\end{align}
+
+\textbf{步骤2}：计算$A^T W \bm{F}$
+\begin{align}
+A^T W \bm{F} &= \begin{bmatrix} 1 & 1 \end{bmatrix} \begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 3 \end{bmatrix} \\
+&= \begin{bmatrix} 2 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 3 \end{bmatrix} = 4 + 3 = 7
+\end{align}
+
+\textbf{步骤3}：计算加权投影
+\begin{align}
+\text{proj}_{A,W}(\bm{F}) &= A (A^T W A)^{-1} A^T W \bm{F} \\
+&= \begin{bmatrix} 1 \\ 1 \end{bmatrix} \cdot \frac{1}{3} \cdot 7 = \frac{7}{3} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} \frac{7}{3} \\ \frac{7}{3} \end{bmatrix}
+\end{align}
+
+\textbf{对比标准投影}：如果使用标准投影（$W = I$），则：
+\begin{align}
+\text{proj}_{A}(\bm{F}) &= \frac{\bm{F}^T \bm{A}}{\bm{A}^T \bm{A}} \bm{A} = \frac{5}{2} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = \begin{bmatrix} 2.5 \\ 2.5 \end{bmatrix}
+\end{align}
+
+\textbf{解释}：加权投影考虑了不同坐标轴的重要性（$x$轴的权重是$y$轴的2倍），因此结果与标准投影不同。
+
+\section{特殊情况}
+
+\subsection{一维情况（向量投影）}
+
+当$A = \bm{a} \in \mathbb{R}^n$是单个向量时，投影公式(\ref{eq:subspace_projection})退化为：
+\begin{equation}
+\text{proj}_{\bm{a}}(\bm{F}) = \bm{a} (\bm{a}^T \bm{a})^{-1} \bm{a}^T \bm{F} = \frac{\bm{a} \bm{a}^T}{\bm{a}^T \bm{a}} \bm{F}
+\end{equation}
+
+这与公式(\ref{eq:vector_projection})一致。
+
+\subsection{满秩方阵}
+
+如果$A \in \mathbb{R}^{n \times n}$是满秩方阵（$\text{rank}(A) = n$），则$\text{col}(A) = \mathbb{R}^n$，投影矩阵为：
+\begin{equation}
+P_A = A (A^T A)^{-1} A^T = I
+\end{equation}
+
+即恒等矩阵，因为整个空间都在$A$的列空间中。
+
+\subsection{零矩阵}
+
+如果$A = 0$，则$\text{col}(A) = \{0\}$，投影矩阵为：
+\begin{equation}
+P_A = 0
+\end{equation}
+
+所有向量都投影到零向量。
+
+\section{投影的分解}
+
+\subsection{正交分解}
+
+对于任意向量$\bm{F}$，可以分解为：
+\begin{equation}
+\bm{F} = \underbrace{P_A \bm{F}}_{\text{投影分量}} + \underbrace{(I - P_A) \bm{F}}_{\text{正交分量}}
+\label{eq:orthogonal_decomposition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $P_A \bm{F}$：在$\text{col}(A)$上的投影
+\item $(I - P_A) \bm{F}$：在$\text{col}(A)^\perp$（正交补空间）上的投影
+\end{itemize}
+
+\subsubsection{例子10：正交分解}
+
+\textbf{问题}：将向量$\bm{F} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}$分解为在$\bm{A} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$方向上的投影分量和正交分量。
+
+\textbf{步骤1}：计算投影分量（从例子1已知）
+\begin{equation}
+P_{\bm{A}} \bm{F} = \text{proj}_{\bm{A}}(\bm{F}) = \begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix}
+\end{equation}
+
+\textbf{步骤2}：计算正交分量
+\begin{align}
+(I - P_{\bm{A}}) \bm{F} &= \bm{F} - P_{\bm{A}} \bm{F} \\
+&= \begin{bmatrix} 3 \\ 4 \end{bmatrix} - \begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix} = \begin{bmatrix} -0.5 \\ 0.5 \end{bmatrix}
+\end{align}
+
+\textbf{验证正交性}：
+\begin{align}
+(P_{\bm{A}} \bm{F})^T ((I - P_{\bm{A}}) \bm{F}) &= \begin{bmatrix} 3.5 & 3.5 \end{bmatrix} \begin{bmatrix} -0.5 \\ 0.5 \end{bmatrix} \\
+&= 3.5 \cdot (-0.5) + 3.5 \cdot 0.5 = -1.75 + 1.75 = 0
+\end{align}
+
+\textbf{验证分解}：
+\begin{align}
+P_{\bm{A}} \bm{F} + (I - P_{\bm{A}}) \bm{F} &= \begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix} + \begin{bmatrix} -0.5 \\ 0.5 \end{bmatrix} = \begin{bmatrix} 3 \\ 4 \end{bmatrix} = \bm{F}
+\end{align}
+
+\textbf{几何解释}：
+\begin{itemize}
+\item 投影分量$\begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix}$在$\bm{A}$的方向上
+\item 正交分量$\begin{bmatrix} -0.5 \\ 0.5 \end{bmatrix}$垂直于$\bm{A}$（因为$\begin{bmatrix} 1 \\ 1 \end{bmatrix}^T \begin{bmatrix} -0.5 \\ 0.5 \end{bmatrix} = -0.5 + 0.5 = 0$）
+\item 两个分量之和等于原始向量$\bm{F}$
+\end{itemize}
+
+\subsection{投影的标量大小}
+
+投影的标量大小（在标准内积下）为：
+\begin{equation}
+\|\text{proj}_{A}(\bm{F})\| = \sqrt{\bm{F}^T P_A \bm{F}} = \sqrt{\bm{F}^T A (A^T A)^{-1} A^T \bm{F}}
+\end{equation}
+
+在加权内积$\langle \cdot, \cdot \rangle_W$下，投影的加权大小为：
+\begin{equation}
+\|\text{proj}_{A,W}(\bm{F})\|_W = \sqrt{\bm{F}^T W P_{A,W} \bm{F}}
+\end{equation}
+
+\subsubsection{例子9：投影大小的计算}
+
+\textbf{问题}：计算例子1中投影的标量大小。
+
+\textbf{已知}：
+\begin{itemize}
+\item $\bm{F} = \begin{bmatrix} 3 \\ 4 \end{bmatrix}$
+\item $\bm{A} = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$
+\item 投影向量：$\text{proj}_{\bm{A}}(\bm{F}) = \begin{bmatrix} 3.5 \\ 3.5 \end{bmatrix}$
+\end{itemize}
+
+\textbf{方法1}：直接计算投影向量的模长
+\begin{equation}
+\|\text{proj}_{\bm{A}}(\bm{F})\| = \sqrt{3.5^2 + 3.5^2} = \sqrt{24.5} = \frac{7}{\sqrt{2}} \approx 4.95
+\end{equation}
+
+\textbf{方法2}：使用公式
+\begin{align}
+\|\text{proj}_{\bm{A}}(\bm{F})\| &= \frac{|\bm{F}^T \bm{A}|}{\|\bm{A}\|} = \frac{|7|}{\sqrt{2}} = \frac{7}{\sqrt{2}} \approx 4.95
+\end{align}
+
+\textbf{方法3}：使用投影矩阵
+\begin{align}
+P_{\bm{A}} &= \frac{\bm{A} \bm{A}^T}{\bm{A}^T \bm{A}} = \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \\
+\|\text{proj}_{\bm{A}}(\bm{F})\| &= \sqrt{\bm{F}^T P_{\bm{A}} \bm{F}} \\
+&= \sqrt{\begin{bmatrix} 3 & 4 \end{bmatrix} \frac{1}{2} \begin{bmatrix} 1 & 1 \\ 1 & 1 \end{bmatrix} \begin{bmatrix} 3 \\ 4 \end{bmatrix}} \\
+&= \sqrt{\frac{1}{2} \begin{bmatrix} 3 & 4 \end{bmatrix} \begin{bmatrix} 7 \\ 7 \end{bmatrix}} \\
+&= \sqrt{\frac{1}{2} \cdot 49} = \frac{7}{\sqrt{2}}
+\end{align}
+
+三种方法结果一致！
+
+\section{点乘与叉乘的区别}
+
+\subsection{点乘（内积）vs 叉乘（外积）}
+
+在投影公式中，我们使用的是\textbf{点乘（内积）}，而不是叉乘。理解两者的区别对于正确理解投影公式至关重要。
+
+\subsubsection{点乘（内积）}
+
+\textbf{定义}：对于向量$\bm{a}, \bm{b} \in \mathbb{R}^n$，点乘定义为：
+\begin{equation}
+\bm{a} \cdot \bm{b} = \bm{a}^T \bm{b} = \sum_{i=1}^n a_i b_i
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item \textbf{结果是标量}：$\bm{a} \cdot \bm{b} \in \mathbb{R}$
+\item \textbf{交换律}：$\bm{a} \cdot \bm{b} = \bm{b} \cdot \bm{a}$
+\item \textbf{几何意义}：$\bm{a} \cdot \bm{b} = \|\bm{a}\| \|\bm{b}\| \cos \theta$，其中$\theta$是两向量的夹角
+\item \textbf{投影关系}：$\bm{a} \cdot \bm{b}$等于$\|\bm{a}\|$乘以$\bm{b}$在$\bm{a}$方向上的投影长度
+\end{itemize}
+
+\subsubsection{叉乘（外积）}
+
+\textbf{定义}：对于向量$\bm{a}, \bm{b} \in \mathbb{R}^3$，叉乘定义为：
+\begin{equation}
+\bm{a} \times \bm{b} = \begin{bmatrix}
+a_2 b_3 - a_3 b_2 \\
+a_3 b_1 - a_1 b_3 \\
+a_1 b_2 - a_2 b_1
+\end{bmatrix}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item \textbf{结果是向量}：$\bm{a} \times \bm{b} \in \mathbb{R}^3$（仅适用于3维向量）
+\item \textbf{反对称性}：$\bm{a} \times \bm{b} = -\bm{b} \times \bm{a}$
+\item \textbf{几何意义}：$\|\bm{a} \times \bm{b}\| = \|\bm{a}\| \|\bm{b}\| \sin \theta$，方向垂直于$\bm{a}$和$\bm{b}$构成的平面
+\item \textbf{物理意义}：在机器人学中，$\bm{r} \times \bm{f}$表示力$\bm{f}$通过力臂$\bm{r}$产生的力矩
+\end{itemize}
+
+\subsection{为什么投影使用点乘而不是叉乘？}
+
+\subsubsection{投影的本质}
+
+投影的目的是找到向量在某个方向上的\textbf{标量分量}，这需要：
+\begin{itemize}
+\item \textbf{结果必须是标量}：投影的大小是一个数值
+\item \textbf{方向信息}：投影的方向由被投影的方向决定
+\end{itemize}
+
+点乘正好满足这个需求：
+\begin{equation}
+\text{proj}_{\bm{A}}(\bm{F}) = \frac{\bm{F}^T \bm{A}}{\|\bm{A}\|^2} \bm{A} = \frac{(\bm{F} \cdot \bm{A})}{\|\bm{A}\|^2} \bm{A}
+\end{equation}
+
+其中$\bm{F} \cdot \bm{A} = \bm{F}^T \bm{A}$是标量，表示投影的\textbf{大小}。
+
+\subsubsection{如果使用叉乘会怎样？}
+
+如果使用叉乘$\bm{F} \times \bm{A}$：
+\begin{itemize}
+\item \textbf{结果是向量}：$\bm{F} \times \bm{A} \in \mathbb{R}^3$（仅适用于3维）
+\item \textbf{方向错误}：结果垂直于$\bm{F}$和$\bm{A}$构成的平面，而不是在$\bm{A}$方向上
+\item \textbf{物理意义不同}：叉乘表示的是垂直于两个向量的方向，不是投影
+\end{itemize}
+
+\textbf{例子}：设$\bm{F} = \begin{bmatrix} 3 \\ 4 \\ 0 \end{bmatrix}$，$\bm{A} = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}$（$x$轴方向）
+
+\begin{itemize}
+\item \textbf{点乘}：$\bm{F} \cdot \bm{A} = 3$（标量，表示$\bm{F}$在$x$轴方向上的投影大小）
+\item \textbf{叉乘}：$\bm{F} \times \bm{A} = \begin{bmatrix} 0 \\ 0 \\ -4 \end{bmatrix}$（向量，垂直于$\bm{F}$和$\bm{A}$，在$z$轴方向）
+\end{itemize}
+
+显然，叉乘的结果不是我们想要的投影。
+
+\subsection{叉乘在机器人学中的应用}
+
+虽然投影使用点乘，但叉乘在机器人学中也有重要应用：
+
+\subsubsection{力矩计算}
+
+力$\bm{f}$通过力臂$\bm{r}$产生的力矩：
+\begin{equation}
+\bm{m} = \bm{r} \times \bm{f}
+\end{equation}
+
+\textbf{例子}：力$\bm{f} = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}$作用在点$\bm{r} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}$处：
+\begin{equation}
+\bm{m} = \bm{r} \times \bm{f} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix} \times \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 2 \\ 0 \end{bmatrix}
+\end{equation}
+
+\subsubsection{与投影的关系}
+
+在关节力矩计算中：
+\begin{enumerate}
+\item \textbf{第一步}：使用叉乘计算力矩（如果有力臂）
+\begin{equation}
+\bm{m} = \bm{r} \times \bm{f}
+\end{equation}
+
+\item \textbf{第二步}：力矩$\bm{m}$被包含在wrench $F_i = \begin{bmatrix} m_i \\ f_i \end{bmatrix}$中
+
+\item \textbf{第三步}：使用点乘提取关节力矩
+\begin{equation}
+\tau_i = F_i^T A_i = \bm{m}_i \cdot \hat{\bm{\omega}}_i
+\end{equation}
+\end{enumerate}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item \textbf{叉乘}：用于计算力矩向量（3维向量）
+\item \textbf{点乘}：用于提取力矩在旋转轴方向上的分量（标量）
+\item 两者配合使用：先叉乘得到力矩，再点乘得到关节力矩
+\end{itemize}
+
+\subsubsection{完整例子}
+
+\textbf{场景}：旋转关节，旋转轴沿$z$轴，力$\bm{f} = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}$作用在$\bm{r} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}$处。
+
+\textbf{步骤1}：使用叉乘计算力矩
+\begin{equation}
+\bm{m} = \bm{r} \times \bm{f} = \begin{bmatrix} 0 \\ 2 \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{步骤2}：构造wrench
+\begin{equation}
+F_i = \begin{bmatrix} \bm{m} \\ \bm{f} \end{bmatrix} = \begin{bmatrix} 0 \\ 2 \\ 0 \\ 1 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{步骤3}：使用点乘计算关节力矩
+\begin{align}
+\tau_i &= F_i^T A_i = \begin{bmatrix} 0 & 2 & 0 & 1 & 0 & 0 \end{bmatrix} \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 0 \\ 0 \end{bmatrix} \\
+&= 0 \cdot 0 + 2 \cdot 0 + 0 \cdot 1 + 1 \cdot 0 + 0 \cdot 0 + 0 \cdot 0 = 0
+\end{align}
+
+\textbf{解释}：
+\begin{itemize}
+\item 叉乘产生了力矩$\begin{bmatrix} 0 \\ 2 \\ 0 \end{bmatrix}$（在$y$方向）
+\item 但旋转轴在$z$方向
+\item 点乘提取$z$方向的分量，结果为$0$（因为力矩在$z$方向没有分量）
+\item 因此关节力矩$\tau_i = 0$（力矩无法被传递）
+\end{itemize}
+
+\subsection{总结对比}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{特性} & \textbf{点乘（内积）} & \textbf{叉乘（外积）} \\
+\hline
+符号 & $\bm{a} \cdot \bm{b}$ 或 $\bm{a}^T \bm{b}$ & $\bm{a} \times \bm{b}$ \\
+\hline
+结果类型 & 标量 & 向量（仅3维） \\
+\hline
+维度要求 & 任意维度 & 仅3维 \\
+\hline
+交换律 & $\bm{a} \cdot \bm{b} = \bm{b} \cdot \bm{a}$ & $\bm{a} \times \bm{b} = -\bm{b} \times \bm{a}$ \\
+\hline
+几何意义 & 投影大小 & 垂直方向 \\
+\hline
+在投影中 & 用于计算投影大小 & 不适用 \\
+\hline
+在机器人学中 & 提取关节力矩 & 计算力矩向量 \\
+\hline
+\end{tabular}
+\caption{点乘与叉乘的对比}
+\label{tab:dot_vs_cross}
+\end{table}
+
+\section{在机器人学中的应用}
+
+\subsection{关节力矩计算}
+
+在牛顿-欧拉算法中，关节力矩公式：
+\begin{equation}
+\tau_i = F_i^T A_i
+\end{equation}
+
+\textbf{这是点乘（内积）}，可以理解为wrench $F_i$在螺旋轴$A_i$方向上的投影的标量大小（当$A_i$是单位向量时）。
+
+\subsubsection{例子7：旋转关节的力矩计算}
+
+\textbf{问题}：计算旋转关节的力矩，已知：
+\begin{itemize}
+\item Wrench：$F_i = \begin{bmatrix} m_i \\ f_i \end{bmatrix} = \begin{bmatrix} 2 \\ 1 \\ 3 \\ 0 \\ 0 \\ 0 \end{bmatrix}$（力矩$\bm{m}_i = \begin{bmatrix} 2 \\ 1 \\ 3 \end{bmatrix}$，力$\bm{f}_i = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$）
+\item 螺旋轴：$A_i = \begin{bmatrix} \omega_{A_i} \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 0 \\ 0 \end{bmatrix}$（绕$z$轴旋转）
+\end{itemize}
+
+\textbf{计算}：
+\begin{align}
+\tau_i &= F_i^T A_i \\
+&= \begin{bmatrix} 2 & 1 & 3 & 0 & 0 & 0 \end{bmatrix} \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 0 \\ 0 \end{bmatrix} \\
+&= 2 \cdot 0 + 1 \cdot 0 + 3 \cdot 1 + 0 \cdot 0 + 0 \cdot 0 + 0 \cdot 0 \\
+&= 3
+\end{align}
+
+\textbf{解释}：
+\begin{itemize}
+\item 关节只能传递绕$z$轴方向的力矩
+\item 力矩向量$\bm{m}_i = \begin{bmatrix} 2 \\ 1 \\ 3 \end{bmatrix}$在$z$轴方向的分量是$3$
+\item 因此关节力矩$\tau_i = 3$
+\item $x$和$y$方向的力矩分量（$2$和$1$）被轴承约束，无法传递
+\end{itemize}
+
+\subsubsection{例子8：移动关节的力计算}
+
+\textbf{问题}：计算移动关节的力，已知：
+\begin{itemize}
+\item Wrench：$F_i = \begin{bmatrix} m_i \\ f_i \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \\ 5 \\ 3 \\ 2 \end{bmatrix}$（力矩$\bm{m}_i = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}$，力$\bm{f}_i = \begin{bmatrix} 5 \\ 3 \\ 2 \end{bmatrix}$）
+\item 螺旋轴：$A_i = \begin{bmatrix} 0 \\ v_{A_i} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \\ 1 \\ 0 \\ 0 \end{bmatrix}$（沿$x$轴移动）
+\end{itemize}
+
+\textbf{计算}：
+\begin{align}
+\tau_i &= F_i^T A_i \\
+&= \begin{bmatrix} 0 & 0 & 0 & 5 & 3 & 2 \end{bmatrix} \begin{bmatrix} 0 \\ 0 \\ 0 \\ 1 \\ 0 \\ 0 \end{bmatrix} \\
+&= 0 \cdot 0 + 0 \cdot 0 + 0 \cdot 0 + 5 \cdot 1 + 3 \cdot 0 + 2 \cdot 0 \\
+&= 5
+\end{align}
+
+\textbf{解释}：
+\begin{itemize}
+\item 关节只能传递沿$x$轴方向的力
+\item 力向量$\bm{f}_i = \begin{bmatrix} 5 \\ 3 \\ 2 \end{bmatrix}$在$x$轴方向的分量是$5$
+\item 因此关节力$\tau_i = 5$
+\item $y$和$z$方向的力分量（$3$和$2$）被导轨约束，无法传递
+\end{itemize}
+
+\subsection{混合运动-力控制}
+
+在混合控制中，使用投影矩阵分离运动子空间和力子空间：
+\begin{align}
+F_{\text{motion}} &= P F \\
+F_{\text{force}} &= (I - P) F
+\end{align}
+
+其中$P$由公式(\ref{eq:hybrid_projection})给出。
+
+\subsection{约束动力学}
+
+在约束动力学中，约束力为：
+\begin{equation}
+F_{\text{constraint}} = A^T \lambda
+\end{equation}
+
+其中$\lambda$是拉格朗日乘数，$A$是约束矩阵。约束力在约束方向（$A$的列空间）上。
+
+\section{计算注意事项}
+
+\subsection{数值稳定性}
+
+当$A^T A$接近奇异时，直接计算$(A^T A)^{-1}$可能不稳定。建议使用：
+\begin{itemize}
+\item QR分解：$A = QR$，其中$Q$是标准正交矩阵，$R$是上三角矩阵
+\item 投影矩阵：$P_A = Q Q^T$
+\item 投影：$\text{proj}_{A}(\bm{F}) = Q Q^T \bm{F}$
+\end{itemize}
+
+\subsection{计算复杂度}
+
+\begin{itemize}
+\item 向量投影：$O(nk)$（如果$A$是$n \times k$矩阵）
+\item 矩阵投影：$O(mnk)$（如果$F$是$m \times n$，$A$是$m \times k$）
+\item QR分解：$O(nk^2)$（对于$n \times k$矩阵$A$）
+\end{itemize}
+
+\section{总结}
+
+\subsection{投影公式总结表}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{情况} & \textbf{投影公式} & \textbf{投影矩阵} \\
+\hline
+向量在向量上 & $\frac{\bm{F}^T \bm{A}}{\bm{A}^T \bm{A}} \bm{A}$ & $\frac{\bm{A} \bm{A}^T}{\bm{A}^T \bm{A}}$ \\
+\hline
+向量在矩阵上 & $A (A^T A)^{-1} A^T \bm{F}$ & $A (A^T A)^{-1} A^T$ \\
+\hline
+标准正交基 & $A A^T \bm{F}$ & $A A^T$ \\
+\hline
+加权投影 & $A (A^T W A)^{-1} A^T W \bm{F}$ & $A (A^T W A)^{-1} A^T W$ \\
+\hline
+矩阵在矩阵上 & $A (A^T A)^{-1} A^T F$ & $A (A^T A)^{-1} A^T$ \\
+\hline
+\end{tabular}
+\caption{各种投影公式总结}
+\label{tab:projection_formulas}
+\end{table}
+
+\subsection{关键性质}
+
+所有投影矩阵$P$都满足：
+\begin{enumerate}
+\item \textbf{幂等性}：$P^2 = P$
+\item \textbf{对称性}：$P^T = P$（在标准内积下）
+\item \textbf{正交补}：$I - P$也是投影矩阵，且$P(I - P) = 0$
+\end{enumerate}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control, Chapter 8, 11
+\item 线性代数教材：投影和正交分解
+\item 关节力矩公式推导：\texttt{taui\_derivation.tex}
+\end{itemize}
+
+\end{document}
+

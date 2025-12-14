@@ -1,0 +1,455 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{单刚体动力学方程推导：$m_i = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)$和$f_i = m_i \dot{v}_i + m_i \omega_i \times v_i$}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+本文档详细推导单刚体动力学的两个基本方程：
+\begin{align}
+m_i &= I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) \label{eq:euler_equation} \\
+f_i &= m_i \dot{v}_i + m_i \omega_i \times v_i \label{eq:newton_equation}
+\end{align}
+
+其中：
+\begin{itemize}
+\item $m_i \in \mathbb{R}^3$：作用在刚体上的力矩
+\item $f_i \in \mathbb{R}^3$：作用在刚体上的力
+\item $I_i \in \mathbb{R}^{3 \times 3}$：刚体在质心处的转动惯量矩阵
+\item $\omega_i \in \mathbb{R}^3$：刚体的角速度
+\item $\dot{\omega}_i \in \mathbb{R}^3$：刚体的角加速度
+\item $v_i \in \mathbb{R}^3$：刚体质心的线速度
+\item $\dot{v}_i \in \mathbb{R}^3$：刚体质心的线加速度
+\item $m_i$（标量）：刚体的质量
+\end{itemize}
+
+\section{基本假设和坐标系}
+
+\subsection{坐标系设置}
+
+考虑一个刚体，在质心处建立体坐标系$\{i\}$，其中：
+\begin{itemize}
+\item 坐标系原点位于刚体的质心
+\item 坐标轴方向可以任意选择（通常选择与主惯性轴对齐）
+\end{itemize}
+
+\subsection{刚体的表示}
+
+刚体由多个点质量组成，或者可以看作连续的质量分布：
+\begin{itemize}
+\item 点质量模型：刚体由$n$个点质量$m_k$组成，位置为$\bm{r}_k$（在坐标系$\{i\}$中）
+\item 连续模型：刚体具有质量密度函数$\rho(x, y, z)$
+\end{itemize}
+
+对于质心坐标系，有：
+\begin{equation}
+\sum_k m_k \bm{r}_k = 0 \quad \text{（点质量模型）}
+\end{equation}
+
+或
+\begin{equation}
+\int_B \rho(\bm{r}) \bm{r} \, dV = 0 \quad \text{（连续模型）}
+\end{equation}
+
+其中$B$是刚体的体积。
+
+\section{公式(71)：欧拉方程$m_i = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)$的推导}
+
+\subsection{角动量的定义}
+
+刚体的角动量（在质心坐标系中）定义为：
+\begin{equation}
+\bm{L}_i = \sum_k m_k (\bm{r}_k \times \dot{\bm{r}}_k) \quad \text{（点质量模型）}
+\label{eq:angular_momentum_discrete}
+\end{equation}
+
+或
+\begin{equation}
+\bm{L}_i = \int_B \rho(\bm{r}) (\bm{r} \times \dot{\bm{r}}) \, dV \quad \text{（连续模型）}
+\label{eq:angular_momentum_continuous}
+\end{equation}
+
+\subsection{点质量的速度}
+
+对于刚体上的任意点$\bm{r}_k$（在体坐标系$\{i\}$中），其速度由两部分组成：
+\begin{enumerate}
+\item 由于刚体的平移运动：$v_i$（质心速度）
+\item 由于刚体的旋转运动：$\omega_i \times \bm{r}_k$
+\end{enumerate}
+
+因此：
+\begin{equation}
+\dot{\bm{r}}_k = v_i + \omega_i \times \bm{r}_k
+\label{eq:point_velocity}
+\end{equation}
+
+\textbf{注意}：这里$\bm{r}_k$是在体坐标系中的固定位置，所以$\dot{\bm{r}}_k$表示该点在惯性系中的速度。
+
+\subsection{角动量的计算}
+
+将式(\ref{eq:point_velocity})代入式(\ref{eq:angular_momentum_discrete})：
+\begin{align}
+\bm{L}_i &= \sum_k m_k [\bm{r}_k \times (v_i + \omega_i \times \bm{r}_k)] \\
+&= \sum_k m_k (\bm{r}_k \times v_i) + \sum_k m_k [\bm{r}_k \times (\omega_i \times \bm{r}_k)]
+\end{align}
+
+第一项：
+\begin{align}
+\sum_k m_k (\bm{r}_k \times v_i) &= \left(\sum_k m_k \bm{r}_k\right) \times v_i \\
+&= 0 \times v_i = 0
+\end{align}
+
+这是因为质心在原点，$\sum_k m_k \bm{r}_k = 0$。
+
+第二项需要使用向量三重积恒等式：
+\begin{equation}
+\bm{a} \times (\bm{b} \times \bm{c}) = (\bm{a} \cdot \bm{c})\bm{b} - (\bm{a} \cdot \bm{b})\bm{c}
+\end{equation}
+
+因此：
+\begin{align}
+\bm{r}_k \times (\omega_i \times \bm{r}_k) &= (\bm{r}_k \cdot \bm{r}_k)\omega_i - (\bm{r}_k \cdot \omega_i)\bm{r}_k \\
+&= \|\bm{r}_k\|^2 \omega_i - (\bm{r}_k \cdot \omega_i)\bm{r}_k
+\end{align}
+
+使用反对称矩阵表示：
+\begin{equation}
+\bm{r}_k \times (\omega_i \times \bm{r}_k) = -[\bm{r}_k]^2 \omega_i
+\end{equation}
+
+其中$[\bm{r}_k]$是$\bm{r}_k$的反对称矩阵，$[\bm{r}_k]^2 = [\bm{r}_k][\bm{r}_k]$。
+
+因此：
+\begin{align}
+\bm{L}_i &= \sum_k m_k [-[\bm{r}_k]^2] \omega_i \\
+&= -\left(\sum_k m_k [\bm{r}_k]^2\right) \omega_i \\
+&= I_i \omega_i
+\label{eq:angular_momentum_result}
+\end{align}
+
+其中转动惯量矩阵定义为：
+\begin{equation}
+I_i = -\sum_k m_k [\bm{r}_k]^2
+\label{eq:inertia_matrix_definition}
+\end{equation}
+
+\subsection{角动量定理}
+
+根据角动量定理，力矩等于角动量的时间导数：
+\begin{equation}
+m_i = \frac{d\bm{L}_i}{dt}
+\label{eq:angular_momentum_theorem}
+\end{equation}
+
+\textbf{关键点}：这里的导数是在\textbf{惯性坐标系}中计算的，而$\bm{L}_i = I_i \omega_i$是在\textbf{体坐标系}中表示的。
+
+\subsection{在旋转坐标系中的时间导数}
+
+对于在旋转坐标系中表示的向量$\bm{L}_i$，其在惯性系中的时间导数为：
+\begin{equation}
+\left.\frac{d\bm{L}_i}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{L}_i}{dt}\right|_{\text{body}} + \omega_i \times \bm{L}_i
+\label{eq:rotating_frame_derivative}
+\end{equation}
+
+这个公式反映了旋转坐标系的影响。
+
+\subsection{完成欧拉方程的推导}
+
+将式(\ref{eq:angular_momentum_result})和式(\ref{eq:rotating_frame_derivative})代入式(\ref{eq:angular_momentum_theorem})：
+\begin{align}
+m_i &= \frac{d}{dt}(I_i \omega_i) + \omega_i \times (I_i \omega_i) \\
+&= I_i \frac{d\omega_i}{dt} + \frac{dI_i}{dt} \omega_i + \omega_i \times (I_i \omega_i)
+\end{align}
+
+由于$I_i$在体坐标系中是常数（刚体的形状和质量分布不变），$\frac{dI_i}{dt} = 0$。
+
+因此：
+\begin{equation}
+m_i = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\label{eq:euler_final}
+\end{equation}
+
+这就是\textbf{欧拉方程}。
+
+\textbf{各项的物理意义}：
+\begin{itemize}
+\item $I_i \dot{\omega}_i$：由于角加速度产生的力矩（惯性力矩）
+\item $\omega_i \times (I_i \omega_i)$：由于旋转产生的陀螺力矩（科里奥利效应）
+\end{itemize}
+
+\section{公式(72)：牛顿方程$f_i = m_i \dot{v}_i + m_i \omega_i \times v_i$的推导}
+
+\subsection{线动量的定义}
+
+刚体的线动量定义为：
+\begin{equation}
+\bm{p}_i = \sum_k m_k \dot{\bm{r}}_k = m_i v_i
+\label{eq:linear_momentum}
+\end{equation}
+
+其中$m_i = \sum_k m_k$是刚体的总质量，$v_i$是质心速度。
+
+\subsection{牛顿第二定律}
+
+根据牛顿第二定律：
+\begin{equation}
+f_i = \frac{d\bm{p}_i}{dt}
+\label{eq:newton_second_law}
+\end{equation}
+
+同样，这里需要考虑旋转坐标系的影响。
+
+\subsection{质心速度的时间导数}
+
+质心速度$v_i$是在体坐标系中表示的。根据旋转坐标系中的时间导数公式：
+\begin{equation}
+\left.\frac{dv_i}{dt}\right|_{\text{inertial}} = \left.\frac{dv_i}{dt}\right|_{\text{body}} + \omega_i \times v_i
+\label{eq:velocity_derivative}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\left.\frac{dv_i}{dt}\right|_{\text{body}} = \dot{v}_i$：在体坐标系中观察到的加速度
+\item $\omega_i \times v_i$：由于坐标系旋转产生的额外项
+\end{itemize}
+
+\subsection{完成牛顿方程的推导}
+
+将式(\ref{eq:linear_momentum})和式(\ref{eq:velocity_derivative})代入式(\ref{eq:newton_second_law})：
+\begin{align}
+f_i &= \frac{d}{dt}(m_i v_i) \\
+&= m_i \frac{dv_i}{dt} \\
+&= m_i \left(\left.\frac{dv_i}{dt}\right|_{\text{body}} + \omega_i \times v_i\right) \\
+&= m_i \dot{v}_i + m_i \omega_i \times v_i
+\label{eq:newton_final}
+\end{align}
+
+这就是\textbf{牛顿方程}在旋转坐标系中的形式。
+
+\textbf{各项的物理意义}：
+\begin{itemize}
+\item $m_i \dot{v}_i$：由于线加速度产生的力（惯性力）
+\item $m_i \omega_i \times v_i$：由于旋转产生的科里奥利力
+\end{itemize}
+
+\section{旋转坐标系中的时间导数详解}
+
+\subsection{基本公式}
+
+对于在旋转坐标系中表示的向量$\bm{u}$，其在惯性系中的时间导数为：
+\begin{equation}
+\left.\frac{d\bm{u}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{u}}{dt}\right|_{\text{body}} + \omega \times \bm{u}
+\label{eq:rotating_derivative_general}
+\end{equation}
+
+\subsection{推导}
+
+设旋转坐标系相对于惯性系的角速度为$\omega$。对于坐标系中的固定向量$\bm{u}$，其在惯性系中的变化率为：
+\begin{equation}
+\left.\frac{d\bm{u}}{dt}\right|_{\text{inertial}} = \omega \times \bm{u}
+\end{equation}
+
+对于变化的向量$\bm{u}(t)$，有：
+\begin{align}
+\left.\frac{d\bm{u}}{dt}\right|_{\text{inertial}} &= \left.\frac{d\bm{u}}{dt}\right|_{\text{body}} + \omega \times \bm{u}
+\end{align}
+
+第一项是在体坐标系中观察到的变化率，第二项是由于坐标系旋转产生的变化率。
+
+\subsection{应用示例}
+
+\textbf{示例1：角动量}：
+\begin{align}
+\left.\frac{d(I_i \omega_i)}{dt}\right|_{\text{inertial}} &= \left.\frac{d(I_i \omega_i)}{dt}\right|_{\text{body}} + \omega_i \times (I_i \omega_i) \\
+&= I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\end{align}
+
+\textbf{示例2：线动量}：
+\begin{align}
+\left.\frac{d(m_i v_i)}{dt}\right|_{\text{inertial}} &= \left.\frac{d(m_i v_i)}{dt}\right|_{\text{body}} + \omega_i \times (m_i v_i) \\
+&= m_i \dot{v}_i + m_i \omega_i \times v_i
+\end{align}
+
+\section{转动惯量矩阵$I_i$的详细定义}
+
+\subsection{从点质量模型}
+
+对于点质量模型，转动惯量矩阵定义为：
+\begin{equation}
+I_i = -\sum_k m_k [\bm{r}_k]^2
+\end{equation}
+
+其中$[\bm{r}_k]$是$\bm{r}_k$的反对称矩阵：
+\begin{equation}
+[\bm{r}_k] = \begin{bmatrix}
+0 & -r_{k,z} & r_{k,y} \\
+r_{k,z} & 0 & -r_{k,x} \\
+-r_{k,y} & r_{k,x} & 0
+\end{bmatrix}
+\end{equation}
+
+计算$[\bm{r}_k]^2$：
+\begin{equation}
+[\bm{r}_k]^2 = [\bm{r}_k][\bm{r}_k] = \begin{bmatrix}
+-r_{k,y}^2 - r_{k,z}^2 & r_{k,x} r_{k,y} & r_{k,x} r_{k,z} \\
+r_{k,x} r_{k,y} & -r_{k,x}^2 - r_{k,z}^2 & r_{k,y} r_{k,z} \\
+r_{k,x} r_{k,z} & r_{k,y} r_{k,z} & -r_{k,x}^2 - r_{k,y}^2
+\end{bmatrix}
+\end{equation}
+
+因此：
+\begin{equation}
+I_i = \begin{bmatrix}
+\sum_k m_k (r_{k,y}^2 + r_{k,z}^2) & -\sum_k m_k r_{k,x} r_{k,y} & -\sum_k m_k r_{k,x} r_{k,z} \\
+-\sum_k m_k r_{k,x} r_{k,y} & \sum_k m_k (r_{k,x}^2 + r_{k,z}^2) & -\sum_k m_k r_{k,y} r_{k,z} \\
+-\sum_k m_k r_{k,x} r_{k,z} & -\sum_k m_k r_{k,y} r_{k,z} & \sum_k m_k (r_{k,x}^2 + r_{k,y}^2)
+\end{bmatrix}
+\end{equation}
+
+\subsection{从连续模型}
+
+对于连续质量分布：
+\begin{equation}
+I_i = \int_B \rho(\bm{r}) \begin{bmatrix}
+r_y^2 + r_z^2 & -r_x r_y & -r_x r_z \\
+-r_x r_y & r_x^2 + r_z^2 & -r_y r_z \\
+-r_x r_z & -r_y r_z & r_x^2 + r_y^2
+\end{bmatrix} dV
+\end{equation}
+
+\subsection{标准表示}
+
+通常写成：
+\begin{equation}
+I_i = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+其中：
+\begin{align}
+I_{xx} &= \int_B (y^2 + z^2) \rho(x,y,z) \, dV \\
+I_{yy} &= \int_B (x^2 + z^2) \rho(x,y,z) \, dV \\
+I_{zz} &= \int_B (x^2 + y^2) \rho(x,y,z) \, dV \\
+I_{xy} &= -\int_B xy \rho(x,y,z) \, dV \\
+I_{xz} &= -\int_B xz \rho(x,y,z) \, dV \\
+I_{yz} &= -\int_B yz \rho(x,y,z) \, dV
+\end{align}
+
+\section{物理意义总结}
+
+\subsection{欧拉方程$m_i = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)$}
+
+\begin{itemize}
+\item \textbf{第一项$I_i \dot{\omega}_i$}：
+\begin{itemize}
+\item 表示由于角加速度$\dot{\omega}_i$产生的力矩
+\item 类似于$F = ma$中的惯性项
+\item 如果$\omega_i = 0$，这是唯一的力矩项
+\end{itemize}
+
+\item \textbf{第二项$\omega_i \times (I_i \omega_i)$}：
+\begin{itemize}
+\item 表示由于旋转产生的陀螺力矩
+\item 即使$\dot{\omega}_i = 0$，如果$\omega_i \neq 0$，这个项也可能非零
+\item 这是旋转刚体的特征，在静止或平移的刚体中不存在
+\item 解释了为什么旋转的陀螺会表现出进动等现象
+\end{itemize}
+\end{itemize}
+
+\subsection{牛顿方程$f_i = m_i \dot{v}_i + m_i \omega_i \times v_i$}
+
+\begin{itemize}
+\item \textbf{第一项$m_i \dot{v}_i$}：
+\begin{itemize}
+\item 表示由于线加速度$\dot{v}_i$产生的力
+\item 这是标准的牛顿第二定律项
+\item 如果$\omega_i = 0$，这是唯一的力项
+\end{itemize}
+
+\item \textbf{第二项$m_i \omega_i \times v_i$}：
+\begin{itemize}
+\item 表示由于旋转产生的科里奥利力
+\item 即使$\dot{v}_i = 0$，如果$\omega_i \neq 0$且$v_i \neq 0$，这个项也可能非零
+\item 这是旋转坐标系中运动的特征
+\item 解释了为什么在旋转参考系中会感受到额外的"虚拟力"
+\end{itemize}
+\end{itemize}
+
+\section{特殊情况}
+
+\subsection{静止情况}
+
+如果刚体静止（$\omega_i = 0$，$v_i = 0$），则：
+\begin{align}
+m_i &= I_i \dot{\omega}_i \\
+f_i &= m_i \dot{v}_i
+\end{align}
+
+退化为标准的牛顿-欧拉方程。
+
+\subsection{匀速旋转}
+
+如果刚体以恒定角速度旋转（$\dot{\omega}_i = 0$，但$\omega_i \neq 0$），则：
+\begin{align}
+m_i &= \omega_i \times (I_i \omega_i) \\
+f_i &= m_i \dot{v}_i + m_i \omega_i \times v_i
+\end{align}
+
+此时仍然需要力矩来维持旋转（除非$\omega_i$与$I_i \omega_i$平行，即绕主惯性轴旋转）。
+
+\subsection{主惯性轴旋转}
+
+如果$\omega_i$沿着$I_i$的主惯性轴方向，则$I_i \omega_i$与$\omega_i$平行，因此：
+\begin{equation}
+\omega_i \times (I_i \omega_i) = 0
+\end{equation}
+
+此时欧拉方程简化为：
+\begin{equation}
+m_i = I_i \dot{\omega}_i
+\end{equation}
+
+\section{总结}
+
+本文档详细推导了单刚体动力学的两个基本方程：
+
+\begin{enumerate}
+\item \textbf{欧拉方程}：$m_i = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)$
+\begin{itemize}
+\item 描述了旋转动力学
+\item 包含惯性项和陀螺项
+\end{itemize}
+
+\item \textbf{牛顿方程}：$f_i = m_i \dot{v}_i + m_i \omega_i \times v_i$
+\begin{itemize}
+\item 描述了平移动力学
+\item 包含惯性项和科里奥利项
+\end{itemize}
+\end{enumerate}
+
+这两个方程是机器人动力学的基础，通过递归应用这些方程，可以推导出整个机器人的动力学模型。
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control, Chapter 8.2
+\item 经典力学教材中的刚体动力学章节
+\end{itemize}
+
+\end{document}

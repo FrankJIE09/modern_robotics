@@ -1,0 +1,220 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{矩阵特征值与特征向量的计算}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+给定矩阵：
+\begin{equation}
+\bm{A} = \begin{bmatrix} 1 & 1 \\ -4 & 4 \end{bmatrix}
+\end{equation}
+
+求矩阵$\bm{A}$的特征值和特征向量。
+
+\section{特征值计算}
+
+特征值通过求解特征方程$\det(\bm{A} - \lambda \bm{I}) = 0$得到。
+
+\subsection{步骤1：构造特征矩阵}
+
+\begin{align}
+\bm{A} - \lambda \bm{I} &= \begin{bmatrix} 1 & 1 \\ -4 & 4 \end{bmatrix} - \lambda \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} 1 - \lambda & 1 \\ -4 & 4 - \lambda \end{bmatrix}
+\end{align}
+
+\subsection{步骤2：计算特征多项式}
+
+\begin{align}
+\det(\bm{A} - \lambda \bm{I}) &= \det\begin{bmatrix} 1 - \lambda & 1 \\ -4 & 4 - \lambda \end{bmatrix} \\
+&= (1 - \lambda)(4 - \lambda) - (1)(-4) \\
+&= (1 - \lambda)(4 - \lambda) + 4 \\
+&= 4 - 4\lambda - \lambda + \lambda^2 + 4 \\
+&= \lambda^2 - 5\lambda + 8
+\end{align}
+
+\subsection{步骤3：求解特征方程}
+
+令特征多项式等于零：
+\begin{equation}
+\lambda^2 - 5\lambda + 8 = 0
+\label{eq:characteristic}
+\end{equation}
+
+使用二次公式求解：
+\begin{align}
+\lambda &= \frac{5 \pm \sqrt{25 - 32}}{2} \\
+&= \frac{5 \pm \sqrt{-7}}{2} \\
+&= \frac{5 \pm i\sqrt{7}}{2}
+\end{align}
+
+因此，特征值为：
+\begin{align}
+\lambda_1 &= \frac{5 + i\sqrt{7}}{2} \\
+\lambda_2 &= \frac{5 - i\sqrt{7}}{2}
+\end{align}
+
+\section{特征向量计算}
+
+对于每个特征值，求解齐次线性方程组$(\bm{A} - \lambda \bm{I})\bm{v} = \bm{0}$。
+
+\subsection{特征向量$\bm{v}_1$对应特征值$\lambda_1$}
+
+求解方程组：
+\begin{equation}
+(\bm{A} - \lambda_1 \bm{I})\bm{v}_1 = \bm{0}
+\end{equation}
+
+即：
+\begin{align}
+\begin{bmatrix} 1 - \lambda_1 & 1 \\ -4 & 4 - \lambda_1 \end{bmatrix} \begin{bmatrix} v_{11} \\ v_{12} \end{bmatrix} &= \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\end{align}
+
+代入$\lambda_1 = \frac{5 + i\sqrt{7}}{2}$：
+\begin{align}
+1 - \lambda_1 &= 1 - \frac{5 + i\sqrt{7}}{2} = \frac{2 - 5 - i\sqrt{7}}{2} = \frac{-3 - i\sqrt{7}}{2} \\
+4 - \lambda_1 &= 4 - \frac{5 + i\sqrt{7}}{2} = \frac{8 - 5 - i\sqrt{7}}{2} = \frac{3 - i\sqrt{7}}{2}
+\end{align}
+
+因此方程组为：
+\begin{equation}
+\begin{bmatrix} \frac{-3 - i\sqrt{7}}{2} & 1 \\ -4 & \frac{3 - i\sqrt{7}}{2} \end{bmatrix} \begin{bmatrix} v_{11} \\ v_{12} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+从第一个方程：
+\begin{align}
+\frac{-3 - i\sqrt{7}}{2} v_{11} + v_{12} &= 0 \\
+v_{12} &= \frac{3 + i\sqrt{7}}{2} v_{11}
+\end{align}
+
+取$v_{11} = 2$（方便计算），则：
+\begin{align}
+v_{12} &= \frac{3 + i\sqrt{7}}{2} \cdot 2 = 3 + i\sqrt{7}
+\end{align}
+
+因此，特征向量为：
+\begin{equation}
+\bm{v}_1 = \begin{bmatrix} 2 \\ 3 + i\sqrt{7} \end{bmatrix}
+\end{equation}
+
+或者，更一般的形式（任意非零标量倍数）：
+\begin{equation}
+\bm{v}_1 = c_1 \begin{bmatrix} 2 \\ 3 + i\sqrt{7} \end{bmatrix}, \quad c_1 \neq 0
+\end{equation}
+
+\subsection{特征向量$\bm{v}_2$对应特征值$\lambda_2$}
+
+求解方程组：
+\begin{equation}
+(\bm{A} - \lambda_2 \bm{I})\bm{v}_2 = \bm{0}
+\end{equation}
+
+代入$\lambda_2 = \frac{5 - i\sqrt{7}}{2}$：
+\begin{align}
+1 - \lambda_2 &= 1 - \frac{5 - i\sqrt{7}}{2} = \frac{2 - 5 + i\sqrt{7}}{2} = \frac{-3 + i\sqrt{7}}{2} \\
+4 - \lambda_2 &= 4 - \frac{5 - i\sqrt{7}}{2} = \frac{8 - 5 + i\sqrt{7}}{2} = \frac{3 + i\sqrt{7}}{2}
+\end{align}
+
+因此方程组为：
+\begin{equation}
+\begin{bmatrix} \frac{-3 + i\sqrt{7}}{2} & 1 \\ -4 & \frac{3 + i\sqrt{7}}{2} \end{bmatrix} \begin{bmatrix} v_{21} \\ v_{22} \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+从第一个方程：
+\begin{align}
+\frac{-3 + i\sqrt{7}}{2} v_{21} + v_{22} &= 0 \\
+v_{22} &= \frac{3 - i\sqrt{7}}{2} v_{21}
+\end{align}
+
+取$v_{21} = 2$，则：
+\begin{align}
+v_{22} &= \frac{3 - i\sqrt{7}}{2} \cdot 2 = 3 - i\sqrt{7}
+\end{align}
+
+因此，特征向量为：
+\begin{equation}
+\bm{v}_2 = \begin{bmatrix} 2 \\ 3 - i\sqrt{7} \end{bmatrix}
+\end{equation}
+
+或者，更一般的形式：
+\begin{equation}
+\bm{v}_2 = c_2 \begin{bmatrix} 2 \\ 3 - i\sqrt{7} \end{bmatrix}, \quad c_2 \neq 0
+\end{equation}
+
+\section{验证}
+
+验证特征值和特征向量的关系$\bm{A}\bm{v} = \lambda\bm{v}$。
+
+\subsection{验证$\lambda_1$和$\bm{v}_1$}
+
+\begin{align}
+\bm{A}\bm{v}_1 &= \begin{bmatrix} 1 & 1 \\ -4 & 4 \end{bmatrix} \begin{bmatrix} 2 \\ 3 + i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 2 + 3 + i\sqrt{7} \\ -8 + 4(3 + i\sqrt{7}) \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ -8 + 12 + 4i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ 4 + 4i\sqrt{7} \end{bmatrix}
+\end{align}
+
+\begin{align}
+\lambda_1 \bm{v}_1 &= \frac{5 + i\sqrt{7}}{2} \begin{bmatrix} 2 \\ 3 + i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ \frac{(5 + i\sqrt{7})(3 + i\sqrt{7})}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ \frac{15 + 5i\sqrt{7} + 3i\sqrt{7} + i^2 \cdot 7}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ \frac{15 + 8i\sqrt{7} - 7}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ \frac{8 + 8i\sqrt{7}}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 + i\sqrt{7} \\ 4 + 4i\sqrt{7} \end{bmatrix}
+\end{align}
+
+因此，$\bm{A}\bm{v}_1 = \lambda_1 \bm{v}_1$，验证正确！
+
+\subsection{验证$\lambda_2$和$\bm{v}_2$}
+
+\begin{align}
+\bm{A}\bm{v}_2 &= \begin{bmatrix} 1 & 1 \\ -4 & 4 \end{bmatrix} \begin{bmatrix} 2 \\ 3 - i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 2 + 3 - i\sqrt{7} \\ -8 + 4(3 - i\sqrt{7}) \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ -8 + 12 - 4i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ 4 - 4i\sqrt{7} \end{bmatrix}
+\end{align}
+
+\begin{align}
+\lambda_2 \bm{v}_2 &= \frac{5 - i\sqrt{7}}{2} \begin{bmatrix} 2 \\ 3 - i\sqrt{7} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ \frac{(5 - i\sqrt{7})(3 - i\sqrt{7})}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ \frac{15 - 5i\sqrt{7} - 3i\sqrt{7} + i^2 \cdot 7}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ \frac{15 - 8i\sqrt{7} - 7}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ \frac{8 - 8i\sqrt{7}}{2} \end{bmatrix} \\
+&= \begin{bmatrix} 5 - i\sqrt{7} \\ 4 - 4i\sqrt{7} \end{bmatrix}
+\end{align}
+
+因此，$\bm{A}\bm{v}_2 = \lambda_2 \bm{v}_2$，验证正确！
+
+\section{总结}
+
+矩阵$\bm{A} = \begin{bmatrix} 1 & 1 \\ -4 & 4 \end{bmatrix}$的特征值和特征向量为：
+
+\textbf{特征值}：
+\begin{align}
+\lambda_1 &= \frac{5 + i\sqrt{7}}{2} \\
+\lambda_2 &= \frac{5 - i\sqrt{7}}{2}
+\end{align}
+
+\textbf{对应的特征向量}：
+\begin{align}
+\bm{v}_1 &= \begin{bmatrix} 2 \\ 3 + i\sqrt{7} \end{bmatrix} \\
+\bm{v}_2 &= \begin{bmatrix} 2 \\ 3 - i\sqrt{7} \end{bmatrix}
+\end{align}
+
+\textbf{注}：特征向量可以乘以任意非零标量，结果仍然是特征向量。
+
+\end{document}
+

@@ -1,0 +1,233 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{反对称矩阵恒等式$[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = [[\bm{a}]\bm{b}]$的详细推导}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+在机器人动力学中，反对称矩阵（skew-symmetric matrix）的运算经常出现。本文将详细推导一个重要的恒等式：
+
+\begin{equation}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = [[\bm{a}]\bm{b}]
+\label{eq:main_identity}
+\end{equation}
+
+其中$\bm{a}, \bm{b} \in \mathbb{R}^3$是三维向量，$[\bm{a}]$表示向量$\bm{a}$的反对称矩阵表示。
+
+\section{反对称矩阵的定义}
+
+对于向量$\bm{a} = (a_x, a_y, a_z)^T \in \mathbb{R}^3$，其反对称矩阵定义为：
+
+\begin{equation}
+[\bm{a}] = \begin{bmatrix}
+0 & -a_z & a_y \\
+a_z & 0 & -a_x \\
+-a_y & a_x & 0
+\end{bmatrix}
+\label{eq:skew_definition}
+\end{equation}
+
+这个矩阵具有以下性质：
+\begin{itemize}
+\item 反对称性：$[\bm{a}]^T = -[\bm{a}]$
+\item 叉积表示：$[\bm{a}]\bm{b} = \bm{a} \times \bm{b}$，对于任意$\bm{b} \in \mathbb{R}^3$
+\end{itemize}
+
+\section{恒等式的详细推导}
+
+\subsection{方法1：直接矩阵乘法}
+
+\subsubsection{计算$[\bm{a}][\bm{b}]$}
+
+设$\bm{a} = (a_x, a_y, a_z)^T$，$\bm{b} = (b_x, b_y, b_z)^T$，则：
+
+\begin{align}
+[\bm{a}][\bm{b}] &= \begin{bmatrix}
+0 & -a_z & a_y \\
+a_z & 0 & -a_x \\
+-a_y & a_x & 0
+\end{bmatrix}
+\begin{bmatrix}
+0 & -b_z & b_y \\
+b_z & 0 & -b_x \\
+-b_y & b_x & 0
+\end{bmatrix} \\
+&= \begin{bmatrix}
+-a_z b_z - a_y b_y & a_y b_x & a_z b_x \\
+a_z b_y & -a_x b_x - a_z b_z & a_x b_y \\
+-a_y b_z & a_x b_z & -a_x b_x - a_y b_y
+\end{bmatrix}
+\label{eq:ab_product}
+\end{align}
+
+详细计算第一行第一列元素：
+\begin{align}
+([\bm{a}][\bm{b}])_{11} &= 0 \cdot 0 + (-a_z) \cdot b_z + a_y \cdot (-b_y) \\
+&= -a_z b_z - a_y b_y
+\end{align}
+
+第一行第二列元素：
+\begin{align}
+([\bm{a}][\bm{b}])_{12} &= 0 \cdot (-b_z) + (-a_z) \cdot 0 + a_y \cdot b_x \\
+&= a_y b_x
+\end{align}
+
+其他元素类似计算。
+
+\subsubsection{计算$[\bm{b}][\bm{a}]$}
+
+类似地：
+
+\begin{align}
+[\bm{b}][\bm{a}] &= \begin{bmatrix}
+0 & -b_z & b_y \\
+b_z & 0 & -b_x \\
+-b_y & b_x & 0
+\end{bmatrix}
+\begin{bmatrix}
+0 & -a_z & a_y \\
+a_z & 0 & -a_x \\
+-a_y & a_x & 0
+\end{bmatrix} \\
+&= \begin{bmatrix}
+-b_z a_z - b_y a_y & b_y a_x & b_z a_x \\
+b_z a_y & -b_x a_x - b_z a_z & b_x a_y \\
+-b_y a_z & b_x a_z & -b_x a_x - b_y a_y
+\end{bmatrix}
+\label{eq:ba_product}
+\end{align}
+
+\subsubsection{计算$[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}]$}
+
+将式(\ref{eq:ab_product})和式(\ref{eq:ba_product})相减：
+
+\begin{align}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] &= \begin{bmatrix}
+0 & a_y b_x - b_y a_x & a_z b_x - b_z a_x \\
+a_z b_y - b_z a_y & 0 & a_x b_y - b_x a_y \\
+-a_y b_z + b_y a_z & a_x b_z - b_x a_z & 0
+\end{bmatrix}
+\end{align}
+
+注意到：
+\begin{align}
+a_y b_x - b_y a_x &= -(\bm{a} \times \bm{b})_z = -([\bm{a}]\bm{b})_z \\
+a_z b_x - b_z a_x &= (\bm{a} \times \bm{b})_y = ([\bm{a}]\bm{b})_y \\
+a_z b_y - b_z a_y &= -(\bm{a} \times \bm{b})_x = -([\bm{a}]\bm{b})_x \\
+a_x b_y - b_x a_y &= (\bm{a} \times \bm{b})_z = ([\bm{a}]\bm{b})_z \\
+-a_y b_z + b_y a_z &= (\bm{a} \times \bm{b})_x = ([\bm{a}]\bm{b})_x \\
+a_x b_z - b_x a_z &= -(\bm{a} \times \bm{b})_y = -([\bm{a}]\bm{b})_y
+\end{align}
+
+因此：
+\begin{equation}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = \begin{bmatrix}
+0 & -([\bm{a}]\bm{b})_z & ([\bm{a}]\bm{b})_y \\
+([\bm{a}]\bm{b})_z & 0 & -([\bm{a}]\bm{b})_x \\
+-([\bm{a}]\bm{b})_y & ([\bm{a}]\bm{b})_x & 0
+\end{bmatrix} = [[\bm{a}]\bm{b}]
+\label{eq:result}
+\end{equation}
+
+\subsection{方法2：使用叉积性质}
+
+利用反对称矩阵与叉积的关系：$[\bm{a}]\bm{b} = \bm{a} \times \bm{b}$。
+
+对于任意向量$\bm{c} \in \mathbb{R}^3$，考虑：
+
+\begin{align}
+([\bm{a}][\bm{b}] - [\bm{b}][\bm{a}])\bm{c} &= [\bm{a}]([\bm{b}]\bm{c}) - [\bm{b}]([\bm{a}]\bm{c}) \\
+&= [\bm{a}](\bm{b} \times \bm{c}) - [\bm{b}](\bm{a} \times \bm{c}) \\
+&= \bm{a} \times (\bm{b} \times \bm{c}) - \bm{b} \times (\bm{a} \times \bm{c})
+\end{align}
+
+使用向量三重积的恒等式：
+\begin{align}
+\bm{a} \times (\bm{b} \times \bm{c}) &= (\bm{a} \cdot \bm{c})\bm{b} - (\bm{a} \cdot \bm{b})\bm{c} \\
+\bm{b} \times (\bm{a} \times \bm{c}) &= (\bm{b} \cdot \bm{c})\bm{a} - (\bm{b} \cdot \bm{a})\bm{c}
+\end{align}
+
+因此：
+\begin{align}
+([\bm{a}][\bm{b}] - [\bm{b}][\bm{a}])\bm{c} &= (\bm{a} \cdot \bm{c})\bm{b} - (\bm{a} \cdot \bm{b})\bm{c} - (\bm{b} \cdot \bm{c})\bm{a} + (\bm{b} \cdot \bm{a})\bm{c} \\
+&= (\bm{a} \cdot \bm{c})\bm{b} - (\bm{b} \cdot \bm{c})\bm{a}
+\end{align}
+
+使用另一个向量三重积恒等式：
+\begin{equation}
+(\bm{a} \cdot \bm{c})\bm{b} - (\bm{b} \cdot \bm{c})\bm{a} = (\bm{a} \times \bm{b}) \times \bm{c}
+\end{equation}
+
+因此：
+\begin{align}
+([\bm{a}][\bm{b}] - [\bm{b}][\bm{a}])\bm{c} &= (\bm{a} \times \bm{b}) \times \bm{c} \\
+&= [\bm{a} \times \bm{b}]\bm{c} \\
+&= [[\bm{a}]\bm{b}]\bm{c}
+\end{align}
+
+由于这对任意$\bm{c}$都成立，我们得到：
+\begin{equation}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = [[\bm{a}]\bm{b}]
+\end{equation}
+
+\subsection{方法3：使用Lie括号}
+
+在Lie代数$\mathfrak{so}(3)$中，Lie括号定义为：
+\begin{equation}
+[[\bm{a}], [\bm{b}]] = [\bm{a}][\bm{b}] - [\bm{b}][\bm{a}]
+\end{equation}
+
+同时，Lie括号满足：
+\begin{equation}
+[[\bm{a}], [\bm{b}]] = [[\bm{a}]\bm{b}]
+\end{equation}
+
+这是因为$\mathfrak{so}(3)$与$\mathbb{R}^3$（配备叉积）同构。
+
+\section{应用示例}
+
+\subsection{在机器人动力学中的应用}
+
+在牛顿-欧拉逆向动力学中，这个恒等式用于推导加速度递推公式。
+
+考虑伴随变换的时间导数：
+\begin{equation}
+\frac{d}{dt}[\text{Ad}_{T}] = [\text{ad}_V] \text{Ad}_T
+\end{equation}
+
+其中$V$是twist，$\text{ad}_V$的推导中使用了这个恒等式。
+
+具体地，当计算$\frac{d}{dt}[[p]R]$时：
+\begin{align}
+\frac{d}{dt}[[p]R] &= [\dot{p}]R + [p]\dot{R} \\
+&= [[\omega]p + v]R + [p][\omega]R \\
+&= [\omega][p]R - [p][\omega]R + [v]R + [p][\omega]R \\
+&= [\omega][p]R + [v]R
+\end{align}
+
+这里使用了恒等式$[\omega][p] - [p][\omega] = [[\omega]p]$。
+
+\section{总结}
+
+本文详细推导了反对称矩阵的恒等式：
+\begin{equation}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = [[\bm{a}]\bm{b}]
+\end{equation}
+
+这个恒等式在机器人动力学中非常重要，特别是在推导加速度递推公式和计算伴随变换的时间导数时。
+
+\end{document}
+

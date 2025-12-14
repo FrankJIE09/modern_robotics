@@ -1,0 +1,429 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{空间惯性矩阵$G$的定义与推导}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+空间惯性矩阵$G$（spatial inertia matrix）是描述刚体惯性特性的$6 \times 6$矩阵，它将twist（速度）与wrench（力）联系起来。本文档详细说明$G$的定义、推导过程及其物理意义。
+
+\section{基本定义}
+
+\subsection{空间惯性矩阵的定义}
+
+对于刚体，其空间惯性矩阵$G \in \mathbb{R}^{6 \times 6}$定义为：
+
+\begin{equation}
+G = \begin{bmatrix}
+I & 0 \\
+0 & mI
+\end{bmatrix}
+\label{eq:G_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $I \in \mathbb{R}^{3 \times 3}$：刚体在质心处的转动惯量矩阵（rotational inertia matrix）
+\item $m \in \mathbb{R}$：刚体的质量
+\item $I$（右下角）：$3 \times 3$单位矩阵
+\end{itemize}
+
+\textbf{注意}：这个定义假设坐标系固定在刚体的质心处，且坐标轴与主惯性轴对齐（或至少$I$是已知的）。
+
+\section{从单刚体动力学推导}
+
+\subsection{问题设置}
+
+考虑一个由多个点质量组成的刚体。设：
+\begin{itemize}
+\item 点质量$i$的质量为$m_i$
+\item 总质量：$m = \sum_i m_i$
+\item 点质量$i$在体坐标系$\{b\}$中的位置为$\bm{r}_i = (x_i, y_i, z_i)^T$
+\item 体坐标系$\{b\}$的原点位于质心，即：$\sum_i m_i \bm{r}_i = 0$
+\end{itemize}
+
+\subsection{刚体的运动}
+
+设刚体以twist $V_b = (\omega_b, v_b)$运动，其中：
+\begin{itemize}
+\item $\omega_b \in \mathbb{R}^3$：角速度
+\item $v_b \in \mathbb{R}^3$：线速度（质心的速度）
+\end{itemize}
+
+点质量$i$的速度为：
+\begin{equation}
+\dot{\bm{p}}_i = v_b + \omega_b \times \bm{p}_i
+\end{equation}
+
+其中$\bm{p}_i(t)$是点质量$i$在惯性系中的位置。
+
+\subsection{点质量的加速度}
+
+对速度求导：
+\begin{align}
+\ddot{\bm{p}}_i &= \frac{d}{dt}[v_b + \omega_b \times \bm{p}_i] \\
+&= \dot{v}_b + \dot{\omega}_b \times \bm{p}_i + \omega_b \times \dot{\bm{p}}_i \\
+&= \dot{v}_b + \dot{\omega}_b \times \bm{p}_i + \omega_b \times (v_b + \omega_b \times \bm{p}_i) \\
+&= \dot{v}_b + \dot{\omega}_b \times \bm{r}_i + [\omega_b]v_b + [\omega_b]^2 \bm{r}_i
+\end{align}
+
+使用反对称矩阵表示：
+\begin{equation}
+\ddot{\bm{p}}_i = \dot{v}_b + [\dot{\omega}_b]\bm{r}_i + [\omega_b]v_b + [\omega_b]^2 \bm{r}_i
+\label{eq:point_acceleration}
+\end{equation}
+
+\subsection{作用在点质量上的力}
+
+根据牛顿第二定律，作用在点质量$i$上的力为：
+\begin{equation}
+\bm{f}_i = m_i \ddot{\bm{p}}_i = m_i(\dot{v}_b + [\dot{\omega}_b]\bm{r}_i + [\omega_b]v_b + [\omega_b]^2 \bm{r}_i)
+\end{equation}
+
+\subsection{总力和总力矩}
+
+作用在刚体上的总力为：
+\begin{equation}
+\bm{f}_b = \sum_i \bm{f}_i = \sum_i m_i \ddot{\bm{p}}_i
+\end{equation}
+
+作用在刚体上的总力矩（关于质心）为：
+\begin{equation}
+\bm{m}_b = \sum_i \bm{r}_i \times \bm{f}_i = \sum_i [\bm{r}_i] \bm{f}_i
+\end{equation}
+
+\subsection{线动力学的推导}
+
+计算总力：
+\begin{align}
+\bm{f}_b &= \sum_i m_i(\dot{v}_b + [\dot{\omega}_b]\bm{r}_i + [\omega_b]v_b + [\omega_b]^2 \bm{r}_i) \\
+&= \sum_i m_i \dot{v}_b + \sum_i m_i [\dot{\omega}_b]\bm{r}_i + \sum_i m_i [\omega_b]v_b + \sum_i m_i [\omega_b]^2 \bm{r}_i
+\end{align}
+
+利用质心性质：$\sum_i m_i \bm{r}_i = 0$，我们有：
+\begin{itemize}
+\item $\sum_i m_i [\dot{\omega}_b]\bm{r}_i = [\dot{\omega}_b] \sum_i m_i \bm{r}_i = 0$
+\item $\sum_i m_i [\omega_b]^2 \bm{r}_i = [\omega_b]^2 \sum_i m_i \bm{r}_i = 0$
+\end{itemize}
+
+因此：
+\begin{equation}
+\bm{f}_b = m \dot{v}_b + m [\omega_b] v_b = m(\dot{v}_b + [\omega_b] v_b)
+\label{eq:linear_dynamics}
+\end{equation}
+
+\subsection{转动力学的推导}
+
+计算总力矩：
+\begin{align}
+\bm{m}_b &= \sum_i [\bm{r}_i] m_i(\dot{v}_b + [\dot{\omega}_b]\bm{r}_i + [\omega_b]v_b + [\omega_b]^2 \bm{r}_i) \\
+&= \sum_i m_i [\bm{r}_i]\dot{v}_b + \sum_i m_i [\bm{r}_i][\dot{\omega}_b]\bm{r}_i + \sum_i m_i [\bm{r}_i][\omega_b]v_b + \sum_i m_i [\bm{r}_i][\omega_b]^2 \bm{r}_i
+\end{align}
+
+利用质心性质：
+\begin{itemize}
+\item $\sum_i m_i [\bm{r}_i]\dot{v}_b = [\sum_i m_i \bm{r}_i]\dot{v}_b = 0$
+\item $\sum_i m_i [\bm{r}_i][\omega_b]v_b = [\sum_i m_i \bm{r}_i][\omega_b]v_b = 0$
+\end{itemize}
+
+对于第二项，使用$[\bm{r}_i][\dot{\omega}_b]\bm{r}_i = -[\bm{r}_i]^2 \dot{\omega}_b$：
+\begin{equation}
+\sum_i m_i [\bm{r}_i][\dot{\omega}_b]\bm{r}_i = -\sum_i m_i [\bm{r}_i]^2 \dot{\omega}_b
+\end{equation}
+
+对于第四项，使用$[\bm{r}_i][\omega_b]^2 \bm{r}_i = -[\bm{r}_i]^T [\omega_b]^T [\bm{r}_i] \omega_b$，经过整理：
+\begin{equation}
+\sum_i m_i [\bm{r}_i][\omega_b]^2 \bm{r}_i = -[\omega_b] \sum_i m_i [\bm{r}_i]^2 \omega_b
+\end{equation}
+
+定义转动惯量矩阵：
+\begin{equation}
+I_b = -\sum_i m_i [\bm{r}_i]^2
+\label{eq:inertia_definition}
+\end{equation}
+
+则：
+\begin{equation}
+\bm{m}_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\label{eq:rotational_dynamics}
+\end{equation}
+
+\subsection{转动惯量矩阵的展开}
+
+展开$[\bm{r}_i]^2$：
+\begin{equation}
+[\bm{r}_i]^2 = \begin{bmatrix}
+0 & -z_i & y_i \\
+z_i & 0 & -x_i \\
+-y_i & x_i & 0
+\end{bmatrix}^2 = \begin{bmatrix}
+-(y_i^2 + z_i^2) & x_i y_i & x_i z_i \\
+x_i y_i & -(x_i^2 + z_i^2) & y_i z_i \\
+x_i z_i & y_i z_i & -(x_i^2 + y_i^2)
+\end{bmatrix}
+\end{equation}
+
+因此：
+\begin{equation}
+I_b = -\sum_i m_i [\bm{r}_i]^2 = \begin{bmatrix}
+\sum_i m_i(y_i^2 + z_i^2) & -\sum_i m_i x_i y_i & -\sum_i m_i x_i z_i \\
+-\sum_i m_i x_i y_i & \sum_i m_i(x_i^2 + z_i^2) & -\sum_i m_i y_i z_i \\
+-\sum_i m_i x_i z_i & -\sum_i m_i y_i z_i & \sum_i m_i(x_i^2 + y_i^2)
+\end{bmatrix}
+\end{equation}
+
+写成标准形式：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+其中：
+\begin{align}
+I_{xx} &= \sum_i m_i(y_i^2 + z_i^2) \\
+I_{yy} &= \sum_i m_i(x_i^2 + z_i^2) \\
+I_{zz} &= \sum_i m_i(x_i^2 + y_i^2) \\
+I_{xy} &= -\sum_i m_i x_i y_i \\
+I_{xz} &= -\sum_i m_i x_i z_i \\
+I_{yz} &= -\sum_i m_i y_i z_i
+\end{align}
+
+\subsection{组合成空间形式}
+
+将线动力学(\ref{eq:linear_dynamics})和转动力学(\ref{eq:rotational_dynamics})组合：
+
+\begin{equation}
+\begin{bmatrix}
+\bm{m}_b \\
+\bm{f}_b
+\end{bmatrix} = \begin{bmatrix}
+I_b \dot{\omega}_b + [\omega_b] I_b \omega_b \\
+m \dot{v}_b + m [\omega_b] v_b
+\end{bmatrix}
+\end{equation}
+
+写成矩阵形式：
+\begin{equation}
+\begin{bmatrix}
+\bm{m}_b \\
+\bm{f}_b
+\end{bmatrix} = \begin{bmatrix}
+I_b & 0 \\
+0 & mI
+\end{bmatrix} \begin{bmatrix}
+\dot{\omega}_b \\
+\dot{v}_b
+\end{bmatrix} - \begin{bmatrix}
+-[\omega_b] I_b \omega_b \\
+-m [\omega_b] v_b
+\end{bmatrix}
+\end{equation}
+
+使用$[\omega_b]^T = -[\omega_b]$，整理得：
+\begin{equation}
+\begin{bmatrix}
+\bm{m}_b \\
+\bm{f}_b
+\end{bmatrix} = \begin{bmatrix}
+I_b & 0 \\
+0 & mI
+\end{bmatrix} \begin{bmatrix}
+\dot{\omega}_b \\
+\dot{v}_b
+\end{bmatrix} - \begin{bmatrix}
+[\omega_b] & 0 \\
+[v_b] & [\omega_b]
+\end{bmatrix}^T \begin{bmatrix}
+I_b \omega_b \\
+m v_b
+\end{bmatrix}
+\end{equation}
+
+定义空间惯性矩阵：
+\begin{equation}
+G_b = \begin{bmatrix}
+I_b & 0 \\
+0 & mI
+\end{bmatrix}
+\label{eq:G_final}
+\end{equation}
+
+则动力学方程可以写成：
+\begin{equation}
+F_b = G_b \dot{V}_b - [\text{ad}_{V_b}]^T G_b V_b
+\label{eq:spatial_dynamics}
+\end{equation}
+
+其中$F_b = (\bm{m}_b, \bm{f}_b)$是wrench，$V_b = (\omega_b, v_b)$是twist。
+
+\section{空间惯性矩阵的性质}
+
+\subsection{对称性和正定性}
+
+\begin{enumerate}
+\item \textbf{对称性}：$G_b$是对称矩阵，因为$I_b$是对称的
+\item \textbf{正定性}：$G_b$是正定矩阵，因为：
+\begin{itemize}
+\item $I_b$是正定的（转动惯量矩阵）
+\item $m > 0$（质量为正）
+\item 因此对于任意非零twist $V_b$，有$V_b^T G_b V_b > 0$
+\end{itemize}
+\end{enumerate}
+
+\subsection{与动能的关系}
+
+刚体的动能为：
+\begin{equation}
+K = \frac{1}{2} \sum_i m_i \|\dot{\bm{p}}_i\|^2
+\end{equation}
+
+可以证明：
+\begin{equation}
+K = \frac{1}{2} \omega_b^T I_b \omega_b + \frac{1}{2} m v_b^T v_b = \frac{1}{2} V_b^T G_b V_b
+\label{eq:kinetic_energy}
+\end{equation}
+
+这证明了空间惯性矩阵$G_b$完全描述了刚体的惯性特性。
+
+\subsection{与动量的关系}
+
+刚体的空间动量为：
+\begin{equation}
+P_b = G_b V_b = \begin{bmatrix}
+I_b \omega_b \\
+m v_b
+\end{bmatrix}
+\label{eq:spatial_momentum}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $I_b \omega_b$：角动量
+\item $m v_b$：线动量
+\end{itemize}
+
+\section{在不同坐标系中的表示}
+
+\subsection{坐标系变换}
+
+如果空间惯性矩阵$G_b$在坐标系$\{b\}$（质心）中定义，那么在另一个坐标系$\{a\}$中的表示为：
+
+\begin{equation}
+G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}]
+\label{eq:G_transform}
+\end{equation}
+
+其中$T_{ba}$是从坐标系$\{b\}$到$\{a\}$的变换。
+
+\textbf{推导}：
+
+由于动能是标量，不依赖于坐标系：
+\begin{equation}
+\frac{1}{2} V_a^T G_a V_a = \frac{1}{2} V_b^T G_b V_b
+\end{equation}
+
+使用伴随变换：$V_b = [\text{Ad}_{T_{ba}}] V_a$，因此：
+\begin{align}
+\frac{1}{2} V_a^T G_a V_a &= \frac{1}{2} ([\text{Ad}_{T_{ba}}] V_a)^T G_b ([\text{Ad}_{T_{ba}}] V_a) \\
+&= \frac{1}{2} V_a^T [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}] V_a
+\end{align}
+
+因此：
+\begin{equation}
+G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}]
+\end{equation}
+
+\subsection{Steiner定理的推广}
+
+如果坐标系$\{a\}$不在质心，而是在距离质心$\bm{p}$的位置，则：
+
+\begin{equation}
+G_a = \begin{bmatrix}
+I_b + m([\bm{p}]^T [\bm{p}] - \|\bm{p}\|^2 I) & m [\bm{p}]^T \\
+m [\bm{p}] & mI
+\end{bmatrix}
+\end{equation}
+
+这可以简化为：
+\begin{equation}
+G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}]
+\end{equation}
+
+其中$T_{ba}$是从质心到$\{a\}$的变换。
+
+\section{在机器人动力学中的应用}
+
+\subsection{连杆的空间惯性矩阵}
+
+对于机器人连杆$i$，其空间惯性矩阵$G_i$定义为：
+
+\begin{equation}
+G_i = \begin{bmatrix}
+I_i & 0 \\
+0 & m_i I
+\end{bmatrix}
+\label{eq:link_inertia}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $I_i$：连杆$i$在质心处的转动惯量矩阵（在坐标系$\{i\}$中表示）
+\item $m_i$：连杆$i$的质量
+\item 坐标系$\{i\}$固定在连杆$i$的质心处
+\end{itemize}
+
+\subsection{在牛顿-欧拉算法中的使用}
+
+在牛顿-欧拉逆向动力学算法中，$G_i$用于计算连杆$i$的动力学：
+
+\begin{equation}
+F_i = G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F_i$：作用在连杆$i$上的wrench
+\item $V_i$：连杆$i$的twist
+\item $\dot{V}_i$：连杆$i$的twist的导数
+\end{itemize}
+
+\section{总结}
+
+\begin{enumerate}
+\item \textbf{定义}：$G = \begin{bmatrix} I & 0 \\ 0 & mI \end{bmatrix}$，其中$I$是转动惯量矩阵，$m$是质量
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 描述刚体的惯性特性
+\item 将twist与wrench联系起来
+\item 与动能和动量直接相关
+\end{itemize}
+
+\item \textbf{性质}：
+\begin{itemize}
+\item 对称正定矩阵
+\item 动能：$K = \frac{1}{2} V^T G V$
+\item 动量：$P = G V$
+\end{itemize}
+
+\item \textbf{坐标系变换}：$G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}]$
+
+\item \textbf{应用}：在机器人动力学中用于计算每个连杆的惯性力
+\end{enumerate}
+\end{document}
