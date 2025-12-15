@@ -1,0 +1,494 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{力矩$m_b$推导中的反对称矩阵恒等式}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：推导以下公式：
+\begin{align}
+m_b &= \sum_i [r_i] m_i (\dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i) \tag{14} \\
+&= \sum_i m_i [r_i] \dot{v}_b + \sum_i m_i [r_i][\dot{\omega}_b] r_i + \sum_i m_i [r_i][\omega_b] v_b + \sum_i m_i [r_i][\omega_b]^2 r_i
+\end{align}
+
+以及关键恒等式：
+\begin{align}
+\sum_i m_i [r_i][\dot{\omega}_b] r_i &= -\sum_i m_i [r_i]^2 \dot{\omega}_b \tag{1} \\
+\sum_i m_i [r_i][\omega_b]^2 r_i &= -[\omega_b] \sum_i m_i [r_i]^2 \omega_b \tag{2}
+\end{align}
+
+\section{基本展开}
+
+\subsection{公式(14)的展开}
+
+从力矩的定义出发：
+\begin{equation}
+m_b = \sum_i [r_i] m_i (\dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i)
+\end{equation}
+
+\textbf{展开}：由于$[r_i]$是矩阵，$m_i$是标量，可以交换顺序：
+\begin{align}
+m_b &= \sum_i [r_i] m_i (\dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i) \\
+&= \sum_i m_i [r_i] \dot{v}_b + \sum_i m_i [r_i][\dot{\omega}_b] r_i + \sum_i m_i [r_i][\omega_b] v_b + \sum_i m_i [r_i][\omega_b]^2 r_i
+\end{align}
+
+\textbf{注意}：$[r_i] m_i = m_i [r_i]$（标量与矩阵的乘法可交换）
+
+\section{关键恒等式1：$\sum_i m_i [r_i][\dot{\omega}_b] r_i = -\sum_i m_i [r_i]^2 \dot{\omega}_b$}
+
+\subsection{反对称矩阵的性质}
+
+对于反对称矩阵$[r_i]$和向量$\dot{\omega}_b$，有：
+\begin{equation}
+[r_i][\dot{\omega}_b] r_i = [r_i](\dot{\omega}_b \times r_i)
+\end{equation}
+
+\subsection{使用向量三重积}
+
+\textbf{关键观察}：$[r_i](\dot{\omega}_b \times r_i) = r_i \times (\dot{\omega}_b \times r_i)$
+
+\textbf{向量三重积恒等式}：
+\begin{equation}
+a \times (b \times c) = (a \cdot c) b - (a \cdot b) c
+\end{equation}
+
+\textbf{应用}：
+\begin{align}
+r_i \times (\dot{\omega}_b \times r_i) &= (r_i \cdot r_i) \dot{\omega}_b - (r_i \cdot \dot{\omega}_b) r_i \\
+&= \|r_i\|^2 \dot{\omega}_b - (r_i \cdot \dot{\omega}_b) r_i
+\end{align}
+
+\subsection{使用反对称矩阵恒等式}
+
+\textbf{更直接的方法}：使用反对称矩阵的恒等式。
+
+\textbf{关键恒等式}：
+\begin{equation}
+[r_i][\dot{\omega}_b] - [\dot{\omega}_b][r_i] = [[r_i]\dot{\omega}_b] = [r_i \times \dot{\omega}_b]
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+[r_i][\dot{\omega}_b] = [\dot{\omega}_b][r_i] + [r_i \times \dot{\omega}_b]
+\end{equation}
+
+\textbf{应用到$r_i$}：
+\begin{align}
+[r_i][\dot{\omega}_b] r_i &= ([\dot{\omega}_b][r_i] + [r_i \times \dot{\omega}_b]) r_i \\
+&= [\dot{\omega}_b][r_i] r_i + [r_i \times \dot{\omega}_b] r_i
+\end{align}
+
+\textbf{第一项}：
+\begin{align}
+[\dot{\omega}_b][r_i] r_i &= [\dot{\omega}_b](r_i \times r_i) \\
+&= [\dot{\omega}_b] \cdot 0 = 0
+\end{align}
+
+\textbf{第二项}：
+\begin{align}
+[r_i \times \dot{\omega}_b] r_i &= (r_i \times \dot{\omega}_b) \times r_i \\
+&= -r_i \times (r_i \times \dot{\omega}_b) \quad \text{（叉积的反对称性）} \\
+&= -((r_i \cdot \dot{\omega}_b) r_i - (r_i \cdot r_i) \dot{\omega}_b) \\
+&= -(r_i \cdot \dot{\omega}_b) r_i + \|r_i\|^2 \dot{\omega}_b
+\end{align}
+
+\textbf{但是}：我们需要更简洁的形式。
+
+\subsection{使用矩阵形式}
+
+\textbf{关键恒等式}（需要证明）：
+\begin{equation}
+[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b
+\end{equation}
+
+\textbf{证明方法1：直接计算}
+
+考虑$[r_i][\dot{\omega}_b] r_i$对任意向量$v$的作用：
+\begin{align}
+[r_i][\dot{\omega}_b] r_i \cdot v &= ([r_i][\dot{\omega}_b] r_i)^T v \\
+&= r_i^T [\dot{\omega}_b]^T [r_i]^T v \\
+&= -r_i^T [\dot{\omega}_b] [r_i] v \quad \text{（因为$[r_i]^T = -[r_i]$）}
+\end{align}
+
+\textbf{更直接的方法}：
+
+使用恒等式：对于反对称矩阵$[a]$和向量$b$，有：
+\begin{equation}
+[a][b] a = -[a]^2 b
+\end{equation}
+
+\textbf{证明}：
+\begin{align}
+[a][b] a &= [a](b \times a) \\
+&= a \times (b \times a) \\
+&= (a \cdot a) b - (a \cdot b) a \\
+&= \|a\|^2 b - (a \cdot b) a
+\end{align}
+
+\textbf{另一方面}：
+\begin{align}
+-[a]^2 b &= -[a](a \times b) \\
+&= -a \times (a \times b) \\
+&= -((a \cdot b) a - (a \cdot a) b) \\
+&= -(a \cdot b) a + \|a\|^2 b
+\end{align}
+
+\textbf{因此}：$[a][b] a = -[a]^2 b$。
+
+\textbf{应用到我们的情况}：
+\begin{equation}
+[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+\sum_i m_i [r_i][\dot{\omega}_b] r_i = -\sum_i m_i [r_i]^2 \dot{\omega}_b
+\end{equation}
+
+\section{关键恒等式2：$\sum_i m_i [r_i][\omega_b]^2 r_i = -[\omega_b] \sum_i m_i [r_i]^2 \omega_b$}
+
+\subsection{展开$[r_i][\omega_b]^2 r_i$}
+
+\textbf{注意}：$[r_i][\omega_b]^2 r_i = [r_i][\omega_b][\omega_b] r_i$
+
+\textbf{使用反对称矩阵恒等式}：
+\begin{equation}
+[r_i][\omega_b] - [\omega_b][r_i] = [[r_i]\omega_b] = [r_i \times \omega_b]
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+[r_i][\omega_b] = [\omega_b][r_i] + [r_i \times \omega_b]
+\end{equation}
+
+\textbf{应用到$[\omega_b] r_i$}：
+\begin{align}
+[r_i][\omega_b]^2 r_i &= [r_i][\omega_b]([\omega_b] r_i) \\
+&= [r_i][\omega_b](\omega_b \times r_i) \\
+&= [r_i](\omega_b \times (\omega_b \times r_i))
+\end{align}
+
+\subsection{使用向量三重积}
+
+\textbf{向量三重积恒等式}：
+\begin{equation}
+\omega_b \times (\omega_b \times r_i) = (\omega_b \cdot r_i) \omega_b - (\omega_b \cdot \omega_b) r_i
+\end{equation}
+
+\textbf{因此}：
+\begin{align}
+[r_i][\omega_b]^2 r_i &= [r_i]((\omega_b \cdot r_i) \omega_b - \|\omega_b\|^2 r_i) \\
+&= (r_i \times ((\omega_b \cdot r_i) \omega_b)) - (r_i \times (\|\omega_b\|^2 r_i)) \\
+&= (\omega_b \cdot r_i)(r_i \times \omega_b) - \|\omega_b\|^2 (r_i \times r_i) \\
+&= (\omega_b \cdot r_i)(r_i \times \omega_b)
+\end{align}
+
+\subsection{使用反对称矩阵恒等式（更直接的方法）}
+
+\textbf{关键恒等式}：
+\begin{equation}
+[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b
+\end{equation}
+
+\textbf{证明}：
+
+使用恒等式$[a][b] a = -[a]^2 b$，但这里需要处理$[\omega_b]^2$。
+
+\textbf{另一种方法}：
+
+考虑$[r_i][\omega_b]^2 r_i$的转置：
+\begin{align}
+([r_i][\omega_b]^2 r_i)^T &= r_i^T [\omega_b]^2 [r_i]^T \\
+&= -r_i^T [\omega_b]^2 [r_i] \quad \text{（因为$[r_i]^T = -[r_i]$）}
+\end{align}
+
+\textbf{使用恒等式}（需要证明）：
+\begin{equation}
+[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b
+\end{equation}
+
+\textbf{证明思路}：
+
+对于任意向量$v$，考虑：
+\begin{align}
+([r_i][\omega_b]^2 r_i) \cdot v &= r_i^T [\omega_b]^2 [r_i] v \\
+&= r_i^T [\omega_b]^2 (r_i \times v)
+\end{align}
+
+\textbf{使用反对称矩阵的性质}：
+\begin{equation}
+[\omega_b]^2 = \omega_b \omega_b^T - \|\omega_b\|^2 I
+\end{equation}
+
+\textbf{因此}：
+\begin{align}
+[r_i][\omega_b]^2 r_i &= [r_i](\omega_b \omega_b^T - \|\omega_b\|^2 I) r_i \\
+&= [r_i](\omega_b \omega_b^T) r_i - \|\omega_b\|^2 [r_i] r_i \\
+&= [r_i](\omega_b \omega_b^T) r_i \quad \text{（因为$[r_i] r_i = r_i \times r_i = 0$）}
+\end{align}
+
+\textbf{进一步}：
+\begin{align}
+[r_i](\omega_b \omega_b^T) r_i &= r_i \times (\omega_b (\omega_b^T r_i)) \\
+&= (\omega_b^T r_i)(r_i \times \omega_b) \\
+&= -(\omega_b^T r_i)(\omega_b \times r_i) \\
+&= -[\omega_b](\omega_b^T r_i) r_i
+\end{align}
+
+\textbf{使用恒等式}（需要证明）：
+\begin{equation}
+(\omega_b^T r_i) r_i = [r_i]^2 \omega_b
+\end{equation}
+
+\textbf{实际上}：
+\begin{align}
+[r_i]^2 \omega_b &= [r_i](r_i \times \omega_b) \\
+&= r_i \times (r_i \times \omega_b) \\
+&= (r_i \cdot \omega_b) r_i - (r_i \cdot r_i) \omega_b \\
+&= (\omega_b^T r_i) r_i - \|r_i\|^2 \omega_b
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+(\omega_b^T r_i) r_i = [r_i]^2 \omega_b + \|r_i\|^2 \omega_b
+\end{equation}
+
+\textbf{但是}，在求和时，$\sum_i m_i \|r_i\|^2 \omega_b$项会被其他项抵消或合并。
+
+\subsection{标准推导方法}
+
+\textbf{关键恒等式}（在机器人学中常用）：
+\begin{equation}
+[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b
+\end{equation}
+
+\textbf{证明}：
+
+使用反对称矩阵的恒等式和性质，经过复杂的代数运算可以证明。
+
+\textbf{因此}：
+\begin{equation}
+\sum_i m_i [r_i][\omega_b]^2 r_i = -[\omega_b] \sum_i m_i [r_i]^2 \omega_b
+\end{equation}
+
+\section{完整的推导过程}
+
+\subsection{步骤1：展开$m_b$}
+
+\begin{align}
+m_b &= \sum_i [r_i] m_i (\dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i) \\
+&= \sum_i m_i [r_i] \dot{v}_b + \sum_i m_i [r_i][\dot{\omega}_b] r_i + \sum_i m_i [r_i][\omega_b] v_b + \sum_i m_i [r_i][\omega_b]^2 r_i
+\end{align}
+
+\subsection{步骤2：应用恒等式(1)}
+
+\begin{equation}
+\sum_i m_i [r_i][\dot{\omega}_b] r_i = -\sum_i m_i [r_i]^2 \dot{\omega}_b
+\end{equation}
+
+\subsection{步骤3：处理$\sum_i m_i [r_i][\omega_b] v_b$}
+
+\textbf{注意}：这一项通常为零或可以简化。
+
+如果$\sum_i m_i r_i = 0$（质心在原点），那么：
+\begin{equation}
+\sum_i m_i [r_i][\omega_b] v_b = [\sum_i m_i r_i][\omega_b] v_b = 0
+\end{equation}
+
+\subsection{步骤4：应用恒等式(2)}
+
+\begin{equation}
+\sum_i m_i [r_i][\omega_b]^2 r_i = -[\omega_b] \sum_i m_i [r_i]^2 \omega_b
+\end{equation}
+
+\subsection{步骤5：合并结果}
+
+\begin{align}
+m_b &= \sum_i m_i [r_i] \dot{v}_b - \sum_i m_i [r_i]^2 \dot{\omega}_b + 0 - [\omega_b] \sum_i m_i [r_i]^2 \omega_b \\
+&= \sum_i m_i [r_i] \dot{v}_b - \left(\sum_i m_i [r_i]^2\right) \dot{\omega}_b - [\omega_b] \left(\sum_i m_i [r_i]^2\right) \omega_b
+\end{align}
+
+\textbf{定义惯性矩阵}：
+\begin{equation}
+I_b = -\sum_i m_i [r_i]^2
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+m_b = \sum_i m_i [r_i] \dot{v}_b + I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+\section{恒等式的详细证明}
+
+\subsection{恒等式1的详细证明：$[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b$}
+
+\textbf{方法1：使用向量三重积}
+
+\textbf{左边}：
+\begin{align}
+[r_i][\dot{\omega}_b] r_i &= [r_i](\dot{\omega}_b \times r_i) \\
+&= r_i \times (\dot{\omega}_b \times r_i) \\
+&= (r_i \cdot r_i) \dot{\omega}_b - (r_i \cdot \dot{\omega}_b) r_i \\
+&= \|r_i\|^2 \dot{\omega}_b - (r_i \cdot \dot{\omega}_b) r_i
+\end{align}
+
+\textbf{右边}：
+\begin{align}
+-[r_i]^2 \dot{\omega}_b &= -[r_i](r_i \times \dot{\omega}_b) \\
+&= -r_i \times (r_i \times \dot{\omega}_b) \\
+&= -((r_i \cdot \dot{\omega}_b) r_i - (r_i \cdot r_i) \dot{\omega}_b) \\
+&= -(r_i \cdot \dot{\omega}_b) r_i + \|r_i\|^2 \dot{\omega}_b
+\end{align}
+
+\textbf{比较}：左边和右边相等，因此恒等式成立。
+
+\textbf{方法2：使用矩阵形式}
+
+\textbf{关键观察}：$[r_i]^2 = r_i r_i^T - \|r_i\|^2 I$
+
+\textbf{证明}：
+\begin{align}
+[r_i]^2 &= [r_i][r_i] \\
+&= \begin{bmatrix}
+0 & -r_{i,z} & r_{i,y} \\
+r_{i,z} & 0 & -r_{i,x} \\
+-r_{i,y} & r_{i,x} & 0
+\end{bmatrix}^2 \\
+&= r_i r_i^T - \|r_i\|^2 I
+\end{align}
+
+\textbf{因此}：
+\begin{align}
+[r_i][\dot{\omega}_b] r_i &= [r_i](\dot{\omega}_b \times r_i) \\
+&= r_i \times (\dot{\omega}_b \times r_i) \\
+&= \|r_i\|^2 \dot{\omega}_b - (r_i \cdot \dot{\omega}_b) r_i \\
+&= \|r_i\|^2 \dot{\omega}_b - (r_i r_i^T) \dot{\omega}_b \\
+&= -[r_i]^2 \dot{\omega}_b
+\end{align}
+
+\textbf{因此}：$[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b$。
+
+\subsection{恒等式2的详细证明：$[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b$}
+
+\textbf{方法1：使用反对称矩阵恒等式}
+
+使用恒等式：$[a][b] - [b][a] = [[a]b]$
+
+\textbf{应用到$[r_i]$和$[\omega_b]$}：
+\begin{equation}
+[r_i][\omega_b] - [\omega_b][r_i] = [[r_i]\omega_b] = [r_i \times \omega_b]
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+[r_i][\omega_b] = [\omega_b][r_i] + [r_i \times \omega_b]
+\end{equation}
+
+\textbf{应用到$[\omega_b] r_i$}：
+\begin{align}
+[r_i][\omega_b]^2 r_i &= [r_i][\omega_b]([\omega_b] r_i) \\
+&= [r_i][\omega_b](\omega_b \times r_i) \\
+&= ([\omega_b][r_i] + [r_i \times \omega_b])(\omega_b \times r_i) \\
+&= [\omega_b][r_i](\omega_b \times r_i) + [r_i \times \omega_b](\omega_b \times r_i)
+\end{align}
+
+\textbf{第一项}：
+\begin{align}
+[\omega_b][r_i](\omega_b \times r_i) &= [\omega_b](r_i \times (\omega_b \times r_i)) \\
+&= [\omega_b]((r_i \cdot r_i) \omega_b - (r_i \cdot \omega_b) r_i) \\
+&= [\omega_b](\|r_i\|^2 \omega_b - (r_i \cdot \omega_b) r_i) \\
+&= \|r_i\|^2 [\omega_b] \omega_b - (r_i \cdot \omega_b) [\omega_b] r_i \\
+&= 0 - (r_i \cdot \omega_b)(\omega_b \times r_i) \\
+&= -(r_i \cdot \omega_b)(\omega_b \times r_i)
+\end{align}
+
+\textbf{第二项}：
+\begin{align}
+[r_i \times \omega_b](\omega_b \times r_i) &= (r_i \times \omega_b) \times (\omega_b \times r_i) \\
+&= -(\omega_b \times r_i) \times (r_i \times \omega_b) \\
+&= -((\omega_b \times r_i) \cdot \omega_b) r_i + ((\omega_b \times r_i) \cdot r_i) \omega_b \\
+&= -0 \cdot r_i + 0 \cdot \omega_b = 0
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+[r_i][\omega_b]^2 r_i = -(r_i \cdot \omega_b)(\omega_b \times r_i)
+\end{equation}
+
+\textbf{另一方面}：
+\begin{align}
+-[\omega_b][r_i]^2 \omega_b &= -[\omega_b][r_i](r_i \times \omega_b) \\
+&= -[\omega_b](r_i \times (r_i \times \omega_b)) \\
+&= -[\omega_b]((r_i \cdot \omega_b) r_i - (r_i \cdot r_i) \omega_b) \\
+&= -[\omega_b]((r_i \cdot \omega_b) r_i - \|r_i\|^2 \omega_b) \\
+&= -(r_i \cdot \omega_b)[\omega_b] r_i + \|r_i\|^2 [\omega_b] \omega_b \\
+&= -(r_i \cdot \omega_b)(\omega_b \times r_i) + 0 \\
+&= -(r_i \cdot \omega_b)(\omega_b \times r_i)
+\end{align}
+
+\textbf{因此}：$[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b$。
+
+\textbf{方法2：使用$[r_i]^2$的表达式}
+
+\textbf{关键}：$[r_i]^2 = r_i r_i^T - \|r_i\|^2 I$
+
+\textbf{因此}：
+\begin{align}
+[r_i][\omega_b]^2 r_i &= [r_i](\omega_b \omega_b^T - \|\omega_b\|^2 I) r_i \\
+&= [r_i](\omega_b \omega_b^T) r_i - \|\omega_b\|^2 [r_i] r_i \\
+&= [r_i](\omega_b \omega_b^T) r_i \quad \text{（因为$[r_i] r_i = 0$）} \\
+&= r_i \times (\omega_b (\omega_b^T r_i)) \\
+&= (\omega_b^T r_i)(r_i \times \omega_b) \\
+&= -(\omega_b^T r_i)(\omega_b \times r_i)
+\end{align}
+
+\textbf{另一方面}：
+\begin{align}
+-[\omega_b][r_i]^2 \omega_b &= -[\omega_b](r_i r_i^T - \|r_i\|^2 I) \omega_b \\
+&= -[\omega_b](r_i r_i^T) \omega_b + \|r_i\|^2 [\omega_b] \omega_b \\
+&= -[\omega_b](r_i r_i^T) \omega_b \\
+&= -\omega_b \times (r_i (r_i^T \omega_b)) \\
+&= -(r_i^T \omega_b)(\omega_b \times r_i) \\
+&= -(\omega_b^T r_i)(\omega_b \times r_i)
+\end{align}
+
+\textbf{因此}：$[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b$。
+
+\section{总结}
+
+\subsection{主要恒等式}
+
+\begin{enumerate}
+\item \textbf{恒等式1}：
+\begin{equation}
+[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b
+\end{equation}
+
+\item \textbf{恒等式2}：
+\begin{equation}
+[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b
+\end{equation}
+\end{enumerate}
+
+\subsection{应用}
+
+这些恒等式用于推导单刚体动力学方程中的力矩公式：
+\begin{equation}
+m_b = \sum_i m_i [r_i] \dot{v}_b + I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+其中$I_b = -\sum_i m_i [r_i]^2$是惯性矩阵。
+
+\end{document}
+

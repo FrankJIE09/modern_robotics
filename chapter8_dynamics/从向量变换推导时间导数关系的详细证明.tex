@@ -1,0 +1,389 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{从向量变换推导时间导数关系的详细证明}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{已知}：
+\begin{enumerate}
+\item 向量变换关系：
+\begin{equation}
+\bm{v}_I = R(t) \bm{v}_b
+\label{eq:vector_transform}
+\end{equation}
+
+其中$R(t)$是从体坐标系$\{b\}$到惯性坐标系$\{I\}$的旋转矩阵。
+
+\item 旋转矩阵的导数关系：
+\begin{equation}
+\dot{R}(t) = R(t) [\omega_b]_{\times}
+\label{eq:rotation_derivative}
+\end{equation}
+
+其中$\omega_b$是体坐标系相对于惯性坐标系的角速度（在体坐标系中表示），$[\omega_b]_{\times}$是$\omega_b$的反对称矩阵。
+
+\textbf{要证明}：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega_b \times \bm{v}_b
+\label{eq:target}
+\end{equation}
+\end{enumerate}
+
+\section{推导方法1：直接对向量变换求导}
+
+\subsection{步骤1：对向量变换关系求导}
+
+对式(\ref{eq:vector_transform})两边对时间求导：
+\begin{align}
+\frac{d\bm{v}_I}{dt} &= \frac{d}{dt}[R(t) \bm{v}_b] \\
+&= \dot{R}(t) \bm{v}_b + R(t) \dot{\bm{v}}_b
+\label{eq:derivative_expanded}
+\end{align}
+
+\textbf{说明}：
+\begin{itemize}
+\item $\frac{d\bm{v}_I}{dt}$：向量在惯性坐标系中的时间导数
+\item $\dot{R}(t)$：旋转矩阵的时间导数
+\item $\dot{\bm{v}}_b$：向量在体坐标系中的时间导数
+\end{itemize}
+
+\subsection{步骤2：使用旋转矩阵的导数关系}
+
+将式(\ref{eq:rotation_derivative})代入式(\ref{eq:derivative_expanded})：
+\begin{align}
+\frac{d\bm{v}_I}{dt} &= R(t) [\omega_b]_{\times} \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) ([\omega_b]_{\times} \bm{v}_b + \dot{\bm{v}}_b)
+\label{eq:intermediate}
+\end{align}
+
+\subsection{步骤3：使用反对称矩阵的性质}
+
+反对称矩阵$[\omega_b]_{\times}$的性质：
+\begin{equation}
+[\omega_b]_{\times} \bm{v}_b = \omega_b \times \bm{v}_b
+\label{eq:skew_property}
+\end{equation}
+
+\textbf{证明}：
+
+设$\omega_b = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}$，$\bm{v}_b = \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix}$，则：
+\begin{equation}
+[\omega_b]_{\times} = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+因此：
+\begin{align}
+[\omega_b]_{\times} \bm{v}_b &= \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix} \begin{bmatrix}
+v_x \\ v_y \\ v_z
+\end{bmatrix} \\
+&= \begin{bmatrix}
+-\omega_z v_y + \omega_y v_z \\
+\omega_z v_x - \omega_x v_z \\
+-\omega_y v_x + \omega_x v_y
+\end{bmatrix} \\
+&= \omega_b \times \bm{v}_b
+\end{align}
+
+\textbf{证毕}。
+
+\subsection{步骤4：代入反对称矩阵性质}
+
+将式(\ref{eq:skew_property})代入式(\ref{eq:intermediate})：
+\begin{align}
+\frac{d\bm{v}_I}{dt} &= R(t) (\omega_b \times \bm{v}_b + \dot{\bm{v}}_b) \\
+&= R(t) \dot{\bm{v}}_b + R(t) (\omega_b \times \bm{v}_b)
+\label{eq:before_transform}
+\end{align}
+
+\subsection{步骤5：转换到体坐标系表示}
+
+\textbf{关键观察}：式(\ref{eq:before_transform})的结果是在惯性坐标系$\{I\}$中的表示。要得到在体坐标系$\{B\}$中的表示，需要左乘$R^T(t)$。
+
+\textbf{左乘$R^T(t)$}：
+\begin{align}
+R^T(t) \frac{d\bm{v}_I}{dt} &= R^T(t) R(t) \dot{\bm{v}}_b + R^T(t) R(t) (\omega_b \times \bm{v}_b) \\
+&= I \dot{\bm{v}}_b + I (\omega_b \times \bm{v}_b) \\
+&= \dot{\bm{v}}_b + \omega_b \times \bm{v}_b
+\label{eq:body_frame_result}
+\end{align}
+
+其中$I$是$3 \times 3$单位矩阵。
+
+\subsection{步骤6：解释结果}
+
+\textbf{物理意义}：
+
+\begin{itemize}
+\item $R^T(t) \frac{d\bm{v}_I}{dt}$：向量在惯性系中的时间导数，转换到体坐标系中的表示
+
+\item $\dot{\bm{v}}_b$：向量在体坐标系中观察到的变化率，即$\left.\frac{d\bm{v}}{dt}\right|_{\text{body}}$
+
+\item $\omega_b \times \bm{v}_b$：由于坐标系旋转产生的额外项
+\end{itemize}
+
+\textbf{因此}，在体坐标系中，向量在惯性系中的时间导数表示为：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+\textbf{证毕}。
+
+\section{推导方法2：使用旋转矩阵的指数表示}
+
+\subsection{旋转矩阵的指数表示}
+
+旋转矩阵可以表示为：
+\begin{equation}
+R(t) = \exp([\theta(t)]_{\times})
+\end{equation}
+
+其中$\theta(t)$是旋转角度向量，满足$\dot{\theta}(t) = \omega(t)$。
+
+\subsection{对时间求导}
+
+\begin{align}
+\dot{R}(t) &= \frac{d}{dt}[\exp([\theta(t)]_{\times})] \\
+&= \exp([\theta(t)]_{\times}) [\dot{\theta}(t)]_{\times} \\
+&= R(t) [\omega(t)]_{\times}
+\end{align}
+
+这与前面的结果一致。
+
+\subsection{应用到向量导数}
+
+\begin{align}
+\frac{d}{dt}[R(t) \bm{v}_b] &= \dot{R}(t) \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) [\omega_b]_{\times} \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) (\omega_b \times \bm{v}_b + \dot{\bm{v}}_b)
+\end{align}
+
+在体坐标系中表示：
+\begin{equation}
+R^T(t) \frac{d}{dt}[R(t) \bm{v}_b] = \omega_b \times \bm{v}_b + \dot{\bm{v}}_b
+\end{equation}
+
+\section{推导方法3：几何直观方法}
+
+\subsection{固定向量的情况}
+
+考虑一个固定在体坐标系中的向量$\bm{v}_b$（在体坐标系中不变）。
+
+\textbf{在体坐标系中}：
+\begin{equation}
+\dot{\bm{v}}_b = 0
+\end{equation}
+
+\textbf{在惯性坐标系中}：
+
+由于坐标系旋转，向量在惯性系中的方向在改变。在时间$\Delta t$内，坐标系旋转了$\omega_b \Delta t$的角度。
+
+\textbf{向量变化}：
+\begin{equation}
+\Delta \bm{v}_I \approx \omega_b \times \bm{v}_b \cdot \Delta t
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+\frac{d\bm{v}_I}{dt} = \lim_{\Delta t \to 0} \frac{\Delta \bm{v}_I}{\Delta t} = \omega_b \times \bm{v}_b
+\end{equation}
+
+\subsection{变化向量的情况}
+
+如果向量不仅在坐标系中变化，坐标系本身也在旋转，那么总的变化率是两项之和：
+\begin{equation}
+\frac{d\bm{v}_I}{dt} = \dot{\bm{v}}_b + \omega_b \times \bm{v}_b
+\end{equation}
+
+\section{关键步骤详解}
+
+\subsection{为什么需要左乘$R^T(t)$？}
+
+\textbf{问题}：为什么在步骤5中需要左乘$R^T(t)$？
+
+\textbf{回答}：
+
+\begin{enumerate}
+\item $\frac{d\bm{v}_I}{dt}$是在惯性坐标系$\{I\}$中的表示
+
+\item 我们需要得到在体坐标系$\{B\}$中的表示
+
+\item 从$\{I\}$到$\{B\}$的坐标变换是$R^T(t)$（因为从$\{B\}$到$\{I\}$是$R(t)$）
+
+\item 因此，要将在$\{I\}$中的向量转换到$\{B\}$中，需要左乘$R^T(t)$
+\end{enumerate}
+
+\textbf{数学表达}：
+
+如果$\bm{v}_I = R(t) \bm{v}_b$，那么：
+\begin{equation}
+\bm{v}_b = R^T(t) \bm{v}_I
+\end{equation}
+
+类似地，对于时间导数：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{body}} = R^T(t) \left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}}
+\end{equation}
+
+\subsection{为什么$\omega_b \times \bm{v}_b$项出现在体坐标系中？}
+
+\textbf{关键观察}：
+
+虽然$\omega_b \times \bm{v}_b$是在体坐标系中计算的，但它表示的是由于坐标系旋转产生的变化，这个变化在体坐标系中也能观察到。
+
+\textbf{物理意义}：
+
+\begin{itemize}
+\item 即使向量在体坐标系中不变（$\dot{\bm{v}}_b = 0$），由于坐标系旋转，向量在惯性系中的方向在改变
+\item 这个方向变化在体坐标系中表现为$\omega_b \times \bm{v}_b$项
+\item 这是科里奥利效应的体现
+\end{itemize}
+
+\section{验证：特殊情况}
+
+\subsection{情况1：向量在体坐标系中不变}
+
+如果$\dot{\bm{v}}_b = 0$（向量在体坐标系中不变），那么：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \omega_b \times \bm{v}_b
+\end{equation}
+
+\textbf{验证}：
+
+从向量变换：
+\begin{align}
+\frac{d\bm{v}_I}{dt} &= \dot{R}(t) \bm{v}_b + R(t) \cdot 0 \\
+&= R(t) [\omega_b]_{\times} \bm{v}_b \\
+&= R(t) (\omega_b \times \bm{v}_b)
+\end{align}
+
+在体坐标系中：
+\begin{equation}
+R^T(t) \frac{d\bm{v}_I}{dt} = \omega_b \times \bm{v}_b
+\end{equation}
+
+\textbf{符合预期}。
+
+\subsection{情况2：坐标系不旋转}
+
+如果$\omega_b = 0$（坐标系不旋转），那么：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}}
+\end{equation}
+
+\textbf{验证}：
+
+从向量变换：
+\begin{align}
+\frac{d\bm{v}_I}{dt} &= R(t) \cdot 0 \cdot \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) \dot{\bm{v}}_b
+\end{align}
+
+在体坐标系中：
+\begin{equation}
+R^T(t) \frac{d\bm{v}_I}{dt} = \dot{\bm{v}}_b
+\end{equation}
+
+\textbf{符合预期}。
+
+\section{应用到角动量}
+
+\subsection{角动量在体坐标系中的表示}
+
+角动量$\bm{L}_b = I_b \omega_b$在体坐标系$\{b\}$中表示。
+
+\subsection{在惯性系中的时间导数}
+
+根据时间导数关系：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{body}} + \omega_b \times \bm{L}_b
+\end{equation}
+
+\subsection{展开}
+
+\begin{align}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} &= \frac{d}{dt}(I_b \omega_b) + \omega_b \times (I_b \omega_b) \\
+&= I_b \dot{\omega}_b + \frac{dI_b}{dt} \omega_b + \omega_b \times (I_b \omega_b)
+\end{align}
+
+由于$I_b$在体坐标系中是常数，$\frac{dI_b}{dt} = 0$。
+
+\textbf{因此}：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+\subsection{角动量定理}
+
+根据角动量定理：
+\begin{equation}
+m_b = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}}
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+这就是欧拉方程。
+
+\section{总结}
+
+\subsection{推导步骤总结}
+
+\begin{enumerate}
+\item \textbf{向量变换}：$\bm{v}_I = R(t) \bm{v}_b$
+
+\item \textbf{对时间求导}：$\frac{d\bm{v}_I}{dt} = \dot{R}(t) \bm{v}_b + R(t) \dot{\bm{v}}_b$
+
+\item \textbf{使用旋转矩阵导数}：$\dot{R}(t) = R(t) [\omega_b]_{\times}$
+
+\item \textbf{代入并简化}：$\frac{d\bm{v}_I}{dt} = R(t) ([\omega_b]_{\times} \bm{v}_b + \dot{\bm{v}}_b)$
+
+\item \textbf{使用反对称矩阵性质}：$[\omega_b]_{\times} \bm{v}_b = \omega_b \times \bm{v}_b$
+
+\item \textbf{转换到体坐标系}：左乘$R^T(t)$得到体坐标系中的表示
+
+\item \textbf{最终结果}：$\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega_b \times \bm{v}_b$
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 向量变换关系是基础：$\bm{v}_I = R(t) \bm{v}_b$
+\item 旋转矩阵的导数关系：$\dot{R}(t) = R(t) [\omega_b]_{\times}$
+\item 反对称矩阵的性质：$[\omega_b]_{\times} \bm{v}_b = \omega_b \times \bm{v}_b$
+\item 坐标变换：从惯性系到体坐标系需要左乘$R^T(t)$
+\item $\omega_b \times \bm{v}_b$项是旋转坐标系效应的直接结果
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学（欧拉方程）
+\item 机器人动力学（递归牛顿-欧拉算法）
+\item 航天器姿态控制
+\item 旋转机械系统分析
+\end{itemize}
+
+\end{document}
+

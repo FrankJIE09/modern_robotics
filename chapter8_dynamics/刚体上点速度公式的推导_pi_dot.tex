@@ -1,0 +1,337 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{刚体上点速度公式的推导：$\dot{p}_i = v_b + \omega_b \times p_i$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：为什么刚体上点质量$i$的速度为：
+\begin{equation}
+\dot{p}_i = v_b + \omega_b \times p_i
+\label{eq:velocity_formula}
+\end{equation}
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $\dot{p}_i$：点质量$i$在惯性坐标系中的速度
+\item $v_b$：刚体质心的线速度（在体坐标系$\{b\}$中表示）
+\item $\omega_b$：刚体的角速度（在体坐标系$\{b\}$中表示）
+\item $p_i$：点质量$i$在惯性坐标系中的位置
+\end{itemize}
+
+\section{基本设置}
+
+\subsection{坐标系设置}
+
+\begin{itemize}
+\item $\{s\}$或$\{I\}$：惯性坐标系（固定）
+\item $\{b\}$：体坐标系（固定在刚体上，原点在质心）
+\item $R(t)$：从体坐标系$\{b\}$到惯性坐标系$\{s\}$的旋转矩阵
+\end{itemize}
+
+\subsection{点质量的位置关系}
+
+点质量$i$在体坐标系$\{b\}$中的固定位置为$r_i$（常数）。
+
+点质量$i$在惯性坐标系$\{s\}$中的位置为：
+\begin{equation}
+p_i(t) = p_b(t) + R(t) r_i
+\label{eq:position_relation}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $p_b(t)$：刚体质心在惯性坐标系中的位置
+\item $r_i$：点质量$i$在体坐标系$\{b\}$中的位置向量（常数，因为刚体是刚性的）
+\end{itemize}
+
+\textbf{关键观察}：由于$r_i$固定在刚体上，在体坐标系中是常数，因此：
+\begin{equation}
+\frac{dr_i}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+
+\section{推导方法1：直接对位置求导}
+
+\subsection{步骤1：对位置关系求导}
+
+对式(\ref{eq:position_relation})两边对时间求导：
+\begin{align}
+\dot{p}_i(t) &= \frac{d}{dt}[p_b(t) + R(t) r_i] \\
+&= \dot{p}_b(t) + \dot{R}(t) r_i + R(t) \frac{dr_i}{dt}
+\label{eq:derivative_step1}
+\end{align}
+
+\subsection{步骤2：简化}
+
+由于$r_i$在体坐标系中是固定的，$\frac{dr_i}{dt} = 0$（在体坐标系中观察）。
+
+\textbf{但是}：这里需要小心。$R(t) r_i$表示$r_i$在惯性坐标系中的表示，而$\frac{dr_i}{dt}$应该理解为$r_i$在体坐标系中的时间导数。
+
+\textbf{更准确的理解}：
+
+在体坐标系中，$r_i$是常数，因此：
+\begin{equation}
+\frac{dr_i}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+
+在惯性坐标系中，$R(t) r_i$会变化，但这个变化完全由旋转矩阵$R(t)$引起。
+
+\textbf{因此}：
+\begin{align}
+\dot{p}_i(t) &= \dot{p}_b(t) + \dot{R}(t) r_i + R(t) \cdot 0 \\
+&= \dot{p}_b(t) + \dot{R}(t) r_i
+\label{eq:derivative_step2}
+\end{align}
+
+\subsection{步骤3：使用旋转矩阵的导数}
+
+旋转矩阵的导数满足：
+\begin{equation}
+\dot{R}(t) = R(t) [\omega_b]_{\times}
+\label{eq:rotation_derivative}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_b$：体坐标系相对于惯性坐标系的角速度（在体坐标系$\{b\}$中表示）
+\item $[\omega_b]_{\times}$：$\omega_b$的反对称矩阵
+\end{itemize}
+
+\textbf{代入}：
+\begin{align}
+\dot{p}_i(t) &= \dot{p}_b(t) + R(t) [\omega_b]_{\times} r_i \\
+&= \dot{p}_b(t) + R(t) (\omega_b \times r_i)
+\label{eq:derivative_step3}
+\end{align}
+
+其中使用了反对称矩阵的性质：$[\omega_b]_{\times} r_i = \omega_b \times r_i$。
+
+\subsection{步骤4：理解各项的物理意义}
+
+\textbf{第一项}：$\dot{p}_b(t) = v_b$
+
+这是质心在惯性坐标系中的速度。根据body twist的定义，$v_b$是质心速度在体坐标系中的表示。
+
+\textbf{关键点}：虽然$v_b$在体坐标系中表示，但$\dot{p}_b(t)$是在惯性坐标系中的速度。它们的关系是：
+\begin{equation}
+\dot{p}_b(t) = R(t) v_b
+\end{equation}
+
+\textbf{第二项}：$R(t) (\omega_b \times r_i)$
+
+这是点质量$i$由于刚体旋转而产生的速度。
+
+\textbf{在惯性坐标系中的表示}：
+
+由于$\omega_b$和$r_i$都在体坐标系中表示，它们的叉积$\omega_b \times r_i$也在体坐标系中。要得到在惯性坐标系中的表示，需要左乘$R(t)$：
+\begin{equation}
+R(t) (\omega_b \times r_i) = \omega_s \times (R(t) r_i) = \omega_s \times (p_i - p_b)
+\end{equation}
+
+其中$\omega_s = R(t) \omega_b$是角速度在惯性坐标系中的表示。
+
+\subsection{步骤5：最终形式}
+
+\textbf{在惯性坐标系中}：
+
+\begin{align}
+\dot{p}_i(t) &= \dot{p}_b(t) + R(t) (\omega_b \times r_i) \\
+&= R(t) v_b + R(t) (\omega_b \times r_i) \\
+&= R(t) (v_b + \omega_b \times r_i)
+\end{align}
+
+\textbf{但是}：公式(\ref{eq:velocity_formula})中的形式是$\dot{p}_i = v_b + \omega_b \times p_i$，这里需要理解$v_b$和$\omega_b$的含义。
+
+\section{推导方法2：使用速度合成定理}
+
+\subsection{速度合成定理}
+
+刚体上任意一点的速度由两部分组成：
+\begin{enumerate}
+\item \textbf{牵连速度}：由于刚体的平移和旋转产生的速度
+\item \textbf{相对速度}：点相对于刚体的速度（对于刚体，相对速度为零）
+\end{enumerate}
+
+\subsection{牵连速度的分解}
+
+\textbf{平移部分}：$v_b$
+
+质心的速度$v_b$（在体坐标系中表示）。
+
+\textbf{旋转部分}：$\omega_b \times p_i$
+
+点质量$i$由于刚体旋转而产生的速度。
+
+\textbf{关键理解}：
+
+虽然$v_b$和$\omega_b$在体坐标系中表示，但当我们计算$\omega_b \times p_i$时，需要确保$p_i$也在同一个坐标系中。
+
+\textbf{实际上}：公式(\ref{eq:velocity_formula})中的$v_b$和$\omega_b$应该理解为在惯性坐标系中的表示，或者公式本身需要在体坐标系中理解。
+
+\section{正确的理解方式}
+
+\subsection{方法1：所有量都在惯性坐标系中}
+
+如果所有量都在惯性坐标系$\{s\}$中表示：
+
+\begin{equation}
+\dot{p}_i = v_s + \omega_s \times p_i
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $v_s = R(t) v_b$：质心速度在惯性坐标系中的表示
+\item $\omega_s = R(t) \omega_b$：角速度在惯性坐标系中的表示
+\item $p_i$：点在惯性坐标系中的位置
+\end{itemize}
+
+\subsection{方法2：使用体坐标系中的量（标准形式）}
+
+\textbf{关键理解}：虽然$v_b$和$\omega_b$在体坐标系中表示，但公式$\dot{p}_i = v_b + \omega_b \times p_i$中的$p_i$需要转换。
+
+\textbf{更准确的形式}：
+
+从位置关系$p_i = p_b + R(t) r_i$，对时间求导：
+\begin{align}
+\dot{p}_i &= \dot{p}_b + \dot{R}(t) r_i \\
+&= R(t) v_b + R(t) [\omega_b]_{\times} r_i \\
+&= R(t) v_b + R(t) (\omega_b \times r_i)
+\end{align}
+
+\textbf{使用$p_i = p_b + R(t) r_i$的关系}：
+
+\begin{align}
+\omega_b \times p_i &= \omega_b \times (p_b + R(t) r_i) \\
+&= \omega_b \times p_b + \omega_b \times (R(t) r_i)
+\end{align}
+
+\textbf{但是}：这里$\omega_b$在体坐标系中，而$p_i$在惯性坐标系中，不能直接叉积。
+
+\subsection{方法3：在体坐标系中表示（推荐）}
+
+\textbf{将速度转换到体坐标系}：
+
+\begin{align}
+R^T(t) \dot{p}_i &= R^T(t) \dot{p}_b + R^T(t) R(t) (\omega_b \times r_i) \\
+&= R^T(t) R(t) v_b + \omega_b \times r_i \\
+&= v_b + \omega_b \times r_i
+\end{align}
+
+\textbf{因此}，在体坐标系中：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times r_i
+\end{equation}
+
+其中$\dot{p}_{i,b} = R^T(t) \dot{p}_i$是点速度在体坐标系中的表示。
+
+\section{原公式的正确理解}
+
+\subsection{原公式的含义}
+
+公式$\dot{p}_i = v_b + \omega_b \times p_i$中的符号需要理解为：
+
+\textbf{可能的情况1}：符号混用
+
+这里的$v_b$和$\omega_b$实际上应该是在惯性坐标系中的表示，即：
+\begin{equation}
+\dot{p}_i = v_s + \omega_s \times p_i
+\end{equation}
+
+其中$v_s = R(t) v_b$，$\omega_s = R(t) \omega_b$。
+
+\textbf{可能的情况2}：约定表示
+
+在某些约定中，即使$p_i$在惯性坐标系中，$v_b$和$\omega_b$仍然用体坐标系中的表示，但通过坐标变换隐含处理。
+
+\subsection{标准形式}
+
+\textbf{在惯性坐标系中}（所有量都在惯性系中表示）：
+\begin{equation}
+\dot{p}_i = v_s + \omega_s \times (p_i - p_b)
+\end{equation}
+
+其中$v_s = \dot{p}_b$是质心速度。
+
+\textbf{在体坐标系中}（所有量都在体坐标系中表示）：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times r_i
+\end{equation}
+
+其中$\dot{p}_{i,b} = R^T(t) \dot{p}_i$，$r_i = R^T(t) (p_i - p_b)$。
+
+\section{物理直观}
+
+\subsection{速度的组成}
+
+刚体上任意一点的速度由两部分组成：
+
+\textbf{1. 平移速度}：$v_b$
+
+由于刚体的平移运动，所有点都有相同的平移速度（等于质心速度）。
+
+\textbf{2. 旋转速度}：$\omega_b \times r_i$
+
+由于刚体的旋转运动，距离旋转轴$r_i$的点会有额外的速度，方向垂直于$\omega_b$和$r_i$所在的平面。
+
+\subsection{几何直观}
+
+考虑一个绕固定轴旋转的刚体：
+
+\begin{itemize}
+\item 质心以速度$v_b$平移
+\item 同时，刚体以角速度$\omega_b$旋转
+\item 距离旋转轴$r_i$的点，由于旋转产生的速度为$\omega_b \times r_i$
+\item 总速度为两者的矢量和
+\end{itemize}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{速度公式}：刚体上任意一点的速度由平移速度和旋转速度组成
+
+\item \textbf{在惯性坐标系中}：
+\begin{equation}
+\dot{p}_i = v_s + \omega_s \times (p_i - p_b)
+\end{equation}
+
+\item \textbf{在体坐标系中}：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times r_i
+\end{equation}
+
+\item \textbf{原公式的理解}：$\dot{p}_i = v_b + \omega_b \times p_i$需要理解为所有量都在同一坐标系中，或者$v_b$和$\omega_b$已经转换到惯性坐标系
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 速度由平移和旋转两部分组成
+\item 需要注意坐标系的统一
+\item body twist $V_b = (\omega_b, v_b)$中的量在体坐标系中表示
+\item 使用时需要根据具体情况转换坐标系
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体运动学分析
+\item 机器人运动学
+\item 航天器姿态动力学
+\item 机械系统仿真
+\end{itemize}
+
+\end{document}
+

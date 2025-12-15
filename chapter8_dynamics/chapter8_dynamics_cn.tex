@@ -1,1 +1,1120 @@
-  
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumerate}
+
+\geometry{margin=2.5cm}
+
+\title{第8章：开链动力学}
+\author{Modern Robotics - 中文翻译}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+在本章中，我们再次研究开链机器人的运动，但这次考虑引起运动的力和力矩；这就是机器人动力学的研究内容。相关的动力学方程——也称为运动方程——是一组二阶微分方程，形式为
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}), \label{eq:8.1}
+\end{equation}
+其中 $\theta \in \mathbb{R}^n$ 是关节变量向量，$\tau \in \mathbb{R}^n$ 是关节力和力矩向量，$M(\theta) \in \mathbb{R}^{n \times n}$ 是对称正定质量矩阵，$h(\theta, \dot{\theta}) \in \mathbb{R}^n$ 是包含向心力、科里奥利力、重力和摩擦项的力，这些项依赖于 $\theta$ 和 $\dot{\theta}$。不应被这些方程的简单形式所欺骗；即使对于"简单"的开链，例如关节轴彼此正交或平行的开链，$M(\theta)$ 和 $h(\theta, \dot{\theta})$ 也可能极其复杂。
+
+正如区分机器人的正向和逆向运动学一样，通常也区分机器人的正向和逆向动力学。\textbf{正向问题}是在给定状态 $(\theta, \dot{\theta})$ 和关节力与力矩的情况下确定机器人的加速度 $\ddot{\theta}$，
+\begin{equation}
+\ddot{\theta} = M^{-1}(\theta)\left(\tau - h(\theta, \dot{\theta})\right), \label{eq:8.2}
+\end{equation}
+而\textbf{逆向问题}是找到对应于机器人状态和期望加速度的关节力和力矩 $\tau$，即方程 (8.1)。
+
+机器人的动力学方程通常通过两种方式之一推导：直接应用刚体的牛顿和欧拉动力学方程（通常称为\textbf{牛顿-欧拉公式}）或通过从机器人的动能和势能推导的\textbf{拉格朗日动力学公式}。
+
+拉格朗日形式在概念上优雅，对于结构简单的机器人（例如，具有三个或更少自由度的机器人）非常有效。然而，对于具有更多自由度的机器人，计算可能很快变得繁琐。对于一般的开链，牛顿-欧拉公式导致用于逆向和正向动力学的有效递归算法，这些算法也可以组装成封闭形式的解析表达式，例如质量矩阵 $M(\theta)$ 和动力学方程 (8.1) 中的其他项。牛顿-欧拉公式还利用了我们在本书中已经开发的工具。
+
+在本章中，我们研究开链机器人的拉格朗日和牛顿-欧拉动力学公式。虽然我们通常用关节空间变量 $\theta$ 表示动力学，但有时用末端执行器的配置、twist 和 twist 的变化率表示它更方便。这是\textbf{任务空间动力学}，在第 8.6 节中研究。有时机器人受到一组运动约束，例如当机器人与刚性环境接触时。这导致了\textbf{约束动力学}的公式（第 8.7 节），其中关节力矩和力的空间被分为引起机器人运动的子空间和引起约束力的子空间。用于指定机器人惯性属性的 URDF 文件格式在第 8.8 节中描述。最后，在机器人动力学推导中出现的一些实际问题，例如电机齿轮和摩擦的影响，在第 8.9 节中描述。
+
+\section{拉格朗日公式}
+\subsection{基本概念和激励示例}
+
+拉格朗日动力学公式的第一步是选择一组独立坐标 $q \in \mathbb{R}^n$ 来描述系统的配置。坐标 $q$ 称为\textbf{广义坐标}。一旦选择了广义坐标，它们就定义了广义力 $f \in \mathbb{R}^n$。力 $f$ 和坐标变化率 $\dot{q}$ 在对偶的意义上，内积 $f^T \dot{q}$ 对应于功率。然后拉格朗日函数 $L(q, \dot{q})$ 定义为整个系统的动能 $K(q, \dot{q})$ 减去势能 $P(q)$，
+\begin{equation}
+L(q, \dot{q}) = K(q, \dot{q}) - P(q).
+\end{equation}
+现在可以用拉格朗日表示运动方程如下：
+\begin{equation}
+f = \frac{d}{dt}\frac{\partial L}{\partial \dot{q}} - \frac{\partial L}{\partial q}, \label{eq:8.3}
+\end{equation}
+这些方程也称为带外力的\textbf{欧拉-拉格朗日方程}。推导可以在动力学教科书中找到。
+
+我们通过两个例子来说明拉格朗日动力学公式。在第一个例子中，考虑一个质量为 $m$ 的粒子，约束在垂直线上运动。粒子的配置空间是这条垂直线，广义坐标的自然选择是粒子的高度，我们用标量变量 $x \in \mathbb{R}$ 表示。假设重力 $mg$ 向下作用，外力 $f$ 向上施加。根据牛顿第二定律，粒子的运动方程为
+\begin{equation}
+f - mg = m\ddot{x}. \label{eq:8.4}
+\end{equation}
+
+我们现在应用拉格朗日形式来推导相同的结果。动能是 $m\dot{x}^2/2$，势能是 $mgx$，拉格朗日是
+\begin{equation}
+L(x, \dot{x}) = K(x, \dot{x}) - P(x) = \frac{1}{2}m\dot{x}^2 - mgx. \label{eq:8.5}
+\end{equation}
+然后运动方程由下式给出
+\begin{equation}
+f = \frac{d}{dt}\frac{\partial L}{\partial \dot{x}} - \frac{\partial L}{\partial x} = m\ddot{x} + mg, \label{eq:8.6}
+\end{equation}
+这与方程 (8.4) 匹配。
+
+我们现在推导在重力作用下运动的平面 2R 开链的动力学方程（图 8.1）。链在 $\hat{x}$-$\hat{y}$ 平面内运动，重力 $g$ 在 $-\hat{y}$ 方向作用。在推导动力学之前，必须指定所有连杆的质量和惯性属性。为了简化，两个连杆被建模为集中在每个连杆末端的点质量 $m_1$ 和 $m_2$。
+
+\begin{figure}[h]
+\centering
+% 这里应该插入图片
+\caption{(左) 重力作用下的 2R 开链。(右) 在 $\theta = (0, \pi/2)$ 处。}
+\label{fig:8.1}
+\end{figure}
+
+连杆 1 质量的位置和速度由下式给出
+\begin{align}
+\begin{bmatrix} x_1 \\ y_1 \end{bmatrix} &= \begin{bmatrix} L_1 \cos \theta_1 \\ L_1 \sin \theta_1 \end{bmatrix}, \\
+\begin{bmatrix} \dot{x}_1 \\ \dot{y}_1 \end{bmatrix} &= \begin{bmatrix} -L_1 \sin \theta_1 \\ L_1 \cos \theta_1 \end{bmatrix} \dot{\theta}_1,
+\end{align}
+而连杆 2 质量的位置和速度由下式给出
+\begin{align}
+\begin{bmatrix} x_2 \\ y_2 \end{bmatrix} &= \begin{bmatrix} L_1 \cos \theta_1 + L_2 \cos(\theta_1 + \theta_2) \\ L_1 \sin \theta_1 + L_2 \sin(\theta_1 + \theta_2) \end{bmatrix}, \\
+\begin{bmatrix} \dot{x}_2 \\ \dot{y}_2 \end{bmatrix} &= \begin{bmatrix} -L_1 \sin \theta_1 - L_2 \sin(\theta_1 + \theta_2) & -L_2 \sin(\theta_1 + \theta_2) \\ L_1 \cos \theta_1 + L_2 \cos(\theta_1 + \theta_2) & L_2 \cos(\theta_1 + \theta_2) \end{bmatrix} \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}.
+\end{align}
+
+我们选择关节坐标 $\theta = (\theta_1, \theta_2)$ 作为广义坐标。广义力 $\tau = (\tau_1, \tau_2)$ 然后对应于关节力矩（因为 $\tau^T \dot{\theta}$ 对应于功率）。拉格朗日 $L(\theta, \dot{\theta})$ 的形式为
+\begin{equation}
+L(\theta, \dot{\theta}) = \sum_{i=1}^{2} (K_i - P_i), \label{eq:8.7}
+\end{equation}
+其中连杆动能项 $K_1$ 和 $K_2$ 为
+\begin{align}
+K_1 &= \frac{1}{2}m_1(\dot{x}_1^2 + \dot{y}_1^2) = \frac{1}{2}m_1 L_1^2 \dot{\theta}_1^2, \\
+K_2 &= \frac{1}{2}m_2(\dot{x}_2^2 + \dot{y}_2^2) \nonumber \\
+&= \frac{1}{2}m_2\left[(L_1^2 + 2L_1 L_2 \cos \theta_2 + L_2^2)\dot{\theta}_1^2 + 2(L_2^2 + L_1 L_2 \cos \theta_2)\dot{\theta}_1 \dot{\theta}_2 + L_2^2 \dot{\theta}_2^2\right],
+\end{align}
+连杆势能项 $P_1$ 和 $P_2$ 为
+\begin{align}
+P_1 &= m_1 g y_1 = m_1 g L_1 \sin \theta_1, \\
+P_2 &= m_2 g y_2 = m_2 g[L_1 \sin \theta_1 + L_2 \sin(\theta_1 + \theta_2)].
+\end{align}
+
+此示例的欧拉-拉格朗日方程 (8.3) 的形式为
+\begin{equation}
+\tau_i = \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_i} - \frac{\partial L}{\partial \theta_i}, \quad i = 1, 2. \label{eq:8.8}
+\end{equation}
+
+2R 平面链的动力学方程来自对 (8.8) 右侧的显式评估（我们省略了详细计算，这些计算是直接但繁琐的）：
+\begin{align}
+\tau_1 &= \left[m_1 L_1^2 + m_2(L_1^2 + 2L_1 L_2 \cos \theta_2 + L_2^2)\right]\ddot{\theta}_1 \nonumber \\
+&\quad + m_2(L_1 L_2 \cos \theta_2 + L_2^2)\ddot{\theta}_2 - m_2 L_1 L_2 \sin \theta_2(2\dot{\theta}_1 \dot{\theta}_2 + \dot{\theta}_2^2) \nonumber \\
+&\quad + (m_1 + m_2)L_1 g \cos \theta_1 + m_2 g L_2 \cos(\theta_1 + \theta_2), \label{eq:8.9a} \\
+\tau_2 &= m_2(L_1 L_2 \cos \theta_2 + L_2^2)\ddot{\theta}_1 + m_2 L_2^2 \ddot{\theta}_2 + m_2 L_1 L_2 \dot{\theta}_1^2 \sin \theta_2 \nonumber \\
+&\quad + m_2 g L_2 \cos(\theta_1 + \theta_2). \label{eq:8.9b}
+\end{align}
+
+我们可以将项收集到以下形式的方程中
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta), \label{eq:8.10}
+\end{equation}
+其中
+\begin{equation}
+M(\theta) = \begin{bmatrix}
+m_1 L_1^2 + m_2(L_1^2 + 2L_1 L_2 \cos \theta_2 + L_2^2) & m_2(L_1 L_2 \cos \theta_2 + L_2^2) \\
+m_2(L_1 L_2 \cos \theta_2 + L_2^2) & m_2 L_2^2
+\end{bmatrix},
+\end{equation}
+\begin{equation}
+c(\theta, \dot{\theta}) = \begin{bmatrix}
+-m_2 L_1 L_2 \sin \theta_2(2\dot{\theta}_1 \dot{\theta}_2 + \dot{\theta}_2^2) \\
+m_2 L_1 L_2 \dot{\theta}_1^2 \sin \theta_2
+\end{bmatrix},
+\end{equation}
+\begin{equation}
+g(\theta) = \begin{bmatrix}
+(m_1 + m_2)L_1 g \cos \theta_1 + m_2 g L_2 \cos(\theta_1 + \theta_2) \\
+m_2 g L_2 \cos(\theta_1 + \theta_2)
+\end{bmatrix},
+\end{equation}
+其中 $M(\theta)$ 是对称正定质量矩阵，$c(\theta, \dot{\theta})$ 是包含科里奥利和向心力矩的向量，$g(\theta)$ 是包含重力矩的向量。这些揭示了运动方程在 $\ddot{\theta}$ 中是线性的，在 $\dot{\theta}$ 中是二次的，在 $\theta$ 中是三角函数的。这对于包含旋转关节的串联链通常是正确的，而不仅仅是 2R 机器人。
+
+方程 (8.10) 中的 $M(\theta)\ddot{\theta} + c(\theta, \dot{\theta})$ 项可以通过对每个点质量写出 $f_i = m_i a_i$ 来推导，其中加速度 $a_i$ 用 $\theta$ 表示，通过对上面给出的 $(x_1, y_1)$ 和 $(x_2, y_2)$ 的表达式求导得到：
+\begin{align}
+f_1 = \begin{bmatrix} f_{x1} \\ f_{y1} \\ f_{z1} \end{bmatrix} &= m_1 \begin{bmatrix} \ddot{x}_1 \\ \ddot{y}_1 \\ \ddot{z}_1 \end{bmatrix} = m_1 \begin{bmatrix} -L_1 \dot{\theta}_1^2 c_1 - L_1 \ddot{\theta}_1 s_1 \\ -L_1 \dot{\theta}_1^2 s_1 + L_1 \ddot{\theta}_1 c_1 \\ 0 \end{bmatrix}, \label{eq:8.11} \\
+f_2 = m_2 \begin{bmatrix} -L_1 \dot{\theta}_1^2 c_1 - L_2 (\dot{\theta}_1 + \dot{\theta}_2)^2 c_{12} - L_1 \ddot{\theta}_1 s_1 - L_2 (\ddot{\theta}_1 + \ddot{\theta}_2)s_{12} \\ -L_1 \dot{\theta}_1^2 s_1 - L_2 (\dot{\theta}_1 + \dot{\theta}_2)^2 s_{12} + L_1 \ddot{\theta}_1 c_1 + L_2 (\ddot{\theta}_1 + \ddot{\theta}_2)c_{12} \\ 0 \end{bmatrix}, \label{eq:8.12}
+\end{align}
+其中 $s_{12}$ 表示 $\sin(\theta_1 + \theta_2)$ 等。定义 $r_{11}$ 为从关节 1 到 $m_1$ 的向量，$r_{12}$ 为从关节 1 到 $m_2$ 的向量，$r_{22}$ 为从关节 2 到 $m_2$ 的向量，附着在关节 1 和 2 上的世界对齐坐标系 $\{i\}$ 中的力矩可以表示为 $m_1 = r_{11} \times f_1 + r_{12} \times f_2$ 和 $m_2 = r_{22} \times f_2$。（注意关节 1 必须提供力矩来移动 $m_1$ 和 $m_2$，但关节 2 只需要提供力矩来移动 $m_2$。）关节力矩 $\tau_1$ 和 $\tau_2$ 分别是 $m_1$ 和 $m_2$ 的第三个元素，即分别关于从页面伸出的 $\hat{z}_i$ 轴的力矩。
+
+在 $(x, y)$ 坐标中，质量的加速度简单地写为坐标的二阶时间导数，例如 $(\ddot{x}_2, \ddot{y}_2)$。这是因为 $\hat{x}$-$\hat{y}$ 坐标系是惯性坐标系。然而，关节坐标 $(\theta_1, \theta_2)$ 不在惯性坐标系中，因此加速度表示为在关节变量的二阶导数 $\ddot{\theta}$ 中是线性的项和在关节变量的一阶导数 $\dot{\theta}^T \dot{\theta}$ 中是二次的项的和，如方程 (8.11) 和 (8.12) 所示。包含 $\dot{\theta}_i^2$ 的二次项称为\textbf{向心项}，包含 $\dot{\theta}_i \dot{\theta}_j$（$i \neq j$）的二次项称为\textbf{科里奥利项}。换句话说，$\ddot{\theta} = 0$ 并不意味着质量的加速度为零，因为存在向心和科里奥利项。
+
+为了更好地理解向心和科里奥利项，考虑配置为 $(\theta_1, \theta_2) = (0, \pi/2)$ 的臂，即 $\cos \theta_1 = \sin(\theta_1 + \theta_2) = 1$，$\sin \theta_1 = \cos(\theta_1 + \theta_2) = 0$。假设 $\ddot{\theta} = 0$，从方程 (8.12) 得到的 $m_2$ 的加速度 $(\ddot{x}_2, \ddot{y}_2)$ 可以写成
+\begin{equation}
+\begin{bmatrix} \ddot{x}_2 \\ \ddot{y}_2 \end{bmatrix} = \begin{bmatrix} -L_1 \dot{\theta}_1^2 \\ -L_2 \dot{\theta}_1^2 - L_2 \dot{\theta}_2^2 \end{bmatrix} + \begin{bmatrix} 0 \\ -2L_2 \dot{\theta}_1 \dot{\theta}_2 \end{bmatrix},
+\end{equation}
+其中第一项是向心项，第二项是科里奥利项。
+
+图 8.2 显示了当 $\dot{\theta}_2 = 0$ 时向心加速度 $a_{\text{cent}1} = (-L_1 \dot{\theta}_1^2, -L_2 \dot{\theta}_1^2)$，当 $\dot{\theta}_1 = 0$ 时向心加速度 $a_{\text{cent}2} = (0, -L_2 \dot{\theta}_2^2)$，以及当 $\dot{\theta}_1$ 和 $\dot{\theta}_2$ 都为正时科里奥利加速度 $a_{\text{cor}} = (0, -2L_2 \dot{\theta}_1 \dot{\theta}_2)$。如图 8.2 所示，每个向心加速度 $a_{\text{cent}i}$ 将 $m_2$ 拉向关节 $i$，以保持 $m_2$ 围绕由关节 $i$ 定义的圆的中心旋转。因此 $a_{\text{cent}i}$ 关于关节 $i$ 产生零力矩。在这个例子中，科里奥利加速度 $a_{\text{cor}}$ 通过关节 2，因此它关于关节 2 产生零力矩，但关于关节 1 产生负力矩；关于关节 1 的力矩为负，因为 $m_2$ 更接近关节 1（由于关节 2 的运动）。因此，由于 $m_2$ 关于 $\hat{z}_1$ 轴的惯性在下降，这意味着关于关节 1 的正动量在下降，而关节 1 的速度 $\dot{\theta}_1$ 是恒定的。因此关节 1 必须施加负力矩，因为力矩定义为角动量的变化率。否则，当 $m_2$ 更接近关节 1 时，$\dot{\theta}_1$ 会增加，就像滑冰者在做旋转时拉回伸出的手臂时旋转速度会增加一样。
+
+\subsection{一般公式}
+
+我们现在描述一般 $n$ 连杆开链的拉格朗日动力学公式。第一步是为系统的配置空间选择一组广义坐标 $\theta \in \mathbb{R}^n$。对于所有关节都被驱动的开链，方便且总是可以选择 $\theta$ 为关节值的向量。广义力将表示为 $\tau \in \mathbb{R}^n$。如果 $\theta_i$ 是旋转关节，则 $\tau_i$ 对应于力矩，而如果 $\theta_i$ 是移动关节，则 $\tau_i$ 对应于力。
+
+一旦选择了 $\theta$ 并确定了广义力 $\tau$，下一步是如下公式化拉格朗日 $L(\theta, \dot{\theta})$：
+\begin{equation}
+L(\theta, \dot{\theta}) = K(\theta, \dot{\theta}) - P(\theta), \label{eq:8.13}
+\end{equation}
+其中 $K(\theta, \dot{\theta})$ 是动能，$P(\theta)$ 是整个系统的势能。对于刚性连杆机器人，动能总是可以写成以下形式：
+\begin{equation}
+K(\theta) = \frac{1}{2}\sum_{i=1}^{n}\sum_{j=1}^{n} m_{ij}(\theta)\dot{\theta}_i \dot{\theta}_j = \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}, \label{eq:8.14}
+\end{equation}
+其中 $m_{ij}(\theta)$ 是 $n \times n$ 质量矩阵 $M(\theta)$ 的 $(i, j)$ 元素；当我们研究牛顿-欧拉公式时，将提供这一断言的构造性证明。
+
+通过评估以下右侧，可以解析地获得动力学方程：
+\begin{equation}
+\tau_i = \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}_i} - \frac{\partial L}{\partial \theta_i}, \quad i = 1, \ldots, n. \label{eq:8.15}
+\end{equation}
+将动能表示为方程 (8.14) 的形式，动力学可以显式地写为
+\begin{equation}
+\tau_i = \sum_{j=1}^{n} m_{ij}(\theta)\ddot{\theta}_j + \sum_{j=1}^{n}\sum_{k=1}^{n} \Gamma_{ijk}(\theta)\dot{\theta}_j \dot{\theta}_k + \frac{\partial P}{\partial \theta_i}, \quad i = 1, \ldots, n, \label{eq:8.16}
+\end{equation}
+其中 $\Gamma_{ijk}(\theta)$，称为第一类克里斯托费尔符号，定义如下：
+\begin{equation}
+\Gamma_{ijk}(\theta) = \frac{1}{2}\left(\frac{\partial m_{ij}}{\partial \theta_k} + \frac{\partial m_{ik}}{\partial \theta_j} - \frac{\partial m_{jk}}{\partial \theta_i}\right). \label{eq:8.17}
+\end{equation}
+这表明生成科里奥利和向心项 $c(\theta, \dot{\theta})$ 的克里斯托费尔符号是从质量矩阵 $M(\theta)$ 推导出来的。
+
+正如我们已经看到的，方程 (8.16) 通常以以下形式收集在一起：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) \quad \text{或} \quad M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}),
+\end{equation}
+其中 $g(\theta)$ 简单地是 $\partial P/\partial \theta$。
+
+我们可以显式地看到科里奥利和向心项在速度中是二次的，通过使用以下形式：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + \dot{\theta}^T \Gamma(\theta)\dot{\theta} + g(\theta), \label{eq:8.18}
+\end{equation}
+其中 $\Gamma(\theta)$ 是一个 $n \times n \times n$ 矩阵，乘积 $\dot{\theta}^T \Gamma(\theta)\dot{\theta}$ 应该解释如下：
+\begin{equation}
+\dot{\theta}^T \Gamma(\theta)\dot{\theta} = \begin{bmatrix} \dot{\theta}^T \Gamma_1(\theta)\dot{\theta} \\ \dot{\theta}^T \Gamma_2(\theta)\dot{\theta} \\ \vdots \\ \dot{\theta}^T \Gamma_n(\theta)\dot{\theta} \end{bmatrix},
+\end{equation}
+其中 $\Gamma_i(\theta)$ 是一个 $n \times n$ 矩阵，其 $(j, k)$ 元素是 $\Gamma_{ijk}$。
+
+也常见将动力学写为
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + C(\theta, \dot{\theta})\dot{\theta} + g(\theta), \label{eq:8.19}
+\end{equation}
+其中 $C(\theta, \dot{\theta}) \in \mathbb{R}^{n \times n}$ 称为科里奥利矩阵，其 $(i, j)$ 元素为
+\begin{equation}
+c_{ij}(\theta, \dot{\theta}) = \sum_{k=1}^{n} \Gamma_{ijk}(\theta)\dot{\theta}_k. \label{eq:8.20}
+\end{equation}
+
+科里奥利矩阵用于证明以下无源性性质（命题 8.1），这可用于证明某些机器人控制律的稳定性，正如我们将在第 11.4.2.2 节中看到的。
+
+\begin{proposition}[命题 8.1]
+矩阵 $\dot{M}(\theta) - 2C(\theta, \dot{\theta}) \in \mathbb{R}^{n \times n}$ 是反对称的，其中 $M(\theta) \in \mathbb{R}^{n \times n}$ 是质量矩阵，$\dot{M}(\theta)$ 是其时间导数，$C(\theta, \dot{\theta}) \in \mathbb{R}^{n \times n}$ 是方程 (8.20) 中定义的科里奥利矩阵。
+\end{proposition}
+
+\begin{proof}
+$\dot{M} - 2C$ 的 $(i, j)$ 分量是
+\begin{align}
+\dot{m}_{ij}(\theta) - 2c_{ij}(\theta, \dot{\theta}) &= \sum_{k=1}^{n} \frac{\partial m_{ij}}{\partial \theta_k}\dot{\theta}_k - \sum_{k=1}^{n}\left(\frac{\partial m_{ij}}{\partial \theta_k}\dot{\theta}_k - \frac{\partial m_{ik}}{\partial \theta_j}\dot{\theta}_k + \frac{\partial m_{kj}}{\partial \theta_i}\dot{\theta}_k\right) \nonumber \\
+&= \sum_{k=1}^{n}\left(\frac{\partial m_{kj}}{\partial \theta_i} - \frac{\partial m_{ik}}{\partial \theta_j}\right)\dot{\theta}_k.
+\end{align}
+通过交换索引 $i$ 和 $j$，可以看出
+\begin{equation}
+\dot{m}_{ji}(\theta) - 2c_{ji}(\theta, \dot{\theta}) = -(\dot{m}_{ij}(\theta) - 2c_{ij}(\theta, \dot{\theta})),
+\end{equation}
+因此证明了 $(\dot{M} - 2C)^T = -(\dot{M} - 2C)$，如所声称的。
+\end{proof}
+
+\subsection{理解质量矩阵}
+
+动能 $\frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$ 是熟悉的点质量表达式 $\frac{1}{2}mv^T v$ 的推广。质量矩阵 $M(\theta)$ 是正定的，意味着对于所有 $\dot{\theta} \neq 0$，$\dot{\theta}^T M(\theta)\dot{\theta} > 0$，这是点质量的质量总是为正 $m > 0$ 这一事实的推广。在这两种情况下，如果速度非零，动能必须为正。
+
+一方面，对于在笛卡尔坐标中动力学表示为 $f = m\ddot{x}$ 的点质量，质量与加速度方向无关，加速度 $\ddot{x}$ 总是与力"平行"，在 $\ddot{x}$ 是 $f$ 的标量倍数的意义上。另一方面，质量矩阵 $M(\theta)$ 在不同的加速度方向上呈现不同的有效质量，即使当 $\dot{\theta} = 0$ 时，$\ddot{\theta}$ 通常也不是 $\tau$ 的标量倍数。为了可视化有效质量的方向依赖性，我们可以将单位加速度球 $\{\ddot{\theta} | \ddot{\theta}^T \ddot{\theta} = 1\}$ 通过质量矩阵 $M(\theta)$ 映射，以在机构静止时（$\dot{\theta} = 0$）生成关节力-力矩椭球。图 8.3 显示了图 8.1 的 2R 臂在两种不同关节配置下的示例：$(\theta_1, \theta_2) = (0^\circ, 90^\circ)$ 和 $(\theta_1, \theta_2) = (0^\circ, 150^\circ)$，其中 $L_1 = L_2 = m_1 = m_2 = 1$。力矩椭球可以解释为方向相关的质量椭球：相同的关节加速度大小 $\|\ddot{\theta}\|$ 需要不同的关节力矩大小 $\|\tau\|$，这取决于加速度方向。质量椭球的主轴方向由 $M(\theta)$ 的特征向量 $v_i$ 给出，主轴半轴的长度由相应的特征值 $\lambda_i$ 给出。只有当 $\tau$ 沿着椭球的主轴时，$\ddot{\theta}$ 才是 $\tau$ 的标量倍数。
+
+如果质量矩阵表示为末端执行器的有效质量，则更容易可视化，因为可以通过抓住并移动末端执行器直接感受到这种质量。如果你抓住 2R 机器人的端点，根据你施加力的方向，它会感觉有多重？让我们将末端执行器处的有效质量矩阵表示为 $\Lambda(\theta)$，末端执行器的速度表示为 $V = (\dot{x}, \dot{y})$。我们知道机器人的动能必须相同，无论我们使用什么坐标，所以
+\begin{equation}
+\frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta} = \frac{1}{2}V^T \Lambda(\theta)V. \label{eq:8.21}
+\end{equation}
+假设满足 $V = J(\theta)\dot{\theta}$ 的雅可比 $J(\theta)$ 是可逆的，方程 (8.21) 可以重写如下：
+\begin{equation}
+V^T \Lambda V = (J^{-1}V)^T M(J^{-1}V) = V^T(J^{-T}MJ^{-1})V.
+\end{equation}
+换句话说，末端执行器质量矩阵是
+\begin{equation}
+\Lambda(\theta) = J^{-T}(\theta)M(\theta)J^{-1}(\theta). \label{eq:8.22}
+\end{equation}
+
+图 8.4 显示了末端执行器质量椭球，主轴方向由 $\Lambda(\theta)$ 的特征向量给出，主轴半轴长度由其特征值给出，对于与图 8.3 中相同的两个 2R 机器人配置。端点加速度 $(\ddot{x}, \ddot{y})$ 是施加在端点处的力 $(f_x, f_y)$ 的标量倍数，仅当力沿着椭球的主轴时。除非 $\Lambda(\theta)$ 是 $cI$ 的形式，其中 $c > 0$ 是标量，$I$ 是单位矩阵，否则端点处的质量感觉与点质量不同。
+
+表观端点质量作为机器人配置的函数的变化是用于触觉显示的机器人的一个问题。减少用户对变化质量感觉的一种方法是使连杆的质量尽可能小。
+
+注意，这里定义的力和加速度之间关系的椭球解释仅在零速度时相关，此时没有科里奥利或向心项。
+
+\subsection{拉格朗日动力学与牛顿-欧拉动力学的比较}
+
+在本章的其余部分，我们专注于用于计算机器人动力学的牛顿-欧拉递归方法。使用我们到目前为止开发的工具，牛顿-欧拉公式允许计算高效的计算机实现，特别是对于具有许多自由度的机器人，无需微分。得到的运动方程与使用基于能量的拉格朗日方法推导的方程相同且必须相同。
+
+牛顿-欧拉方法建立在单个刚体动力学的基础上，因此我们从那里开始。
+
+\section{单个刚体的动力学}
+\subsection{经典公式}
+
+考虑一个由许多刚性地连接的点质量组成的刚体，其中点质量 $i$ 的质量为 $m_i$，总质量为 $m = \sum_i m_i$。设 $r_i = (x_i, y_i, z_i)$ 是质量 $i$ 在物体坐标系 $\{b\}$ 中的固定位置，该坐标系的原点是唯一点，使得
+\begin{equation}
+\sum_i m_i r_i = 0.
+\end{equation}
+这个点称为\textbf{质心}。如果碰巧选择了其他不方便的点作为原点，则应该将坐标系 $\{b\}$ 移动到质心位置（在不方便的坐标系中为 $(1/m)\sum_i m_i r_i$），并在质心坐标系中重新计算 $r_i$。
+
+现在假设物体以物体 twist $V_b = (\omega_b, v_b)$ 运动，设 $p_i(t)$ 是 $m_i$ 在惯性坐标系 $\{s\}$ 中的时变位置，初始位置在 $r_i$。那么
+\begin{align}
+\dot{p}_i &= v_b + \omega_b \times p_i, \\
+\ddot{p}_i &= \dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times \dot{p}_i \nonumber \\
+&= \dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times (v_b + \omega_b \times p_i).
+\end{align}
+在右侧用 $r_i$ 替换 $p_i$ 并使用我们的反对称符号（见方程 (3.30)），我们得到
+\begin{equation}
+\ddot{p}_i = \dot{v}_b + [\dot{\omega}_b]r_i + [\omega_b]v_b + [\omega_b]^2 r_i.
+\end{equation}
+将 $f_i = m_i \ddot{p}_i$ 作为点质量的给定，作用在 $m_i$ 上的力是
+\begin{equation}
+f_i = m_i(\dot{v}_b + [\dot{\omega}_b]r_i + [\omega_b]v_b + [\omega_b]^2 r_i),
+\end{equation}
+这意味着力矩
+\begin{equation}
+m_i = [r_i]f_i.
+\end{equation}
+作用在物体上的总力和力矩表示为 wrench $F_b$：
+\begin{equation}
+F_b = \begin{bmatrix} m_b \\ f_b \end{bmatrix} = \begin{bmatrix} \sum_i m_i \\ \sum_i f_i \end{bmatrix}.
+\end{equation}
+
+为了简化 $f_b$ 和 $m_b$ 的表达式，记住 $\sum_i m_i r_i = 0$（因此 $\sum_i m_i [r_i] = 0$），并且对于 $a, b \in \mathbb{R}^3$，$[a] = -[a]^T$，$[a]b = -[b]a$，$[a][b] = ([b][a])^T$。专注于线性动力学，
+\begin{equation}
+f_b = \sum_i m_i(\dot{v}_b + [\dot{\omega}_b]r_i + [\omega_b]v_b + [\omega_b]^2 r_i) = m(\dot{v}_b + [\omega_b]v_b). \label{eq:8.23}
+\end{equation}
+速度乘积项 $m[\omega_b]v_b$ 源于这样的事实：对于 $\omega_b \neq 0$，恒定的 $v_b \neq 0$ 对应于惯性坐标系中变化的线性速度。
+
+现在专注于旋转动力学，
+\begin{align}
+m_b &= \sum_i m_i [r_i](\dot{v}_b + [\dot{\omega}_b]r_i + [\omega_b]v_b + [\omega_b]^2 r_i) \nonumber \\
+&= \sum_i m_i(-[r_i]^2 \dot{\omega}_b - [\omega_b][r_i]^2 \omega_b) \nonumber \\
+&= -\left(\sum_i m_i [r_i]^2\right)\dot{\omega}_b + [\omega_b]\left(\sum_i m_i [r_i]^2\right)\omega_b \nonumber \\
+&= I_b \dot{\omega}_b + [\omega_b]I_b \omega_b, \label{eq:8.24}
+\end{align}
+其中 $I_b = -\sum_i m_i [r_i]^2 \in \mathbb{R}^{3 \times 3}$ 是物体的旋转惯性矩阵。方程 (8.24) 称为旋转刚体的\textbf{欧拉方程}。
+
+在方程 (8.24) 中，注意存在角加速度的线性项 $I_b \dot{\omega}_b$ 和角速度的二次项 $[\omega_b]I_b \omega_b$，正如我们在第 8.1 节中看到的机构一样。此外，$I_b$ 是对称正定的，就像机构的质量矩阵一样，旋转动能由二次型给出
+\begin{equation}
+K = \frac{1}{2}\omega_b^T I_b \omega_b.
+\end{equation}
+一个区别是 $I_b$ 是常数，而质量矩阵 $M(\theta)$ 随机构的配置而变化。
+
+写出 $I_b$ 的各个元素，我们得到
+\begin{equation}
+I_b = \begin{bmatrix}
+\sum_i m_i(y_i^2 + z_i^2) & -\sum_i m_i x_i y_i & -\sum_i m_i x_i z_i \\
+-\sum_i m_i x_i y_i & \sum_i m_i(x_i^2 + z_i^2) & -\sum_i m_i y_i z_i \\
+-\sum_i m_i x_i z_i & -\sum_i m_i y_i z_i & \sum_i m_i(x_i^2 + y_i^2)
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}.
+\end{equation}
+
+求和可以用物体 $B$ 上的体积积分替换，使用微分体积元素 $dV$，点质量 $m_i$ 替换为质量密度函数 $\rho(x, y, z)$：
+\begin{align}
+I_{xx} &= \int_B (y^2 + z^2)\rho(x, y, z) dV, \\
+I_{yy} &= \int_B (x^2 + z^2)\rho(x, y, z) dV, \\
+I_{zz} &= \int_B (x^2 + y^2)\rho(x, y, z) dV, \\
+I_{xy} &= -\int_B xy\rho(x, y, z) dV, \\
+I_{xz} &= -\int_B xz\rho(x, y, z) dV, \\
+I_{yz} &= -\int_B yz\rho(x, y, z) dV.
+\end{align}
+
+如果物体具有均匀密度，$I_b$ 完全由刚体的形状决定（见图 8.5）。
+
+给定惯性矩阵 $I_b$，惯性的主轴由 $I_b$ 的特征向量和特征值给出。设 $v_1, v_2, v_3$ 是 $I_b$ 的特征向量，$\lambda_1, \lambda_2, \lambda_3$ 是对应的特征值。那么惯性的主轴在 $v_1, v_2, v_3$ 的方向上，关于这些轴的标量惯性矩（主惯性矩）是 $\lambda_1, \lambda_2, \lambda_3 > 0$。一个主轴最大化通过质心的所有轴的惯性矩，另一个最小化惯性矩。对于具有对称性的物体，惯性的主轴通常是明显的。它们可能不是唯一的；例如，对于均匀密度的实心球，任何三个在质心相交的正交轴构成一组主轴，最小主惯性矩等于最大主惯性矩。
+
+如果惯性的主轴与 $\{b\}$ 的轴对齐，则 $I_b$ 的非对角项都为零，特征值是分别关于 $\hat{x}$-、$\hat{y}$-和 $\hat{z}$-轴的标量惯性矩 $I_{xx}$、$I_{yy}$ 和 $I_{zz}$。在这种情况下，运动方程 (8.24) 简化为
+\begin{equation}
+m_b = \begin{bmatrix}
+I_{xx}\dot{\omega}_x + (I_{zz} - I_{yy})\omega_y \omega_z \\
+I_{yy}\dot{\omega}_y + (I_{xx} - I_{zz})\omega_x \omega_z \\
+I_{zz}\dot{\omega}_z + (I_{yy} - I_{xx})\omega_x \omega_y
+\end{bmatrix}, \label{eq:8.25}
+\end{equation}
+其中 $\omega_b = (\omega_x, \omega_y, \omega_z)$。在可能的情况下，我们选择 $\{b\}$ 的轴与惯性的主轴对齐，以减少 $I_b$ 中非零项的数量并简化运动方程。
+
+常见均匀密度实心体的示例、它们的惯性主轴以及通过求解积分 (8.24) 获得的主惯性矩在图 8.5 中给出。
+
+惯性矩阵 $I_b$ 可以在由旋转矩阵 $R_{bc}$ 描述的旋转坐标系 $\{c\}$ 中表示。将这个惯性矩阵表示为 $I_c$，并知道旋转物体的动能与所选择的坐标系无关，我们有
+\begin{align}
+\frac{1}{2}\omega_c^T I_c \omega_c &= \frac{1}{2}\omega_b^T I_b \omega_b \nonumber \\
+&= \frac{1}{2}(R_{bc}\omega_c)^T I_b(R_{bc}\omega_c) \nonumber \\
+&= \frac{1}{2}\omega_c^T(R_{bc}^T I_b R_{bc})\omega_c.
+\end{align}
+换句话说，
+\begin{equation}
+I_c = R_{bc}^T I_b R_{bc}. \label{eq:8.26}
+\end{equation}
+如果 $\{b\}$ 的轴不与惯性的主轴对齐，则我们可以通过在旋转坐标系 $\{c\}$ 中表示它来对角化惯性矩阵，其中 $R_{bc}$ 的列对应于 $I_b$ 的特征向量。
+
+有时在不在物体质心的点（例如在关节处）的坐标系中表示惯性矩阵是方便的。\textbf{施泰纳定理}可以表述如下。
+
+\begin{theorem}[定理 8.2]
+在点 $q = (q_x, q_y, q_z)$ 处与 $\{b\}$ 对齐但位于 $\{b\}$ 中的坐标系中的惯性矩阵 $I_q$ 与在质心计算的惯性矩阵 $I_b$ 相关：
+\begin{equation}
+I_q = I_b + m(q^T qI - qq^T), \label{eq:8.27}
+\end{equation}
+其中 $I$ 是 $3 \times 3$ 单位矩阵，$m$ 是物体的质量。
+\end{theorem}
+
+施泰纳定理是平行轴定理的更一般表述，平行轴定理指出，关于与通过质心的轴平行但距离为 $d$ 的轴的标量惯性 $I_d$ 与关于通过质心的轴的标量惯性 $I_{\text{cm}}$ 相关：
+\begin{equation}
+I_d = I_{\text{cm}} + md^2. \label{eq:8.28}
+\end{equation}
+
+方程 (8.26) 和 (8.27) 对于计算由组件刚体组成的刚体的惯性是有用的。首先，我们计算 $n$ 个组件物体在它们各自质心坐标系中的惯性矩阵。然后我们选择一个公共坐标系 $\{\text{common}\}$（例如，在复合刚体的质心处），并使用方程 (8.26) 和 (8.27) 在公共坐标系中表示每个惯性矩阵。一旦各个惯性矩阵在 $\{\text{common}\}$ 中表示，它们可以相加得到复合刚体的惯性矩阵 $I_{\text{common}}$。
+
+在运动限制在 $\hat{x}$-$\hat{y}$ 平面的情况下，其中 $\omega_b = (0, 0, \omega_z)$，物体关于通过质心的 $\hat{z}$ 轴的惯性由标量 $I_{zz}$ 给出，空间旋转动力学 (8.24) 简化为平面旋转动力学
+\begin{equation}
+m_z = I_{zz}\dot{\omega}_z,
+\end{equation}
+旋转动能为
+\begin{equation}
+K = \frac{1}{2}I_{zz}\omega_z^2.
+\end{equation}
+
+\subsection{Twist-Wrench 公式}
+
+线性动力学 (8.23) 和旋转动力学 (8.24) 可以写成以下组合形式：
+\begin{equation}
+\begin{bmatrix} m_b \\ f_b \end{bmatrix} = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}\begin{bmatrix} \dot{\omega}_b \\ \dot{v}_b \end{bmatrix} + \begin{bmatrix} [\omega_b] & 0 \\ 0 & [\omega_b] \end{bmatrix}\begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}\begin{bmatrix} \omega_b \\ v_b \end{bmatrix}, \label{eq:8.29}
+\end{equation}
+其中 $I$ 是 $3 \times 3$ 单位矩阵。利用后见之明，并利用 $[v]v = v \times v = 0$ 和 $[v]^T = -[v]$ 的事实，我们可以将方程 (8.29) 写成以下等价形式：
+\begin{equation}
+\begin{bmatrix} m_b \\ f_b \end{bmatrix} = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}\begin{bmatrix} \dot{\omega}_b \\ \dot{v}_b \end{bmatrix} - \begin{bmatrix} [\omega_b] & 0 \\ [v_b] & [\omega_b] \end{bmatrix}^T\begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}\begin{bmatrix} \omega_b \\ v_b \end{bmatrix}. \label{eq:8.30}
+\end{equation}
+
+以这种方式书写，每个项现在可以识别为六维空间量，如下所示：
+
+(a) 向量 $(\omega_b, v_b)$ 和 $(m_b, f_b)$ 可以分别识别为物体 twist $V_b$ 和物体 wrench $F_b$：
+\begin{equation}
+V_b = \begin{bmatrix} \omega_b \\ v_b \end{bmatrix}, \quad F_b = \begin{bmatrix} m_b \\ f_b \end{bmatrix}. \label{eq:8.31}
+\end{equation}
+
+(b) \textbf{空间惯性矩阵} $G_b \in \mathbb{R}^{6 \times 6}$ 定义为
+\begin{equation}
+G_b = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}. \label{eq:8.32}
+\end{equation}
+作为旁注，刚体的动能可以用空间惯性矩阵表示为
+\begin{equation}
+\text{动能} = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b = \frac{1}{2}V_b^T G_b V_b. \label{eq:8.33}
+\end{equation}
+
+(c) \textbf{空间动量} $P_b \in \mathbb{R}^6$ 定义为
+\begin{equation}
+P_b = \begin{bmatrix} I_b \omega_b \\ mv_b \end{bmatrix} = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}\begin{bmatrix} \omega_b \\ v_b \end{bmatrix} = G_b V_b. \label{eq:8.34}
+\end{equation}
+
+观察方程 (8.30) 中涉及 $P_b$ 的项被矩阵
+\begin{equation}
+-\begin{bmatrix} [\omega_b] & 0 \\ [v_b] & [\omega_b] \end{bmatrix}^T
+\end{equation}
+左乘。我们现在解释这个矩阵的起源和几何意义。首先，回忆两个向量 $\omega_1, \omega_2 \in \mathbb{R}^3$ 的叉积可以使用反对称矩阵符号计算如下：
+\begin{equation}
+[\omega_1 \times \omega_2] = [\omega_1][\omega_2] - [\omega_2][\omega_1]. \label{eq:8.36}
+\end{equation}
+方程 (8.35) 中的矩阵可以被认为是叉积运算到六维 twist 的推广。具体来说，给定两个 twist $V_1 = (\omega_1, v_1)$ 和 $V_2 = (\omega_2, v_2)$，我们执行类似于 (8.36) 的计算。这个推广到两个 twist $V_1$ 和 $V_2$ 的叉积称为 $V_1$ 和 $V_2$ 的\textbf{李括号}。
+
+\begin{definition}[定义 8.3]
+给定两个 twist $V_1 = (\omega_1, v_1)$ 和 $V_2 = (\omega_2, v_2)$，$V_1$ 和 $V_2$ 的李括号，写为 $[\text{ad}_{V_1}]V_2$ 或 $\text{ad}_{V_1}(V_2)$，定义如下：
+\begin{equation}
+\begin{bmatrix} [\omega_1] & 0 \\ [v_1] & [\omega_1] \end{bmatrix}\begin{bmatrix} \omega_2 \\ v_2 \end{bmatrix} = [\text{ad}_{V_1}]V_2 = \text{ad}_{V_1}(V_2) \in \mathbb{R}^6, \label{eq:8.37}
+\end{equation}
+其中
+\begin{equation}
+[\text{ad}_V] = \begin{bmatrix} [\omega] & 0 \\ [v] & [\omega] \end{bmatrix} \in \mathbb{R}^{6 \times 6}. \label{eq:8.38}
+\end{equation}
+\end{definition}
+
+\begin{definition}[定义 8.4]
+给定一个 twist $V = (\omega, v)$ 和一个 wrench $F = (m, f)$，定义映射
+\begin{equation}
+\text{ad}_V^T(F) = [\text{ad}_V]^T F = \begin{bmatrix} -[\omega]m - [v]f \\ -[\omega]f \end{bmatrix}. \label{eq:8.39}
+\end{equation}
+\end{definition}
+
+使用上述符号和定义，单个刚体的动力学方程现在可以写成
+\begin{equation}
+F_b = G_b \dot{V}_b - \text{ad}_{V_b}^T(P_b) = G_b \dot{V}_b - [\text{ad}_{V_b}]^T G_b V_b. \label{eq:8.40}
+\end{equation}
+
+注意方程 (8.40) 与旋转刚体的力矩方程之间的类比：
+\begin{equation}
+m_b = I_b \dot{\omega}_b - [\omega_b]^T I_b \omega_b. \label{eq:8.41}
+\end{equation}
+方程 (8.41) 简单地是 (8.40) 的旋转分量。
+
+\subsection{其他坐标系中的动力学}
+
+动力学方程 (8.40) 的推导依赖于使用质心坐标系 $\{b\}$。然而，在其他坐标系中表示动力学是直接的。让我们称这样的一个坐标系为 $\{a\}$。
+
+由于刚体的动能必须与表示坐标系无关，
+\begin{align}
+\frac{1}{2}V_a^T G_a V_a &= \frac{1}{2}V_b^T G_b V_b \nonumber \\
+&= \frac{1}{2}([\text{Ad}_{T_{ba}}]^T V_a)^T G_b [\text{Ad}_{T_{ba}}]^T V_a \nonumber \\
+&= \frac{1}{2}V_a^T [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}] V_a;
+\end{align}
+对于伴随表示 $\text{Ad}$（见定义 3.20）。换句话说，$\{a\}$ 中的空间惯性矩阵 $G_a$ 与 $G_b$ 相关：
+\begin{equation}
+G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}]. \label{eq:8.42}
+\end{equation}
+这是施泰纳定理的推广。
+
+使用空间惯性矩阵 $G_a$，$\{b\}$ 坐标系中的运动方程 (8.40) 可以在 $\{a\}$ 坐标系中等价地表示为
+\begin{equation}
+F_a = G_a \dot{V}_a - [\text{ad}_{V_a}]^T G_a V_a, \label{eq:8.43}
+\end{equation}
+其中 $F_a$ 和 $V_a$ 是在 $\{a\}$ 坐标系中书写的 wrench 和 twist。（见练习 8.3。）因此，运动方程的形式与表示坐标系无关。
+
+\section{牛顿-欧拉逆向动力学}
+我们现在考虑通过单自由度关节连接的 $n$ 连杆开链的逆向动力学问题。给定关节位置 $\theta \in \mathbb{R}^n$、速度 $\dot{\theta} \in \mathbb{R}^n$ 和加速度 $\ddot{\theta} \in \mathbb{R}^n$，目标是计算动力学方程的右侧
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}).
+\end{equation}
+主要结果是一个递归逆向动力学算法，由前向和后向迭代阶段组成。在前者中，每个连杆的位置、速度和加速度从基座传播到末端，而在后向迭代中，每个连杆所经历的力和力矩从末端传播到基座。
+
+\subsection{推导}
+一个物体固定的参考坐标系 $\{i\}$ 附着在每个连杆 $i$（$i = 1, \ldots, n$）的质心。基座坐标系表示为 $\{0\}$，末端执行器处的坐标系表示为 $\{n+1\}$。该坐标系固定在 $\{n\}$ 中。
+
+当操作器处于零位置时，所有关节变量为零，我们将坐标系 $\{j\}$ 在 $\{i\}$ 中的配置表示为 $M_{i,j} \in SE(3)$，并使用简写 $M_i = M_{0,i}$ 表示 $\{i\}$ 在基座坐标系 $\{0\}$ 中的配置。有了这些定义，$M_{i-1,i}$ 和 $M_{i,i-1}$ 可以计算为
+\begin{equation}
+M_{i-1,i} = M_{i-1}^{-1}M_i \quad \text{和} \quad M_{i,i-1} = M_i^{-1}M_{i-1}.
+\end{equation}
+
+在连杆坐标系 $\{i\}$ 中表示的关节 $i$ 的螺旋轴是 $A_i$。相同的螺旋轴在空间坐标系 $\{0\}$ 中表示为 $S_i$，两者通过以下关系相关：
+\begin{equation}
+A_i = \text{Ad}_{M_i^{-1}}(S_i).
+\end{equation}
+
+定义 $T_{i,j} \in SE(3)$ 为任意关节变量 $\theta$ 时坐标系 $\{j\}$ 在 $\{i\}$ 中的配置，那么 $T_{i-1,i}(\theta_i)$，给定关节变量 $\theta_i$ 时 $\{i\}$ 相对于 $\{i-1\}$ 的配置，以及 $T_{i,i-1}(\theta_i) = T_{i-1,i}(\theta_i)^{-1}$ 计算为
+\begin{equation}
+T_{i-1,i}(\theta_i) = M_{i-1,i}e^{[A_i]\theta_i} \quad \text{和} \quad T_{i,i-1}(\theta_i) = e^{-[A_i]\theta_i}M_{i,i-1}.
+\end{equation}
+
+我们进一步采用以下符号：
+
+(a) 在坐标系 $\{i\}$ 坐标中表示的连杆坐标系 $\{i\}$ 的 twist 表示为 $V_i = (\omega_i, v_i)$。
+
+(b) 通过关节 $i$ 传递到连杆坐标系 $\{i\}$ 的 wrench，在坐标系 $\{i\}$ 坐标中表示，表示为 $F_i = (m_i, f_i)$。
+
+(c) 设 $G_i \in \mathbb{R}^{6 \times 6}$ 表示连杆 $i$ 的空间惯性矩阵，相对于连杆坐标系 $\{i\}$ 表示。由于我们假设所有连杆坐标系都位于连杆质心，$G_i$ 具有块对角形式
+\begin{equation}
+G_i = \begin{bmatrix} I_i & 0 \\ 0 & m_i I \end{bmatrix}, \label{eq:8.44}
+\end{equation}
+其中 $I_i$ 表示连杆 $i$ 的 $3 \times 3$ 旋转惯性矩阵，$m_i$ 是连杆质量。
+
+有了这些定义，我们可以递归地计算每个连杆的 twist 和加速度，从基座移动到末端。连杆 $i$ 的 twist $V_i$ 是连杆 $i-1$ 的 twist 在 $\{i\}$ 中表示的和，加上由于关节速率 $\dot{\theta}_i$ 而添加的 twist：
+\begin{equation}
+V_i = A_i \dot{\theta}_i + [\text{Ad}_{T_{i,i-1}}]V_{i-1}. \label{eq:8.45}
+\end{equation}
+
+加速度 $\dot{V}_i$ 也可以递归地找到。对方程 (8.45) 求时间导数，我们得到
+\begin{equation}
+\dot{V}_i = A_i \ddot{\theta}_i + [\text{Ad}_{T_{i,i-1}}]\dot{V}_{i-1} + \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}]V_{i-1}. \label{eq:8.46}
+\end{equation}
+经过详细计算（这里省略），最终项可以表示为
+\begin{equation}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}]V_{i-1} = [\text{ad}_{V_i}]A_i \dot{\theta}_i.
+\end{equation}
+将这个结果代入方程 (8.46)，我们得到
+\begin{equation}
+\dot{V}_i = A_i \ddot{\theta}_i + [\text{Ad}_{T_{i,i-1}}]\dot{V}_{i-1} + [\text{ad}_{V_i}]A_i \dot{\theta}_i, \label{eq:8.47}
+\end{equation}
+即，连杆 $i$ 的加速度是三个分量的和：由于关节加速度 $\ddot{\theta}_i$ 的分量，由于在 $\{i\}$ 中表示的连杆 $i-1$ 的加速度的分量，以及速度乘积分量。
+
+一旦我们从基座向外确定了所有连杆的 twist 和加速度，我们可以通过从末端向内移动来计算关节力矩或力。刚体动力学 (8.40) 告诉我们，给定 $V_i$ 和 $\dot{V}_i$，作用在连杆 $i$ 上的总 wrench。此外，作用在连杆 $i$ 上的总 wrench 是通过关节 $i$ 传递的 wrench $F_i$ 和通过关节 $i+1$（或对于连杆 $n$，由环境在末端执行器坐标系 $\{n+1\}$ 处施加到连杆的 wrench）施加到连杆的 wrench 的和，在坐标系 $i$ 中表示。因此，我们有等式
+\begin{equation}
+G_i \dot{V}_i - \text{ad}_{V_i}^T(G_i V_i) = F_i - \text{Ad}_{T_{i+1,i}}^T(F_{i+1}); \label{eq:8.48}
+\end{equation}
+见图 8.6。从末端向基座求解，在每个连杆 $i$ 处，我们求解方程 (8.48) 中唯一的未知数：$F_i$。由于关节 $i$ 只有一个自由度，六向量 $F_i$ 的五个维度由关节的结构"免费"提供，执行器只需要提供沿关节螺旋轴方向的标量力或力矩：
+\begin{equation}
+\tau_i = F_i^T A_i. \label{eq:8.49}
+\end{equation}
+方程 (8.49) 提供了每个关节所需的力矩，解决了逆向动力学问题。
+
+\subsection{牛顿-欧拉逆向动力学算法}
+\textbf{初始化} 将坐标系 $\{0\}$ 附着到基座，将坐标系 $\{1\}$ 到 $\{n\}$ 附着到连杆 $\{1\}$ 到 $\{n\}$ 的质心，并将坐标系 $\{n+1\}$ 附着到末端执行器，固定在坐标系 $\{n\}$ 中。定义 $M_{i,i-1}$ 为当 $\theta_i = 0$ 时 $\{i-1\}$ 在 $\{i\}$ 中的配置。设 $A_i$ 为在 $\{i\}$ 中表示的关节 $i$ 的螺旋轴，$G_i$ 为连杆 $i$ 的 $6 \times 6$ 空间惯性矩阵。定义 $V_0$ 为在基座坐标系 $\{0\}$ 坐标中表示的基座坐标系 $\{0\}$ 的 twist。（这个量通常为零。）设 $g \in \mathbb{R}^3$ 为在基座坐标系坐标中表示的重力向量，并定义 $\dot{V}_0 = (\dot{\omega}_0, \dot{v}_0) = (0, -g)$。（重力被视为基座在相反方向的加速度。）定义 $F_{n+1} = F_{\text{tip}} = (m_{\text{tip}}, f_{\text{tip}})$ 为在末端执行器坐标系 $\{n+1\}$ 中表示的由末端执行器施加到环境的 wrench。
+
+\textbf{前向迭代} 给定 $\theta$、$\dot{\theta}$、$\ddot{\theta}$，对于 $i = 1$ 到 $n$ 执行：
+\begin{align}
+T_{i,i-1} &= e^{-[A_i]\theta_i}M_{i,i-1}, \label{eq:8.50} \\
+V_i &= \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i, \label{eq:8.51} \\
+\dot{V}_i &= \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i. \label{eq:8.52}
+\end{align}
+
+\textbf{后向迭代} 对于 $i = n$ 到 $1$ 执行：
+\begin{align}
+F_i &= \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - \text{ad}_{V_i}^T(G_i V_i), \label{eq:8.53} \\
+\tau_i &= F_i^T A_i. \label{eq:8.54}
+\end{align}
+
+\section{封闭形式的动力学方程}
+在本节中，我们展示如何将递归逆向动力学算法中的方程组织成封闭形式的动力学方程集 $\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta)$。
+
+在这样做之前，我们证明我们之前的断言，即机器人的总动能 $K$ 可以表示为 $K = \frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$。我们通过注意到 $K$ 可以表示为每个连杆的动能之和来做到这一点：
+\begin{equation}
+K = \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i, \label{eq:8.55}
+\end{equation}
+其中 $V_i$ 是连杆坐标系 $\{i\}$ 的 twist，$G_i$ 是方程 (8.32) 定义的连杆 $i$ 的空间惯性矩阵（两者都在连杆坐标系 $\{i\}$ 坐标中表示）。设 $T_{0i}(\theta_1, \ldots, \theta_i)$ 表示从基座坐标系 $\{0\}$ 到连杆坐标系 $\{i\}$ 的正向运动学，设 $J_i^b(\theta)$ 表示从 $T_{0i}^{-1}\dot{T}_{0i}$ 获得的身体雅可比。注意 $J_i^b$ 如定义的是一个 $6 \times i$ 矩阵；我们通过将最后 $n-i$ 列的所有条目填充为零，将其转换为 $6 \times n$ 矩阵。有了 $J_i^b$ 的这个定义，我们可以写
+\begin{equation}
+V_i = J_i^b(\theta)\dot{\theta}, \quad i = 1, \ldots, n.
+\end{equation}
+动能然后可以写成
+\begin{equation}
+K = \frac{1}{2}\dot{\theta}^T\left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right)\dot{\theta}. \label{eq:8.56}
+\end{equation}
+括号内的项正是质量矩阵 $M(\theta)$：
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta). \label{eq:8.57}
+\end{equation}
+
+我们现在回到推导封闭形式动力学方程集的最初任务。我们首先定义以下堆叠向量和矩阵（详细定义见原文）。通过这些定义，我们之前的递归逆向动力学算法可以组装成以下矩阵方程集：
+\begin{align}
+V &= W(\theta)V + A\dot{\theta} + V_{\text{base}}, \label{eq:8.68} \\
+\dot{V} &= W(\theta)\dot{V} + A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}}, \label{eq:8.69} \\
+F &= W^T(\theta)F + G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}, \label{eq:8.70} \\
+\tau &= A^T F. \label{eq:8.71}
+\end{align}
+
+矩阵 $W(\theta)$ 具有 $W^n(\theta) = 0$ 的性质（这样的矩阵被称为 $n$ 阶幂零），一个可以通过直接计算验证的结果是 $(I-W(\theta))^{-1} = I + W(\theta) + \cdots + W^{n-1}(\theta)$。定义 $L(\theta) = (I-W(\theta))^{-1}$，可以进一步通过直接计算验证（详细形式见原文）。
+
+先前的矩阵方程现在可以重新组织如下：
+\begin{align}
+V &= L(\theta)(A\dot{\theta} + V_{\text{base}}), \label{eq:8.73} \\
+\dot{V} &= L(\theta)(A\ddot{\theta} + [\text{ad}_{A\dot{\theta}}]W(\theta)V + [\text{ad}_{A\dot{\theta}}]V_{\text{base}} + \dot{V}_{\text{base}}), \label{eq:8.74} \\
+F &= L^T(\theta)(G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}), \label{eq:8.75} \\
+\tau &= A^T F. \label{eq:8.76}
+\end{align}
+
+如果机器人在末端执行器处施加外部 wrench $F_{\text{tip}}$，这可以包含到动力学方程中
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) + J^T(\theta)F_{\text{tip}}, \label{eq:8.77}
+\end{equation}
+其中 $J(\theta)$ 表示在与 $F_{\text{tip}}$ 相同的参考坐标系中表示的正向运动学的雅可比，并且
+\begin{align}
+M(\theta) &= A^T L^T(\theta)GL(\theta)A, \label{eq:8.78} \\
+c(\theta, \dot{\theta}) &= -A^T L^T(\theta)\left(GL(\theta)[\text{ad}_{A\dot{\theta}}]W(\theta) + [\text{ad}_V]^T G\right)L(\theta)A\dot{\theta}, \label{eq:8.79} \\
+g(\theta) &= A^T L^T(\theta)GL(\theta)\dot{V}_{\text{base}}. \label{eq:8.80}
+\end{align}
+
+\section{开链的正向动力学}
+正向动力学问题涉及求解
+\begin{equation}
+M(\theta)\ddot{\theta} = \tau(t) - h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{tip}} \label{eq:8.81}
+\end{equation}
+得到 $\ddot{\theta}$，给定 $\theta$、$\dot{\theta}$、$\tau$ 和由末端执行器施加的 wrench $F_{\text{tip}}$（如果适用）。项 $h(\theta, \dot{\theta})$ 可以通过调用逆向动力学算法计算，其中 $\ddot{\theta} = 0$ 和 $F_{\text{tip}} = 0$。惯性矩阵 $M(\theta)$ 可以使用方程 (8.57) 计算。另一种方法是使用逆向动力学算法的 $n$ 次调用来逐列构建 $M(\theta)$。在 $n$ 次调用的每一次中，设置 $g = 0$、$\dot{\theta} = 0$ 和 $F_{\text{tip}} = 0$。在第一次调用中，列向量 $\ddot{\theta}$ 除了第一行中的 1 外全为零。在第二次调用中，$\ddot{\theta}$ 除了第二行中的 1 外全为零，依此类推。第 $i$ 次调用返回的 $\tau$ 向量是 $M(\theta)$ 的第 $i$ 列，在 $n$ 次调用后，构建了 $n \times n$ 矩阵 $M(\theta)$。
+
+有了 $M(\theta)$、$h(\theta, \dot{\theta})$ 和 $F_{\text{tip}}$，我们可以使用任何有效的算法来求解方程 (8.81)，它是 $M\ddot{\theta} = b$ 的形式，得到 $\ddot{\theta}$。
+
+正向动力学可用于模拟机器人的运动，给定其初始状态、关节力-力矩 $\tau(t)$ 和可选的外部 wrench $F_{\text{tip}}(t)$，对于 $t \in [0, t_f]$。首先定义函数 $\text{ForwardDynamics}$ 返回方程 (8.81) 的解，即
+\begin{equation}
+\ddot{\theta} = \text{ForwardDynamics}(\theta, \dot{\theta}, \tau, F_{\text{tip}}).
+\end{equation}
+定义变量 $q_1 = \theta$、$q_2 = \dot{\theta}$，二阶动力学 (8.81) 可以转换为两个一阶微分方程：
+\begin{align}
+\dot{q}_1 &= q_2, \\
+\dot{q}_2 &= \text{ForwardDynamics}(q_1, q_2, \tau, F_{\text{tip}}).
+\end{align}
+
+数值积分形式为 $q \in \mathbb{R}^n$ 的一阶微分方程组 $q = f(q, t)$ 的最简单方法是一阶欧拉迭代
+\begin{equation}
+q(t + \delta t) = q(t) + \delta tf(q(t), t),
+\end{equation}
+其中正标量 $\delta t$ 表示时间步长。机器人动力学的欧拉积分因此是
+\begin{align}
+q_1(t + \delta t) &= q_1(t) + q_2(t)\delta t, \\
+q_2(t + \delta t) &= q_2(t) + \text{ForwardDynamics}(q_1, q_2, \tau, F_{\text{tip}})\delta t.
+\end{align}
+给定 $q_1(0) = \theta(0)$ 和 $q_2(0) = \dot{\theta}(0)$ 的一组初始值，上述方程可以向前迭代时间以获得数值运动 $\theta(t) = q_1(t)$。
+
+\textbf{正向动力学的欧拉积分算法}
+\begin{itemize}
+\item \textbf{输入}：初始条件 $\theta(0)$ 和 $\dot{\theta}(0)$，输入力矩 $\tau(t)$ 和末端执行器处的 wrench $F_{\text{tip}}(t)$，对于 $t \in [0, t_f]$，以及积分步数 $N$。
+\item \textbf{初始化}：设置时间步长 $\delta t = t_f/N$，并设置 $\theta[0] = \theta(0)$、$\dot{\theta}[0] = \dot{\theta}(0)$。
+\item \textbf{迭代}：对于 $k = 0$ 到 $N-1$ 执行：
+\begin{align}
+\ddot{\theta}[k] &= \text{ForwardDynamics}(\theta[k], \dot{\theta}[k], \tau(k\delta t), F_{\text{tip}}(k\delta t)), \\
+\theta[k+1] &= \theta[k] + \dot{\theta}[k]\delta t, \\
+\dot{\theta}[k+1] &= \dot{\theta}[k] + \ddot{\theta}[k]\delta t.
+\end{align}
+\item \textbf{输出}：关节轨迹 $\theta(k\delta t) = \theta[k]$、$\dot{\theta}(k\delta t) = \dot{\theta}[k]$，$k = 0, \ldots, N$。
+\end{itemize}
+
+数值积分的结果随着积分步数 $N$ 趋于无穷而收敛到理论结果。高阶数值积分方案，如四阶龙格-库塔，可以用比简单的一阶欧拉方法更少的计算获得更接近的近似。
+
+\section{任务空间中的动力学}
+在本节中，我们考虑在变换到末端执行器坐标系（任务空间坐标）坐标时动力学方程如何变化。为了简化，我们考虑具有关节空间动力学的六自由度开链
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}), \quad \theta \in \mathbb{R}^6, \tau \in \mathbb{R}^6. \label{eq:8.82}
+\end{equation}
+我们暂时忽略任何末端执行器力 $F_{\text{tip}}$。末端执行器的 twist $V = (\omega, v)$ 通过以下关系与关节速度 $\dot{\theta}$ 相关：
+\begin{equation}
+V = J(\theta)\dot{\theta}, \label{eq:8.83}
+\end{equation}
+理解 $V$ 和 $J(\theta)$ 总是用相同的参考坐标系表示。时间导数 $\dot{V}$ 然后为
+\begin{equation}
+\dot{V} = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}. \label{eq:8.84}
+\end{equation}
+在 $J(\theta)$ 可逆的配置 $\theta$ 处，我们有
+\begin{align}
+\dot{\theta} &= J^{-1}V, \label{eq:8.85} \\
+\ddot{\theta} &= J^{-1}\dot{V} - J^{-1}\dot{J}J^{-1}V. \label{eq:8.86}
+\end{align}
+将 $\dot{\theta}$ 和 $\ddot{\theta}$ 代入方程 (8.82) 得到
+\begin{equation}
+\tau = M(\theta)\left(J^{-1}\dot{V} - J^{-1}\dot{J}J^{-1}V\right) + h(\theta, J^{-1}V). \label{eq:8.87}
+\end{equation}
+设 $J^{-T}$ 表示 $(J^{-1})^T = (J^T)^{-1}$。两边左乘 $J^{-T}$ 得到
+\begin{equation}
+J^{-T}\tau = J^{-T}MJ^{-1}\dot{V} - J^{-T}MJ^{-1}\dot{J}J^{-1}V + J^{-T}h(\theta, J^{-1}V). \label{eq:8.88}
+\end{equation}
+将 $J^{-T}\tau$ 表示为 wrench $F$，上述可以写成
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V), \label{eq:8.89}
+\end{equation}
+其中
+\begin{align}
+\Lambda(\theta) &= J^{-T}M(\theta)J^{-1}, \label{eq:8.90} \\
+\eta(\theta, V) &= J^{-T}h(\theta, J^{-1}V) - \Lambda(\theta)\dot{J}J^{-1}V. \label{eq:8.91}
+\end{align}
+这些是用末端执行器坐标系坐标表示的动力学方程。如果对末端执行器坐标系施加外部 wrench $F$，那么，假设执行器提供零力和力矩，末端执行器坐标系的运动由这些方程决定。
+
+注意 $J(\theta)$ 必须是可逆的（即，关节速度和末端执行器 twist 之间必须存在一一映射）才能推导上述任务空间动力学。还要注意 $\Lambda(\theta)$ 和 $\eta(\theta, V)$ 对 $\theta$ 的依赖性。一般来说，我们不能将对 $\theta$ 的依赖性替换为对末端执行器配置 $X$ 的依赖性，因为可能存在多个逆向运动学解，并且动力学取决于特定的关节配置 $\theta$。
+
+\section{约束动力学}
+现在考虑 $n$ 关节机器人受到一组 $k$ 个完整或非完整普法夫速度约束的情况，形式为
+\begin{equation}
+A(\theta)\dot{\theta} = 0, \quad A(\theta) \in \mathbb{R}^{k \times n}. \label{eq:8.92}
+\end{equation}
+（见第 2.4 节对普法夫约束的介绍。）这样的约束可以来自闭环约束；例如，刚性地握住门把手的末端执行器的运动受到 $k = 5$ 个约束，由于门的铰链。作为另一个例子，用笔写字的机器人受到单个约束，保持笔尖在纸上方的高度为零。无论如何，我们假设约束不对机器人做功，即，由于约束的广义力 $\tau_{\text{con}}$ 满足
+\begin{equation}
+\tau_{\text{con}}^T \dot{\theta} = 0.
+\end{equation}
+这个假设意味着 $\tau_{\text{con}}$ 必须是 $A^T(\theta)$ 的列的线性组合，即 $\tau_{\text{con}} = A^T(\theta)\lambda$，对于某个 $\lambda \in \mathbb{R}^k$，因为当 $\dot{\theta}$ 受到约束 (8.92) 时，这些是对机器人不做功的广义力：
+\begin{equation}
+(A^T(\theta)\lambda)^T \dot{\theta} = \lambda^T A(\theta)\dot{\theta} = 0 \quad \text{对于所有} \quad \lambda \in \mathbb{R}^k.
+\end{equation}
+对于写字机器人示例，约束不做功的假设意味着笔和纸之间不能有摩擦。
+
+将约束力 $A^T(\theta)\lambda$ 添加到运动方程，我们可以将 $n+k$ 个约束运动方程写成 $n+k$ 个未知数 $\{\ddot{\theta}, \lambda\}$（正向动力学）或 $n+k$ 个未知数 $\{\tau, \lambda\}$（逆向动力学）：
+\begin{align}
+\tau &= M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) + A^T(\theta)\lambda, \label{eq:8.93} \\
+A(\theta)\dot{\theta} &= 0, \label{eq:8.94}
+\end{align}
+其中 $\lambda$ 是一组拉格朗日乘数，$A^T(\theta)\lambda$ 是作用在约束上的关节力和力矩。从这些方程中，应该清楚机器人有 $n-k$ 个速度自由度和 $k$ 个"力自由度"——机器人可以自由创建形式为 $A^T(\theta)\lambda$ 的任何广义力。（对于写字机器人，存在等式约束：机器人只能对纸和桌子施加推力，不能施加拉力。）
+
+通常，将 $n+k$ 个方程中的 $n+k$ 个未知数简化为 $n$ 个方程中的 $n$ 个未知数，而不显式计算拉格朗日乘数 $\lambda$，是方便的。为此，我们可以用其他量求解 $\lambda$ 并将我们的解代入方程 (8.93)。由于约束在所有时间都满足，约束的时间变化率满足
+\begin{equation}
+\dot{A}(\theta)\dot{\theta} + A(\theta)\ddot{\theta} = 0. \label{eq:8.95}
+\end{equation}
+假设 $M(\theta)$ 和 $A(\theta)$ 是满秩的，我们可以从方程 (8.93) 求解 $\ddot{\theta}$，代入方程 (8.95)，并省略对 $\theta$ 和 $\dot{\theta}$ 的依赖性以简洁，得到
+\begin{equation}
+\dot{A}\dot{\theta} + AM^{-1}(\tau - h - A^T\lambda) = 0. \label{eq:8.96}
+\end{equation}
+使用 $A\ddot{\theta} = -\dot{A}\dot{\theta}$，经过一些操作，我们得到
+\begin{equation}
+\lambda = (AM^{-1}A^T)^{-1}(AM^{-1}(\tau - h) - A\ddot{\theta}). \label{eq:8.97}
+\end{equation}
+将方程 (8.97) 与方程 (8.93) 结合并进一步操作，我们得到
+\begin{equation}
+P\tau = P(M\ddot{\theta} + h) \label{eq:8.98}
+\end{equation}
+其中
+\begin{equation}
+P = I - A^T(AM^{-1}A^T)^{-1}AM^{-1} \label{eq:8.99}
+\end{equation}
+其中 $I$ 是 $n \times n$ 单位矩阵。$n \times n$ 矩阵 $P(\theta)$ 的秩为 $n-k$，将关节广义力 $\tau$ 映射到 $P(\theta)\tau$，投影掉作用在约束上而不对机器人做功的广义力分量，同时保留对机器人做功的广义力。互补投影 $I - P(\theta)$ 将 $\tau$ 映射到 $(I - P(\theta))\tau$，作用在约束上而不对机器人做功的关节力。
+
+使用 $P(\theta)$，我们可以通过评估方程 (8.98) 的右侧来求解逆向动力学。解 $P(\theta)\tau$ 是一组广义关节力，实现期望关节加速度 $\ddot{\theta}$ 的可行分量。对于这个解，我们可以添加任何约束力 $A^T(\theta)\lambda$ 而不改变机器人的加速度。
+
+我们可以将方程 (8.98) 重新排列为形式
+\begin{equation}
+P_{\ddot{\theta}}\ddot{\theta} = P_{\ddot{\theta}}M^{-1}(\tau - h), \label{eq:8.100}
+\end{equation}
+其中
+\begin{equation}
+P_{\ddot{\theta}} = M^{-1}PM = I - M^{-1}A^T(AM^{-1}A^T)^{-1}A. \label{eq:8.101}
+\end{equation}
+秩为 $(n-k)$ 的投影矩阵 $P_{\ddot{\theta}}(\theta) \in \mathbb{R}^{n \times n}$ 投影掉违反约束的任意关节加速度 $\ddot{\theta}$ 的分量，只留下满足约束的分量 $P_{\ddot{\theta}}(\theta)\ddot{\theta}$。为了求解正向动力学，我们评估方程 (8.100) 的右侧，得到的 $P_{\ddot{\theta}}\ddot{\theta}$ 是关节加速度集。
+
+在第 11.6 节中，我们讨论混合运动-力控制的相关主题，其中每个瞬间的目标是同时实现满足 $A\ddot{\theta} = 0$ 的期望加速度（由 $n-k$ 个运动自由度组成）和针对 $k$ 个约束的期望力。在该节中，我们使用任务空间动力学来更自然地表示任务空间末端执行器运动和力。
+
+\section{URDF 中的机器人动力学}
+如第 4.2 节所述并在 UR5 通用机器人描述格式文件中说明，连杆 $i$ 的惯性属性在 URDF 中由连杆元素 \texttt{mass}、\texttt{origin}（质心坐标系相对于附着在关节 $i$ 处的坐标系的位置和方向）和 \texttt{inertia} 描述，它指定对称旋转惯性矩阵在对角线上或上方的六个元素。为了完全写出机器人的动力学，对于关节 $i$，我们还需要关节元素 \texttt{origin}，指定当 $\theta_i = 0$ 时连杆 $i$ 的关节坐标系相对于连杆 $(i-1)$ 的关节坐标系的位置和方向，以及元素 \texttt{axis}，它指定关节 $i$ 的运动轴。我们将这些元素转换为牛顿-欧拉逆向动力学算法所需量的转换留给练习。
+
+\section{驱动、齿轮和摩擦}
+到目前为止，我们一直假设存在直接提供指令力和力矩的执行器。实际上，有许多类型的执行器（例如，电动、液压和气动）和机械功率变换器（例如，齿轮头），执行器可以位于关节本身或远程，通过电缆或同步带传递机械功率。这些的每种组合都有其自己的特性，可以在"扩展动力学"中发挥重要作用，将实际控制输入（例如，连接到电机的放大器请求的电流）映射到机器人的运动。
+
+在本节中，我们介绍与一种特定且常见的配置相关的一些问题：位于每个关节处的齿轮直流电机。这是例如 Universal Robots UR5 中使用的配置。
+
+图 8.7 显示了由直流电机驱动的典型 $n$ 关节机器人的电气框图。为了具体，我们假设每个关节都是旋转的。电源将墙壁交流电压转换为直流电压，为与每个电机关联的放大器供电。控制箱接收用户输入，例如以期望轨迹的形式，以及来自位于每个关节的编码器的位置反馈。使用期望轨迹、机器人动力学的模型以及当前机器人状态相对于期望机器人状态的测量误差，控制器计算每个执行器所需的力矩。由于直流电机名义上提供与通过电机的电流成比例的力矩，这个力矩指令等价于电流指令。然后每个电机放大器使用电流传感器（在图 8.7 中显示为放大器外部，但实际上在放大器内部）持续调整电机两端的电压，以尝试实现请求的电流。电机的运动由电机编码器感测，位置信息被发送回控制器。
+
+指令力矩通常以每秒约 1000 次（1 kHz）更新，放大器的电压控制环路可能以十倍或更高的速率更新。
+
+图 8.8 是单个轴的电机和其他组件的概念表示。电机有一个从电机两端延伸的单轴：一端驱动旋转编码器，测量关节的位置，另一端成为齿轮头的输入。齿轮头增加力矩同时降低速度，因为大多数具有适当功率等级的直流电机提供的力矩太低，对机器人应用没有用处。轴承的目的是支撑齿轮头输出，自由地传递关于齿轮头轴的力矩，同时将齿轮头（和电机）与由于其他五个方向中的连杆 $i+1$ 而产生的 wrench 分量隔离。编码器、电机、齿轮头和轴承的外壳都相对于彼此和连杆 $i$ 固定。电机通常也有某种制动器，未显示。
+
+\subsection{直流电机和齿轮}
+直流电机由定子和相对于定子旋转的转子组成。直流电机通过在水久磁铁产生的磁场中向绕组发送电流来产生力矩，其中磁铁附着到定子，绕组附着到转子，或反之亦然。直流电机有多个绕组，其中一些在任意给定时间被激励，一些不活跃。被激励的绕组被选择为转子相对于定子的角度的函数。绕组的这种"换向"使用电刷（有刷电机）机械地发生，或使用控制电路（无刷电机）电发生。无刷电机具有无刷磨损和更高连续力矩的优点，因为绕组通常附着到电机外壳，由于绕组电阻产生的热量可以更容易地消散。在我们对直流电机建模的基本介绍中，我们不区分有刷和无刷电机。
+
+图 8.9 显示了带有编码器和齿轮头的有刷直流电机。
+
+由直流电机产生的力矩 $\tau$，以牛顿米（N m）测量，由方程控制
+\begin{equation}
+\tau = k_t I,
+\end{equation}
+其中 $I$，以安培（A）测量，是通过绕组的电流。常数 $k_t$，以每安培牛顿米（N m/A）测量，称为\textbf{力矩常数}。由绕组作为热量耗散的功率，以瓦特（W）测量，由以下控制
+\begin{equation}
+P_{\text{heat}} = I^2 R,
+\end{equation}
+其中 $R$ 是绕组的电阻，以欧姆（$\Omega$）测量。为了防止电机绕组过热，通过电机的连续电流必须受到限制。因此，在连续操作中，电机力矩必须保持在由电机热特性确定的连续力矩限制 $\tau_{\text{cont}}$ 以下。
+
+直流电机的简化模型，其中所有单位都在 SI 系统中，可以通过将电机消耗的电功率 $P_{\text{elec}} = IV$（以瓦特（W））等同于电机产生的机械功率 $P_{\text{mech}} = \tau w$（也以 W）和其他功率来推导：
+\begin{equation}
+IV = \tau w + I^2 R + LI\frac{dI}{dt} + \text{摩擦和其他功率损失项},
+\end{equation}
+其中 $V$ 是施加到电机的电压，以伏特（V）测量，$w$ 是电机的角速度，以每秒弧度（1/s）测量，$L$ 是由于绕组的电感，以亨利（H）测量。右侧的项是电机产生的机械功率、由于导线电阻加热绕组而损失的功率、激励或去激励绕组电感消耗或产生的功率（因为存储在电感器中的能量是 $\frac{1}{2}LI^2$，功率是能量的时间导数），以及由于轴承中的摩擦等而损失的功率。去掉最后一项，用 $k_t Iw$ 替换 $\tau w$，并除以 $I$，我们得到电压方程
+\begin{equation}
+V = k_t w + IR + L\frac{dI}{dt}. \label{eq:8.102}
+\end{equation}
+通常方程 (8.102) 用电气常数 $k_e$（单位为 V s）而不是力矩常数 $k_t$ 书写，但在 SI 单位（V s 或 N m/A）中，两者的数值相同；它们表示电机的相同常数特性。所以我们更喜欢使用 $k_t$。
+
+方程 (8.102) 中的电压项 $k_t w$ 称为\textbf{反电动势}或简称反电动势，它是将电机与简单的串联电阻和电感区分开来的原因。它还允许电机，我们通常认为它将电功率转换为机械功率，作为发电机运行，将机械功率转换为电功率。如果电机的电气输入断开（因此没有电流可以流动）并且轴被某个外部力矩强制转动，你可以测量电机输入两端的反电动势电压 $k_t w$。
+
+为了简化，在本节的其余部分，我们忽略 $L dI/dt$ 项。当电机以恒定电流运行时，这个假设完全满足。有了这个假设，方程 (8.102) 可以重新排列为
+\begin{equation}
+w = \frac{1}{k_t}(V - IR) = \frac{V}{k_t} - \frac{R}{k_t^2}\tau,
+\end{equation}
+对于恒定 $V$，将速度 $w$ 表示为 $\tau$ 的线性函数（斜率为 $-R/k_t^2$）。现在假设电机两端的电压限制在范围 $[-V_{\max}, +V_{\max}]$，通过电机的电流限制在 $[-I_{\max}, +I_{\max}]$，可能由放大器或电源限制。那么电机在力矩-速度平面中的操作区域如图 8.10 所示。注意 $\tau$ 和 $w$ 的符号在这个平面的第二和第四象限中相反，因此乘积 $\tau w$ 是负的。当电机在这些象限中操作时，它实际上消耗机械功率，而不是产生机械功率。电机表现得像一个阻尼器。
+
+专注于第一象限（$\tau \geq 0$，$w \geq 0$，$\tau w \geq 0$），操作区域的边界称为\textbf{速度-力矩曲线}。速度-力矩曲线一端的空载速度 $w_0 = V_{\max}/k_t$ 是电机在由 $V_{\max}$ 供电但不提供力矩时的速度。在这种操作条件下，反电动势 $k_t w$ 等于施加的电压，因此没有剩余的电压来产生电流（或力矩）。速度-力矩曲线另一端的失速力矩 $\tau_{\text{stall}} = k_t V_{\max}/R$ 是在轴被阻止旋转时实现的，因此没有反电动势。
+
+图 8.10 还指示了连续操作区域，其中 $|\tau| \leq \tau_{\text{cont}}$。电机可以在连续操作区域之外间歇操作，但在连续操作区域之外的扩展操作增加了电机过热的可能性。
+
+电机的额定机械功率是 $P_{\text{rated}} = \tau_{\text{cont}} w_{\text{cont}}$，其中 $w_{\text{cont}}$ 是对应于 $\tau_{\text{cont}}$ 的速度-力矩曲线上的速度。即使电机的额定功率对于特定应用是足够的，直流电机产生的力矩通常太低而没有用处。如前所述，因此使用齿轮来增加力矩，同时也降低速度。对于齿轮比 $G$，齿轮头的输出速度是
+\begin{equation}
+w_{\text{gear}} = \frac{w_{\text{motor}}}{G}.
+\end{equation}
+对于理想齿轮头，在力矩转换中没有功率损失，因此 $\tau_{\text{motor}} w_{\text{motor}} = \tau_{\text{gear}} w_{\text{gear}}$，这意味着
+\begin{equation}
+\tau_{\text{gear}} = G\tau_{\text{motor}}.
+\end{equation}
+实际上，由于齿轮齿、轴承等之间的摩擦和冲击，一些机械功率会损失，因此
+\begin{equation}
+\tau_{\text{gear}} = \eta G\tau_{\text{motor}},
+\end{equation}
+其中 $\eta \leq 1$ 是齿轮头的效率。
+
+图 8.11 显示了当电机由 $G = 2$（$\eta = 1$）齿轮驱动时，图 8.10 中电机的操作区域。最大力矩加倍，而最大速度缩小两倍。由于许多直流电机能够达到 10000 rpm 或更高的空载速度，机器人关节通常具有 100 或更高的齿轮比，以在速度和力矩之间实现适当的折衷。
+
+\subsection{表观惯性}
+电机的定子附着到一个连杆，转子附着到另一个连杆，可能通过齿轮头。因此，在计算电机对连杆的质量和惯性的贡献时，定子的质量和惯性必须分配给一个连杆，转子的质量和惯性必须分配给另一个连杆。
+
+考虑一个静止的连杆 0，关节 1 的齿轮电机的定子附着到它。关节 1 的旋转速度，齿轮头的输出，是 $\dot{\theta}$。因此电机的转子以 $G\dot{\theta}$ 旋转。转子的动能因此是
+\begin{equation}
+K = \frac{1}{2}I_{\text{rotor}}(G\dot{\theta})^2 = \frac{1}{2}G^2 I_{\text{rotor}}\dot{\theta}^2,
+\end{equation}
+其中 $I_{\text{rotor}}$ 是转子关于旋转轴的标量惯性，$G^2 I_{\text{rotor}}$ 是转子关于该轴的\textbf{表观惯性}（通常称为反射惯性）。换句话说，如果你要抓住连杆 1 并手动旋转它，由于齿轮头，转子贡献的惯性会感觉好像比其实际惯性大 $G^2$ 倍。
+
+虽然惯性 $I_{\text{rotor}}$ 通常远小于连杆其余部分关于旋转轴的惯性 $I_{\text{link}}$，但表观惯性 $G^2 I_{\text{rotor}}$ 可能与 $I_{\text{link}}$ 同量级，甚至更大。
+
+随着齿轮比变大，一个后果是关节 $i$ 看到的惯性越来越由转子的表观惯性主导。换句话说，关节 $i$ 所需的力矩相对于 $\ddot{\theta}_i$ 变得相对更依赖于其他关节加速度，即，机器人的质量矩阵变得更加对角。在质量矩阵具有可忽略的非对角分量的极限情况下（并且在不存在重力的情况下），机器人的动力学是解耦的——一个关节的动力学不依赖于其他关节的配置或运动。
+
+作为一个例子，考虑图 8.1 的 2R 臂，其中 $L_1 = L_2 = m_1 = m_2 = 1$。现在假设关节 1 和关节 2 中的每一个都有一个质量为 1 的电机，定子惯性为 0.005，转子惯性为 0.00125，以及齿轮比 $G$（$\eta = 1$）。齿轮比 $G = 10$ 时，质量矩阵是
+\begin{equation}
+M(\theta) = \begin{bmatrix}
+4.13 + 2\cos\theta_2 & 1.01 + \cos\theta_2 \\
+1.01 + \cos\theta_2 & 1.13
+\end{bmatrix}.
+\end{equation}
+齿轮比 $G = 100$ 时，质量矩阵是
+\begin{equation}
+M(\theta) = \begin{bmatrix}
+16.5 + 2\cos\theta_2 & 1.13 + \cos\theta_2 \\
+1.13 + \cos\theta_2 & 13.5
+\end{bmatrix}.
+\end{equation}
+非对角分量对于第二个机器人相对不太重要。第二个机器人的可用关节力矩是第一个机器人的十倍，因此，尽管质量矩阵元素增加，第二个机器人能够显著更高的加速度和末端执行器有效载荷。然而，第二个机器人的每个关节的最高速度是第一个机器人的十分之一。
+
+如果转子的表观惯性相对于连杆其余部分的惯性不可忽略，则必须修改牛顿-欧拉逆向动力学算法以考虑它。一种方法是将连杆视为由两个独立物体组成：驱动连杆的齿轮转子和连杆的其余部分，每个都有自己的质心和惯性属性（其中连杆惯性属性包括安装在该连杆上的任何电机的定子的惯性属性）。在前向迭代中，在计算转子的运动时考虑齿轮头，确定每个物体的 twist 和加速度。在后向迭代中，连杆上的 wrench 计算为两个 wrench 的和：（i）由方程 (8.53) 给出的连杆 wrench 和（ii）来自远端转子的反作用 wrench。然后投影到关节轴上的合成 wrench 是齿轮力矩 $\tau_{\text{gear}}$；将 $\tau_{\text{gear}}$ 除以齿轮比并加上转子的加速度产生的力矩，得到所需的电机力矩 $\tau_{\text{motor}}$。然后直流电机的电流指令是 $I_{\text{com}} = \tau_{\text{motor}}/(\eta k_t)$。
+
+\subsection{考虑电机惯性和齿轮的牛顿-欧拉逆向动力学算法}
+我们现在重新表述递归牛顿-欧拉逆向动力学算法，考虑如上所述的表观惯性。图 8.12 说明了设置。我们假设无质量齿轮和轴，齿轮之间以及轴和连杆之间的摩擦可以忽略。
+
+\textbf{初始化} 将坐标系 $\{0\}_L$ 附着到基座，将坐标系 $\{1\}_L$ 到 $\{n\}_L$ 附着到连杆 1 到 $n$ 的质心，将坐标系 $\{1\}_R$ 到 $\{n\}_R$ 附着到转子 1 到 $n$ 的质心。坐标系 $\{n+1\}_L$ 附着到末端执行器，假设相对于坐标系 $\{n\}_L$ 固定。定义 $M_{iR,(i-1)L}$ 和 $M_{iL,(i-1)L}$ 为当 $\theta_i = 0$ 时 $\{i-1\}_L$ 分别在 $\{i\}_R$ 和 $\{i\}_L$ 中的配置。设 $A_i$ 为在 $\{i\}_L$ 中表示的关节 $i$ 的螺旋轴。类似地，设 $R_i$ 为在 $\{i\}_R$ 中表示的转子 $i$ 的螺旋轴。设 $G_{iL}$ 为包括附着的定子惯性的连杆 $i$ 的 $6 \times 6$ 空间惯性矩阵，$G_{iR}$ 为转子 $i$ 的 $6 \times 6$ 空间惯性矩阵。电机 $i$ 的齿轮比是 $G_i$。twist $V_{0L}$ 和 $\dot{V}_{0L}$ 以及 wrench $F_{(n+1)L}$ 以与第 8.3.2 节中的 $V_0$、$\dot{V}_0$ 和 $F_{n+1}$ 相同的方式定义。
+
+\textbf{前向迭代} 给定 $\theta$、$\dot{\theta}$、$\ddot{\theta}$，对于 $i = 1$ 到 $n$ 执行：
+\begin{align}
+T_{iR,(i-1)L} &= e^{-[R_i]G_i\theta_i}M_{iR,(i-1)L}, \label{eq:8.103} \\
+T_{iL,(i-1)L} &= e^{-[A_i]\theta_i}M_{iL,(i-1)L}, \label{eq:8.104} \\
+V_{iR} &= \text{Ad}_{T_{iR,(i-1)L}}(V_{(i-1)L}) + R_i G_i \dot{\theta}_i, \label{eq:8.105} \\
+V_{iL} &= \text{Ad}_{T_{iL,(i-1)L}}(V_{(i-1)L}) + A_i \dot{\theta}_i, \label{eq:8.106} \\
+\dot{V}_{iR} &= \text{Ad}_{T_{iR,(i-1)L}}(\dot{V}_{(i-1)L}) + \text{ad}_{V_{iR}}(R_i)G_i \dot{\theta}_i + R_i G_i \ddot{\theta}_i, \label{eq:8.107} \\
+\dot{V}_{iL} &= \text{Ad}_{T_{iL,(i-1)L}}(\dot{V}_{(i-1)L}) + \text{ad}_{V_{iL}}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i. \label{eq:8.108}
+\end{align}
+
+\textbf{后向迭代} 对于 $i = n$ 到 $1$ 执行：
+\begin{align}
+F_{iL} &= \text{Ad}_{T_{(i+1)L,iL}}^T(F_{(i+1)L}) + G_{iL}\dot{V}_{iL} - \text{ad}_{V_{iL}}^T(G_{iL}V_{iL}) \nonumber \\
+&\quad + \text{Ad}_{T_{(i+1)R,iL}}^T(G_{(i+1)R}\dot{V}_{(i+1)R} - \text{ad}_{V_{(i+1)R}}^T(G_{(i+1)R}V_{(i+1)R})), \label{eq:8.109} \\
+\tau_{i,\text{gear}} &= A_i^T F_{iL}, \label{eq:8.110} \\
+\tau_{i,\text{motor}} &= \frac{\tau_{i,\text{gear}}}{G_i} + R_i^T(G_{iR}\dot{V}_{iR} - \text{ad}_{V_{iR}}^T(G_{iR}V_{iR})). \label{eq:8.111}
+\end{align}
+在后向迭代阶段，在后向迭代的第一步中出现的量 $F_{(n+1)L}$ 被视为施加到末端执行器的外部 wrench（在 $\{n+1\}_L$ 坐标系中表示），$G_{(n+1)R}$ 设置为零；$F_{iL}$ 表示通过电机 $i$ 齿轮头施加到连杆 $i$ 的 wrench（在 $\{i_L\}$ 坐标系中表示）；$\tau_{i,\text{gear}}$ 是在电机 $i$ 齿轮头产生的力矩；$\tau_{i,\text{motor}}$ 是转子 $i$ 处的力矩。
+
+注意，如果没有齿轮，则不需要对原始牛顿-欧拉逆向动力学算法进行修改；定子附着到一个连杆，转子附着到另一个连杆。在每个轴上都有一个电机且没有齿轮头的机器人有时称为直接驱动机器人。直接驱动机器人具有低摩擦，但它们的使用有限，因为通常电机必须大而重才能产生适当的力矩。
+
+不需要对动力学的拉格朗日方法进行修改来处理齿轮电机，前提是我们能够正确表示更快旋转的转子的动能。
+
+\subsection{摩擦}
+拉格朗日和牛顿-欧拉动力学不考虑关节处的摩擦，但齿轮头和轴承中的摩擦力和力矩可能是显著的。摩擦是一个复杂的现象，是大量当前研究的主题；任何摩擦模型都是捕获接触微力学平均行为的粗略尝试。
+
+摩擦模型通常包括静摩擦项和速度相关的粘性摩擦项。静摩擦项的存在意味着需要非零力矩来使关节开始移动。粘性摩擦项表明摩擦力矩的量随着关节速度的增加而增加。有关速度相关摩擦模型的一些示例，请参见图 8.13。
+
+其他因素可能对关节处的摩擦有贡献，包括关节轴承的负载、关节静止的时间、温度等。齿轮头中的摩擦通常随着齿轮比 $G$ 的增加而增加。
+
+\subsection{关节和连杆的柔性}
+实际上，机器人的关节和连杆可能表现出一些柔性。例如，谐波驱动齿轮头的柔性花键元件通过具有一定柔性来实现基本上零间隙。因此，具有谐波驱动齿轮的关节模型可以包括电机的转子和齿轮头附着的连杆之间的相对刚性的扭转弹簧。
+
+类似地，连杆本身不是无限刚性的。它们的有限刚性表现为沿连杆的振动。
+
+柔性关节和连杆为机器人的动力学引入了额外的状态，显著复杂化了动力学和控制。虽然许多机器人被设计为刚性的，以最小化这些复杂性，但在某些情况下，由于创建刚性所需的额外连杆质量，这是不切实际的。
+
+\section{总结}
+\begin{itemize}
+\item 给定一组广义坐标 $\theta$ 和广义力 $\tau$，欧拉-拉格朗日方程可以写成
+\begin{equation}
+\tau = \frac{d}{dt}\frac{\partial L}{\partial \dot{\theta}} - \frac{\partial L}{\partial \theta},
+\end{equation}
+其中 $L(\theta, \dot{\theta}) = K(\theta, \dot{\theta}) - P(\theta)$，$K$ 是机器人的动能，$P$ 是机器人的势能。
+
+\item 机器人的运动方程可以写成以下等价形式：
+\begin{align}
+\tau &= M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \\
+&= M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) \\
+&= M(\theta)\ddot{\theta} + \dot{\theta}^T \Gamma(\theta)\dot{\theta} + g(\theta) \\
+&= M(\theta)\ddot{\theta} + C(\theta, \dot{\theta})\dot{\theta} + g(\theta),
+\end{align}
+其中 $M(\theta)$ 是 $n \times n$ 对称正定质量矩阵，$h(\theta, \dot{\theta})$ 是由于重力和二次速度项的广义力的和，$c(\theta, \dot{\theta})$ 是二次速度力，$g(\theta)$ 是重力，$\Gamma(\theta)$ 是从 $M(\theta)$ 关于 $\theta$ 的偏导数获得的第一类克里斯托费尔符号的 $n \times n \times n$ 矩阵，$C(\theta, \dot{\theta})$ 是 $n \times n$ 科里奥利矩阵，其 $(i, j)$ 元素由下式给出：
+\begin{equation}
+c_{ij}(\theta, \dot{\theta}) = \sum_{k=1}^{n} \Gamma_{ijk}(\theta)\dot{\theta}_k.
+\end{equation}
+如果机器人的末端执行器对环境施加 wrench $F_{\text{tip}}$，则项 $J^T(\theta)F_{\text{tip}}$ 应该添加到机器人动力学方程的右侧。
+
+\item 刚体的对称正定旋转惯性矩阵是
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix},
+\end{equation}
+其中（详细积分表达式见原文）。
+
+\item 如果 $I_b$ 在质心坐标系 $\{b\}$ 中定义，其轴与惯性的主轴对齐，则 $I_b$ 是对角的。
+
+\item 如果 $\{b\}$ 在质心但其轴不与惯性的主轴对齐，总是存在由旋转矩阵 $R_{bc}$ 定义的旋转坐标系 $\{c\}$，使得 $I_c = R_{bc}^T I_b R_{bc}$ 是对角的。
+
+\item 如果 $I_b$ 在质心坐标系 $\{b\}$ 中定义，则 $I_q$，在点 $q \in \mathbb{R}^3$ 处与 $\{b\}$ 对齐但从 $\{b\}$ 的原点位移的坐标系 $\{q\}$ 中的惯性，是
+\begin{equation}
+I_q = I_b + m(q^T qI - qq^T).
+\end{equation}
+
+\item 在质心坐标系 $\{b\}$ 中表示的空间惯性矩阵 $G_b$ 定义为 $6 \times 6$ 矩阵
+\begin{equation}
+G_b = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix}.
+\end{equation}
+在相对于 $\{b\}$ 的配置 $T_{ba}$ 处的坐标系 $\{a\}$ 中，空间惯性矩阵是
+\begin{equation}
+G_a = [\text{Ad}_{T_{ba}}]^T G_b [\text{Ad}_{T_{ba}}].
+\end{equation}
+
+\item 两个 twist $V_1$ 和 $V_2$ 的李括号是
+\begin{equation}
+\text{ad}_{V_1}(V_2) = [\text{ad}_{V_1}]V_2,
+\end{equation}
+其中（详细定义见原文）。
+
+\item 单个刚体刚体动力学的 twist-wrench 公式是
+\begin{equation}
+F_b = G_b \dot{V}_b - [\text{ad}_{V_b}]^T G_b V_b.
+\end{equation}
+如果 $F$、$V$ 和 $G$ 都在同一坐标系中表示，则方程具有相同的形式，无论坐标系如何。
+
+\item 刚体的动能是 $\frac{1}{2}V_b^T G_b V_b$，开链机器人的动能是 $\frac{1}{2}\dot{\theta}^T M(\theta)\dot{\theta}$。
+
+\item 前向-后向牛顿-欧拉逆向动力学算法如下（详细算法见原文）。
+
+\item 设 $J_i^b(\theta)$ 是将 $\dot{\theta}$ 与连杆 $i$ 的质心坐标系 $\{i\}$ 中的身体 twist $V_i$ 相关的雅可比。那么操作器的质量矩阵 $M(\theta)$ 可以表示为
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta).
+\end{equation}
+
+\item 正向动力学问题涉及求解
+\begin{equation}
+M(\theta)\ddot{\theta} = \tau(t) - h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{tip}}
+\end{equation}
+得到 $\ddot{\theta}$，使用任何有效的 $Ax = b$ 形式方程的求解器。
+
+\item 机器人的动力学 $M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})$ 可以在任务空间中表示为
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V),
+\end{equation}
+其中 $F$ 是施加到末端执行器的 wrench，$V$ 是末端执行器的 twist，$F$、$V$ 和雅可比 $J(\theta)$ 都在同一坐标系中定义。任务空间质量矩阵 $\Lambda(\theta)$ 以及重力和二次速度力 $\eta(\theta, V)$ 是
+\begin{align}
+\Lambda(\theta) &= J^{-T}M(\theta)J^{-1}, \\
+\eta(\theta, V) &= J^{-T}h(\theta, J^{-1}V) - \Lambda(\theta)\dot{J}J^{-1}V.
+\end{align}
+
+\item 定义两个秩为 $n-k$ 的 $n \times n$ 投影矩阵
+\begin{align}
+P(\theta) &= I - A^T(AM^{-1}A^T)^{-1}AM^{-1}, \\
+P_{\ddot{\theta}}(\theta) &= M^{-1}PM = I - M^{-1}A^T(AM^{-1}A^T)^{-1}A,
+\end{align}
+对应于作用在机器人上的 $k$ 个普法夫约束 $A(\theta)\dot{\theta} = 0$，$A \in \mathbb{R}^{k \times n}$。那么 $n+k$ 个约束运动方程
+\begin{align}
+\tau &= M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) + A^T(\theta)\lambda, \\
+A(\theta)\dot{\theta} &= 0
+\end{align}
+可以通过消除拉格朗日乘数 $\lambda$ 简化为以下等价形式：
+\begin{align}
+P\tau &= P(M\ddot{\theta} + h), \\
+P_{\ddot{\theta}}\ddot{\theta} &= P_{\ddot{\theta}}M^{-1}(\tau - h).
+\end{align}
+矩阵 $P$ 投影掉作用在约束上而不对机器人做功的关节力-力矩分量，矩阵 $P_{\ddot{\theta}}$ 投影掉不满足约束的加速度分量。
+
+\item 具有齿轮比 $G$ 的理想齿轮头（效率为 100\%）将电机输出的力矩乘以因子 $G$，将速度除以因子 $G$，保持机械功率不变。电机的转子关于其旋转轴的惯性，当它出现在齿轮头的输出时，是 $G^2 I_{\text{rotor}}$。
+\end{itemize}
+
+\section{软件}
+与本章相关的软件函数如下。
+
+\texttt{adV = ad(V)} 计算 $[\text{ad}_V]$。
+
+\texttt{taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist,Glist,Slist)} 使用牛顿-欧拉逆向动力学计算所需的关节力-力矩的 $n$ 向量 $\tau$，给定 $\theta$、$\dot{\theta}$、$\ddot{\theta}$、$g$、$F_{\text{tip}}$、指定机器人处于零位置时连杆 $\{i\}$ 的质心坐标系相对于 $\{i-1\}$ 的配置的变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{M = MassMatrix(thetalist,Mlist,Glist,Slist)} 计算质量矩阵 $M(\theta)$，给定关节配置 $\theta$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{c = VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)} 计算 $c(\theta, \dot{\theta})$，给定关节配置 $\theta$、关节速度 $\dot{\theta}$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{grav = GravityForces(thetalist,g,Mlist,Glist,Slist)} 计算 $g(\theta)$，给定关节配置 $\theta$、重力向量 $g$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)} 计算 $J^T(\theta)F_{\text{tip}}$，给定关节配置 $\theta$、由末端执行器施加的 wrench $F_{\text{tip}}$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{ddthetalist = ForwardDynamics(thetalist,dthetalist,taulist,g,Ftip,Mlist,Glist,Slist)} 计算 $\ddot{\theta}$，给定关节配置 $\theta$、关节速度 $\dot{\theta}$、关节力-力矩 $\tau$、重力向量 $g$、由末端执行器施加的 wrench $F_{\text{tip}}$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。
+
+\texttt{[thetalistNext,dthetalistNext] = EulerStep(thetalist,dthetalist,ddthetalist,dt)} 计算 $\{\theta(t + \delta t), \dot{\theta}(t + \delta t)\}$ 的一阶欧拉近似，给定关节配置 $\theta(t)$、关节速度 $\dot{\theta}(t)$、关节加速度 $\ddot{\theta}(t)$ 和时间步长 $\delta t$。
+
+\texttt{taumat = InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g,Ftipmat,Mlist,Glist,Slist)} 变量 \texttt{thetamat} 是机器人关节变量 $\theta$ 的 $N \times n$ 矩阵，其中第 $i$ 行对应于时间 $t = (i-1)\delta t$ 时的关节变量 $\theta(t)$ 的 $n$ 向量，其中 $\delta t$ 是时间步长。变量 \texttt{dthetamat}、\texttt{ddthetamat} 和 \texttt{Ftipmat} 类似地表示 $\dot{\theta}$、$\ddot{\theta}$ 和 $F_{\text{tip}}$ 作为时间的函数。其他输入包括重力向量 $g$、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表，以及在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表。此函数计算表示生成由 $\theta(t)$ 和 $F_{\text{tip}}(t)$ 指定的轨迹所需的关节力-力矩 $\tau(t)$ 的 $N \times n$ 矩阵 \texttt{taumat}。注意不需要指定 $\delta t$。速度 $\dot{\theta}(t)$ 和加速度 $\ddot{\theta}(t)$ 应该与 $\theta(t)$ 一致。
+
+\texttt{[thetamat,dthetamat] = ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat,Mlist,Glist,Slist,dt,intRes)} 此函数使用欧拉积分数值积分机器人的运动方程。输出是 $N \times n$ 矩阵 \texttt{thetamat} 和 \texttt{dthetamat}，其中第 $i$ 行分别对应于 $n$ 向量 $\theta((i-1)\delta t)$ 和 $\dot{\theta}((i-1)\delta t)$。输入是初始状态 $\theta(0)$、$\dot{\theta}(0)$、关节力或力矩 $\tau(t)$ 的 $N \times n$ 矩阵、重力向量 $g$、末端执行器 wrench $F_{\text{tip}}(t)$ 的 $N \times n$ 矩阵、变换 $M_{i-1,i}$ 的列表、连杆空间惯性矩阵 $G_i$ 的列表、在基座坐标系中表示的关节螺旋轴 $S_i$ 的列表、时间步长 $\delta t$，以及在每个时间步长期间要采取的积分步数（正整数）。
+
+\section{练习}
+
+\textbf{练习 8.1} 推导图 8.5 中给出的公式：
+\begin{enumerate}[(a)]
+\item 矩形平行六面体；
+\item 圆柱体；
+\item 椭球。
+\end{enumerate}
+
+\textbf{练习 8.2} 考虑一个由连接圆柱体两端的两个实心球组成的铸铁哑铃。哑铃的密度为 7500 kg/m$^3$。圆柱体的直径为 4 cm，长度为 20 cm。每个球的直径为 20 cm。
+\begin{enumerate}[(a)]
+\item 在质心处轴与哑铃的惯性主轴对齐的坐标系 $\{b\}$ 中，找到近似旋转惯性矩阵 $I_b$。
+\item 写出空间惯性矩阵 $G_b$。
+\end{enumerate}
+
+\textbf{练习 8.3} 任意坐标系中的刚体动力学。
+\begin{enumerate}[(a)]
+\item 证明方程 (8.42) 是施泰纳定理的推广。
+\item 推导方程 (8.43)。
+\end{enumerate}
+
+\textbf{练习 8.4} 图 8.14 的 2R 开链机器人，称为旋转倒立摆或古田摆，显示在其零位置。假设每个连杆的质量集中在末端并忽略其厚度，机器人可以建模为右图所示。假设 $m_1 = m_2 = 2$，$L_1 = L_2 = 1$，$g = 10$，连杆惯性 $I_1$ 和 $I_2$（在它们各自的连杆坐标系 $\{b_1\}$ 和 $\{b_2\}$ 中表示）是
+\begin{equation}
+I_1 = \begin{bmatrix} 0 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 4 \end{bmatrix}, \quad I_2 = \begin{bmatrix} 4 & 0 & 0 \\ 0 & 4 & 0 \\ 0 & 0 & 0 \end{bmatrix}.
+\end{equation}
+\begin{enumerate}[(a)]
+\item 推导动力学方程并确定当 $\theta_1 = \theta_2 = \pi/4$ 且关节速度和加速度都为零时的输入力矩 $\tau_1$ 和 $\tau_2$。
+\item 当 $\theta_1 = \theta_2 = \pi/4$ 时，绘制质量矩阵 $M(\theta)$ 的力矩椭球。
+\end{enumerate}
+
+\textbf{练习 8.5} 证明以下李括号恒等式（称为雅可比恒等式）对于任意 twist $V_1$、$V_2$、$V_3$：
+\begin{equation}
+\text{ad}_{V_1}(\text{ad}_{V_2}(V_3)) + \text{ad}_{V_3}(\text{ad}_{V_1}(V_2)) + \text{ad}_{V_2}(\text{ad}_{V_3}(V_1)) = 0.
+\end{equation}
+
+\textbf{练习 8.6} 正向运动学雅可比的时间导数 $\dot{J}(\theta)$ 的评估在牛顿-欧拉逆向动力学算法中框架加速度 $\dot{V}_i$ 的计算以及任务空间动力学的公式中都需要。设 $J_i(\theta)$ 表示 $J(\theta)$ 的第 $i$ 列，我们有
+\begin{equation}
+\frac{d}{dt}J_i(\theta) = \sum_{j=1}^{n}\frac{\partial J_i}{\partial \theta_j}\dot{\theta}_j.
+\end{equation}
+\begin{enumerate}[(a)]
+\item 假设 $J(\theta)$ 是空间雅可比。证明
+\begin{equation}
+\frac{\partial J_i}{\partial \theta_j} = \begin{cases}
+\text{ad}_{J_i}(J_j) & \text{对于 } i > j, \\
+0 & \text{对于 } i \leq j.
+\end{cases}
+\end{equation}
+\item 现在假设 $J(\theta)$ 是身体雅可比。证明
+\begin{equation}
+\frac{\partial J_i}{\partial \theta_j} = \begin{cases}
+\text{ad}_{J_i}(J_j) & \text{对于 } i < j, \\
+0 & \text{对于 } i \geq j.
+\end{cases}
+\end{equation}
+\end{enumerate}
+
+\textbf{练习 8.7} 证明质量矩阵的时间导数 $\dot{M}(\theta)$ 可以显式地写成
+\begin{equation}
+\dot{M} = A^T L^T \Gamma^T [\text{ad}_{A\dot{\theta}}]^T L^T GLA + A^T L^T GL[\text{ad}_{A\dot{\theta}}]\Gamma A,
+\end{equation}
+矩阵如封闭形式动力学公式中定义。
+
+\textbf{练习 8.8} 基于点质量和雅可比，直观地解释图 8.4 中末端执行器力椭球的形状。
+
+\textbf{练习 8.9} 考虑一个转子惯性为 $I_{\text{rotor}}$ 的电机，通过齿轮比为 $G$ 的齿轮头连接到关于旋转轴具有标量惯性 $I_{\text{link}}$ 的负载。负载和电机被称为惯性匹配，如果对于电机处的任何给定力矩 $\tau_m$，负载的加速度最大化。负载的加速度可以写成
+\begin{equation}
+\ddot{\theta} = \frac{G\tau_m}{I_{\text{link}} + G^2 I_{\text{rotor}}}.
+\end{equation}
+通过求解 $d\ddot{\theta}/dG = 0$ 来求解惯性匹配的齿轮比 $\sqrt{I_{\text{link}}/I_{\text{rotor}}}$。
+
+\textbf{练习 8.10} 给出重新排列方程 (8.98) 得到方程 (8.100) 的步骤。记住 $P(\theta)$ 不是满秩的，不能求逆。
+
+\textbf{练习 8.11} 编程一个函数，使用牛顿-欧拉逆向动力学高效地计算 $h(\theta, \dot{\theta}) = c(\theta, \dot{\theta}) + g(\theta)$。
+
+\textbf{练习 8.12} 给出将机器人 URDF 文件中的关节和连杆描述转换为数据 \texttt{Mlist}、\texttt{Glist} 和 \texttt{Slist} 的方程，适合与牛顿-欧拉算法 \texttt{InverseDynamicsTrajectory} 一起使用。
+
+\textbf{练习 8.13} $M(\theta)$ 的高效评估。
+\begin{enumerate}[(a)]
+\item 概念上开发一个使用方程 (8.57) 确定质量矩阵 $M(\theta)$ 的计算高效算法。
+\item 实现这个算法。
+\end{enumerate}
+
+\textbf{练习 8.14} 函数 \texttt{InverseDynamicsTrajectory} 要求用户不仅输入关节变量 \texttt{thetamat} 的时间序列，还输入关节速度 \texttt{dthetamat} 和加速度 \texttt{ddthetamat} 的时间序列。相反，该函数可以使用数值微分来近似找到每个时间步的关节速度和加速度，仅使用 \texttt{thetamat}。编写一个不需要用户输入 \texttt{dthetamat} 和 \texttt{ddthetamat} 的替代 \texttt{InverseDynamicsTrajectory} 函数。验证它产生类似的结果。
+
+\textbf{练习 8.15} UR5 机器人的动力学。
+\begin{enumerate}[(a)]
+\item 写出 UR5 六个连杆的空间惯性矩阵 $G_i$，给定在第 4.2 节的 URDF 中定义的质心坐标系以及质量和惯性属性。
+\item 模拟 UR5 在重力加速度 $g = 9.81$ m/s$^2$ 在 $-\hat{z}_s$ 方向作用下的下落。机器人从其零配置开始，施加零关节力矩。模拟运动三秒，每秒至少 100 个积分步。（忽略摩擦和齿轮转子的影响。）
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,366 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{动能公式中$V_b^T$的展开：$\frac{1}{2}V_b^T G_b V_b$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：动能公式
+\begin{equation}
+K = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b = \frac{1}{2}V_b^T G_b V_b
+\label{eq:kinetic_energy}
+\end{equation}
+
+中的$V_b^T$是什么？需要详细展开。
+
+\section{符号定义}
+
+\subsection{Body Twist $V_b$}
+
+\textbf{定义}：Body twist $V_b$是一个6维向量，包含角速度和线速度：
+\begin{equation}
+V_b = \begin{bmatrix} \omega_b \\ v_b \end{bmatrix} \in \mathbb{R}^6
+\label{eq:Vb_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_b \in \mathbb{R}^3$：角速度（在体坐标系$\{b\}$中表示）
+\item $v_b \in \mathbb{R}^3$：线速度（在体坐标系$\{b\}$中表示）
+\end{itemize}
+
+\subsection{$V_b^T$的展开}
+
+\textbf{转置}：
+\begin{equation}
+V_b^T = \begin{bmatrix} \omega_b \\ v_b \end{bmatrix}^T = \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} \in \mathbb{R}^{1 \times 6}
+\label{eq:Vb_transpose}
+\end{equation}
+
+\textbf{详细展开}：
+
+设$\omega_b = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}$，$v_b = \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix}$，则：
+\begin{equation}
+V_b^T = \begin{bmatrix} \omega_x & \omega_y & \omega_z & v_x & v_y & v_z \end{bmatrix}
+\end{equation}
+
+\subsection{空间惯性矩阵$G_b$}
+
+\textbf{定义}：
+\begin{equation}
+G_b = \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\label{eq:Gb_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $I_b \in \mathbb{R}^{3 \times 3}$：转动惯量矩阵
+\item $m \in \mathbb{R}$：刚体的质量
+\item $I \in \mathbb{R}^{3 \times 3}$：$3 \times 3$单位矩阵
+\item $0 \in \mathbb{R}^{3 \times 3}$：$3 \times 3$零矩阵
+\end{itemize}
+
+\textbf{详细展开}：
+\begin{equation}
+G_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} & 0 & 0 & 0 \\
+I_{xy} & I_{yy} & I_{yz} & 0 & 0 & 0 \\
+I_{xz} & I_{yz} & I_{zz} & 0 & 0 & 0 \\
+0 & 0 & 0 & m & 0 & 0 \\
+0 & 0 & 0 & 0 & m & 0 \\
+0 & 0 & 0 & 0 & 0 & m
+\end{bmatrix}
+\end{equation}
+
+\section{动能公式的展开}
+
+\subsection{方法1：直接展开$V_b^T G_b V_b$}
+
+\textbf{步骤1}：计算$G_b V_b$
+
+\begin{align}
+G_b V_b &= \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix} \begin{bmatrix} \omega_b \\ v_b \end{bmatrix} \\
+&= \begin{bmatrix} I_b \omega_b \\ mI v_b \end{bmatrix} \\
+&= \begin{bmatrix} I_b \omega_b \\ mv_b \end{bmatrix}
+\label{eq:Gb_Vb}
+\end{align}
+
+\textbf{步骤2}：计算$V_b^T (G_b V_b)$
+
+\begin{align}
+V_b^T G_b V_b &= \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} \begin{bmatrix} I_b \omega_b \\ mv_b \end{bmatrix} \\
+&= \omega_b^T I_b \omega_b + v_b^T (mv_b) \\
+&= \omega_b^T I_b \omega_b + m v_b^T v_b
+\label{eq:VbT_Gb_Vb}
+\end{align}
+
+\textbf{步骤3}：动能公式
+
+\begin{equation}
+K = \frac{1}{2}V_b^T G_b V_b = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b
+\end{equation}
+
+\textbf{证毕}。
+
+\subsection{方法2：分块矩阵乘法}
+
+\textbf{使用分块矩阵}：
+
+\begin{align}
+V_b^T G_b V_b &= \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} \begin{bmatrix} I_b & 0 \\ 0 & mI \end{bmatrix} \begin{bmatrix} \omega_b \\ v_b \end{bmatrix} \\
+&= \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} \begin{bmatrix} I_b \omega_b \\ mI v_b \end{bmatrix} \\
+&= \omega_b^T I_b \omega_b + v_b^T (mI) v_b \\
+&= \omega_b^T I_b \omega_b + m v_b^T v_b
+\end{align}
+
+\subsection{方法3：逐元素展开}
+
+\textbf{详细展开每个分量}：
+
+\textbf{第一部分}：$\omega_b^T I_b \omega_b$
+
+设$\omega_b = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}$，$I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}$，则：
+
+\begin{align}
+\omega_b^T I_b \omega_b &= \begin{bmatrix} \omega_x & \omega_y & \omega_z \end{bmatrix} \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix} \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \end{bmatrix} \\
+&= \begin{bmatrix} \omega_x & \omega_y & \omega_z \end{bmatrix} \begin{bmatrix}
+I_{xx}\omega_x + I_{xy}\omega_y + I_{xz}\omega_z \\
+I_{xy}\omega_x + I_{yy}\omega_y + I_{yz}\omega_z \\
+I_{xz}\omega_x + I_{yz}\omega_y + I_{zz}\omega_z
+\end{bmatrix} \\
+&= I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2 + 2I_{xy}\omega_x\omega_y + 2I_{xz}\omega_x\omega_z + 2I_{yz}\omega_y\omega_z
+\end{align}
+
+\textbf{第二部分}：$m v_b^T v_b$
+
+设$v_b = \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix}$，则：
+
+\begin{align}
+m v_b^T v_b &= m \begin{bmatrix} v_x & v_y & v_z \end{bmatrix} \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix} \\
+&= m(v_x^2 + v_y^2 + v_z^2) \\
+&= m \|v_b\|^2
+\end{align}
+
+\textbf{总动能}：
+
+\begin{equation}
+K = \frac{1}{2}\left[I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2 + 2I_{xy}\omega_x\omega_y + 2I_{xz}\omega_x\omega_z + 2I_{yz}\omega_y\omega_z + m(v_x^2 + v_y^2 + v_z^2)\right]
+\end{equation}
+
+\section{物理意义}
+
+\subsection{旋转动能}
+
+\textbf{第一项}：$\frac{1}{2}\omega_b^T I_b \omega_b$
+
+这是刚体的\textbf{旋转动能}，表示由于旋转运动而具有的能量。
+
+\textbf{展开形式}：
+\begin{equation}
+K_{\text{rot}} = \frac{1}{2}(I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2 + 2I_{xy}\omega_x\omega_y + 2I_{xz}\omega_x\omega_z + 2I_{yz}\omega_y\omega_z)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 对角项（$I_{xx}\omega_x^2$等）：绕各轴的旋转动能
+\item 交叉项（$2I_{xy}\omega_x\omega_y$等）：由于惯性积产生的耦合项
+\end{itemize}
+
+\subsection{平移动能}
+
+\textbf{第二项}：$\frac{1}{2}mv_b^T v_b$
+
+这是刚体的\textbf{平移动能}，表示由于平移运动而具有的能量。
+
+\textbf{展开形式}：
+\begin{equation}
+K_{\text{trans}} = \frac{1}{2}m(v_x^2 + v_y^2 + v_z^2) = \frac{1}{2}m\|v_b\|^2
+\end{equation}
+
+\textbf{物理意义}：这是质心的动能，等于$\frac{1}{2}mv^2$，其中$v = \|v_b\|$是质心速度的大小。
+
+\subsection{总动能}
+
+\textbf{总动能}：
+\begin{equation}
+K = K_{\text{rot}} + K_{\text{trans}} = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b
+\end{equation}
+
+\textbf{物理意义}：刚体的总动能等于旋转动能和平移动能之和。
+
+\section{矩阵乘法的详细步骤}
+
+\subsection{步骤1：$V_b^T$的定义}
+
+\begin{equation}
+V_b^T = \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} = \begin{bmatrix} \omega_x & \omega_y & \omega_z & v_x & v_y & v_z \end{bmatrix}
+\end{equation}
+
+这是一个$1 \times 6$的行向量。
+
+\subsection{步骤2：$G_b$的定义}
+
+\begin{equation}
+G_b = \begin{bmatrix}
+I_b & 0 \\
+0 & mI
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} & 0 & 0 & 0 \\
+I_{xy} & I_{yy} & I_{yz} & 0 & 0 & 0 \\
+I_{xz} & I_{yz} & I_{zz} & 0 & 0 & 0 \\
+0 & 0 & 0 & m & 0 & 0 \\
+0 & 0 & 0 & 0 & m & 0 \\
+0 & 0 & 0 & 0 & 0 & m
+\end{bmatrix}
+\end{equation}
+
+这是一个$6 \times 6$的矩阵。
+
+\subsection{步骤3：$G_b V_b$的计算}
+
+\begin{align}
+G_b V_b &= \begin{bmatrix}
+I_b & 0 \\
+0 & mI
+\end{bmatrix} \begin{bmatrix} \omega_b \\ v_b \end{bmatrix} \\
+&= \begin{bmatrix}
+I_b \omega_b \\
+mI v_b
+\end{bmatrix} \\
+&= \begin{bmatrix}
+I_{xx}\omega_x + I_{xy}\omega_y + I_{xz}\omega_z \\
+I_{xy}\omega_x + I_{yy}\omega_y + I_{yz}\omega_z \\
+I_{xz}\omega_x + I_{yz}\omega_y + I_{zz}\omega_z \\
+mv_x \\
+mv_y \\
+mv_z
+\end{bmatrix}
+\end{align}
+
+这是一个$6 \times 1$的列向量。
+
+\subsection{步骤4：$V_b^T (G_b V_b)$的计算}
+
+\begin{align}
+V_b^T G_b V_b &= \begin{bmatrix} \omega_x & \omega_y & \omega_z & v_x & v_y & v_z \end{bmatrix} \begin{bmatrix}
+I_{xx}\omega_x + I_{xy}\omega_y + I_{xz}\omega_z \\
+I_{xy}\omega_x + I_{yy}\omega_y + I_{yz}\omega_z \\
+I_{xz}\omega_x + I_{yz}\omega_y + I_{zz}\omega_z \\
+mv_x \\
+mv_y \\
+mv_z
+\end{bmatrix} \\
+&= \omega_x(I_{xx}\omega_x + I_{xy}\omega_y + I_{xz}\omega_z) \\
+&\quad + \omega_y(I_{xy}\omega_x + I_{yy}\omega_y + I_{yz}\omega_z) \\
+&\quad + \omega_z(I_{xz}\omega_x + I_{yz}\omega_y + I_{zz}\omega_z) \\
+&\quad + v_x(mv_x) + v_y(mv_y) + v_z(mv_z) \\
+&= I_{xx}\omega_x^2 + I_{xy}\omega_x\omega_y + I_{xz}\omega_x\omega_z \\
+&\quad + I_{xy}\omega_x\omega_y + I_{yy}\omega_y^2 + I_{yz}\omega_y\omega_z \\
+&\quad + I_{xz}\omega_x\omega_z + I_{yz}\omega_y\omega_z + I_{zz}\omega_z^2 \\
+&\quad + m(v_x^2 + v_y^2 + v_z^2) \\
+&= I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2 \\
+&\quad + 2I_{xy}\omega_x\omega_y + 2I_{xz}\omega_x\omega_z + 2I_{yz}\omega_y\omega_z \\
+&\quad + m(v_x^2 + v_y^2 + v_z^2)
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+K = \frac{1}{2}V_b^T G_b V_b = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b
+\end{equation}
+
+\section{特殊情况}
+
+\subsection{主惯性轴情况}
+
+如果坐标轴与主惯性轴对齐，则$I_b$是对角矩阵：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+\textbf{旋转动能简化为}：
+\begin{equation}
+K_{\text{rot}} = \frac{1}{2}(I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2)
+\end{equation}
+
+没有交叉项。
+
+\subsection{纯旋转情况}
+
+如果$v_b = 0$（只有旋转，没有平移），则：
+\begin{equation}
+K = \frac{1}{2}\omega_b^T I_b \omega_b
+\end{equation}
+
+\subsection{纯平移情况}
+
+如果$\omega_b = 0$（只有平移，没有旋转），则：
+\begin{equation}
+K = \frac{1}{2}mv_b^T v_b = \frac{1}{2}m\|v_b\|^2
+\end{equation}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{$V_b^T$的定义}：
+\begin{equation}
+V_b^T = \begin{bmatrix} \omega_b^T & v_b^T \end{bmatrix} = \begin{bmatrix} \omega_x & \omega_y & \omega_z & v_x & v_y & v_z \end{bmatrix}
+\end{equation}
+
+\item \textbf{动能公式的展开}：
+\begin{equation}
+K = \frac{1}{2}V_b^T G_b V_b = \frac{1}{2}\omega_b^T I_b \omega_b + \frac{1}{2}mv_b^T v_b
+\end{equation}
+
+\item \textbf{详细形式}：
+\begin{align}
+K &= \frac{1}{2}[I_{xx}\omega_x^2 + I_{yy}\omega_y^2 + I_{zz}\omega_z^2 \\
+&\quad + 2I_{xy}\omega_x\omega_y + 2I_{xz}\omega_x\omega_z + 2I_{yz}\omega_y\omega_z \\
+&\quad + m(v_x^2 + v_y^2 + v_z^2)]
+\end{align}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item $V_b^T$是$1 \times 6$的行向量
+\item $G_b$是$6 \times 6$的对称正定矩阵
+\item $V_b^T G_b V_b$是标量（动能）
+\item 动能由旋转动能和平移动能两部分组成
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学分析
+\item 机器人能量计算
+\item 航天器姿态动力学
+\item 机械系统能量分析
+\end{itemize}
+
+\end{document}
+

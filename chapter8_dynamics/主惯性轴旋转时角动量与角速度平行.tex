@@ -1,0 +1,419 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{绕主惯性轴旋转时，角动量和角速度平行的证明}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：证明当刚体绕主惯性轴旋转时，角动量$\bm{L}$和角速度$\bm{\omega}$平行。
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $\bm{L} \in \mathbb{R}^3$：刚体的角动量向量
+\item $\bm{\omega} \in \mathbb{R}^3$：刚体的角速度向量
+\item $I_b \in \mathbb{R}^{3 \times 3}$：转动惯量矩阵（在体坐标系$\{b\}$中）
+\item $\lambda_i$：转动惯量矩阵的特征值（主转动惯量）
+\item $\bm{v}_i$：转动惯量矩阵的特征向量（主惯性轴方向）
+\end{itemize}
+
+\section{基本关系}
+
+\subsection{角动量与角速度的关系}
+
+刚体的角动量定义为：
+\begin{equation}
+\bm{L} = I_b \bm{\omega}
+\label{eq:angular_momentum}
+\end{equation}
+
+\textbf{展开形式}：
+\begin{equation}
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix} \begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+\end{equation}
+
+\subsection{主惯性轴的定义}
+
+\textbf{主惯性轴}（principal axes of inertia）是使得转动惯量矩阵对角化的坐标轴方向。
+
+如果坐标轴与主惯性轴对齐，则转动惯量矩阵为对角矩阵：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\label{eq:diagonal_inertia}
+\end{equation}
+
+此时所有惯性积为零：$I_{xy} = I_{xz} = I_{yz} = 0$。
+
+\subsection{主惯性轴与特征向量的关系}
+
+主惯性轴是转动惯量矩阵的特征向量方向：
+\begin{equation}
+I_b \bm{v}_i = \lambda_i \bm{v}_i, \quad i = 1, 2, 3
+\label{eq:eigenvalue_equation}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\lambda_i$：特征值（主转动惯量）
+\item $\bm{v}_i$：特征向量（主惯性轴方向，单位向量）
+\end{itemize}
+
+\section{主要证明}
+
+\subsection{定理陈述}
+
+\textbf{定理}：如果角速度$\bm{\omega}$沿着主惯性轴方向，即$\bm{\omega} = \omega \bm{v}_i$（其中$\omega$是标量，$\bm{v}_i$是主惯性轴方向的单位向量），那么角动量$\bm{L} = I_b \bm{\omega}$与角速度$\bm{\omega}$平行。
+
+\subsection{证明方法1：使用特征值方程}
+
+\textbf{步骤1}：假设角速度沿着第$i$个主惯性轴方向
+
+设$\bm{\omega} = \omega \bm{v}_i$，其中：
+\begin{itemize}
+\item $\omega$：角速度的大小（标量）
+\item $\bm{v}_i$：第$i$个主惯性轴方向的单位向量
+\end{itemize}
+
+\textbf{步骤2}：计算角动量
+
+\begin{align}
+\bm{L} &= I_b \bm{\omega} \\
+&= I_b (\omega \bm{v}_i) \\
+&= \omega (I_b \bm{v}_i)
+\end{align}
+
+\textbf{步骤3}：使用特征值方程
+
+由于$\bm{v}_i$是$I_b$的特征向量，满足特征值方程：
+\begin{equation}
+I_b \bm{v}_i = \lambda_i \bm{v}_i
+\end{equation}
+
+\textbf{步骤4}：代入并完成证明
+
+\begin{align}
+\bm{L} &= \omega (I_b \bm{v}_i) \\
+&= \omega (\lambda_i \bm{v}_i) \\
+&= \lambda_i (\omega \bm{v}_i) \\
+&= \lambda_i \bm{\omega}
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+\bm{L} = \lambda_i \bm{\omega}
+\end{equation}
+
+这说明角动量$\bm{L}$是角速度$\bm{\omega}$的标量倍数，因此两者平行。
+
+\textbf{证毕}。
+
+\subsection{证明方法2：使用对角矩阵形式}
+
+\textbf{步骤1}：假设坐标系与主惯性轴对齐
+
+如果坐标轴与主惯性轴对齐，转动惯量矩阵为对角矩阵：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+\textbf{步骤2}：假设角速度沿着$x$轴方向
+
+设$\bm{\omega} = \begin{bmatrix} \omega_x \\ 0 \\ 0 \end{bmatrix}$（沿着$x$轴，即第一个主惯性轴）。
+
+\textbf{步骤3}：计算角动量
+
+\begin{align}
+\bm{L} &= I_b \bm{\omega} \\
+&= \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix} \begin{bmatrix}
+\omega_x \\ 0 \\ 0
+\end{bmatrix} \\
+&= \begin{bmatrix}
+I_{xx} \omega_x \\
+0 \\
+0
+\end{bmatrix} \\
+&= I_{xx} \begin{bmatrix}
+\omega_x \\
+0 \\
+0
+\end{bmatrix} \\
+&= I_{xx} \bm{\omega}
+\end{align}
+
+\textbf{因此}：$\bm{L} = I_{xx} \bm{\omega}$，两者平行。
+
+\textbf{类似地}，如果$\bm{\omega}$沿着$y$轴或$z$轴方向，可以得到相同的结果。
+
+\textbf{证毕}。
+
+\subsection{证明方法3：使用向量平行性的定义}
+
+\textbf{定义}：两个向量$\bm{a}$和$\bm{b}$平行，当且仅当存在标量$k$使得$\bm{a} = k \bm{b}$。
+
+\textbf{步骤1}：计算角动量
+
+\begin{equation}
+\bm{L} = I_b \bm{\omega}
+\end{equation}
+
+\textbf{步骤2}：如果$\bm{\omega}$沿着主惯性轴方向
+
+设$\bm{\omega} = \omega \bm{v}_i$，其中$\bm{v}_i$是主惯性轴方向的单位向量。
+
+\textbf{步骤3}：使用特征值方程
+
+\begin{align}
+\bm{L} &= I_b (\omega \bm{v}_i) \\
+&= \omega (I_b \bm{v}_i) \\
+&= \omega (\lambda_i \bm{v}_i) \\
+&= \lambda_i \omega \bm{v}_i \\
+&= \lambda_i \bm{\omega}
+\end{align}
+
+\textbf{步骤4}：结论
+
+由于$\bm{L} = \lambda_i \bm{\omega}$，其中$\lambda_i$是标量，因此$\bm{L}$和$\bm{\omega}$平行。
+
+\textbf{证毕}。
+
+\section{逆命题}
+
+\subsection{逆命题的陈述}
+
+\textbf{逆命题}：如果角动量$\bm{L}$和角速度$\bm{\omega}$平行，那么$\bm{\omega}$沿着主惯性轴方向。
+
+\subsection{逆命题的证明}
+
+\textbf{假设}：$\bm{L} = I_b \bm{\omega}$与$\bm{\omega}$平行，即存在标量$k$使得：
+\begin{equation}
+\bm{L} = k \bm{\omega}
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+I_b \bm{\omega} = k \bm{\omega}
+\end{equation}
+
+\textbf{这正好是特征值方程}：
+\begin{equation}
+I_b \bm{\omega} = \lambda \bm{\omega}
+\end{equation}
+
+其中$\lambda = k$是特征值。
+
+\textbf{因此}：$\bm{\omega}$是$I_b$的特征向量，即$\bm{\omega}$沿着主惯性轴方向。
+
+\textbf{证毕}。
+
+\section{几何直观}
+
+\subsection{一般情况}
+
+在一般情况下，角动量$\bm{L}$和角速度$\bm{\omega}$不平行。
+
+\textbf{例子}：考虑一个细长杆，绕垂直于杆的轴旋转。
+
+如果转动惯量矩阵为：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & 0 \\
+I_{xy} & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+角速度为$\bm{\omega} = \begin{bmatrix} \omega_x \\ \omega_y \\ 0 \end{bmatrix}$，则：
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+I_{xx} \omega_x + I_{xy} \omega_y \\
+I_{xy} \omega_x + I_{yy} \omega_y \\
+0
+\end{bmatrix}
+\end{equation}
+
+除非$I_{xy} = 0$或$\omega_x = 0$或$\omega_y = 0$，否则$\bm{L}$和$\bm{\omega}$不平行。
+
+\subsection{主惯性轴情况}
+
+如果坐标轴与主惯性轴对齐，$I_{xy} = 0$，则：
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+I_{xx} \omega_x \\
+I_{yy} \omega_y \\
+I_{zz} \omega_z
+\end{bmatrix}
+\end{equation}
+
+如果$\bm{\omega}$沿着某个坐标轴方向，例如$\bm{\omega} = \begin{bmatrix} \omega_x \\ 0 \\ 0 \end{bmatrix}$，则：
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+I_{xx} \omega_x \\
+0 \\
+0
+\end{bmatrix} = I_{xx} \bm{\omega}
+\end{equation}
+
+两者平行。
+
+\section{物理意义}
+
+\subsection{角动量的方向}
+
+\textbf{一般情况}：
+\begin{itemize}
+\item 角动量$\bm{L}$的方向取决于质量分布和旋转轴的方向
+\item 由于惯性积的存在，$\bm{L}$通常不与$\bm{\omega}$平行
+\item 这导致需要额外的力矩来维持旋转（陀螺效应）
+\end{itemize}
+
+\textbf{主惯性轴情况}：
+\begin{itemize}
+\item 当绕主惯性轴旋转时，$\bm{L}$与$\bm{\omega}$平行
+\item 不需要额外的力矩来维持恒定角速度的旋转
+\item 这是最"自然"的旋转方式
+\end{itemize}
+
+\subsection{在机器人学中的应用}
+
+在机器人动力学中：
+\begin{itemize}
+\item 如果连杆的坐标轴与主惯性轴对齐，动力学方程会简化
+\item 角动量的计算更简单：$\bm{L} = I \bm{\omega}$，其中$I$是对角矩阵
+\item 欧拉方程中的耦合项减少
+\end{itemize}
+
+\section{应用示例}
+
+\subsection{示例1：均匀球体}
+
+对于均匀球体，转动惯量矩阵为：
+\begin{equation}
+I_b = \frac{2mr^2}{5} I
+\end{equation}
+
+其中$I$是单位矩阵。
+
+\textbf{因此}：对于任意方向的角速度$\bm{\omega}$：
+\begin{equation}
+\bm{L} = \frac{2mr^2}{5} I \bm{\omega} = \frac{2mr^2}{5} \bm{\omega}
+\end{equation}
+
+\textbf{结论}：球体的角动量总是与角速度平行，因为所有方向都是主惯性轴。
+
+\subsection{示例2：均匀圆柱体}
+
+对于均匀圆柱体（$z$轴沿圆柱轴），转动惯量矩阵为：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{xx} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+其中$I_{xx} = I_{yy}$（由于对称性）。
+
+\textbf{情况1}：绕$z$轴旋转（$\bm{\omega} = \begin{bmatrix} 0 \\ 0 \\ \omega_z \end{bmatrix}$）
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+0 \\
+0 \\
+I_{zz} \omega_z
+\end{bmatrix} = I_{zz} \bm{\omega}
+\end{equation}
+
+两者平行。
+
+\textbf{情况2}：绕$x$轴旋转（$\bm{\omega} = \begin{bmatrix} \omega_x \\ 0 \\ 0 \end{bmatrix}$）
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+I_{xx} \omega_x \\
+0 \\
+0
+\end{bmatrix} = I_{xx} \bm{\omega}
+\end{equation}
+
+两者平行。
+
+\textbf{情况3}：一般方向（$\bm{\omega} = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \end{bmatrix}$，其中$\omega_x \neq 0$，$\omega_y \neq 0$）
+\begin{equation}
+\bm{L} = \begin{bmatrix}
+I_{xx} \omega_x \\
+I_{xx} \omega_y \\
+I_{zz} \omega_z
+\end{bmatrix}
+\end{equation}
+
+如果$I_{xx} \neq I_{zz}$，则$\bm{L}$和$\bm{\omega}$不平行（除非$\omega_x = \omega_y = 0$或$\omega_z = 0$）。
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{定理}：如果角速度$\bm{\omega}$沿着主惯性轴方向，那么角动量$\bm{L} = I_b \bm{\omega}$与角速度$\bm{\omega}$平行。
+
+\item \textbf{逆定理}：如果角动量$\bm{L}$和角速度$\bm{\omega}$平行，那么$\bm{\omega}$沿着主惯性轴方向。
+
+\item \textbf{数学表达}：当$\bm{\omega} = \omega \bm{v}_i$（其中$\bm{v}_i$是主惯性轴方向的单位向量）时：
+\begin{equation}
+\bm{L} = \lambda_i \bm{\omega}
+\end{equation}
+
+其中$\lambda_i$是对应的主转动惯量（特征值）。
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 主惯性轴是转动惯量矩阵的特征向量方向
+\item 绕主惯性轴旋转时，角动量和角速度平行
+\item 这是刚体最"自然"的旋转方式
+\item 在机器人学中，通常选择坐标轴与主惯性轴对齐以简化计算
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学分析
+\item 机器人连杆的动力学建模
+\item 陀螺仪和旋转体的稳定性分析
+\item 航天器的姿态控制
+\end{itemize}
+
+\end{document}
+

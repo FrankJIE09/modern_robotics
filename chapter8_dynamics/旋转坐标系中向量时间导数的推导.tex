@@ -1,0 +1,340 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{旋转坐标系中向量时间导数的推导：$\omega_b \times \bm{L}_b$项的来源}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：为什么在旋转坐标系中，向量$\bm{v}$在惯性系中的时间导数包含$\omega \times \bm{v}$这一项？
+
+\textbf{具体问题}：在欧拉方程的推导中，为什么有：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{body}} + \omega_b \times \bm{L}_b
+\end{equation}
+
+其中$\omega_b \times \bm{L}_b$这一项是怎么来的？
+
+\section{基本公式}
+
+\subsection{旋转坐标系中的时间导数公式}
+
+对于在旋转坐标系中表示的向量$\bm{v}$，其在惯性系中的时间导数为：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega \times \bm{v}
+\label{eq:rotating_derivative}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}}$：在惯性系中观察到的向量变化率
+\item $\left.\frac{d\bm{v}}{dt}\right|_{\text{body}}$：在旋转坐标系中观察到的向量变化率
+\item $\omega$：旋转坐标系相对于惯性系的角速度
+\item $\omega \times \bm{v}$：由于坐标系旋转产生的额外项（科里奥利项）
+\end{itemize}
+
+\section{几何直观}
+
+\subsection{简单例子：固定向量}
+
+考虑一个固定在旋转坐标系中的向量$\bm{v}$（在体坐标系中不变）。
+
+\textbf{情况}：假设旋转坐标系绕$z$轴以角速度$\omega$旋转，向量$\bm{v}$固定在坐标系中。
+
+\textbf{观察}：
+\begin{itemize}
+\item 在体坐标系中：$\bm{v}$不变，$\left.\frac{d\bm{v}}{dt}\right|_{\text{body}} = 0$
+\item 在惯性系中：由于坐标系旋转，$\bm{v}$的方向在改变
+\end{itemize}
+
+\textbf{几何分析}：
+
+在时间$\Delta t$内，坐标系旋转了$\omega \Delta t$的角度。向量$\bm{v}$在惯性系中的变化为：
+\begin{equation}
+\Delta \bm{v} = \bm{v}(t + \Delta t) - \bm{v}(t)
+\end{equation}
+
+由于旋转，$\bm{v}$的变化方向垂直于$\omega$和$\bm{v}$所在的平面，大小为：
+\begin{equation}
+|\Delta \bm{v}| \approx |\bm{v}| \sin\theta \cdot \omega \Delta t
+\end{equation}
+
+其中$\theta$是$\omega$和$\bm{v}$之间的夹角。
+
+\textbf{方向}：$\Delta \bm{v}$的方向由$\omega \times \bm{v}$给出（右手定则）。
+
+\textbf{因此}：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \lim_{\Delta t \to 0} \frac{\Delta \bm{v}}{\Delta t} = \omega \times \bm{v}
+\end{equation}
+
+\subsection{一般情况：变化的向量}
+
+如果向量$\bm{v}$不仅在坐标系中变化，坐标系本身也在旋转，那么总的变化率是两项之和：
+\begin{enumerate}
+\item 在体坐标系中观察到的变化：$\left.\frac{d\bm{v}}{dt}\right|_{\text{body}}$
+\item 由于坐标系旋转产生的变化：$\omega \times \bm{v}$
+\end{enumerate}
+
+因此：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega \times \bm{v}
+\end{equation}
+
+\section{严格数学推导}
+
+\subsection{坐标系设置}
+
+设：
+\begin{itemize}
+\item $\{I\}$：惯性坐标系（固定）
+\item $\{B\}$：旋转坐标系（体坐标系）
+\item $R(t)$：从$\{B\}$到$\{I\}$的旋转矩阵（时间相关）
+\item $\omega$：$\{B\}$相对于$\{I\}$的角速度（在$\{B\}$中表示）
+\end{itemize}
+
+\subsection{向量在不同坐标系中的表示}
+
+向量$\bm{v}$在$\{B\}$中的表示为$\bm{v}_b$，在$\{I\}$中的表示为$\bm{v}_i$：
+\begin{equation}
+\bm{v}_i = R(t) \bm{v}_b
+\label{eq:vector_transform}
+\end{equation}
+
+\subsection{对时间求导}
+
+对式(\ref{eq:vector_transform})两边对时间求导：
+\begin{align}
+\frac{d\bm{v}_i}{dt} &= \frac{d}{dt}[R(t) \bm{v}_b] \\
+&= \dot{R}(t) \bm{v}_b + R(t) \dot{\bm{v}}_b
+\label{eq:derivative_expanded}
+\end{align}
+
+\subsection{旋转矩阵的导数}
+
+旋转矩阵的导数满足：
+\begin{equation}
+\dot{R}(t) = R(t) [\omega]_{\times}
+\label{eq:rotation_derivative}
+\end{equation}
+
+其中$[\omega]_{\times}$是$\omega$的反对称矩阵：
+\begin{equation}
+[\omega]_{\times} = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{性质}：$[\omega]_{\times} \bm{v} = \omega \times \bm{v}$
+
+\subsection{代入并简化}
+
+将式(\ref{eq:rotation_derivative})代入式(\ref{eq:derivative_expanded})：
+\begin{align}
+\frac{d\bm{v}_i}{dt} &= R(t) [\omega]_{\times} \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) ([\omega]_{\times} \bm{v}_b + \dot{\bm{v}}_b) \\
+&= R(t) (\omega \times \bm{v}_b + \dot{\bm{v}}_b)
+\end{align}
+
+\textbf{关键观察}：这个结果是在惯性系$\{I\}$中的表示。要得到在体坐标系$\{B\}$中的表示，需要左乘$R^T$：
+\begin{align}
+R^T \frac{d\bm{v}_i}{dt} &= R^T R(t) (\omega \times \bm{v}_b + \dot{\bm{v}}_b) \\
+&= \omega \times \bm{v}_b + \dot{\bm{v}}_b
+\end{align}
+
+\textbf{因此}，在体坐标系$\{B\}$中，向量在惯性系中的时间导数表示为：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \dot{\bm{v}}_b + \omega \times \bm{v}_b
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\dot{\bm{v}}_b = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}}$：在体坐标系中观察到的变化率
+\item $\omega \times \bm{v}_b$：由于坐标系旋转产生的额外项
+\end{itemize}
+
+\textbf{证毕}。
+
+\section{另一种推导方法：使用旋转矩阵的指数表示}
+
+\subsection{旋转矩阵的指数表示}
+
+旋转矩阵可以表示为：
+\begin{equation}
+R(t) = \exp([\theta(t)]_{\times})
+\end{equation}
+
+其中$\theta(t)$是旋转角度向量，满足$\dot{\theta}(t) = \omega(t)$。
+
+\subsection{对时间求导}
+
+\begin{align}
+\dot{R}(t) &= \frac{d}{dt}[\exp([\theta(t)]_{\times})] \\
+&= \exp([\theta(t)]_{\times}) [\dot{\theta}(t)]_{\times} \\
+&= R(t) [\omega(t)]_{\times}
+\end{align}
+
+这与前面的结果一致。
+
+\subsection{应用到向量导数}
+
+\begin{align}
+\frac{d}{dt}[R(t) \bm{v}_b] &= \dot{R}(t) \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) [\omega]_{\times} \bm{v}_b + R(t) \dot{\bm{v}}_b \\
+&= R(t) (\omega \times \bm{v}_b + \dot{\bm{v}}_b)
+\end{align}
+
+在体坐标系中表示：
+\begin{equation}
+R^T \frac{d}{dt}[R(t) \bm{v}_b] = \omega \times \bm{v}_b + \dot{\bm{v}}_b
+\end{equation}
+
+\section{应用到角动量}
+
+\subsection{角动量在体坐标系中的表示}
+
+角动量$\bm{L}_b = I_b \omega_b$在体坐标系$\{b\}$中表示。
+
+\subsection{在惯性系中的时间导数}
+
+根据旋转坐标系中的时间导数公式：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{body}} + \omega_b \times \bm{L}_b
+\end{equation}
+
+\subsection{展开}
+
+\begin{align}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} &= \frac{d}{dt}(I_b \omega_b) + \omega_b \times (I_b \omega_b) \\
+&= I_b \dot{\omega}_b + \frac{dI_b}{dt} \omega_b + \omega_b \times (I_b \omega_b)
+\end{align}
+
+由于$I_b$在体坐标系中是常数（刚体的形状和质量分布不变），$\frac{dI_b}{dt} = 0$。
+
+\textbf{因此}：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+\subsection{角动量定理}
+
+根据角动量定理：
+\begin{equation}
+m_b = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}}
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+这就是欧拉方程。
+
+\section{物理意义}
+
+\subsection{为什么需要$\omega \times \bm{v}$项？}
+
+\textbf{原因}：即使向量在体坐标系中不变，由于坐标系本身在旋转，向量在惯性系中的方向也在改变。
+
+\textbf{例子}：
+\begin{itemize}
+\item 考虑一个固定在旋转圆盘上的向量
+\item 在圆盘坐标系中，向量不变
+\item 但在惯性系中，向量的方向在旋转
+\item 这个方向变化由$\omega \times \bm{v}$描述
+\end{itemize}
+
+\subsection{科里奥利效应}
+
+$\omega \times \bm{v}$项是科里奥利效应的体现：
+\begin{itemize}
+\item 当物体在旋转坐标系中运动时，会受到额外的"虚拟力"
+\item 这个力垂直于运动方向和旋转轴
+\item 在动力学方程中表现为$\omega \times \bm{v}$项
+\end{itemize}
+
+\subsection{在角动量中的应用}
+
+对于角动量$\bm{L}_b = I_b \omega_b$：
+\begin{itemize}
+\item 即使$\bm{L}_b$在体坐标系中不变（$\dot{\bm{L}}_b = 0$），由于坐标系旋转，$\bm{L}_b$在惯性系中的方向在改变
+\item 这个方向变化由$\omega_b \times \bm{L}_b$描述
+\item 这就是为什么需要额外的力矩来维持旋转
+\end{itemize}
+
+\section{数值验证}
+
+\subsection{简单例子}
+
+考虑一个绕$z$轴以角速度$\omega = \begin{bmatrix} 0 \\ 0 \\ \omega_z \end{bmatrix}$旋转的坐标系。
+
+固定向量$\bm{v} = \begin{bmatrix} v_x \\ 0 \\ 0 \end{bmatrix}$（在体坐标系中沿$x$轴）。
+
+\textbf{在体坐标系中}：$\dot{\bm{v}}_b = 0$
+
+\textbf{在惯性系中}：
+\begin{align}
+\omega \times \bm{v} &= \begin{bmatrix} 0 \\ 0 \\ \omega_z \end{bmatrix} \times \begin{bmatrix} v_x \\ 0 \\ 0 \end{bmatrix} \\
+&= \begin{bmatrix} 0 \\ \omega_z v_x \\ 0 \end{bmatrix}
+\end{align}
+
+\textbf{物理意义}：向量在惯性系中绕$z$轴旋转，$y$方向有速度分量。
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{基本公式}：在旋转坐标系中，向量在惯性系中的时间导数为：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega \times \bm{v}
+\end{equation}
+
+\item \textbf{$\omega \times \bm{v}$项的来源}：
+\begin{itemize}
+\item 即使向量在体坐标系中不变，由于坐标系旋转，向量在惯性系中的方向在改变
+\item 这个方向变化由$\omega \times \bm{v}$描述
+\item 这是旋转坐标系效应的直接结果
+\end{itemize}
+
+\item \textbf{应用到角动量}：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+\item \textbf{物理意义}：$\omega_b \times \bm{L}_b$项表示由于坐标系旋转产生的角动量方向变化，这是陀螺效应的体现。
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 旋转坐标系中的时间导数必须考虑坐标系旋转的影响
+\item $\omega \times \bm{v}$项是几何和物理的必然结果
+\item 这个项在动力学方程中表现为科里奥利效应
+\item 在角动量定理中，这个项导致需要额外的力矩来维持旋转
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学（欧拉方程）
+\item 机器人动力学（递归牛顿-欧拉算法）
+\item 航天器姿态控制
+\item 陀螺仪和导航系统
+\item 旋转机械系统分析
+\end{itemize}
+
+\end{document}
+

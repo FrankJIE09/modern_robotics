@@ -1,0 +1,302 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{如果$p_i$在体坐标系中的速度公式}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：如果$p_i$是质量点$i$在体坐标系$\{b\}$下的位置，那么速度公式是什么？
+
+\textbf{关键区别}：
+\begin{itemize}
+\item \textbf{原情况}：$p_i$在惯性坐标系$\{s\}$中（时变的）
+\item \textbf{新情况}：$p_i$在体坐标系$\{b\}$中（固定的，等于$r_i$）
+\end{itemize}
+
+\section{符号说明}
+
+\begin{itemize}
+\item $r_i$：质量点$i$在体坐标系$\{b\}$中的固定位置（常数）
+\item $p_i$：质量点$i$的位置
+  \begin{itemize}
+  \item \textbf{情况1}：在惯性坐标系$\{s\}$中（时变）
+  \item \textbf{情况2}：在体坐标系$\{b\}$中（固定，等于$r_i$）
+  \end{itemize}
+\item $p_b$：质心在惯性坐标系中的位置
+\item $R(t)$：从体坐标系$\{b\}$到惯性坐标系$\{s\}$的旋转矩阵
+\item $v_b$：质心的线速度（在体坐标系$\{b\}$中表示）
+\item $\omega_b$：刚体的角速度（在体坐标系$\{b\}$中表示）
+\end{itemize}
+
+\section{情况1：$p_i$在惯性坐标系中（原情况）}
+
+\subsection{位置关系}
+
+质量点$i$在惯性坐标系中的位置：
+\begin{equation}
+p_i(t) = p_b(t) + R(t) r_i
+\label{eq:position_inertial}
+\end{equation}
+
+其中$r_i$是点在体坐标系中的固定位置。
+
+\subsection{速度公式}
+
+对时间求导：
+\begin{align}
+\dot{p}_i(t) &= \dot{p}_b(t) + \dot{R}(t) r_i \\
+&= R(t) v_b + R(t) [\omega_b]_{\times} r_i \\
+&= R(t) v_b + R(t) (\omega_b \times r_i) \\
+&= R(t) (v_b + \omega_b \times r_i)
+\end{align}
+
+\textbf{在惯性坐标系中}：
+\begin{equation}
+\dot{p}_i = v_s + \omega_s \times (p_i - p_b)
+\end{equation}
+
+其中$v_s = R(t) v_b$，$\omega_s = R(t) \omega_b$。
+
+\section{情况2：$p_i$在体坐标系中（新情况）}
+
+\subsection{位置关系}
+
+如果$p_i$在体坐标系$\{b\}$中，那么：
+\begin{equation}
+p_i = r_i = \text{常数}
+\label{eq:position_body}
+\end{equation}
+
+\textbf{关键观察}：由于$p_i$固定在刚体上，在体坐标系中是常数。
+
+\subsection{在体坐标系中观察的速度}
+
+\textbf{在体坐标系中}：
+
+由于$p_i$固定在刚体上，在体坐标系中观察，$p_i$不变：
+\begin{equation}
+\dot{p}_i\Big|_{\text{body}} = 0
+\end{equation}
+
+\textbf{物理意义}：从体坐标系的角度看，固定在刚体上的点是不动的。
+
+\subsection{在惯性坐标系中观察的速度}
+
+\textbf{在惯性坐标系中}：
+
+虽然$p_i$在体坐标系中是固定的，但在惯性坐标系中，它的位置会变化。
+
+\textbf{位置关系}：
+
+质量点$i$在惯性坐标系中的位置为：
+\begin{equation}
+p_{i,\text{inertial}}(t) = p_b(t) + R(t) p_i
+\end{equation}
+
+其中$p_i$是点在体坐标系中的位置（常数）。
+
+\textbf{对时间求导}：
+\begin{align}
+\dot{p}_{i,\text{inertial}}(t) &= \dot{p}_b(t) + \dot{R}(t) p_i \\
+&= R(t) v_b + R(t) [\omega_b]_{\times} p_i \\
+&= R(t) v_b + R(t) (\omega_b \times p_i) \\
+&= R(t) (v_b + \omega_b \times p_i)
+\end{align}
+
+\textbf{因此}，在惯性坐标系中：
+\begin{equation}
+\dot{p}_{i,\text{inertial}} = v_s + \omega_s \times (R(t) p_i)
+\end{equation}
+
+其中$v_s = R(t) v_b$，$\omega_s = R(t) \omega_b$。
+
+\subsection{在体坐标系中表示的速度}
+
+\textbf{将惯性系中的速度转换到体坐标系}：
+
+\begin{align}
+R^T(t) \dot{p}_{i,\text{inertial}} &= R^T(t) R(t) (v_b + \omega_b \times p_i) \\
+&= v_b + \omega_b \times p_i
+\end{align}
+
+\textbf{因此}，在体坐标系中，质量点$i$的速度（在惯性系中的速度，转换到体坐标系）为：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times p_i
+\label{eq:velocity_body_frame}
+\end{equation}
+
+其中$\dot{p}_{i,b} = R^T(t) \dot{p}_{i,\text{inertial}}$。
+
+\section{两种情况的对比}
+
+\subsection{情况1：$p_i$在惯性坐标系中}
+
+\begin{itemize}
+\item 位置：$p_i(t) = p_b(t) + R(t) r_i$（时变）
+\item 速度（在惯性系中）：$\dot{p}_i = v_s + \omega_s \times (p_i - p_b)$
+\item 速度（在体坐标系中表示）：$\dot{p}_{i,b} = v_b + \omega_b \times r_i$
+\end{itemize}
+
+\subsection{情况2：$p_i$在体坐标系中}
+
+\begin{itemize}
+\item 位置：$p_i = r_i$（常数，固定在体坐标系中）
+\item 速度（在体坐标系中观察）：$\dot{p}_i\Big|_{\text{body}} = 0$
+\item 速度（在惯性系中）：$\dot{p}_{i,\text{inertial}} = R(t) (v_b + \omega_b \times p_i)$
+\item 速度（在体坐标系中表示）：$\dot{p}_{i,b} = v_b + \omega_b \times p_i$
+\end{itemize}
+
+\subsection{关键区别}
+
+\begin{enumerate}
+\item \textbf{位置的性质}：
+\begin{itemize}
+\item 情况1：$p_i$在惯性系中，是时变的
+\item 情况2：$p_i$在体坐标系中，是固定的（常数）
+\end{itemize}
+
+\item \textbf{速度的观察}：
+\begin{itemize}
+\item 情况1：$\dot{p}_i$直接是点在惯性系中的速度
+\item 情况2：$\dot{p}_i\Big|_{\text{body}} = 0$（在体坐标系中观察），但$\dot{p}_{i,\text{inertial}} \neq 0$（在惯性系中观察）
+\end{itemize}
+
+\item \textbf{公式形式}：
+\begin{itemize}
+\item 情况1：$\dot{p}_i = v_b + \omega_b \times p_i$（需要理解$p_i$在惯性系中）
+\item 情况2：$\dot{p}_{i,b} = v_b + \omega_b \times p_i$（$p_i$在体坐标系中，$\dot{p}_{i,b}$是速度在体坐标系中的表示）
+\end{itemize}
+\end{enumerate}
+
+\section{统一的理解}
+
+\subsection{标准形式}
+
+无论$p_i$在哪个坐标系中定义，速度公式的统一形式是：
+
+\textbf{在体坐标系中表示的速度}：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times r_i
+\label{eq:unified_velocity}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\dot{p}_{i,b}$：质量点$i$在惯性系中的速度，转换到体坐标系中的表示
+\item $v_b$：质心速度（在体坐标系中表示）
+\item $\omega_b$：角速度（在体坐标系中表示）
+\item $r_i$：点在体坐标系中的固定位置
+\end{itemize}
+
+\subsection{物理意义}
+
+公式(\ref{eq:unified_velocity})的物理意义：
+
+\begin{enumerate}
+\item \textbf{$v_b$项}：由于刚体的平移运动，所有点都有相同的平移速度
+
+\item \textbf{$\omega_b \times r_i$项}：由于刚体的旋转运动，距离旋转轴$r_i$的点会有额外的速度
+\begin{itemize}
+\item 方向：垂直于$\omega_b$和$r_i$所在的平面
+\item 大小：$|\omega_b| \cdot |r_i| \cdot \sin\theta$，其中$\theta$是$\omega_b$和$r_i$之间的夹角
+\end{itemize}
+\end{enumerate}
+
+\section{应用到加速度}
+
+\subsection{如果$p_i$在体坐标系中}
+
+如果$p_i$在体坐标系中（固定），那么：
+
+\textbf{在体坐标系中观察的加速度}：
+\begin{equation}
+\ddot{p}_i\Big|_{\text{body}} = 0
+\end{equation}
+
+\textbf{在惯性坐标系中的加速度}：
+
+从速度公式(\ref{eq:velocity_body_frame})对时间求导：
+\begin{align}
+\frac{d}{dt}[\dot{p}_{i,b}] &= \frac{d}{dt}[v_b + \omega_b \times p_i] \\
+&= \dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times \frac{dp_i}{dt}\Big|_{\text{body}} \\
+&= \dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times 0 \\
+&= \dot{v}_b + \dot{\omega}_b \times p_i
+\end{align}
+
+\textbf{但是}：这只是在体坐标系中观察的变化率。要得到在惯性系中的加速度，需要考虑坐标系旋转的影响。
+
+\textbf{使用时间导数关系}：
+\begin{align}
+\ddot{p}_{i,\text{inertial}} &= \frac{d}{dt}[\dot{p}_{i,\text{inertial}}] \\
+&= R(t) \left(\frac{d}{dt}[\dot{p}_{i,b}] + \omega_b \times \dot{p}_{i,b}\right) \\
+&= R(t) \left(\dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times (v_b + \omega_b \times p_i)\right)
+\end{align}
+
+\textbf{在体坐标系中表示}：
+\begin{equation}
+\ddot{p}_{i,b} = \dot{v}_b + \dot{\omega}_b \times p_i + \omega_b \times v_b + \omega_b \times (\omega_b \times p_i)
+\end{equation}
+
+使用反对称矩阵符号：
+\begin{equation}
+\ddot{p}_{i,b} = \dot{v}_b + [\dot{\omega}_b] p_i + [\omega_b] v_b + [\omega_b]^2 p_i
+\label{eq:acceleration_body_frame}
+\end{equation}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{如果$p_i$在体坐标系中}：
+\begin{itemize}
+\item 位置：$p_i = r_i$（常数，固定在刚体上）
+\item 在体坐标系中观察：$\dot{p}_i\Big|_{\text{body}} = 0$
+\item 在惯性坐标系中：$\dot{p}_{i,\text{inertial}} = R(t) (v_b + \omega_b \times p_i)$
+\item 在体坐标系中表示的速度：$\dot{p}_{i,b} = v_b + \omega_b \times p_i$
+\end{itemize}
+
+\item \textbf{速度公式}：
+\begin{equation}
+\dot{p}_{i,b} = v_b + \omega_b \times p_i
+\end{equation}
+
+其中$p_i$在体坐标系中（固定），$\dot{p}_{i,b}$是速度在体坐标系中的表示。
+
+\item \textbf{加速度公式}：
+\begin{equation}
+\ddot{p}_{i,b} = \dot{v}_b + [\dot{\omega}_b] p_i + [\omega_b] v_b + [\omega_b]^2 p_i
+\end{equation}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 如果$p_i$在体坐标系中，它是固定的（常数）
+\item 在体坐标系中观察，固定点的速度为零
+\item 但在惯性坐标系中，固定点的速度不为零（由于刚体运动）
+\item 速度公式$\dot{p}_{i,b} = v_b + \omega_b \times p_i$中的$\dot{p}_{i,b}$是速度在体坐标系中的表示
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体运动学分析
+\item 机器人运动学（连杆上的点）
+\item 航天器姿态动力学
+\item 机械系统仿真
+\end{itemize}
+
+\end{document}
+

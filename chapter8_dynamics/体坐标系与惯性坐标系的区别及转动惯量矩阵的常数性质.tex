@@ -1,0 +1,383 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{体坐标系与惯性坐标系的区别及转动惯量矩阵的常数性质}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题1}：为什么$I_b$在体坐标系中是常数（刚体的形状和质量分布不变）？
+
+\textbf{问题2}：体坐标系和惯性坐标系的区别是什么？
+
+\section{体坐标系与惯性坐标系的定义}
+
+\subsection{惯性坐标系（Inertial Frame）}
+
+\textbf{定义}：惯性坐标系是一个固定不动的参考坐标系，通常选择为：
+\begin{itemize}
+\item 固定在地面上（或空间中某个固定点）
+\item 不随任何物体运动
+\item 满足牛顿第一定律（惯性定律）的参考系
+\end{itemize}
+
+\textbf{特点}：
+\begin{itemize}
+\item 绝对静止或匀速直线运动
+\item 不受任何加速度影响
+\item 是描述物理定律的标准参考系
+\end{itemize}
+
+\textbf{符号}：通常用$\{I\}$或$\{0\}$表示。
+
+\subsection{体坐标系（Body Frame）}
+
+\textbf{定义}：体坐标系是固定在刚体上的坐标系，随刚体一起运动和旋转。
+
+\textbf{特点}：
+\begin{itemize}
+\item 固定在刚体上，与刚体一起运动
+\item 原点通常选择在刚体的质心
+\item 坐标轴方向可以任意选择（通常选择与主惯性轴对齐）
+\item 随刚体一起旋转和平移
+\end{itemize}
+
+\textbf{符号}：通常用$\{b\}$或$\{i\}$表示。
+
+\section{体坐标系与惯性坐标系的主要区别}
+
+\subsection{运动状态}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{特性} & \textbf{惯性坐标系} & \textbf{体坐标系} \\
+\hline
+位置 & 固定不动 & 随刚体运动 \\
+\hline
+方向 & 固定不变 & 随刚体旋转 \\
+\hline
+速度 & 零（或匀速） & 等于刚体速度 \\
+\hline
+角速度 & 零 & 等于刚体角速度 \\
+\hline
+\end{tabular}
+\caption{体坐标系与惯性坐标系的运动状态对比}
+\end{table}
+
+\subsection{观察角度}
+
+\textbf{在惯性坐标系中观察}：
+\begin{itemize}
+\item 看到刚体的绝对运动
+\item 看到刚体的旋转和平移
+\item 向量在空间中的绝对方向
+\end{itemize}
+
+\textbf{在体坐标系中观察}：
+\begin{itemize}
+\item 看到相对于刚体的运动
+\item 固定在刚体上的点看起来是静止的
+\item 向量相对于刚体的方向
+\end{itemize}
+
+\subsection{时间导数的区别}
+
+\textbf{在惯性坐标系中}：
+\begin{itemize}
+\item 时间导数表示向量在空间中的绝对变化率
+\item 包括由于坐标系运动产生的变化
+\end{itemize}
+
+\textbf{在体坐标系中}：
+\begin{itemize}
+\item 时间导数表示向量相对于刚体的变化率
+\item 不包括由于坐标系运动产生的变化
+\end{itemize}
+
+\subsection{数学表示}
+
+设旋转矩阵$R(t)$表示从体坐标系$\{b\}$到惯性坐标系$\{I\}$的旋转。
+
+\textbf{向量变换}：
+\begin{equation}
+\bm{v}_I = R(t) \bm{v}_b
+\end{equation}
+
+\textbf{时间导数关系}：
+\begin{equation}
+\left.\frac{d\bm{v}}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}}{dt}\right|_{\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+其中$\omega_b$是体坐标系相对于惯性坐标系的角速度。
+
+\section{为什么$I_b$在体坐标系中是常数？}
+
+\subsection{转动惯量矩阵的定义}
+
+转动惯量矩阵$I_b$定义为：
+\begin{equation}
+I_b = -\sum_{i=1}^{n} m_i [\bm{r}_i]^2
+\label{eq:inertia_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m_i$：第$i$个点质量的质量
+\item $\bm{r}_i = (x_i, y_i, z_i)^T$：第$i$个点质量在体坐标系$\{b\}$中的位置向量
+\item $[\bm{r}_i]$：$\bm{r}_i$的反对称矩阵
+\end{itemize}
+
+\subsection{关键观察1：位置向量$\bm{r}_i$在体坐标系中是常数}
+
+\textbf{为什么？}
+
+\begin{enumerate}
+\item \textbf{体坐标系固定在刚体上}：体坐标系$\{b\}$固定在刚体上，与刚体一起运动。
+
+\item \textbf{点质量相对于刚体的位置不变}：由于刚体是刚性的（rigid body），刚体上任意两点之间的距离保持不变。因此，点质量$i$相对于刚体的位置$\bm{r}_i$在体坐标系中是固定的。
+
+\item \textbf{数学表达}：在体坐标系$\{b\}$中，$\bm{r}_i$的坐标是常数：
+\begin{equation}
+\bm{r}_i = \begin{bmatrix} x_i \\ y_i \\ z_i \end{bmatrix} = \text{常数}
+\end{equation}
+
+因此：
+\begin{equation}
+\frac{d\bm{r}_i}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+\end{enumerate}
+
+\subsection{关键观察2：质量$m_i$是常数}
+
+\textbf{为什么？}
+
+\begin{enumerate}
+\item \textbf{质量守恒}：在刚体动力学中，假设质量不随时间变化。
+
+\item \textbf{质量分布不变}：刚体的质量分布是固定的，不会随时间改变。
+\end{enumerate}
+
+\subsection{关键观察3：转动惯量矩阵的元素是$\bm{r}_i$和$m_i$的函数}
+
+从定义(\ref{eq:inertia_definition})可以看出，$I_b$的元素只依赖于：
+\begin{itemize}
+\item 质量$m_i$（常数）
+\item 位置向量$\bm{r}_i$（在体坐标系中是常数）
+\end{itemize}
+
+\textbf{因此}：由于$m_i$和$\bm{r}_i$在体坐标系中都是常数，$I_b$在体坐标系中也是常数：
+\begin{equation}
+\frac{dI_b}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+
+\subsection{详细证明}
+
+\textbf{步骤1}：写出$I_b$的展开形式
+
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+其中：
+\begin{align}
+I_{xx} &= \sum_i m_i (y_i^2 + z_i^2) \\
+I_{yy} &= \sum_i m_i (x_i^2 + z_i^2) \\
+I_{zz} &= \sum_i m_i (x_i^2 + y_i^2) \\
+I_{xy} &= -\sum_i m_i x_i y_i \\
+I_{xz} &= -\sum_i m_i x_i z_i \\
+I_{yz} &= -\sum_i m_i y_i z_i
+\end{align}
+
+\textbf{步骤2}：对时间求导（在体坐标系中）
+
+\begin{align}
+\frac{dI_{xx}}{dt}\Big|_{\text{body}} &= \sum_i m_i \frac{d}{dt}(y_i^2 + z_i^2)\Big|_{\text{body}} \\
+&= \sum_i m_i \left(2y_i \frac{dy_i}{dt} + 2z_i \frac{dz_i}{dt}\right)\Big|_{\text{body}} \\
+&= \sum_i m_i (2y_i \cdot 0 + 2z_i \cdot 0) \\
+&= 0
+\end{align}
+
+类似地，所有元素的时间导数都为零：
+\begin{equation}
+\frac{dI_b}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+
+\textbf{证毕}。
+
+\section{在惯性坐标系中的情况}
+
+\subsection{在惯性坐标系中，$I_b$不是常数}
+
+\textbf{为什么？}
+
+虽然$I_b$在体坐标系中是常数，但在惯性坐标系中，由于坐标系旋转，$I_b$的表示会改变。
+
+\textbf{坐标变换}：
+
+如果转动惯量矩阵在体坐标系$\{b\}$中为$I_b$，在旋转后的坐标系$\{c\}$中为$I_c$，那么：
+\begin{equation}
+I_c = R_{bc}^T I_b R_{bc}
+\end{equation}
+
+其中$R_{bc}$是从$\{b\}$到$\{c\}$的旋转矩阵。
+
+\textbf{在惯性坐标系中}：
+
+如果体坐标系$\{b\}$相对于惯性坐标系$\{I\}$有旋转$R(t)$，那么转动惯量矩阵在惯性坐标系中的表示为：
+\begin{equation}
+I_I(t) = R(t) I_b R(t)^T
+\end{equation}
+
+由于$R(t)$随时间变化，$I_I(t)$也随时间变化。
+
+\textbf{但是}：在体坐标系$\{b\}$中，$I_b$是常数。
+
+\section{物理意义}
+
+\subsection{为什么要在体坐标系中表示$I_b$？}
+
+\textbf{原因1}：简化计算
+
+在体坐标系中，$I_b$是常数，不需要计算其时间导数，简化了动力学方程。
+
+\textbf{原因2}：物理直观
+
+转动惯量矩阵描述的是刚体相对于其自身的惯性特性，这在体坐标系中表示最自然。
+
+\textbf{原因3}：数值稳定性
+
+在体坐标系中，$I_b$是常数，避免了由于坐标系旋转导致的数值误差。
+
+\subsection{在欧拉方程中的应用}
+
+\textbf{欧拉方程}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+\textbf{关键步骤}：
+\begin{align}
+m_b &= \frac{d}{dt}(I_b \omega_b) + \omega_b \times (I_b \omega_b) \\
+&= I_b \frac{d\omega_b}{dt} + \frac{dI_b}{dt} \omega_b + \omega_b \times (I_b \omega_b)
+\end{align}
+
+\textbf{由于$I_b$在体坐标系中是常数}：
+\begin{equation}
+\frac{dI_b}{dt} = 0
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+如果$I_b$不是常数，就需要额外的项$\frac{dI_b}{dt} \omega_b$，这会大大复杂化方程。
+
+\section{刚体假设的重要性}
+
+\subsection{刚体假设}
+
+\textbf{定义}：刚体是一个理想化的物体，其形状和大小在运动过程中保持不变。
+
+\textbf{数学表达}：
+\begin{itemize}
+\item 刚体上任意两点之间的距离保持不变
+\item 刚体的质量分布不变
+\item 刚体的形状不变
+\end{itemize}
+
+\subsection{为什么需要刚体假设？}
+
+\textbf{原因1}：如果刚体可以变形，那么点质量的位置$\bm{r}_i$会随时间变化，导致$I_b$不是常数。
+
+\textbf{原因2}：如果质量分布可以改变，那么$m_i$会随时间变化，导致$I_b$不是常数。
+
+\textbf{原因3}：刚体假设使得动力学方程大大简化。
+
+\subsection{实际应用中的考虑}
+
+\textbf{柔性体}：
+
+对于柔性体（可以变形的物体），$I_b$不再是常数，需要考虑：
+\begin{equation}
+\frac{dI_b}{dt} \neq 0
+\end{equation}
+
+这会导致更复杂的动力学方程。
+
+\textbf{质量变化}：
+
+对于质量会变化的系统（如火箭），也需要考虑质量变化对$I_b$的影响。
+
+\section{总结}
+
+\subsection{体坐标系与惯性坐标系的区别}
+
+\begin{enumerate}
+\item \textbf{运动状态}：
+\begin{itemize}
+\item 惯性坐标系：固定不动
+\item 体坐标系：随刚体一起运动
+\end{itemize}
+
+\item \textbf{观察角度}：
+\begin{itemize}
+\item 惯性坐标系：看到绝对运动
+\item 体坐标系：看到相对运动
+\end{itemize}
+
+\item \textbf{时间导数}：
+\begin{itemize}
+\item 惯性坐标系：绝对时间导数
+\item 体坐标系：相对时间导数，需要加上$\omega \times \bm{v}$项
+\end{itemize}
+\end{enumerate}
+
+\subsection{为什么$I_b$在体坐标系中是常数？}
+
+\begin{enumerate}
+\item \textbf{体坐标系固定在刚体上}：与刚体一起运动
+
+\item \textbf{点质量位置在体坐标系中不变}：由于刚体是刚性的，点质量相对于刚体的位置$\bm{r}_i$在体坐标系中是固定的
+
+\item \textbf{质量不变}：假设质量$m_i$不随时间变化
+
+\item \textbf{转动惯量矩阵只依赖于$m_i$和$\bm{r}_i$}：由于两者都是常数，$I_b$也是常数
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 在体坐标系中，$I_b$是常数，这大大简化了动力学方程
+\item 在惯性坐标系中，$I_b$的表示会随时间变化
+\item 刚体假设是$I_b$为常数的前提条件
+\item 对于柔性体或质量变化的系统，需要考虑$I_b$的时间变化
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学分析和仿真
+\item 机器人动力学建模
+\item 航天器姿态控制
+\item 机械系统设计
+\end{itemize}
+
+\end{document}
+

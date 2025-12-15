@@ -1,0 +1,627 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{欧拉方程证明与拓展：$m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：证明并拓展欧拉方程：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\label{eq:euler_equation}
+\end{equation}
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $m_b \in \mathbb{R}^3$：作用在刚体上的力矩（在体坐标系$\{b\}$中表示）
+\item $I_b \in \mathbb{R}^{3 \times 3}$：转动惯量矩阵（在体坐标系$\{b\}$中）
+\item $\omega_b \in \mathbb{R}^3$：角速度（在体坐标系$\{b\}$中表示）
+\item $\dot{\omega}_b \in \mathbb{R}^3$：角加速度（在体坐标系$\{b\}$中表示）
+\item $[\omega_b]$：角速度$\omega_b$的反对称矩阵
+\end{itemize}
+
+\section{欧拉方程的历史背景}
+
+\subsection{欧拉（Leonhard Euler）}
+
+欧拉方程由瑞士数学家欧拉（1707-1783）提出，用于描述刚体的旋转动力学。
+
+\subsection{方程的重要性}
+
+欧拉方程是刚体动力学的核心方程之一，与牛顿方程一起构成了刚体动力学的完整描述。
+
+\section{证明方法1：从角动量定理出发}
+
+\subsection{角动量的定义}
+
+刚体的角动量（在体坐标系$\{b\}$中）定义为：
+\begin{equation}
+\bm{L}_b = I_b \omega_b
+\label{eq:angular_momentum}
+\end{equation}
+
+\textbf{展开形式}：
+\begin{equation}
+\bm{L}_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix} \begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+\end{equation}
+
+\subsection{角动量定理}
+
+根据角动量定理，力矩等于角动量的时间导数：
+\begin{equation}
+m_b = \frac{d\bm{L}_b}{dt}
+\label{eq:angular_momentum_theorem}
+\end{equation}
+
+\textbf{关键点}：这里的导数是在\textbf{惯性坐标系}中计算的，而$\bm{L}_b = I_b \omega_b$是在\textbf{体坐标系}中表示的。
+
+\subsection{旋转坐标系中的时间导数}
+
+对于在旋转坐标系中表示的向量$\bm{L}_b$，其在惯性系中的时间导数为：
+\begin{equation}
+\left.\frac{d\bm{L}_b}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{L}_b}{dt}\right|_{\text{body}} + \omega_b \times \bm{L}_b
+\label{eq:rotating_frame_derivative}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 第一项：在体坐标系中观察到的角动量变化率
+\item 第二项：由于坐标系旋转产生的额外项（科里奥利效应）
+\end{itemize}
+
+\subsection{完成证明}
+
+将式(\ref{eq:angular_momentum})和式(\ref{eq:rotating_frame_derivative})代入式(\ref{eq:angular_momentum_theorem})：
+\begin{align}
+m_b &= \frac{d}{dt}(I_b \omega_b) + \omega_b \times (I_b \omega_b) \\
+&= I_b \frac{d\omega_b}{dt} + \frac{dI_b}{dt} \omega_b + \omega_b \times (I_b \omega_b)
+\end{align}
+
+\textbf{关键观察}：由于$I_b$在体坐标系中是常数（刚体的形状和质量分布不变），$\frac{dI_b}{dt} = 0$。
+
+\textbf{因此}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + \omega_b \times (I_b \omega_b)
+\end{equation}
+
+\textbf{使用反对称矩阵}：
+\begin{equation}
+\omega_b \times (I_b \omega_b) = [\omega_b] I_b \omega_b
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+\textbf{证毕}。
+
+\section{证明方法2：从力矩的定义出发}
+
+\subsection{力矩的定义}
+
+对于由点质量组成的刚体，力矩定义为：
+\begin{equation}
+m_b = \sum_i [r_i] m_i \ddot{r}_i
+\label{eq:torque_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $r_i$：第$i$个点质量在体坐标系$\{b\}$中的位置
+\item $m_i$：第$i$个点质量的质量
+\item $\ddot{r}_i$：第$i$个点质量的加速度
+\end{itemize}
+
+\subsection{点质量的加速度}
+
+对于刚体上的点质量，其加速度为：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i
+\label{eq:point_acceleration}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\dot{v}_b$：质心的线加速度
+\item $[\dot{\omega}_b] r_i$：由于角加速度产生的切向加速度
+\item $[\omega_b] v_b$：由于线速度和角速度耦合产生的加速度
+\item $[\omega_b]^2 r_i$：由于旋转产生的向心加速度
+\end{itemize}
+
+\subsection{展开力矩}
+
+将式(\ref{eq:point_acceleration})代入式(\ref{eq:torque_definition})：
+\begin{align}
+m_b &= \sum_i [r_i] m_i (\dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i) \\
+&= \sum_i m_i [r_i] \dot{v}_b + \sum_i m_i [r_i][\dot{\omega}_b] r_i + \sum_i m_i [r_i][\omega_b] v_b + \sum_i m_i [r_i][\omega_b]^2 r_i
+\end{align}
+
+\subsection{简化各项}
+
+\textbf{第一项}：$\sum_i m_i [r_i] \dot{v}_b$
+
+如果质心在原点，$\sum_i m_i r_i = 0$，因此：
+\begin{equation}
+\sum_i m_i [r_i] \dot{v}_b = [\sum_i m_i r_i] \dot{v}_b = 0
+\end{equation}
+
+\textbf{第二项}：$\sum_i m_i [r_i][\dot{\omega}_b] r_i$
+
+使用恒等式$[r_i][\dot{\omega}_b] r_i = -[r_i]^2 \dot{\omega}_b$：
+\begin{equation}
+\sum_i m_i [r_i][\dot{\omega}_b] r_i = -\sum_i m_i [r_i]^2 \dot{\omega}_b = I_b \dot{\omega}_b
+\end{equation}
+
+其中$I_b = -\sum_i m_i [r_i]^2$是转动惯量矩阵。
+
+\textbf{第三项}：$\sum_i m_i [r_i][\omega_b] v_b$
+
+如果质心在原点，这一项为零。
+
+\textbf{第四项}：$\sum_i m_i [r_i][\omega_b]^2 r_i$
+
+使用恒等式$[r_i][\omega_b]^2 r_i = -[\omega_b][r_i]^2 \omega_b$：
+\begin{equation}
+\sum_i m_i [r_i][\omega_b]^2 r_i = -[\omega_b] \sum_i m_i [r_i]^2 \omega_b = [\omega_b] I_b \omega_b
+\end{equation}
+
+\subsection{合并结果}
+
+\begin{align}
+m_b &= 0 + I_b \dot{\omega}_b + 0 + [\omega_b] I_b \omega_b \\
+&= I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{align}
+
+\textbf{证毕}。
+
+\section{各项的物理意义}
+
+\subsection{第一项：$I_b \dot{\omega}_b$}
+
+\textbf{名称}：惯性力矩（inertial torque）
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 由于角加速度产生的力矩
+\item 与角加速度成正比
+\item 类似于线运动中的$m \dot{v}$（惯性力）
+\end{itemize}
+
+\textbf{展开形式}：
+\begin{equation}
+I_b \dot{\omega}_b = \begin{bmatrix}
+I_{xx} \dot{\omega}_x + I_{xy} \dot{\omega}_y + I_{xz} \dot{\omega}_z \\
+I_{xy} \dot{\omega}_x + I_{yy} \dot{\omega}_y + I_{yz} \dot{\omega}_z \\
+I_{xz} \dot{\omega}_x + I_{yz} \dot{\omega}_y + I_{zz} \dot{\omega}_z
+\end{bmatrix}
+\end{equation}
+
+\subsection{第二项：$[\omega_b] I_b \omega_b$}
+
+\textbf{名称}：陀螺力矩（gyroscopic torque）或科里奥利力矩（Coriolis torque）
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 由于旋转产生的力矩
+\item 与角速度的平方成正比
+\item 即使角速度恒定（$\dot{\omega}_b = 0$），只要$\omega_b \neq 0$，就需要力矩来维持旋转
+\item 这是陀螺效应的体现
+\end{itemize}
+
+\textbf{展开形式}：
+\begin{align}
+[\omega_b] I_b \omega_b &= \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix} \begin{bmatrix}
+I_{xx} \omega_x + I_{xy} \omega_y + I_{xz} \omega_z \\
+I_{xy} \omega_x + I_{yy} \omega_y + I_{yz} \omega_z \\
+I_{xz} \omega_x + I_{yz} \omega_y + I_{zz} \omega_z
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\omega_y (I_{xz} \omega_x + I_{yz} \omega_y + I_{zz} \omega_z) - \omega_z (I_{xy} \omega_x + I_{yy} \omega_y + I_{yz} \omega_z) \\
+\omega_z (I_{xx} \omega_x + I_{xy} \omega_y + I_{xz} \omega_z) - \omega_x (I_{xz} \omega_x + I_{yz} \omega_y + I_{zz} \omega_z) \\
+\omega_x (I_{xy} \omega_x + I_{yy} \omega_y + I_{yz} \omega_z) - \omega_y (I_{xx} \omega_x + I_{xy} \omega_y + I_{xz} \omega_z)
+\end{bmatrix}
+\end{align}
+
+\section{主惯性轴情况}
+
+\subsection{对角化形式}
+
+如果坐标轴与主惯性轴对齐，转动惯量矩阵为对角矩阵：
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\end{equation}
+
+\subsection{欧拉方程的简化}
+
+此时欧拉方程简化为：
+\begin{equation}
+\begin{bmatrix}
+m_x \\
+m_y \\
+m_z
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} \dot{\omega}_x \\
+I_{yy} \dot{\omega}_y \\
+I_{zz} \dot{\omega}_z
+\end{bmatrix} + \begin{bmatrix}
+(I_{zz} - I_{yy}) \omega_y \omega_z \\
+(I_{xx} - I_{zz}) \omega_x \omega_z \\
+(I_{yy} - I_{xx}) \omega_x \omega_y
+\end{bmatrix}
+\label{eq:euler_principal_axes}
+\end{equation}
+
+\textbf{展开形式}：
+\begin{align}
+m_x &= I_{xx} \dot{\omega}_x + (I_{zz} - I_{yy}) \omega_y \omega_z \\
+m_y &= I_{yy} \dot{\omega}_y + (I_{xx} - I_{zz}) \omega_x \omega_z \\
+m_z &= I_{zz} \dot{\omega}_z + (I_{yy} - I_{xx}) \omega_x \omega_y
+\end{align}
+
+\subsection{特殊情况}
+
+\textbf{情况1}：绕$x$轴旋转（$\omega_y = \omega_z = 0$）
+\begin{equation}
+m_x = I_{xx} \dot{\omega}_x, \quad m_y = 0, \quad m_z = 0
+\end{equation}
+
+\textbf{情况2}：绕$y$轴旋转（$\omega_x = \omega_z = 0$）
+\begin{equation}
+m_x = 0, \quad m_y = I_{yy} \dot{\omega}_y, \quad m_z = 0
+\end{equation}
+
+\textbf{情况3}：绕$z$轴旋转（$\omega_x = \omega_y = 0$）
+\begin{equation}
+m_x = 0, \quad m_y = 0, \quad m_z = I_{zz} \dot{\omega}_z
+\end{equation}
+
+\textbf{结论}：绕主惯性轴旋转时，只需要一个方向的力矩，且陀螺项为零。
+
+\section{能量关系}
+
+\subsection{旋转动能}
+
+刚体的旋转动能为：
+\begin{equation}
+K_{\text{rot}} = \frac{1}{2} \omega_b^T I_b \omega_b
+\label{eq:rotational_kinetic_energy}
+\end{equation}
+
+\subsection{功率}
+
+力矩的功率为：
+\begin{equation}
+P = m_b^T \omega_b
+\end{equation}
+
+\textbf{展开}：
+\begin{align}
+P &= (I_b \dot{\omega}_b + [\omega_b] I_b \omega_b)^T \omega_b \\
+&= \dot{\omega}_b^T I_b^T \omega_b + ([\omega_b] I_b \omega_b)^T \omega_b \\
+&= \dot{\omega}_b^T I_b \omega_b + (I_b \omega_b)^T [\omega_b]^T \omega_b \\
+&= \dot{\omega}_b^T I_b \omega_b - (I_b \omega_b)^T [\omega_b] \omega_b \quad \text{（因为$[\omega_b]^T = -[\omega_b]$）} \\
+&= \dot{\omega}_b^T I_b \omega_b - (I_b \omega_b)^T (\omega_b \times \omega_b) \\
+&= \dot{\omega}_b^T I_b \omega_b - 0 \\
+&= \dot{\omega}_b^T I_b \omega_b
+\end{align}
+
+\textbf{与动能的关系}：
+\begin{equation}
+P = \frac{d}{dt}\left(\frac{1}{2} \omega_b^T I_b \omega_b\right) = \frac{dK_{\text{rot}}}{dt}
+\end{equation}
+
+这验证了能量守恒。
+
+\section{坐标变换}
+
+\subsection{从体坐标系到空间坐标系}
+
+如果力矩在空间坐标系中表示为$m_s$，角速度在空间坐标系中表示为$\omega_s$，那么：
+\begin{equation}
+m_s = R m_b, \quad \omega_s = R \omega_b
+\end{equation}
+
+其中$R$是从体坐标系到空间坐标系的旋转矩阵。
+
+\textbf{空间坐标系中的欧拉方程}：
+\begin{equation}
+m_s = I_s \dot{\omega}_s + [\omega_s] I_s \omega_s
+\end{equation}
+
+其中$I_s = R I_b R^T$是空间坐标系中的转动惯量矩阵。
+
+\section{应用示例}
+
+\subsection{示例1：陀螺仪}
+
+陀螺仪是一个快速旋转的刚体。即使没有外力矩，由于陀螺效应，陀螺仪会表现出进动。
+
+\textbf{无外力矩情况}（$m_b = 0$）：
+\begin{equation}
+I_b \dot{\omega}_b + [\omega_b] I_b \omega_b = 0
+\end{equation}
+
+即使$\dot{\omega}_b = 0$（角速度恒定），只要$\omega_b \neq 0$且不沿主惯性轴，角速度方向会改变（进动）。
+
+\subsection{示例2：航天器姿态控制}
+
+在航天器姿态控制中，欧拉方程用于：
+\begin{itemize}
+\item 计算维持特定角速度所需的力矩
+\item 设计姿态控制算法
+\item 分析姿态稳定性
+\end{itemize}
+
+\subsection{示例3：机器人连杆动力学}
+
+在机器人学中，每个连杆的旋转动力学由欧拉方程描述：
+\begin{equation}
+m_i = I_i \dot{\omega}_i + [\omega_i] I_i \omega_i
+\end{equation}
+
+这是递归牛顿-欧拉算法的基础。
+
+\section{数值求解}
+
+\subsection{给定力矩，求解角加速度}
+
+如果已知力矩$m_b$和当前角速度$\omega_b$，可以求解角加速度：
+\begin{equation}
+\dot{\omega}_b = I_b^{-1} (m_b - [\omega_b] I_b \omega_b)
+\end{equation}
+
+\textbf{注意}：$I_b$是正定矩阵，因此可逆。
+
+\subsection{给定角加速度，求解力矩}
+
+如果已知角加速度$\dot{\omega}_b$和角速度$\omega_b$，可以直接计算力矩：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\end{equation}
+
+\section{稳定性分析}
+
+\subsection{无外力矩情况}
+
+当$m_b = 0$时，欧拉方程为：
+\begin{equation}
+I_b \dot{\omega}_b = -[\omega_b] I_b \omega_b
+\end{equation}
+
+\textbf{绕主惯性轴旋转}：
+\begin{itemize}
+\item 如果$\omega_b$沿着主惯性轴方向，则$I_b \omega_b = \lambda \omega_b$（其中$\lambda$是主转动惯量）
+\item 此时$[\omega_b] I_b \omega_b = [\omega_b] (\lambda \omega_b) = \lambda (\omega_b \times \omega_b) = 0$
+\item 因此$I_b \dot{\omega}_b = 0$，即$\dot{\omega}_b = 0$（角速度恒定）
+\item 这是稳定的旋转状态
+\end{itemize}
+
+\textbf{非主惯性轴旋转}：
+\begin{itemize}
+\item 如果$\omega_b$不沿着主惯性轴方向，则$[\omega_b] I_b \omega_b \neq 0$
+\item 即使初始$\dot{\omega}_b = 0$，角速度方向会改变（进动）
+\item 这是不稳定的旋转状态
+\end{itemize}
+
+\subsection{能量稳定性}
+
+旋转动能$K_{\text{rot}} = \frac{1}{2} \omega_b^T I_b \omega_b$在无外力矩情况下守恒。
+
+\textbf{绕主惯性轴旋转}：
+\begin{itemize}
+\item 动能恒定，角速度大小和方向都恒定
+\item 这是能量最小的稳定状态
+\end{itemize}
+
+\textbf{非主惯性轴旋转}：
+\begin{itemize}
+\item 动能恒定，但角速度方向会改变
+\item 角速度在空间中进动，但动能保持不变
+\end{itemize}
+
+\section{与牛顿方程的关系}
+
+\subsection{完整的刚体动力学}
+
+刚体的完整动力学由牛顿方程和欧拉方程共同描述：
+
+\textbf{牛顿方程}（线运动）：
+\begin{equation}
+f_b = m \dot{v}_b + m [\omega_b] v_b
+\label{eq:newton_equation}
+\end{equation}
+
+\textbf{欧拉方程}（旋转运动）：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b
+\label{eq:euler_equation_complete}
+\end{equation}
+
+其中$m$是刚体的总质量。
+
+\subsection{耦合关系}
+
+线运动和旋转运动通过以下方式耦合：
+\begin{itemize}
+\item 线速度$v_b$和角速度$\omega_b$在牛顿方程中耦合
+\item 线加速度$\dot{v}_b$和角加速度$\dot{\omega}_b$在力矩计算中耦合
+\item 质心位置影响转动惯量矩阵（通过Steiner定理）
+\end{itemize}
+
+\section{矩阵形式}
+
+\subsection{空间惯性矩阵}
+
+刚体的完整动力学可以用$6 \times 6$空间惯性矩阵表示：
+\begin{equation}
+G_b = \begin{bmatrix}
+I_b & 0 \\
+0 & m I
+\end{bmatrix}
+\end{equation}
+
+其中$I$是$3 \times 3$单位矩阵。
+
+\subsection{统一的动力学方程}
+
+使用空间速度$\mathcal{V}_b = \begin{bmatrix} \omega_b \\ v_b \end{bmatrix}$和空间力$\mathcal{F}_b = \begin{bmatrix} m_b \\ f_b \end{bmatrix}$：
+
+\begin{equation}
+\mathcal{F}_b = G_b \dot{\mathcal{V}}_b + [\mathcal{V}_b]^T G_b \mathcal{V}_b
+\end{equation}
+
+其中$[\mathcal{V}_b]$是空间速度的反对称矩阵形式。
+
+\section{数值方法}
+
+\subsection{数值积分}
+
+给定初始条件$\omega_b(0)$和力矩$m_b(t)$，可以使用数值积分求解：
+
+\textbf{欧拉法}：
+\begin{align}
+\dot{\omega}_b(t) &= I_b^{-1} (m_b(t) - [\omega_b(t)] I_b \omega_b(t)) \\
+\omega_b(t + \Delta t) &= \omega_b(t) + \dot{\omega}_b(t) \Delta t
+\end{align}
+
+\textbf{龙格-库塔法}（更精确）：
+\begin{itemize}
+\item 使用四阶龙格-库塔法可以提高精度
+\item 特别适用于长时间仿真
+\end{itemize}
+
+\subsection{约束处理}
+
+如果刚体受到约束（如关节约束），需要：
+\begin{itemize}
+\item 添加约束力到力矩方程
+\item 使用拉格朗日乘数法或投影方法
+\item 确保约束条件得到满足
+\end{itemize}
+
+\section{实验验证}
+
+\subsection{陀螺仪实验}
+
+陀螺仪实验验证了欧拉方程中的陀螺项：
+\begin{itemize}
+\item 快速旋转的陀螺仪表现出进动
+\item 进动角速度与角动量成正比
+\item 验证了$[\omega_b] I_b \omega_b$项的存在
+\end{itemize}
+
+\subsection{自由旋转实验}
+
+自由旋转实验验证了稳定性分析：
+\begin{itemize}
+\item 绕主惯性轴旋转是稳定的
+\item 绕非主惯性轴旋转会产生进动
+\item 角动量守恒得到验证
+\end{itemize}
+
+\section{拓展应用}
+
+\subsection{多刚体系统}
+
+对于多刚体系统（如机器人），每个刚体的动力学由欧拉方程描述：
+\begin{equation}
+m_i = I_i \dot{\omega}_i + [\omega_i] I_i \omega_i
+\end{equation}
+
+通过递归牛顿-欧拉算法可以高效计算所有关节的力矩。
+
+\subsection{柔性体动力学}
+
+对于柔性体，欧拉方程需要扩展：
+\begin{itemize}
+\item 转动惯量矩阵可能随时间变化
+\item 需要考虑弹性变形的影响
+\item 使用模态分析方法简化计算
+\end{itemize}
+
+\subsection{流体中的刚体}
+
+在流体中运动的刚体，欧拉方程需要添加流体阻力项：
+\begin{equation}
+m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b + m_{\text{drag}}
+\end{equation}
+
+其中$m_{\text{drag}}$是流体阻力产生的力矩。
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{欧拉方程}：$m_b = I_b \dot{\omega}_b + [\omega_b] I_b \omega_b$是刚体旋转动力学的基本方程。
+
+\item \textbf{两项的物理意义}：
+\begin{itemize}
+\item $I_b \dot{\omega}_b$：惯性力矩，与角加速度成正比
+\item $[\omega_b] I_b \omega_b$：陀螺力矩，与角速度的平方成正比
+\end{itemize}
+
+\item \textbf{主惯性轴情况}：绕主惯性轴旋转时，方程简化，陀螺项可能为零。
+
+\item \textbf{能量关系}：功率等于旋转动能的时间导数，验证了能量守恒。
+
+\item \textbf{稳定性}：绕主惯性轴旋转是稳定的，绕非主惯性轴旋转会产生进动。
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 欧拉方程是角动量定理在旋转坐标系中的体现
+\item 陀螺项$[\omega_b] I_b \omega_b$是旋转坐标系效应的结果
+\item 主惯性轴对齐可以简化计算和分析
+\item 能量守恒是验证方程正确性的重要方法
+\end{itemize}
+
+\subsection{应用领域}
+
+\begin{itemize}
+\item 机器人动力学和控制
+\item 航天器姿态控制
+\item 陀螺仪和导航系统
+\item 机械系统设计和分析
+\item 多体系统动力学仿真
+\end{itemize}
+
+\subsection{进一步阅读}
+
+\begin{itemize}
+\item 刚体动力学经典教材
+\item 机器人学教材中的动力学章节
+\item 数值方法和仿真技术
+\item 控制理论中的动力学建模
+\end{itemize}
+
+\end{document}

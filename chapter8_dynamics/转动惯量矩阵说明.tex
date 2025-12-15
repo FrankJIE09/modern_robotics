@@ -1,0 +1,555 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{转动惯量矩阵说明}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+转动惯量矩阵（Rotational Inertia Matrix）是描述刚体旋转惯性特性的$3 \times 3$对称矩阵，它是刚体动力学中的核心概念。本文档详细说明转动惯量矩阵的定义、性质、计算方法和应用。
+
+\section{基本定义}
+
+\subsection{从点质量模型定义}
+
+对于由$n$个点质量组成的刚体，转动惯量矩阵$I_b \in \mathbb{R}^{3 \times 3}$定义为：
+
+\begin{equation}
+I_b = -\sum_{i=1}^{n} m_i [\bm{r}_i]^2
+\label{eq:inertia_discrete}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m_i$：第$i$个点质量的质量
+\item $\bm{r}_i = (x_i, y_i, z_i)^T$：第$i$个点质量在体坐标系$\{b\}$中的位置向量
+\item $[\bm{r}_i]$：$\bm{r}_i$的反对称矩阵
+\item 坐标系$\{b\}$的原点位于刚体的质心，即：$\sum_i m_i \bm{r}_i = 0$
+\end{itemize}
+
+\subsection{从连续质量分布定义}
+
+对于连续质量分布的刚体，转动惯量矩阵定义为：
+
+\begin{equation}
+I_b = \int_B \rho(x, y, z) \begin{bmatrix}
+y^2 + z^2 & -xy & -xz \\
+-xy & x^2 + z^2 & -yz \\
+-xz & -yz & x^2 + y^2
+\end{bmatrix} dV
+\label{eq:inertia_continuous}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $B$：刚体的体积
+\item $\rho(x, y, z)$：质量密度函数
+\item $dV$：体积微元
+\end{itemize}
+
+\subsection{反对称矩阵的平方}
+
+反对称矩阵$[\bm{r}]$定义为：
+
+\begin{equation}
+[\bm{r}] = \begin{bmatrix}
+0 & -r_z & r_y \\
+r_z & 0 & -r_x \\
+-r_y & r_x & 0
+\end{bmatrix}
+\end{equation}
+
+其平方为：
+
+\begin{equation}
+[\bm{r}]^2 = [\bm{r}][\bm{r}] = \begin{bmatrix}
+-(y^2 + z^2) & xy & xz \\
+xy & -(x^2 + z^2) & yz \\
+xz & yz & -(x^2 + y^2)
+\end{bmatrix}
+\end{equation}
+
+因此：
+
+\begin{equation}
+-[\bm{r}]^2 = \begin{bmatrix}
+y^2 + z^2 & -xy & -xz \\
+-xy & x^2 + z^2 & -yz \\
+-xz & -yz & x^2 + y^2
+\end{bmatrix}
+\end{equation}
+
+\section{矩阵元素}
+
+\subsection{标准表示}
+
+转动惯量矩阵通常写成对称矩阵形式：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix}
+\label{eq:inertia_matrix}
+\end{equation}
+
+\subsection{矩阵元素的定义}
+
+对于连续质量分布，各元素定义为：
+
+\begin{align}
+I_{xx} &= \int_B (y^2 + z^2) \rho(x, y, z) \, dV \label{eq:Ixx} \\
+I_{yy} &= \int_B (x^2 + z^2) \rho(x, y, z) \, dV \label{eq:Iyy} \\
+I_{zz} &= \int_B (x^2 + y^2) \rho(x, y, z) \, dV \label{eq:Izz} \\
+I_{xy} &= -\int_B xy \rho(x, y, z) \, dV \label{eq:Ixy} \\
+I_{xz} &= -\int_B xz \rho(x, y, z) \, dV \label{eq:Ixz} \\
+I_{yz} &= -\int_B yz \rho(x, y, z) \, dV \label{eq:Iyz}
+\end{align}
+
+对于点质量模型，积分替换为求和：
+
+\begin{align}
+I_{xx} &= \sum_i m_i (y_i^2 + z_i^2) \\
+I_{yy} &= \sum_i m_i (x_i^2 + z_i^2) \\
+I_{zz} &= \sum_i m_i (x_i^2 + y_i^2) \\
+I_{xy} &= -\sum_i m_i x_i y_i \\
+I_{xz} &= -\sum_i m_i x_i z_i \\
+I_{yz} &= -\sum_i m_i y_i z_i
+\end{align}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item \textbf{对角元素}（$I_{xx}$, $I_{yy}$, $I_{zz}$）：
+\begin{itemize}
+\item 称为\textbf{主转动惯量}（principal moments of inertia）
+\item $I_{xx}$：绕$x$轴的转动惯量
+\item $I_{yy}$：绕$y$轴的转动惯量
+\item $I_{zz}$：绕$z$轴的转动惯量
+\item 总是为正（或零，对于点质量）
+\end{itemize}
+
+\item \textbf{非对角元素}（$I_{xy}$, $I_{xz}$, $I_{yz}$）：
+\begin{itemize}
+\item 称为\textbf{惯性积}（products of inertia）
+\item 描述质量分布的不对称性
+\item 如果质量分布关于坐标平面对称，相应的惯性积为零
+\item 可以为正、负或零
+\end{itemize}
+\end{itemize}
+
+\section{基本性质}
+
+\subsection{对称性}
+
+转动惯量矩阵是对称矩阵：
+
+\begin{equation}
+I_b = I_b^T
+\end{equation}
+
+即$I_{ij} = I_{ji}$，因此只有6个独立元素。
+
+\subsection{正定性}
+
+转动惯量矩阵是正定矩阵，即对于任意非零角速度向量$\bm{\omega} \neq 0$：
+
+\begin{equation}
+\bm{\omega}^T I_b \bm{\omega} > 0
+\label{eq:positive_definite}
+\end{equation}
+
+\textbf{物理意义}：旋转动能总是为正（除非$\bm{\omega} = 0$）。
+
+\textbf{数学意义}：
+\begin{itemize}
+\item 所有特征值都为正
+\item 行列式为正：$\det(I_b) > 0$
+\item 所有主子式为正
+\end{itemize}
+
+\subsection{与旋转动能的关系}
+
+刚体的旋转动能为：
+
+\begin{equation}
+K_{\text{rot}} = \frac{1}{2} \bm{\omega}^T I_b \bm{\omega}
+\label{eq:rotational_kinetic_energy}
+\end{equation}
+
+其中$\bm{\omega}$是角速度向量。
+
+展开后：
+
+\begin{equation}
+K_{\text{rot}} = \frac{1}{2} (I_{xx} \omega_x^2 + I_{yy} \omega_y^2 + I_{zz} \omega_z^2 + 2I_{xy} \omega_x \omega_y + 2I_{xz} \omega_x \omega_z + 2I_{yz} \omega_y \omega_z)
+\end{equation}
+
+\subsection{与角动量的关系}
+
+刚体的角动量为：
+
+\begin{equation}
+\bm{L} = I_b \bm{\omega}
+\label{eq:angular_momentum}
+\end{equation}
+
+展开后：
+
+\begin{equation}
+\begin{bmatrix}
+L_x \\
+L_y \\
+L_z
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} & I_{xy} & I_{xz} \\
+I_{xy} & I_{yy} & I_{yz} \\
+I_{xz} & I_{yz} & I_{zz}
+\end{bmatrix} \begin{bmatrix}
+\omega_x \\
+\omega_y \\
+\omega_z
+\end{bmatrix}
+\end{equation}
+
+\textbf{注意}：角动量$\bm{L}$和角速度$\bm{\omega}$通常不平行，除非$\bm{\omega}$沿着主惯性轴方向。
+
+\section{主惯性轴}
+
+\subsection{定义}
+
+\textbf{主惯性轴}（principal axes of inertia）是使得转动惯量矩阵对角化的坐标轴方向。如果坐标轴与主惯性轴对齐，则：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+I_{xx} & 0 & 0 \\
+0 & I_{yy} & 0 \\
+0 & 0 & I_{zz}
+\end{bmatrix}
+\label{eq:diagonal_inertia}
+\end{equation}
+
+此时所有惯性积为零：$I_{xy} = I_{xz} = I_{yz} = 0$。
+
+\subsection{主转动惯量}
+
+对角元素$I_{xx}$, $I_{yy}$, $I_{zz}$称为\textbf{主转动惯量}（principal moments of inertia），它们是转动惯量矩阵的特征值。
+
+\subsection{如何找到主惯性轴}
+
+主惯性轴是转动惯量矩阵的特征向量方向：
+
+\begin{equation}
+I_b \bm{v}_i = \lambda_i \bm{v}_i, \quad i = 1, 2, 3
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\lambda_i$：特征值（主转动惯量）
+\item $\bm{v}_i$：特征向量（主惯性轴方向）
+\end{itemize}
+
+\subsection{对角化}
+
+如果坐标系$\{b\}$的轴不与主惯性轴对齐，可以通过旋转矩阵$R_{bc}$将其对角化：
+
+\begin{equation}
+I_c = R_{bc}^T I_b R_{bc} = \begin{bmatrix}
+\lambda_1 & 0 & 0 \\
+0 & \lambda_2 & 0 \\
+0 & 0 & \lambda_3
+\end{bmatrix}
+\label{eq:diagonalization}
+\end{equation}
+
+其中$R_{bc}$的列向量是$I_b$的特征向量（主惯性轴方向）。
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item 绕主惯性轴旋转时，角动量和角速度平行
+\item 绕主惯性轴旋转时，不需要额外的力矩来维持旋转（除非有角加速度）
+\item 一个主惯性轴对应最大转动惯量，另一个对应最小转动惯量
+\end{itemize}
+
+\section{坐标系变换}
+
+\subsection{旋转坐标系变换}
+
+如果转动惯量矩阵$I_b$在坐标系$\{b\}$中定义，在旋转后的坐标系$\{c\}$中的表示为：
+
+\begin{equation}
+I_c = R_{bc}^T I_b R_{bc}
+\label{eq:rotation_transform}
+\end{equation}
+
+其中$R_{bc}$是从坐标系$\{b\}$到$\{c\}$的旋转矩阵。
+
+\textbf{推导}：由于旋转动能是标量，不依赖于坐标系：
+
+\begin{equation}
+\frac{1}{2} \bm{\omega}_c^T I_c \bm{\omega}_c = \frac{1}{2} \bm{\omega}_b^T I_b \bm{\omega}_b
+\end{equation}
+
+使用$\bm{\omega}_b = R_{bc} \bm{\omega}_c$：
+
+\begin{align}
+\frac{1}{2} \bm{\omega}_c^T I_c \bm{\omega}_c &= \frac{1}{2} (R_{bc} \bm{\omega}_c)^T I_b (R_{bc} \bm{\omega}_c) \\
+&= \frac{1}{2} \bm{\omega}_c^T R_{bc}^T I_b R_{bc} \bm{\omega}_c
+\end{align}
+
+因此：$I_c = R_{bc}^T I_b R_{bc}$。
+
+\subsection{Steiner定理（平行轴定理）}
+
+如果转动惯量矩阵$I_b$在质心坐标系$\{b\}$中定义，在另一个坐标系$\{q\}$（与$\{b\}$平行，但原点在点$q = (q_x, q_y, q_z)^T$）中的表示为：
+
+\begin{equation}
+I_q = I_b + m(q^T q I - q q^T)
+\label{eq:steiner}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m$：刚体的质量
+\item $I$：$3 \times 3$单位矩阵
+\item $q$：从质心到点$q$的向量
+\end{itemize}
+
+展开后：
+
+\begin{equation}
+I_q = I_b + m \begin{bmatrix}
+q_y^2 + q_z^2 & -q_x q_y & -q_x q_z \\
+-q_x q_y & q_x^2 + q_z^2 & -q_y q_z \\
+-q_x q_z & -q_y q_z & q_x^2 + q_y^2
+\end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：转动惯量随着距离质心的距离增加而增加。
+
+\textbf{标量形式}（平行轴定理）：对于绕平行轴的标量转动惯量：
+
+\begin{equation}
+I_d = I_{\text{cm}} + m d^2
+\end{equation}
+
+其中$d$是两轴之间的距离。
+
+\section{在动力学方程中的应用}
+
+\subsection{欧拉方程}
+
+刚体的旋转动力学由欧拉方程描述：
+
+\begin{equation}
+\bm{m}_b = I_b \dot{\bm{\omega}}_b + [\bm{\omega}_b] I_b \bm{\omega}_b
+\label{eq:euler_equation}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\bm{m}_b$：作用在刚体上的力矩
+\item $\dot{\bm{\omega}}_b$：角加速度
+\item $[\bm{\omega}_b]$：角速度的反对称矩阵
+\end{itemize}
+
+\textbf{各项的物理意义}：
+\begin{itemize}
+\item $I_b \dot{\bm{\omega}}_b$：由于角加速度产生的惯性力矩
+\item $[\bm{\omega}_b] I_b \bm{\omega}_b$：由于旋转产生的陀螺力矩（科里奥利效应）
+\end{itemize}
+
+\subsection{主惯性轴情况}
+
+如果坐标轴与主惯性轴对齐，欧拉方程简化为：
+
+\begin{equation}
+\begin{bmatrix}
+m_x \\
+m_y \\
+m_z
+\end{bmatrix} = \begin{bmatrix}
+I_{xx} \dot{\omega}_x + (I_{zz} - I_{yy}) \omega_y \omega_z \\
+I_{yy} \dot{\omega}_y + (I_{xx} - I_{zz}) \omega_x \omega_z \\
+I_{zz} \dot{\omega}_z + (I_{yy} - I_{xx}) \omega_x \omega_y
+\end{bmatrix}
+\label{eq:euler_principal}
+\end{equation}
+
+\section{常见几何体的转动惯量矩阵}
+
+\subsection{均匀密度长方体}
+
+对于尺寸为$a \times b \times c$、质量为$m$的均匀密度长方体（质心在原点，轴与边对齐）：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+\frac{m(b^2 + c^2)}{12} & 0 & 0 \\
+0 & \frac{m(a^2 + c^2)}{12} & 0 \\
+0 & 0 & \frac{m(a^2 + b^2)}{12}
+\end{bmatrix}
+\end{equation}
+
+\subsection{均匀密度圆柱体}
+
+对于半径为$r$、高度为$h$、质量为$m$的均匀密度圆柱体（$z$轴沿圆柱轴）：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+\frac{m(3r^2 + h^2)}{12} & 0 & 0 \\
+0 & \frac{m(3r^2 + h^2)}{12} & 0 \\
+0 & 0 & \frac{mr^2}{2}
+\end{bmatrix}
+\end{equation}
+
+\subsection{均匀密度球体}
+
+对于半径为$r$、质量为$m$的均匀密度球体：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+\frac{2mr^2}{5} & 0 & 0 \\
+0 & \frac{2mr^2}{5} & 0 \\
+0 & 0 & \frac{2mr^2}{5}
+\end{bmatrix} = \frac{2mr^2}{5} I
+\end{equation}
+
+其中$I$是单位矩阵。球体的转动惯量矩阵是标量矩阵（所有方向的主转动惯量相同）。
+
+\subsection{均匀密度椭球}
+
+对于半轴为$a$、$b$、$c$，质量为$m$的均匀密度椭球（轴与坐标轴对齐）：
+
+\begin{equation}
+I_b = \begin{bmatrix}
+\frac{m(b^2 + c^2)}{5} & 0 & 0 \\
+0 & \frac{m(a^2 + c^2)}{5} & 0 \\
+0 & 0 & \frac{m(a^2 + b^2)}{5}
+\end{bmatrix}
+\end{equation}
+
+\section{在机器人动力学中的应用}
+
+\subsection{连杆的转动惯量矩阵}
+
+对于机器人连杆$i$，其转动惯量矩阵$I_i$在连杆坐标系$\{i\}$中定义，通常：
+\begin{itemize}
+\item 坐标系$\{i\}$固定在连杆$i$的质心
+\item 坐标轴尽可能与主惯性轴对齐（以简化计算）
+\end{itemize}
+
+\subsection{空间惯性矩阵}
+
+连杆$i$的空间惯性矩阵$G_i$（$6 \times 6$）包含转动惯量矩阵：
+
+\begin{equation}
+G_i = \begin{bmatrix}
+I_i & 0 \\
+0 & m_i I
+\end{bmatrix}
+\end{equation}
+
+其中$m_i$是连杆$i$的质量。
+
+\subsection{在牛顿-欧拉算法中}
+
+在递归牛顿-欧拉算法中，转动惯量矩阵用于计算：
+\begin{itemize}
+\item 连杆的角动量：$\bm{L}_i = I_i \bm{\omega}_i$
+\item 连杆的旋转动能：$K_i = \frac{1}{2} \bm{\omega}_i^T I_i \bm{\omega}_i$
+\item 连杆的动力学方程：$\bm{m}_i = I_i \dot{\bm{\omega}}_i + [\bm{\omega}_i] I_i \bm{\omega}_i$
+\end{itemize}
+
+\section{计算注意事项}
+
+\subsection{坐标系选择}
+
+\begin{itemize}
+\item \textbf{质心坐标系}：通常将坐标系原点放在质心，简化动力学方程
+\item \textbf{主惯性轴对齐}：尽可能使坐标轴与主惯性轴对齐，使矩阵对角化
+\item \textbf{一致性}：在机器人动力学中，所有连杆的转动惯量矩阵应在各自的连杆坐标系中表示
+\end{itemize}
+
+\subsection{数值计算}
+
+\begin{itemize}
+\item 对于复杂几何体，可能需要数值积分
+\item 可以使用CAD软件或有限元分析工具计算
+\item 对于组合刚体，先计算各部分的转动惯量，然后使用Steiner定理和旋转变换组合
+\end{itemize}
+
+\subsection{单位}
+
+\begin{itemize}
+\item 质量：kg
+\item 长度：m
+\item 转动惯量：kg·m²
+\item 角速度：rad/s
+\item 角加速度：rad/s²
+\item 力矩：N·m
+\end{itemize}
+
+\section{总结}
+
+\begin{enumerate}
+\item \textbf{定义}：$I_b = -\sum_i m_i [\bm{r}_i]^2$（点质量）或相应的积分形式（连续分布）
+
+\item \textbf{性质}：
+\begin{itemize}
+\item 对称矩阵：$I_b = I_b^T$
+\item 正定矩阵：$\bm{\omega}^T I_b \bm{\omega} > 0$（对任意$\bm{\omega} \neq 0$）
+\item 6个独立元素：3个对角元素（主转动惯量）+ 3个非对角元素（惯性积）
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 描述刚体的旋转惯性
+\item 与旋转动能相关：$K = \frac{1}{2} \bm{\omega}^T I_b \bm{\omega}$
+\item 与角动量相关：$\bm{L} = I_b \bm{\omega}$
+\end{itemize}
+
+\item \textbf{主惯性轴}：
+\begin{itemize}
+\item 使矩阵对角化的坐标轴方向
+\item 对应特征向量方向
+\item 主转动惯量对应特征值
+\end{itemize}
+
+\item \textbf{坐标系变换}：
+\begin{itemize}
+\item 旋转变换：$I_c = R_{bc}^T I_b R_{bc}$
+\item 平行轴定理（Steiner定理）：$I_q = I_b + m(q^T q I - q q^T)$
+\end{itemize}
+
+\item \textbf{应用}：
+\begin{itemize}
+\item 欧拉方程：$\bm{m} = I \dot{\bm{\omega}} + [\bm{\omega}] I \bm{\omega}$
+\item 机器人动力学中的连杆惯性描述
+\item 空间惯性矩阵的组成部分
+\end{itemize}
+\end{enumerate}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control, Chapter 8.2
+\item 经典力学教材中的刚体动力学章节
+\item 机器人动力学相关教材
+\end{itemize}
+
+\end{document}
+

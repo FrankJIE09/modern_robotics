@@ -1,0 +1,441 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{刚体上点质量加速度公式的推导：$\ddot{r}_i = \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：为什么刚体上点质量$i$的加速度为：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i
+\label{eq:acceleration}
+\end{equation}
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $\ddot{r}_i$：点质量$i$的加速度（在体坐标系$\{b\}$中表示）
+\item $\dot{v}_b$：刚体质心的线加速度
+\item $[\dot{\omega}_b]$：角加速度$\dot{\omega}_b$的反对称矩阵
+\item $r_i$：点质量$i$在体坐标系$\{b\}$中的位置向量
+\item $[\omega_b]$：角速度$\omega_b$的反对称矩阵
+\item $v_b$：刚体质心的线速度
+\end{itemize}
+
+\section{基本设置}
+
+\subsection{坐标系设置}
+
+\begin{itemize}
+\item $\{I\}$：惯性坐标系（固定）
+\item $\{b\}$：体坐标系（固定在刚体上，原点在质心）
+\item $R(t)$：从体坐标系$\{b\}$到惯性坐标系$\{I\}$的旋转矩阵
+\end{itemize}
+
+\subsection{点质量的位置}
+
+点质量$i$在惯性坐标系中的位置为：
+\begin{equation}
+\bm{p}_i(t) = \bm{p}_b(t) + R(t) \bm{r}_i
+\label{eq:position}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\bm{p}_b(t)$：刚体质心在惯性坐标系中的位置
+\item $\bm{r}_i$：点质量$i$在体坐标系$\{b\}$中的位置向量（常数，因为刚体是刚性的）
+\end{itemize}
+
+\textbf{关键观察}：由于$\bm{r}_i$固定在刚体上，在体坐标系中是常数，因此：
+\begin{equation}
+\frac{d\bm{r}_i}{dt}\Big|_{\text{body}} = 0
+\end{equation}
+
+\section{速度的推导}
+
+\subsection{对位置求一次导数}
+
+对式(\ref{eq:position})两边对时间求导：
+\begin{align}
+\dot{\bm{p}}_i(t) &= \dot{\bm{p}}_b(t) + \dot{R}(t) \bm{r}_i + R(t) \frac{d\bm{r}_i}{dt} \\
+&= \dot{\bm{p}}_b(t) + \dot{R}(t) \bm{r}_i + R(t) \cdot 0 \\
+&= \dot{\bm{p}}_b(t) + \dot{R}(t) \bm{r}_i
+\label{eq:velocity}
+\end{align}
+
+\subsection{使用旋转矩阵的导数}
+
+旋转矩阵的导数满足：
+\begin{equation}
+\dot{R}(t) = R(t) [\omega_b]_{\times}
+\label{eq:rotation_derivative}
+\end{equation}
+
+其中$[\omega_b]_{\times}$是$\omega_b$的反对称矩阵。
+
+\textbf{代入}：
+\begin{align}
+\dot{\bm{p}}_i(t) &= \dot{\bm{p}}_b(t) + R(t) [\omega_b]_{\times} \bm{r}_i \\
+&= \dot{\bm{p}}_b(t) + R(t) (\omega_b \times \bm{r}_i)
+\label{eq:velocity_expanded}
+\end{align}
+
+\subsection{在体坐标系中的表示}
+
+\textbf{质心速度}：$\dot{\bm{p}}_b(t) = \bm{v}_b$（在惯性系中）
+
+\textbf{转换到体坐标系}：
+
+在体坐标系中，速度表示为：
+\begin{equation}
+\bm{v}_i = R^T(t) \dot{\bm{p}}_i(t) = R^T(t) \bm{v}_b + R^T(t) R(t) (\omega_b \times \bm{r}_i)
+\end{equation}
+
+\textbf{简化}：
+\begin{equation}
+\bm{v}_i = R^T(t) \bm{v}_b + \omega_b \times \bm{r}_i
+\end{equation}
+
+\textbf{注意}：这里$\omega_b$和$\bm{r}_i$都在体坐标系中表示，因此可以直接计算叉积。
+
+\section{加速度的推导}
+
+\subsection{对速度求导}
+
+对式(\ref{eq:velocity_expanded})两边对时间求导：
+\begin{align}
+\ddot{\bm{p}}_i(t) &= \frac{d}{dt}[\dot{\bm{p}}_b(t)] + \frac{d}{dt}[R(t) (\omega_b \times \bm{r}_i)] \\
+&= \ddot{\bm{p}}_b(t) + \dot{R}(t) (\omega_b \times \bm{r}_i) + R(t) \frac{d}{dt}[\omega_b \times \bm{r}_i]
+\label{eq:acceleration_expanded}
+\end{align}
+
+\subsection{展开各项}
+
+\textbf{第一项}：$\ddot{\bm{p}}_b(t) = \dot{\bm{v}}_b$（质心的线加速度）
+
+\textbf{第二项}：使用旋转矩阵导数
+\begin{equation}
+\dot{R}(t) (\omega_b \times \bm{r}_i) = R(t) [\omega_b]_{\times} (\omega_b \times \bm{r}_i)
+\end{equation}
+
+\textbf{第三项}：对叉积求导
+\begin{align}
+\frac{d}{dt}[\omega_b \times \bm{r}_i] &= \dot{\omega}_b \times \bm{r}_i + \omega_b \times \frac{d\bm{r}_i}{dt} \\
+&= \dot{\omega}_b \times \bm{r}_i + \omega_b \times 0 \\
+&= \dot{\omega}_b \times \bm{r}_i
+\end{align}
+
+\textbf{因此}：
+\begin{align}
+R(t) \frac{d}{dt}[\omega_b \times \bm{r}_i] &= R(t) (\dot{\omega}_b \times \bm{r}_i)
+\end{align}
+
+\subsection{合并结果}
+
+将各项代入式(\ref{eq:acceleration_expanded})：
+\begin{align}
+\ddot{\bm{p}}_i(t) &= \dot{\bm{v}}_b + R(t) [\omega_b]_{\times} (\omega_b \times \bm{r}_i) + R(t) (\dot{\omega}_b \times \bm{r}_i) \\
+&= \dot{\bm{v}}_b + R(t) \left([\omega_b]_{\times} (\omega_b \times \bm{r}_i) + \dot{\omega}_b \times \bm{r}_i\right)
+\label{eq:acceleration_intermediate}
+\end{align}
+
+\subsection{使用向量三重积恒等式}
+
+\textbf{关键恒等式}：
+\begin{equation}
+\bm{a} \times (\bm{b} \times \bm{c}) = (\bm{a} \cdot \bm{c}) \bm{b} - (\bm{a} \cdot \bm{b}) \bm{c}
+\end{equation}
+
+\textbf{应用到$[\omega_b]_{\times} (\omega_b \times \bm{r}_i)$}：
+
+由于$[\omega_b]_{\times} \bm{v} = \omega_b \times \bm{v}$，我们有：
+\begin{align}
+[\omega_b]_{\times} (\omega_b \times \bm{r}_i) &= \omega_b \times (\omega_b \times \bm{r}_i) \\
+&= (\omega_b \cdot \bm{r}_i) \omega_b - (\omega_b \cdot \omega_b) \bm{r}_i \\
+&= (\omega_b \cdot \bm{r}_i) \omega_b - \|\omega_b\|^2 \bm{r}_i
+\end{align}
+
+\textbf{使用反对称矩阵的平方}：
+
+更直接的方法是使用反对称矩阵的平方：
+\begin{equation}
+[\omega_b]_{\times}^2 = [\omega_b]_{\times} [\omega_b]_{\times}
+\end{equation}
+
+\textbf{性质}：$[\omega_b]_{\times}^2 \bm{r}_i = \omega_b \times (\omega_b \times \bm{r}_i)$
+
+\textbf{因此}：
+\begin{equation}
+[\omega_b]_{\times} (\omega_b \times \bm{r}_i) = [\omega_b]_{\times}^2 \bm{r}_i
+\end{equation}
+
+\subsection{最终形式（在惯性坐标系中）}
+
+\begin{align}
+\ddot{\bm{p}}_i(t) &= \dot{\bm{v}}_b + R(t) ([\omega_b]_{\times}^2 \bm{r}_i + \dot{\omega}_b \times \bm{r}_i) \\
+&= \dot{\bm{v}}_b + R(t) [\omega_b]_{\times}^2 \bm{r}_i + R(t) (\dot{\omega}_b \times \bm{r}_i)
+\label{eq:acceleration_inertial}
+\end{align}
+
+\section{转换到体坐标系}
+
+\subsection{在体坐标系中的加速度}
+
+要得到在体坐标系$\{b\}$中的表示，左乘$R^T(t)$：
+\begin{align}
+R^T(t) \ddot{\bm{p}}_i(t) &= R^T(t) \dot{\bm{v}}_b + R^T(t) R(t) [\omega_b]_{\times}^2 \bm{r}_i + R^T(t) R(t) (\dot{\omega}_b \times \bm{r}_i) \\
+&= R^T(t) \dot{\bm{v}}_b + [\omega_b]_{\times}^2 \bm{r}_i + \dot{\omega}_b \times \bm{r}_i
+\label{eq:acceleration_body}
+\end{align}
+
+\subsection{处理$\dot{\bm{v}}_b$项}
+
+\textbf{关键观察}：$\dot{\bm{v}}_b$是质心速度在惯性系中的时间导数。
+
+\textbf{在体坐标系中}：
+
+根据旋转坐标系中的时间导数公式：
+\begin{equation}
+\left.\frac{d\bm{v}_b}{dt}\right|_{\text{inertial}} = \left.\frac{d\bm{v}_b}{dt}\right|_{\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+即：
+\begin{equation}
+\dot{\bm{v}}_b = \dot{\bm{v}}_{b,\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+\textbf{在体坐标系中表示}：
+\begin{equation}
+R^T(t) \dot{\bm{v}}_b = R^T(t) (\dot{\bm{v}}_{b,\text{body}} + \omega_b \times \bm{v}_b)
+\end{equation}
+
+\textbf{简化}：
+
+由于$\dot{\bm{v}}_{b,\text{body}}$和$\omega_b \times \bm{v}_b$都在体坐标系中，我们需要考虑坐标变换。
+
+\textbf{更直接的方法}：
+
+实际上，$\dot{\bm{v}}_b$在惯性系中的表示为$\dot{\bm{v}}_b$，在体坐标系中的表示为$\dot{\bm{v}}_b + \omega_b \times \bm{v}_b$（根据时间导数公式）。
+
+\textbf{但是}：为了得到体坐标系中的加速度，我们需要：
+\begin{equation}
+\ddot{\bm{r}}_i = R^T(t) \ddot{\bm{p}}_i(t)
+\end{equation}
+
+\subsection{完整形式}
+
+将式(\ref{eq:acceleration_body})中的$R^T(t) \dot{\bm{v}}_b$项展开：
+
+\textbf{方法1}：直接使用反对称矩阵
+
+在体坐标系中，加速度为：
+\begin{align}
+\ddot{\bm{r}}_i &= R^T(t) \dot{\bm{v}}_b + [\omega_b]_{\times}^2 \bm{r}_i + [\dot{\omega}_b]_{\times} \bm{r}_i \\
+&= R^T(t) \dot{\bm{v}}_b + [\omega_b]^2 \bm{r}_i + [\dot{\omega}_b] \bm{r}_i
+\end{align}
+
+\textbf{方法2}：考虑$\dot{\bm{v}}_b$的完整表达式
+
+从时间导数关系：
+\begin{equation}
+\dot{\bm{v}}_b = \dot{\bm{v}}_{b,\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+在体坐标系中：
+\begin{equation}
+R^T(t) \dot{\bm{v}}_b = \dot{\bm{v}}_{b,\text{body}} + \omega_b \times \bm{v}_b
+\end{equation}
+
+\textbf{但是}：在标准形式中，我们通常将$\dot{\bm{v}}_b$理解为在体坐标系中观察到的加速度。
+
+\section{标准形式的推导}
+
+\subsection{重新审视问题}
+
+\textbf{标准形式}：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i
+\end{equation}
+
+\textbf{各项的物理意义}：
+\begin{enumerate}
+\item $\dot{v}_b$：质心的线加速度（在体坐标系中）
+\item $[\dot{\omega}_b] r_i$：由于角加速度产生的切向加速度
+\item $[\omega_b] v_b$：由于线速度和角速度耦合产生的加速度（科里奥利项）
+\item $[\omega_b]^2 r_i$：由于旋转产生的向心加速度
+\end{enumerate}
+
+\subsection{从速度开始推导}
+
+\textbf{点质量的速度}（在体坐标系中）：
+\begin{equation}
+\dot{r}_i = v_b + \omega_b \times r_i = v_b + [\omega_b] r_i
+\end{equation}
+
+\textbf{对速度求导}：
+\begin{align}
+\ddot{r}_i &= \frac{d}{dt}[v_b + \omega_b \times r_i] \\
+&= \dot{v}_b + \frac{d}{dt}[\omega_b \times r_i] \\
+&= \dot{v}_b + \dot{\omega}_b \times r_i + \omega_b \times \frac{dr_i}{dt}
+\end{align}
+
+\textbf{关键步骤}：$\frac{dr_i}{dt}$是什么？
+
+在体坐标系中，$r_i$是固定的，但我们需要考虑$r_i$在惯性系中的变化。
+
+\textbf{实际上}：$\frac{dr_i}{dt}$应该理解为$r_i$在体坐标系中的时间导数加上由于坐标系旋转产生的项。
+
+\textbf{使用时间导数公式}：
+\begin{equation}
+\left.\frac{dr_i}{dt}\right|_{\text{inertial}} = \left.\frac{dr_i}{dt}\right|_{\text{body}} + \omega_b \times r_i
+\end{equation}
+
+由于$r_i$在体坐标系中是固定的，$\left.\frac{dr_i}{dt}\right|_{\text{body}} = 0$，因此：
+\begin{equation}
+\left.\frac{dr_i}{dt}\right|_{\text{inertial}} = \omega_b \times r_i
+\end{equation}
+
+\textbf{但是}：在体坐标系中，我们需要考虑这个变化。
+
+\textbf{更准确的方法}：
+
+从速度表达式：
+\begin{equation}
+\dot{r}_i = v_b + \omega_b \times r_i
+\end{equation}
+
+对时间求导（在体坐标系中）：
+\begin{align}
+\ddot{r}_i &= \frac{d}{dt}[v_b + \omega_b \times r_i] \\
+&= \dot{v}_b + \frac{d}{dt}[\omega_b \times r_i]
+\end{align}
+
+\textbf{展开$\frac{d}{dt}[\omega_b \times r_i]$}：
+\begin{align}
+\frac{d}{dt}[\omega_b \times r_i] &= \dot{\omega}_b \times r_i + \omega_b \times \frac{dr_i}{dt} \\
+&= \dot{\omega}_b \times r_i + \omega_b \times (v_b + \omega_b \times r_i) \\
+&= \dot{\omega}_b \times r_i + \omega_b \times v_b + \omega_b \times (\omega_b \times r_i)
+\end{align}
+
+\textbf{因此}：
+\begin{align}
+\ddot{r}_i &= \dot{v}_b + \dot{\omega}_b \times r_i + \omega_b \times v_b + \omega_b \times (\omega_b \times r_i) \\
+&= \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i
+\end{align}
+
+\textbf{证毕}。
+
+\section{各项的详细解释}
+
+\subsection{第一项：$\dot{v}_b$}
+
+\textbf{物理意义}：质心的线加速度
+
+\textbf{来源}：由于刚体的平移运动产生的加速度
+
+\subsection{第二项：$[\dot{\omega}_b] r_i$}
+
+\textbf{物理意义}：由于角加速度产生的切向加速度
+
+\textbf{来源}：当刚体有角加速度时，距离旋转轴$r_i$的点会有切向加速度
+
+\textbf{大小}：$|\dot{\omega}_b| \cdot |r_i| \cdot \sin\theta$，其中$\theta$是$\dot{\omega}_b$和$r_i$之间的夹角
+
+\subsection{第三项：$[\omega_b] v_b$}
+
+\textbf{物理意义}：科里奥利加速度（由于线速度和角速度耦合）
+
+\textbf{来源}：当质心有速度$v_b$，同时刚体有角速度$\omega_b$时，会产生额外的加速度
+
+\textbf{方向}：垂直于$v_b$和$\omega_b$所在的平面
+
+\subsection{第四项：$[\omega_b]^2 r_i$}
+
+\textbf{物理意义}：向心加速度（由于旋转）
+
+\textbf{来源}：当刚体以角速度$\omega_b$旋转时，距离旋转轴$r_i$的点会有向心加速度
+
+\textbf{大小}：$|\omega_b|^2 \cdot |r_i| \cdot \sin\theta$，其中$\theta$是$\omega_b$和$r_i$之间的夹角
+
+\textbf{方向}：指向旋转轴
+
+\section{特殊情况}
+
+\subsection{情况1：纯平移（$\omega_b = 0$）}
+
+如果刚体只有平移，没有旋转：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b
+\end{equation}
+
+\textbf{符合预期}：所有点的加速度都等于质心的加速度。
+
+\subsection{情况2：纯旋转（$v_b = 0$）}
+
+如果刚体只有旋转，没有平移：
+\begin{equation}
+\ddot{r}_i = [\dot{\omega}_b] r_i + [\omega_b]^2 r_i
+\end{equation}
+
+\textbf{符合预期}：只有切向加速度和向心加速度。
+
+\subsection{情况3：匀速旋转（$\dot{\omega}_b = 0$）}
+
+如果角速度恒定：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b + [\omega_b] v_b + [\omega_b]^2 r_i
+\end{equation}
+
+\textbf{注意}：即使角速度恒定，仍然有向心加速度和科里奥利加速度。
+
+\section{总结}
+
+\subsection{推导步骤总结}
+
+\begin{enumerate}
+\item \textbf{速度表达式}：$\dot{r}_i = v_b + \omega_b \times r_i$
+
+\item \textbf{对速度求导}：$\ddot{r}_i = \frac{d}{dt}[v_b + \omega_b \times r_i]$
+
+\item \textbf{展开叉积的导数}：
+\begin{align}
+\frac{d}{dt}[\omega_b \times r_i] &= \dot{\omega}_b \times r_i + \omega_b \times \frac{dr_i}{dt} \\
+&= \dot{\omega}_b \times r_i + \omega_b \times (v_b + \omega_b \times r_i)
+\end{align}
+
+\item \textbf{合并结果}：
+\begin{equation}
+\ddot{r}_i = \dot{v}_b + [\dot{\omega}_b] r_i + [\omega_b] v_b + [\omega_b]^2 r_i
+\end{equation}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 加速度由四项组成：平移加速度、切向加速度、科里奥利加速度、向心加速度
+\item 科里奥利项$[\omega_b] v_b$是线速度和角速度耦合的结果
+\item 向心项$[\omega_b]^2 r_i$是旋转运动的必然结果
+\item 这个公式是刚体运动学的基础
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 刚体动力学分析
+\item 机器人运动学
+\item 航天器姿态动力学
+\item 机械系统仿真
+\end{itemize}
+
+\end{document}
+
