@@ -1,0 +1,333 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{$[\text{ad}_{V_i}] A_i \dot{\theta}_i$与$[\text{ad}_{V_i}](A_i) \dot{\theta}_i$的区别与展开表示}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+在牛顿-欧拉逆向动力学的推导中，我们经常遇到两种看似相似但含义略有不同的表示：
+\begin{itemize}
+\item $[\text{ad}_{V_i}] A_i \dot{\theta}_i$
+\item $[\text{ad}_{V_i}](A_i) \dot{\theta}_i$
+\end{itemize}
+
+本文档将详细解释这两种表示的区别，并给出它们的完整展开形式。
+
+\section{符号定义}
+
+\subsection{基本符号}
+
+\begin{itemize}
+\item $V_i = (\omega_i, v_i) \in \mathbb{R}^6$：连杆$i$的twist，其中$\omega_i \in \mathbb{R}^3$是角速度，$v_i \in \mathbb{R}^3$是线速度
+\item $A_i = (\omega_{A_i}, v_{A_i}) \in \mathbb{R}^6$：关节$i$的螺旋轴
+\item $\dot{\theta}_i \in \mathbb{R}$：关节$i$的速度（标量）
+\item $[\text{ad}_{V_i}] \in \mathbb{R}^{6 \times 6}$：$\text{ad}_{V_i}$算子的矩阵表示
+\end{itemize}
+
+\subsection{$\text{ad}$算子的定义}
+
+对于twist $V = (\omega, v)$，$\text{ad}_V$算子的矩阵表示为：
+\begin{equation}
+[\text{ad}_V] = \begin{bmatrix}
+[\omega] & 0 \\
+[v] & [\omega]
+\end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\label{eq:ad_matrix}
+\end{equation}
+
+其中$[\omega]$和$[v]$分别是$\omega$和$v$的反对称矩阵表示。
+
+\section{两种表示的区别}
+
+\subsection{表示1：$[\text{ad}_{V_i}] A_i \dot{\theta}_i$}
+
+\textbf{含义}：
+\begin{itemize}
+\item 这是\textbf{矩阵乘法}的表示
+\item 计算顺序：先计算$[\text{ad}_{V_i}] A_i$（矩阵乘以向量），再乘以标量$\dot{\theta}_i$
+\item 等价于：$( [\text{ad}_{V_i}] A_i ) \dot{\theta}_i$
+\end{itemize}
+
+\textbf{展开形式}：
+
+设$V_i = (\omega_i, v_i)$，$A_i = (\omega_{A_i}, v_{A_i})$，则：
+
+\begin{align}
+[\text{ad}_{V_i}] A_i \dot{\theta}_i &= \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix} \begin{bmatrix}
+\omega_{A_i} \\
+v_{A_i}
+\end{bmatrix} \dot{\theta}_i \\
+&= \begin{bmatrix}
+[\omega_i] \omega_{A_i} \\
+[v_i] \omega_{A_i} + [\omega_i] v_{A_i}
+\end{bmatrix} \dot{\theta}_i \\
+&= \begin{bmatrix}
+\omega_i \times \omega_{A_i} \\
+v_i \times \omega_{A_i} + \omega_i \times v_{A_i}
+\end{bmatrix} \dot{\theta}_i \\
+&= \begin{bmatrix}
+(\omega_i \times \omega_{A_i}) \dot{\theta}_i \\
+(v_i \times \omega_{A_i} + \omega_i \times v_{A_i}) \dot{\theta}_i
+\end{bmatrix}
+\label{eq:notation1_expanded}
+\end{align}
+
+\subsection{表示2：$[\text{ad}_{V_i}](A_i) \dot{\theta}_i$}
+
+\textbf{含义}：
+\begin{itemize}
+\item 这是\textbf{算子作用}的表示
+\item $[\text{ad}_{V_i}](A_i)$表示$\text{ad}_{V_i}$算子作用在$A_i$上的结果
+\item 根据定义：$\text{ad}_{V_i}(A_i) = [\text{ad}_{V_i}] A_i$
+\item 因此：$[\text{ad}_{V_i}](A_i) = [\text{ad}_{V_i}] A_i$
+\end{itemize}
+
+\textbf{展开形式}：
+
+\begin{align}
+[\text{ad}_{V_i}](A_i) \dot{\theta}_i &= \text{ad}_{V_i}(A_i) \dot{\theta}_i \\
+&= ([\text{ad}_{V_i}] A_i) \dot{\theta}_i \\
+&= \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix} \begin{bmatrix}
+\omega_{A_i} \\
+v_{A_i}
+\end{bmatrix} \dot{\theta}_i \\
+&= \begin{bmatrix}
+\omega_i \times \omega_{A_i} \\
+v_i \times \omega_{A_i} + \omega_i \times v_{A_i}
+\end{bmatrix} \dot{\theta}_i \\
+&= \begin{bmatrix}
+(\omega_i \times \omega_{A_i}) \dot{\theta}_i \\
+(v_i \times \omega_{A_i} + \omega_i \times v_{A_i}) \dot{\theta}_i
+\end{bmatrix}
+\label{eq:notation2_expanded}
+\end{align}
+
+\section{数学等价性}
+
+\subsection{基本等价关系}
+
+从数学上看，这两种表示是\textbf{等价的}：
+
+\begin{equation}
+[\text{ad}_{V_i}] A_i \dot{\theta}_i = [\text{ad}_{V_i}](A_i) \dot{\theta}_i
+\label{eq:equivalence}
+\end{equation}
+
+\textbf{证明}：
+
+根据$\text{ad}$算子的定义：
+\begin{equation}
+\text{ad}_{V_i}(A_i) = [\text{ad}_{V_i}] A_i
+\end{equation}
+
+因此：
+\begin{align}
+[\text{ad}_{V_i}](A_i) \dot{\theta}_i &= \text{ad}_{V_i}(A_i) \dot{\theta}_i \\
+&= ([\text{ad}_{V_i}] A_i) \dot{\theta}_i \\
+&= [\text{ad}_{V_i}] A_i \dot{\theta}_i
+\end{align}
+
+\subsection{符号约定的说明}
+
+虽然在数学上等价，但在不同的文献和推导中，可能会使用不同的符号约定：
+
+\begin{enumerate}
+\item \textbf{矩阵乘法表示}：$[\text{ad}_{V_i}] A_i \dot{\theta}_i$
+\begin{itemize}
+\item 强调这是矩阵与向量的乘法
+\item 计算顺序明确：先矩阵乘法，再标量乘法
+\end{itemize}
+
+\item \textbf{算子作用表示}：$[\text{ad}_{V_i}](A_i) \dot{\theta}_i$
+\begin{itemize}
+\item 强调这是Lie括号运算
+\item 更符合Lie代数的数学语言
+\item 括号表示算子的作用
+\end{itemize}
+\end{enumerate}
+
+\section{详细展开计算}
+
+\subsection{完整的分量展开}
+
+为了更清楚地看到区别，我们给出完整的分量展开。
+
+\textbf{第一步：计算$[\text{ad}_{V_i}] A_i$}
+
+设：
+\begin{align}
+\omega_i &= (\omega_{i,x}, \omega_{i,y}, \omega_{i,z})^T \\
+v_i &= (v_{i,x}, v_{i,y}, v_{i,z})^T \\
+\omega_{A_i} &= (\omega_{A_i,x}, \omega_{A_i,y}, \omega_{A_i,z})^T \\
+v_{A_i} &= (v_{A_i,x}, v_{A_i,y}, v_{A_i,z})^T
+\end{align}
+
+则：
+\begin{equation}
+[\omega_i] = \begin{bmatrix}
+0 & -\omega_{i,z} & \omega_{i,y} \\
+\omega_{i,z} & 0 & -\omega_{i,x} \\
+-\omega_{i,y} & \omega_{i,x} & 0
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+[v_i] = \begin{bmatrix}
+0 & -v_{i,z} & v_{i,y} \\
+v_{i,z} & 0 & -v_{i,x} \\
+-v_{i,y} & v_{i,x} & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{第二步：计算$[\text{ad}_{V_i}] A_i$的分量}
+
+上部分（角速度部分）：
+\begin{align}
+[\omega_i] \omega_{A_i} &= \omega_i \times \omega_{A_i} \\
+&= \begin{bmatrix}
+\omega_{i,y} \omega_{A_i,z} - \omega_{i,z} \omega_{A_i,y} \\
+\omega_{i,z} \omega_{A_i,x} - \omega_{i,x} \omega_{A_i,z} \\
+\omega_{i,x} \omega_{A_i,y} - \omega_{i,y} \omega_{A_i,x}
+\end{bmatrix}
+\end{align}
+
+下部分（线速度部分）：
+\begin{align}
+[v_i] \omega_{A_i} + [\omega_i] v_{A_i} &= v_i \times \omega_{A_i} + \omega_i \times v_{A_i} \\
+&= \begin{bmatrix}
+v_{i,y} \omega_{A_i,z} - v_{i,z} \omega_{A_i,y} + \omega_{i,y} v_{A_i,z} - \omega_{i,z} v_{A_i,y} \\
+v_{i,z} \omega_{A_i,x} - v_{i,x} \omega_{A_i,z} + \omega_{i,z} v_{A_i,x} - \omega_{i,x} v_{A_i,z} \\
+v_{i,x} \omega_{A_i,y} - v_{i,y} \omega_{A_i,x} + \omega_{i,x} v_{A_i,y} - \omega_{i,y} v_{A_i,x}
+\end{bmatrix}
+\end{align}
+
+\textbf{第三步：乘以$\dot{\theta}_i$}
+
+\begin{align}
+[\text{ad}_{V_i}] A_i \dot{\theta}_i &= \begin{bmatrix}
+(\omega_i \times \omega_{A_i}) \dot{\theta}_i \\
+(v_i \times \omega_{A_i} + \omega_i \times v_{A_i}) \dot{\theta}_i
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\begin{bmatrix}
+(\omega_{i,y} \omega_{A_i,z} - \omega_{i,z} \omega_{A_i,y}) \dot{\theta}_i \\
+(\omega_{i,z} \omega_{A_i,x} - \omega_{i,x} \omega_{A_i,z}) \dot{\theta}_i \\
+(\omega_{i,x} \omega_{A_i,y} - \omega_{i,y} \omega_{A_i,x}) \dot{\theta}_i
+\end{bmatrix} \\
+\begin{bmatrix}
+(v_{i,y} \omega_{A_i,z} - v_{i,z} \omega_{A_i,y} + \omega_{i,y} v_{A_i,z} - \omega_{i,z} v_{A_i,y}) \dot{\theta}_i \\
+(v_{i,z} \omega_{A_i,x} - v_{i,x} \omega_{A_i,z} + \omega_{i,z} v_{A_i,x} - \omega_{i,x} v_{A_i,z}) \dot{\theta}_i \\
+(v_{i,x} \omega_{A_i,y} - v_{i,y} \omega_{A_i,x} + \omega_{i,x} v_{A_i,y} - \omega_{i,y} v_{A_i,x}) \dot{\theta}_i
+\end{bmatrix}
+\end{bmatrix}
+\end{align}
+
+\section{在加速度递推中的应用}
+
+\subsection{加速度递推公式中的使用}
+
+在加速度递推公式中：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}] A_i \dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+这里使用$[\text{ad}_{V_i}] A_i \dot{\theta}_i$表示，等价于：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}](A_i) \dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+\textbf{物理意义}：
+
+这一项$[\text{ad}_{V_i}] A_i \dot{\theta}_i$表示：
+\begin{itemize}
+\item 由于连杆$i$的速度$V_i$和关节$i$的螺旋轴$A_i$之间的相互作用
+\item 产生的耦合加速度项
+\item 这是科里奥利力和向心力的来源之一
+\end{itemize}
+
+\subsection{与速度递推公式的关系}
+
+从速度递推公式：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+对时间求导时，$A_i \dot{\theta}_i$项会产生：
+\begin{align}
+\frac{d}{dt}[A_i \dot{\theta}_i] &= A_i \ddot{\theta}_i + \dot{A}_i \dot{\theta}_i
+\end{align}
+
+但由于$A_i$在坐标系$\{i\}$中是常数，$\dot{A}_i = 0$。然而，$\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})]$项会产生与$A_i \dot{\theta}_i$相关的耦合项，这就是$[\text{ad}_{V_i}] A_i \dot{\theta}_i$的来源。
+
+\section{计算顺序的重要性}
+
+\subsection{矩阵乘法的结合性}
+
+虽然两种表示在数学上等价，但在实际计算中需要注意：
+
+\begin{itemize}
+\item $[\text{ad}_{V_i}] A_i \dot{\theta}_i$：先计算$[\text{ad}_{V_i}] A_i$（$6 \times 6$矩阵乘以$6 \times 1$向量，得到$6 \times 1$向量），再乘以标量$\dot{\theta}_i$
+\item $[\text{ad}_{V_i}](A_i) \dot{\theta}_i$：先计算$[\text{ad}_{V_i}](A_i) = [\text{ad}_{V_i}] A_i$（得到$6 \times 1$向量），再乘以标量$\dot{\theta}_i$
+\end{itemize}
+
+\textbf{注意}：不能写成$[\text{ad}_{V_i}] (A_i \dot{\theta}_i)$，因为：
+\begin{itemize}
+\item $A_i \dot{\theta}_i$是$6 \times 1$向量
+\item $[\text{ad}_{V_i}] (A_i \dot{\theta}_i)$是$6 \times 6$矩阵乘以$6 \times 1$向量，结果正确
+\item 但这样写会改变计算的语义，因为$A_i \dot{\theta}_i$本身有特定的物理意义（关节运动产生的速度）
+\end{itemize}
+
+\section{总结}
+
+\begin{enumerate}
+\item \textbf{数学等价性}：$[\text{ad}_{V_i}] A_i \dot{\theta}_i = [\text{ad}_{V_i}](A_i) \dot{\theta}_i$
+
+\item \textbf{表示方式}：
+\begin{itemize}
+\item $[\text{ad}_{V_i}] A_i \dot{\theta}_i$：强调矩阵乘法
+\item $[\text{ad}_{V_i}](A_i) \dot{\theta}_i$：强调算子作用
+\end{itemize}
+
+\item \textbf{展开形式}：两者都展开为：
+\begin{equation}
+\begin{bmatrix}
+(\omega_i \times \omega_{A_i}) \dot{\theta}_i \\
+(v_i \times \omega_{A_i} + \omega_i \times v_{A_i}) \dot{\theta}_i
+\end{bmatrix}
+\end{equation}
+
+\item \textbf{物理意义}：表示由于速度$V_i$和螺旋轴$A_i$之间的相互作用产生的耦合加速度项
+
+\item \textbf{计算顺序}：先计算$[\text{ad}_{V_i}] A_i$（得到$6 \times 1$向量），再乘以标量$\dot{\theta}_i$
+\end{enumerate}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control, Chapter 8
+\item 牛顿-欧拉逆向动力学详细推导：\texttt{newton\_euler.tex}
+\end{itemize}
+
+\end{document}
+
+
+

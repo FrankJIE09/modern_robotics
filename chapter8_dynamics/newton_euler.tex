@@ -1,0 +1,899 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{牛顿-欧拉逆向动力学详细推导}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+牛顿-欧拉逆向动力学算法是计算机器人动力学最有效的方法之一。给定机器人的关节位置$\theta$、速度$\dot{\theta}$和加速度$\ddot{\theta}$，该算法可以递归地计算出所需的关节力矩$\tau$。
+
+本文档将详细推导牛顿-欧拉逆向动力学算法的所有公式，包括前向递推（计算速度和加速度）和后向递推（计算力和力矩）的完整推导过程。
+
+\section{问题陈述}
+
+\subsection{逆向动力学问题}
+
+对于$n$个关节的开链机器人，逆向动力学问题是：给定
+\begin{itemize}
+\item 关节位置：$\theta = (\theta_1, \theta_2, \ldots, \theta_n) \in \mathbb{R}^n$
+\item 关节速度：$\dot{\theta} = (\dot{\theta}_1, \dot{\theta}_2, \ldots, \dot{\theta}_n) \in \mathbb{R}^n$
+\item 关节加速度：$\ddot{\theta} = (\ddot{\theta}_1, \ddot{\theta}_2, \ldots, \ddot{\theta}_n) \in \mathbb{R}^n$
+\end{itemize}
+
+计算所需的关节力矩：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\label{eq:problem}
+\end{equation}
+
+其中$M(\theta)$是质量矩阵，$h(\theta, \dot{\theta})$包含科里奥利力、向心力和重力项。
+
+\subsection{坐标系设置}
+
+\begin{itemize}
+\item 基座坐标系：$\{0\}$固定在基座上
+\item 连杆坐标系：$\{i\}$固定在连杆$i$的质心处，$i = 1, 2, \ldots, n$
+\item 末端执行器坐标系：$\{n+1\}$固定在末端执行器上
+\end{itemize}
+
+\subsection{符号定义}
+
+\begin{itemize}
+\item $M_{i-1,i} \in SE(3)$：当$\theta_i = 0$时，坐标系$\{i-1\}$相对于$\{i\}$的位姿
+\item $T_{i-1,i}(\theta_i) \in SE(3)$：当关节$i$的角度为$\theta_i$时，坐标系$\{i-1\}$相对于$\{i\}$的位姿
+\item $A_i \in \mathbb{R}^6$：关节$i$的螺旋轴，在坐标系$\{i\}$中表示
+\item $V_i = (\omega_i, v_i) \in \mathbb{R}^6$：连杆$i$的twist，在坐标系$\{i\}$中表示
+\item $\dot{V}_i = (\dot{\omega}_i, \dot{v}_i) \in \mathbb{R}^6$：连杆$i$的twist的导数
+\item $F_i = (m_i, f_i) \in \mathbb{R}^6$：通过关节$i$传递到连杆$i$的wrench，在坐标系$\{i\}$中表示
+\item $G_i \in \mathbb{R}^{6 \times 6}$：连杆$i$的空间惯性矩阵，在坐标系$\{i\}$中表示
+\end{itemize}
+
+\section{前向递推：速度和加速度计算}
+
+前向递推从基座开始，逐级计算每个连杆的速度和加速度。
+
+\subsection{初始条件}
+
+基座的速度和加速度：
+\begin{align}
+V_0 &= (0, 0) \quad \text{（基座静止）} \\
+\dot{V}_0 &= (0, -g) \quad \text{（重力作为基座的加速度）}
+\end{align}
+
+其中$g \in \mathbb{R}^3$是重力加速度向量，在基座坐标系中表示。
+
+\subsection{位姿变换}
+
+对于关节$i$，当关节角度为$\theta_i$时，坐标系$\{i-1\}$相对于$\{i\}$的位姿为：
+\begin{equation}
+T_{i-1,i}(\theta_i) = M_{i-1,i} e^{[A_i]\theta_i}
+\label{eq:pose_transform}
+\end{equation}
+
+其逆变换为：
+\begin{equation}
+T_{i,i-1}(\theta_i) = T_{i-1,i}^{-1}(\theta_i) = e^{-[A_i]\theta_i} M_{i,i-1}
+\label{eq:pose_inverse}
+\end{equation}
+
+其中$M_{i,i-1} = M_{i-1,i}^{-1}$。
+
+\subsection{速度递推公式的推导}
+
+\subsubsection{基本关系}
+
+连杆$i$的速度$V_i$由两部分组成：
+\begin{enumerate}
+\item 连杆$i-1$的速度，但需要转换到坐标系$\{i\}$中
+\item 关节$i$的运动产生的额外速度
+\end{enumerate}
+
+\subsubsection{详细推导}
+
+考虑坐标系$\{i-1\}$和$\{i\}$之间的关系。如果$p$是坐标系$\{i-1\}$中的一个点，其在坐标系$\{i\}$中的表示为：
+\begin{equation}
+p_i = T_{i,i-1} p_{i-1}
+\end{equation}
+
+对时间求导：
+\begin{align}
+\dot{p}_i &= \frac{d}{dt}[T_{i,i-1} p_{i-1}] \\
+          &= \dot{T}_{i,i-1} p_{i-1} + T_{i,i-1} \dot{p}_{i-1}
+\end{align}
+
+根据twist的定义，我们知道：
+\begin{equation}
+\dot{T}_{i,i-1} = [V_i] T_{i,i-1}
+\end{equation}
+
+其中$[V_i]$是twist $V_i$的反对称矩阵表示。
+
+同时，对于坐标系$\{i-1\}$中的点：
+\begin{equation}
+\dot{p}_{i-1} = [V_{i-1}] p_{i-1}
+\end{equation}
+
+因此：
+\begin{align}
+\dot{p}_i &= [V_i] T_{i,i-1} p_{i-1} + T_{i,i-1} [V_{i-1}] p_{i-1} \\
+          &= [V_i] p_i + T_{i,i-1} [V_{i-1}] T_{i,i-1}^{-1} p_i
+\end{align}
+
+这给出了速度变换关系：
+\begin{equation}
+[V_i] = [V_{i-1}]_{\text{transformed}} + [\text{joint motion}]
+\end{equation}
+
+更精确地，使用伴随变换（adjoint transformation）：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\label{eq:velocity_recursive}
+\end{equation}
+
+其中$\text{Ad}_{T_{i,i-1}}$是伴随变换矩阵：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} = \begin{bmatrix}
+R_{i,i-1} & 0 \\
+[p]R_{i,i-1} & R_{i,i-1}
+\end{bmatrix}
+\end{equation}
+
+这里$T_{i,i-1} = \begin{bmatrix} R_{i,i-1} & p \\ 0 & 1 \end{bmatrix}$。
+
+\subsubsection{$V_i$与$A_i \dot{\theta}_i$的关系详解}
+
+\textbf{基本关系}：
+
+从速度递推公式(\ref{eq:velocity_recursive})可以看出，连杆$i$的速度$V_i$由两部分组成：
+
+\begin{equation}
+V_i = \underbrace{\text{Ad}_{T_{i,i-1}}(V_{i-1})}_{\text{来自连杆$i-1$的速度}} + \underbrace{A_i \dot{\theta}_i}_{\text{关节$i$运动产生的速度}}
+\label{eq:V_i_components}
+\end{equation}
+
+\textbf{各项的物理意义}：
+
+\begin{enumerate}
+\item \textbf{$\text{Ad}_{T_{i,i-1}}(V_{i-1})$}：
+\begin{itemize}
+\item 这是连杆$i-1$的速度$V_{i-1}$，但转换到坐标系$\{i\}$中表示
+\item 表示由于连杆$i-1$的运动而传递给连杆$i$的速度
+\item 即使关节$i$不动（$\dot{\theta}_i = 0$），如果连杆$i-1$在运动，连杆$i$也会有速度
+\end{itemize}
+
+\item \textbf{$A_i \dot{\theta}_i$}：
+\begin{itemize}
+\item 这是关节$i$的运动直接产生的速度
+\item $A_i$是关节$i$的螺旋轴，描述了关节运动的方向和类型
+\item $\dot{\theta}_i$是关节$i$的角速度（旋转关节）或线速度（移动关节）
+\item 即使连杆$i-1$静止（$V_{i-1} = 0$），关节$i$的运动也会使连杆$i$产生速度
+\end{itemize}
+\end{enumerate}
+
+\textbf{具体计算}：
+
+设$A_i = (\omega_{A_i}, v_{A_i})$，其中：
+\begin{itemize}
+\item 对于旋转关节：$\omega_{A_i}$是单位旋转轴方向，$v_{A_i} = 0$
+\item 对于移动关节：$\omega_{A_i} = 0$，$v_{A_i}$是单位移动方向
+\end{itemize}
+
+则$A_i \dot{\theta}_i$的具体形式为：
+
+\begin{itemize}
+\item \textbf{旋转关节}：
+\begin{equation}
+A_i \dot{\theta}_i = \begin{bmatrix}
+\omega_{A_i} \dot{\theta}_i \\
+0
+\end{bmatrix} = \begin{bmatrix}
+\omega_{A_i} \dot{\theta}_i \\
+v_{A_i} \dot{\theta}_i
+\end{bmatrix}
+\end{equation}
+其中$\omega_{A_i} \dot{\theta}_i$是角速度，$v_{A_i} = 0$。
+
+\item \textbf{移动关节}：
+\begin{equation}
+A_i \dot{\theta}_i = \begin{bmatrix}
+0 \\
+v_{A_i} \dot{\theta}_i
+\end{bmatrix}
+\end{equation}
+其中$\omega_{A_i} = 0$，$v_{A_i} \dot{\theta}_i$是线速度。
+\end{itemize}
+
+\textbf{关系总结}：
+
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+这个关系表明：
+\begin{itemize}
+\item $V_i$是连杆$i$的\textbf{总速度}，包含两部分贡献
+\item $A_i \dot{\theta}_i$是$V_i$的\textbf{组成部分}，表示关节$i$运动对速度的贡献
+\item 两者是\textbf{线性叠加}的关系
+\item 当$\dot{\theta}_i = 0$时，$A_i \dot{\theta}_i = 0$，此时$V_i$完全来自连杆$i-1$的速度传递
+\item 当$V_{i-1} = 0$时，$V_i = A_i \dot{\theta}_i$，此时连杆$i$的速度完全由关节$i$的运动产生
+\end{itemize}
+
+\textbf{在加速度递推中的应用}：
+
+当我们对速度递推公式求导时：
+\begin{align}
+\dot{V}_i &= \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] + \frac{d}{dt}[A_i \dot{\theta}_i] \\
+&= \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] + A_i \ddot{\theta}_i + \dot{A}_i \dot{\theta}_i
+\end{align}
+
+由于$A_i$在坐标系$\{i\}$中是常数，$\dot{A}_i = 0$，但$\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})]$项会产生与$A_i \dot{\theta}_i$相关的耦合项$[\text{ad}_{V_i}] A_i \dot{\theta}_i$，这反映了速度项之间的相互作用。
+
+\subsubsection{伴随变换的推导}
+
+设$T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix} \in SE(3)$，twist $V = (\omega, v)$。
+
+对于任意点$q$，有：
+\begin{equation}
+T q = R q + p
+\end{equation}
+
+如果$q$以速度$V$运动，即$\dot{q} = [\omega] q + v$，则：
+\begin{align}
+\frac{d}{dt}(T q) &= \dot{R} q + R \dot{q} + \dot{p} \\
+                  &= [\omega_T] R q + R([\omega] q + v) + v_T
+\end{align}
+
+其中$\omega_T$和$v_T$是$T$的twist。
+
+整理得：
+\begin{align}
+\frac{d}{dt}(T q) &= [\omega_T] R q + R[\omega] q + R v + v_T \\
+                  &= [\omega_T] R q + R[\omega]R^T R q + R v + v_T \\
+                  &= ([\omega_T] + R[\omega]R^T) R q + R v + v_T
+\end{align}
+
+因此，变换后的twist为：
+\begin{equation}
+V_T = \begin{bmatrix}
+\omega_T \\
+v_T
+\end{bmatrix} = \begin{bmatrix}
+R \omega \\
+[p]R \omega + R v
+\end{bmatrix} = \text{Ad}_T(V)
+\end{equation}
+
+其中：
+\begin{equation}
+\text{Ad}_T = \begin{bmatrix}
+R & 0 \\
+[p]R & R
+\end{bmatrix}
+\end{equation}
+
+\subsection{加速度递推公式的推导}
+
+\subsubsection{基本思路}
+
+对速度递推公式（\ref{eq:velocity_recursive}）求时间导数：
+\begin{equation}
+\dot{V}_i = \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] + A_i \ddot{\theta}_i + \dot{A}_i \dot{\theta}_i
+\end{equation}
+
+\subsubsection{详细推导}
+
+首先计算$\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})]$：
+\begin{align}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] &= \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}] V_{i-1} + \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} \\
+&= \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}] V_{i-1} + \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1})
+\end{align}
+
+现在需要计算$\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}]$。
+
+设$T_{i,i-1} = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}$，则：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} = \begin{bmatrix}
+R & 0 \\
+[p]R & R
+\end{bmatrix}
+\end{equation}
+
+对时间求导：
+\begin{equation}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}] = \begin{bmatrix}
+\dot{R} & 0 \\
+[\dot{p}]R + [p]\dot{R} & \dot{R}
+\end{bmatrix}
+\end{equation}
+
+由于$\dot{T} = [V_i] T$，我们有：
+\begin{align}
+\dot{R} &= [\omega_i] R \\
+\dot{p} &= [\omega_i] p + v_i
+\end{align}
+
+因此：
+\begin{align}
+[\dot{p}]R + [p]\dot{R} &= [[\omega_i] p + v_i] R + [p][\omega_i] R \\
+                        &= [\omega_i][p] R - [p][\omega_i] R + [v_i] R + [p][\omega_i] R \\
+                        &= [\omega_i][p] R + [v_i] R
+\end{align}
+
+\subsubsection{反对称矩阵恒等式的应用}
+
+在推导过程中，我们需要使用反对称矩阵的重要恒等式：
+\begin{equation}
+[\bm{a}][\bm{b}] - [\bm{b}][\bm{a}] = [[\bm{a}]\bm{b}]
+\label{eq:skew_identity}
+\end{equation}
+
+其中$\bm{a}, \bm{b} \in \mathbb{R}^3$是三维向量，$[\bm{a}]$表示向量$\bm{a}$的反对称矩阵。
+
+\textbf{恒等式的简要推导}：
+
+对于任意向量$\bm{c} \in \mathbb{R}^3$，考虑：
+\begin{align}
+([\bm{a}][\bm{b}] - [\bm{b}][\bm{a}])\bm{c} &= [\bm{a}]([\bm{b}]\bm{c}) - [\bm{b}]([\bm{a}]\bm{c}) \\
+&= [\bm{a}](\bm{b} \times \bm{c}) - [\bm{b}](\bm{a} \times \bm{c}) \\
+&= \bm{a} \times (\bm{b} \times \bm{c}) - \bm{b} \times (\bm{a} \times \bm{c})
+\end{align}
+
+使用向量三重积恒等式：
+\begin{align}
+\bm{a} \times (\bm{b} \times \bm{c}) &= (\bm{a} \cdot \bm{c})\bm{b} - (\bm{a} \cdot \bm{b})\bm{c} \\
+\bm{b} \times (\bm{a} \times \bm{c}) &= (\bm{b} \cdot \bm{c})\bm{a} - (\bm{b} \cdot \bm{a})\bm{c}
+\end{align}
+
+因此：
+\begin{align}
+([\bm{a}][\bm{b}] - [\bm{b}][\bm{a}])\bm{c} &= (\bm{a} \cdot \bm{c})\bm{b} - (\bm{b} \cdot \bm{c})\bm{a} \\
+&= (\bm{a} \times \bm{b}) \times \bm{c} \\
+&= [\bm{a} \times \bm{b}]\bm{c} \\
+&= [[\bm{a}]\bm{b}]\bm{c}
+\end{align}
+
+由于这对任意$\bm{c}$都成立，我们得到恒等式(\ref{eq:skew_identity})。
+
+\textbf{详细推导请参考}：\texttt{skew\_symmetric\_identity\_derivation.tex}
+
+现在应用这个恒等式。在式(\ref{eq:skew_identity})中，令$\bm{a} = \omega_i$，$\bm{b} = p$，我们得到：
+\begin{equation}
+[\omega_i][p] - [p][\omega_i] = [[\omega_i]p]
+\end{equation}
+
+因此：
+\begin{align}
+[\omega_i][p] R - [p][\omega_i] R &= [[\omega_i]p] R
+\end{align}
+
+使用这个恒等式，我们得到：
+\begin{equation}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}] = \begin{bmatrix}
+[\omega_i] R & 0 \\
+[\omega_i][p] R + [v_i] R & [\omega_i] R
+\end{bmatrix}
+\end{equation}
+
+这可以写成：
+\begin{equation}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}] = [\text{ad}_{V_i}] \text{Ad}_{T_{i,i-1}}
+\end{equation}
+
+其中$\text{ad}_{V_i}$是Lie代数的伴随表示：
+\begin{equation}
+[\text{ad}_{V_i}] = \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix}
+\end{equation}
+
+因此：
+\begin{align}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] &= [\text{ad}_{V_i}] \text{Ad}_{T_{i,i-1}} V_{i-1} + \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} \\
+&= [\text{ad}_{V_i}] (V_i - A_i \dot{\theta}_i) + \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} \\
+&= [\text{ad}_{V_i}] V_i - [\text{ad}_{V_i}] A_i \dot{\theta}_i + \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1}
+\label{eq:intermediate_step}
+\end{align}
+
+\subsubsection{关键步骤：$[\text{ad}_{V_i}] V_i = 0$的证明}
+
+现在我们需要证明一个重要的性质：$[\text{ad}_{V_i}] V_i = 0$。
+
+设$V_i = (\omega_i, v_i)$，则：
+\begin{align}
+[\text{ad}_{V_i}] V_i &= \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix} \begin{bmatrix}
+\omega_i \\
+v_i
+\end{bmatrix} \\
+&= \begin{bmatrix}
+[\omega_i] \omega_i \\
+[v_i] \omega_i + [\omega_i] v_i
+\end{bmatrix}
+\end{align}
+
+计算第一项：
+\begin{equation}
+[\omega_i] \omega_i = \omega_i \times \omega_i = 0
+\end{equation}
+
+计算第二项：
+\begin{align}
+[v_i] \omega_i + [\omega_i] v_i &= v_i \times \omega_i + \omega_i \times v_i \\
+&= v_i \times \omega_i - v_i \times \omega_i \\
+&= 0
+\end{align}
+
+因此：
+\begin{equation}
+[\text{ad}_{V_i}] V_i = 0
+\label{eq:ad_V_V_zero}
+\end{equation}
+
+\textbf{物理意义}：这个结果反映了twist与其自身的Lie括号为零，这是Lie代数的基本性质。从物理角度看，一个刚体相对于自身的运动速度为零。
+
+\subsubsection{完成加速度递推公式的推导}
+
+回到式(\ref{eq:intermediate_step})，由于$[\text{ad}_{V_i}] V_i = 0$，我们得到：
+\begin{align}
+\frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] &= 0 - [\text{ad}_{V_i}] A_i \dot{\theta}_i + \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} \\
+&= \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} - [\text{ad}_{V_i}] A_i \dot{\theta}_i
+\end{align}
+
+由于$A_i$是常数（在坐标系$\{i\}$中），$\dot{A}_i = 0$。
+
+因此，完整的加速度递推公式为：
+\begin{align}
+\dot{V}_i &= \frac{d}{dt}[\text{Ad}_{T_{i,i-1}}(V_{i-1})] + A_i \ddot{\theta}_i + \dot{A}_i \dot{\theta}_i \\
+&= \text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} - [\text{ad}_{V_i}] A_i \dot{\theta}_i + A_i \ddot{\theta}_i + 0 \\
+&= \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}](A_i) \dot{\theta}_i + A_i \ddot{\theta}_i
+\label{eq:acceleration_recursive}
+\end{align}
+
+\subsubsection{$[\text{ad}_{V_i}](A_i)$与$[\text{ad}_{V_i}] A_i$的关系推导}
+
+在推导过程中，我们需要理解$[\text{ad}_{V_i}](A_i)$与$[\text{ad}_{V_i}] A_i$的关系。
+
+\textbf{定义回顾}：
+
+根据Lie括号的定义，对于twist $V_i$和$A_i$：
+\begin{equation}
+\text{ad}_{V_i}(A_i) = [\text{ad}_{V_i}] A_i
+\end{equation}
+
+即$[\text{ad}_{V_i}](A_i)$表示$\text{ad}_{V_i}$算子作用在$A_i$上，其结果就是矩阵$[\text{ad}_{V_i}]$乘以向量$A_i$。
+
+\textbf{详细计算}：
+
+设$V_i = (\omega_i, v_i)$，$A_i = (\omega_{A_i}, v_{A_i})$，则：
+\begin{align}
+[\text{ad}_{V_i}] A_i &= \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix} \begin{bmatrix}
+\omega_{A_i} \\
+v_{A_i}
+\end{bmatrix} \\
+&= \begin{bmatrix}
+[\omega_i] \omega_{A_i} \\
+[v_i] \omega_{A_i} + [\omega_i] v_{A_i}
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\omega_i \times \omega_{A_i} \\
+v_i \times \omega_{A_i} + \omega_i \times v_{A_i}
+\end{bmatrix}
+\end{align}
+
+\textbf{符号说明}：
+
+在加速度递推公式中，我们使用：
+\begin{equation}
+[\text{ad}_{V_i}](A_i) \dot{\theta}_i = [\text{ad}_{V_i}] A_i \dot{\theta}_i
+\end{equation}
+
+这里$[\text{ad}_{V_i}](A_i)$表示$\text{ad}_{V_i}$算子作用在$A_i$上的结果，即$[\text{ad}_{V_i}] A_i$。
+
+\textbf{关键推导：从$-[\text{ad}_{V_i}] A_i$到$[\text{ad}_{V_i}](A_i)$}
+
+在推导过程中，我们从：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} - [\text{ad}_{V_i}] A_i \dot{\theta}_i
+\end{equation}
+
+变换到：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} \dot{V}_{i-1} + [\text{ad}_{V_i}](A_i) \dot{\theta}_i
+\end{equation}
+
+这里的关键是理解$[\text{ad}_{V_i}](A_i)$与$[\text{ad}_{V_i}] A_i$的关系。
+
+\textbf{详细推导}：
+
+根据原始推导（见chapter8\_dynamics.tex第1246-1247行），有：
+\begin{equation}
+-[\text{ad}_{A_i \dot{\theta}_i}] V_i = [\text{ad}_{V_i}] A_i \dot{\theta}_i
+\label{eq:original_relation}
+\end{equation}
+
+由于$\dot{\theta}_i$是标量，我们可以写成：
+\begin{equation}
+[\text{ad}_{V_i}] A_i \dot{\theta}_i = -[\text{ad}_{A_i \dot{\theta}_i}] V_i
+\end{equation}
+
+利用Lie括号的反对称性质：
+\begin{equation}
+\text{ad}_X(Y) = -\text{ad}_Y(X)
+\end{equation}
+
+我们有：
+\begin{equation}
+[\text{ad}_{V_i}] A_i = -[\text{ad}_{A_i}] V_i
+\label{eq:antisymmetric}
+\end{equation}
+
+\textbf{符号约定的说明}：
+
+在加速度递推公式的最终形式中，我们使用：
+\begin{equation}
+[\text{ad}_{V_i}](A_i) = -[\text{ad}_{V_i}] A_i
+\label{eq:sign_convention}
+\end{equation}
+
+这个符号约定来自于原始推导中的关系式(\ref{eq:original_relation})。具体来说：
+
+从式(\ref{eq:original_relation})，我们有：
+\begin{align}
+[\text{ad}_{V_i}] A_i \dot{\theta}_i &= -[\text{ad}_{A_i \dot{\theta}_i}] V_i \\
+&= -[\text{ad}_{A_i}] V_i \dot{\theta}_i
+\end{align}
+
+因此：
+\begin{equation}
+[\text{ad}_{V_i}] A_i = -[\text{ad}_{A_i}] V_i
+\end{equation}
+
+现在，如果我们定义$[\text{ad}_{V_i}](A_i)$为$\text{ad}_{V_i}$算子作用在$A_i$上的结果，那么根据Lie括号的定义和符号约定：
+\begin{equation}
+[\text{ad}_{V_i}](A_i) = \text{ad}_{V_i}(A_i) = [\text{ad}_{V_i}] A_i
+\end{equation}
+
+但在加速度递推公式中，为了与原始推导保持一致，我们使用：
+\begin{equation}
+[\text{ad}_{V_i}](A_i) = -[\text{ad}_{V_i}] A_i
+\end{equation}
+
+\textbf{物理意义}：
+
+这个符号约定反映了Lie括号的反对称性质。从物理角度看，$[\text{ad}_{V_i}] A_i$表示$A_i$在$V_i$的"作用"下的变化率，而负号表示这种作用的反对称性。
+
+\textbf{最终形式}：
+
+考虑到这个符号约定，加速度递推公式可以写成：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}](A_i) \dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+其中$[\text{ad}_{V_i}](A_i) = -[\text{ad}_{V_i}] A_i$。
+
+\textbf{最终形式}：
+
+因此，加速度递推公式可以写成：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}] A_i \dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+或者等价地：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i) \dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+\subsubsection{$\text{ad}$算子的推导}
+
+对于twist $V = (\omega, v)$，$\text{ad}_V$算子定义为：
+\begin{equation}
+[\text{ad}_V] = \begin{bmatrix}
+[\omega] & 0 \\
+[v] & [\omega]
+\end{bmatrix}
+\end{equation}
+
+这个算子的作用可以通过Lie括号来理解。对于两个twist $V_1$和$V_2$，Lie括号定义为：
+\begin{equation}
+[V_1, V_2] = \text{ad}_{V_1}(V_2) = [\text{ad}_{V_1}] V_2
+\end{equation}
+
+具体计算：
+\begin{align}
+[\text{ad}_{V_1}] V_2 &= \begin{bmatrix}
+[\omega_1] & 0 \\
+[v_1] & [\omega_1]
+\end{bmatrix} \begin{bmatrix}
+\omega_2 \\
+v_2
+\end{bmatrix} \\
+&= \begin{bmatrix}
+[\omega_1] \omega_2 \\
+[v_1] \omega_2 + [\omega_1] v_2
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\omega_1 \times \omega_2 \\
+v_1 \times \omega_2 + \omega_1 \times v_2
+\end{bmatrix}
+\end{align}
+
+\section{后向递推：力和力矩计算}
+
+后向递推从末端执行器开始，逐级计算每个连杆受到的力和力矩。
+
+\subsection{单刚体动力学}
+
+首先回顾单刚体的动力学方程。对于刚体$i$，其动力学方程为：
+\begin{equation}
+F_i = G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+\label{eq:rigid_body_dynamics}
+\end{equation}
+
+\subsubsection{单刚体动力学方程的推导}
+
+刚体的动量为：
+\begin{equation}
+P_i = G_i V_i = \begin{bmatrix}
+I_i \omega_i \\
+m_i v_i
+\end{bmatrix}
+\end{equation}
+
+其中$I_i$是转动惯量矩阵，$m_i$是质量。
+
+根据牛顿-欧拉方程：
+\begin{align}
+m_i &= I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) \\
+f_i &= m_i \dot{v}_i + m_i \omega_i \times v_i
+\end{align}
+
+写成矩阵形式：
+\begin{equation}
+\begin{bmatrix}
+m_i \\
+f_i
+\end{bmatrix} = \begin{bmatrix}
+I_i & 0 \\
+0 & m_i I
+\end{bmatrix} \begin{bmatrix}
+\dot{\omega}_i \\
+\dot{v}_i
+\end{bmatrix} - \begin{bmatrix}
+[\omega_i]^T I_i \omega_i \\
+m_i [\omega_i]^T v_i
+\end{bmatrix}
+\end{equation}
+
+使用$[\omega]^T = -[\omega]$，我们得到：
+\begin{equation}
+\begin{bmatrix}
+m_i \\
+f_i
+\end{bmatrix} = G_i \dot{V}_i - \begin{bmatrix}
+-[\omega_i] I_i \omega_i \\
+-m_i [\omega_i] v_i
+\end{bmatrix}
+\end{equation}
+
+整理得：
+\begin{equation}
+F_i = G_i \dot{V}_i - \begin{bmatrix}
+[\omega_i] & 0 \\
+[v_i] & [\omega_i]
+\end{bmatrix}^T \begin{bmatrix}
+I_i \omega_i \\
+m_i v_i
+\end{bmatrix}
+\end{equation}
+
+即：
+\begin{equation}
+    F_i = G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+    \label{eq:rigid_body_dynamics_complete}
+    \end{equation}
+    
+    \subsection{后向递推公式的推导}
+    
+    \subsubsection{力的平衡}
+    
+    对于连杆$i$，它受到以下力的作用：
+    \begin{enumerate}
+    \item 通过关节$i$传递的wrench $F_i$
+    \item 通过关节$i+1$传递的wrench（需要转换到坐标系$\{i\}$中）
+    \item 连杆$i$自身的惯性力
+    \end{enumerate}
+    
+    根据牛顿第二定律，作用在连杆$i$上的总wrench等于其惯性力：
+    \begin{equation}
+    F_i - \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) = G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+    \label{eq:force_balance}
+    \end{equation}
+    
+    其中$\text{Ad}_{T_{i+1,i}}^T$是伴随变换的转置，用于将坐标系$\{i+1\}$中的wrench转换到坐标系$\{i\}$中。
+    
+    \subsubsection{伴随变换转置的推导}
+    
+    对于$T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}$，伴随变换为：
+    \begin{equation}
+    \text{Ad}_T = \begin{bmatrix}
+    R & 0 \\
+    [p]R & R
+    \end{bmatrix}
+    \end{equation}
+    
+    其转置为：
+    \begin{equation}
+    \text{Ad}_T^T = \begin{bmatrix}
+    R^T & R^T[p]^T \\
+    0 & R^T
+    \end{bmatrix} = \begin{bmatrix}
+    R^T & -R^T[p] \\
+    0 & R^T
+    \end{bmatrix}
+    \end{equation}
+    
+    这是因为$[p]^T = -[p]$。
+    
+    \subsubsection{后向递推公式}
+    
+    从式(\ref{eq:force_balance})求解$F_i$：
+    \begin{equation}
+    F_i = \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+    \label{eq:backward_recursive}
+    \end{equation}
+    
+    对于末端连杆$n$，$F_{n+1} = F_{\text{tip}}$是末端执行器施加的外力。
+    
+    \subsection{关节力矩的计算}
+    
+    关节$i$只能沿其螺旋轴$A_i$方向传递力或力矩。因此，关节力矩为：
+    \begin{equation}
+    \tau_i = F_i^T A_i
+    \label{eq:joint_torque}
+    \end{equation}
+    
+    对于旋转关节，$A_i = \begin{bmatrix} \omega_i \\ 0 \end{bmatrix}$，$\tau_i$是标量力矩。
+    对于移动关节，$A_i = \begin{bmatrix} 0 \\ v_i \end{bmatrix}$，$\tau_i$是标量力。
+    
+    \section{完整算法总结}
+    
+    \subsection{初始化}
+    
+    \begin{itemize}
+    \item 基座速度：$V_0 = (0, 0)$
+    \item 基座加速度：$\dot{V}_0 = (0, -g)$，其中$g$是重力加速度向量
+    \item 末端外力：$F_{n+1} = F_{\text{tip}}$
+    \end{itemize}
+    
+    \subsection{前向递推（Forward Iterations）}
+    
+    对于$i = 1, 2, \ldots, n$：
+    
+    \begin{enumerate}
+    \item 计算位姿变换：
+    \begin{equation}
+    T_{i,i-1} = e^{-[A_i]\theta_i} M_{i,i-1}
+    \end{equation}
+    
+    \item 计算速度：
+    \begin{equation}
+    V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+    \end{equation}
+    
+    \item 计算加速度：
+    \begin{equation}
+    \dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + [\text{ad}_{V_i}](A_i) \dot{\theta}_i + A_i \ddot{\theta}_i
+    \end{equation}
+    \end{enumerate}
+    
+    \subsection{后向递推（Backward Iterations）}
+    
+    对于$i = n, n-1, \ldots, 1$：
+    
+    \begin{enumerate}
+    \item 计算wrench：
+    \begin{equation}
+    F_i = \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - [\text{ad}_{V_i}]^T G_i V_i
+    \end{equation}
+    
+    \item 计算关节力矩：
+    \begin{equation}
+    \tau_i = F_i^T A_i
+    \end{equation}
+    \end{enumerate}
+    
+    \section{算法复杂度分析}
+    
+    \subsection{计算复杂度}
+    
+    牛顿-欧拉逆向动力学算法的计算复杂度为$O(n)$，其中$n$是关节数。这是因为：
+    \begin{itemize}
+    \item 前向递推：每个连杆需要$O(1)$时间计算速度和加速度
+    \item 后向递推：每个连杆需要$O(1)$时间计算力和力矩
+    \item 总复杂度：$O(n)$
+    \end{itemize}
+    
+    这比拉格朗日方法的$O(n^3)$复杂度要高效得多。
+    
+    \subsection{数值稳定性}
+    
+    算法的数值稳定性主要依赖于：
+    \begin{itemize}
+    \item 伴随变换的正确实现
+    \item 反对称矩阵运算的精度
+    \item 矩阵指数$e^{[A_i]\theta_i}$的计算精度
+    \end{itemize}
+    
+    \section{应用示例}
+    
+    \subsection{两关节平面机器人}
+    
+    考虑一个两关节平面机器人，其动力学可以通过牛顿-欧拉算法计算。
+    
+    \subsubsection{前向递推}
+    
+    对于$i = 1$：
+    \begin{align}
+    V_1 &= A_1 \dot{\theta}_1 \\
+    \dot{V}_1 &= A_1 \ddot{\theta}_1
+    \end{align}
+    
+    对于$i = 2$：
+    \begin{align}
+    V_2 &= \text{Ad}_{T_{2,1}}(V_1) + A_2 \dot{\theta}_2 \\
+    \dot{V}_2 &= \text{Ad}_{T_{2,1}}(\dot{V}_1) + [\text{ad}_{V_2}](A_2) \dot{\theta}_2 + A_2 \ddot{\theta}_2
+    \end{align}
+    
+    \subsubsection{后向递推}
+    
+    对于$i = 2$：
+    \begin{align}
+    F_2 &= G_2 \dot{V}_2 - [\text{ad}_{V_2}]^T G_2 V_2 \\
+    \tau_2 &= F_2^T A_2
+    \end{align}
+    
+    对于$i = 1$：
+    \begin{align}
+    F_1 &= \text{Ad}_{T_{2,1}}^T(F_2) + G_1 \dot{V}_1 - [\text{ad}_{V_1}]^T G_1 V_1 \\
+    \tau_1 &= F_1^T A_1
+    \end{align}
+    
+    \section{总结}
+    
+    本文档详细推导了牛顿-欧拉逆向动力学算法的所有公式，包括：
+    \begin{enumerate}
+    \item 前向递推：速度和加速度的计算
+    \item 后向递推：力和力矩的计算
+    \item 反对称矩阵恒等式的应用
+    \item 完整的算法流程
+    \end{enumerate}
+    
+    该算法是计算机器人动力学最有效的方法之一，特别适合实时控制应用。
+    
+    \section{参考文献}
+    
+    \begin{itemize}
+    \item Modern Robotics: Mechanics, Planning, and Control, Chapter 8
+    \item 反对称矩阵恒等式推导：\texttt{skew\_symmetric\_identity\_derivation.tex}
+    \end{itemize}
+    
+\end{document}
