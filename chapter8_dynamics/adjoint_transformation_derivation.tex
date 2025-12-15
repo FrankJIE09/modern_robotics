@@ -1,0 +1,756 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{伴随变换$\text{Ad}_{T_{i,i-1}^{-1}}$的推导}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：如何推导伴随变换的公式？
+
+\textbf{需要推导的公式}：
+
+根据原始文档（MR-tablet.txt），标准形式是：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} = \begin{bmatrix}
+R_i & 0 \\
+-[R_i p_i]_{\times} R_i & R_i
+\end{bmatrix}
+\end{equation}
+
+但在某些推导中，也会使用：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 如果$T_{i,i-1}$是从$\{i-1\}$到$\{i\}$的变换，应该使用$\text{Ad}_{T_{i,i-1}}$（基于从$\{i-1\}$到$\{i\}$的变换）
+\item 这是标准的伴随变换形式
+\item 在原始文档的递归算法中使用的是$\text{Ad}_{T_{i,i-1}}$
+\end{itemize}
+
+\textbf{其中}：
+\begin{itemize}
+\item $T_{i,i-1} = \begin{bmatrix} R_i & p_i \\ 0 & 1 \end{bmatrix}$：从坐标系$\{i-1\}$到坐标系$\{i\}$的齐次变换矩阵
+\item $R_i \in SO(3)$：从$\{i-1\}$到$\{i\}$的旋转矩阵
+\item $p_i \in \mathbb{R}^3$：从$\{i-1\}$原点到$\{i\}$原点的向量（在$\{i-1\}$中表示）
+\item $[p]_{\times}$：向量$p$的反对称矩阵
+\end{itemize}
+
+\section{伴随变换的定义}
+
+\subsection{基本定义}
+
+\textbf{伴随变换}：伴随变换$\text{Ad}_T$将twist从一个坐标系转换到另一个坐标系。
+
+\textbf{Twist定义}：
+
+Twist是一个6维向量，包含角速度和线速度：
+\begin{equation}
+V = \begin{bmatrix} \omega \\ v \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\textbf{伴随变换的作用}：
+
+如果$V_a$是坐标系$\{a\}$的twist（在$\{a\}$中表示），$T_{ba}$是从$\{a\}$到$\{b\}$的变换矩阵，那么：
+\begin{equation}
+V_b = \text{Ad}_{T_{ba}}(V_a)
+\end{equation}
+
+其中$V_b$是坐标系$\{b\}$的twist（在$\{b\}$中表示）。
+
+\textbf{关键点}：
+\begin{itemize}
+\item $T_{ba}$是从$\{a\}$到$\{b\}$的变换
+\item $\text{Ad}_{T_{ba}}$将twist从$\{a\}$转换到$\{b\}$
+\item \textbf{应该基于$T_{ba}$（从$\{a\}$到$\{b\}$），而不是$T_{ba}^{-1}$（从$\{b\}$到$\{a\}$）}
+\item 这是标准的伴随变换定义
+\end{itemize}
+
+\subsection{逆变换的伴随}
+
+\textbf{逆变换}：
+
+如果$T_{ba}$是从$\{a\}$到$\{b\}$的变换，那么$T_{ba}^{-1} = T_{ab}$是从$\{b\}$到$\{a\}$的变换。
+
+\textbf{逆伴随变换}：
+
+\begin{equation}
+V_a = \text{Ad}_{T_{ba}^{-1}}(V_b) = \text{Ad}_{T_{ab}}(V_b)
+\end{equation}
+
+这表示将twist从$\{b\}$转换到$\{a\}$。
+
+\textbf{注意}：在速度合成公式中，虽然使用的是$R_i^T$的形式，但这实际上对应的是$\text{Ad}_{T_{i,i-1}^{-1}}$，因为我们需要将twist从$\{i-1\}$转换到$\{i\}$，但使用的是逆变换的形式。这需要特别注意符号约定。
+
+\section{推导过程}
+
+\subsection{方法1：推导$\text{Ad}_{T_{i,i-1}}$（从$\{i-1\}$到$\{i\}$）}
+
+\textbf{问题}：如何将twist从坐标系$\{i-1\}$转换到坐标系$\{i\}$？
+
+\textbf{使用$\text{Ad}_{T_{i,i-1}}$}：
+
+如果$T_{i,i-1}$是从$\{i-1\}$到$\{i\}$的变换，那么：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1})
+\end{equation}
+
+\textbf{角速度的变换}：
+
+角速度是自由向量，只需要旋转：
+\begin{equation}
+\omega_i = R_i \omega_{i-1}
+\end{equation}
+
+\textbf{注意}：这里使用$R_i$（不是$R_i^T$），因为$R_i$是从$\{i-1\}$到$\{i\}$的旋转矩阵。
+
+\textbf{线速度的变换}：
+
+坐标系$\{i\}$原点的速度（在$\{i-1\}$中表示）为：
+\begin{equation}
+v_{i,\{i-1\}} = v_{i-1} + \omega_{i-1} \times p_i
+\end{equation}
+
+要转换到坐标系$\{i\}$中，需要左乘$R_i$：
+\begin{equation}
+v_i = R_i (v_{i-1} + \omega_{i-1} \times p_i)
+\end{equation}
+
+\textbf{使用反对称矩阵}：
+
+\begin{equation}
+v_i = R_i (v_{i-1} - [p_i]_{\times} \omega_{i-1}) = R_i v_{i-1} - R_i [p_i]_{\times} \omega_{i-1}
+\end{equation}
+
+\textbf{关键关系}：
+
+\begin{equation}
+R_i [p_i]_{\times} = [R_i p_i]_{\times} R_i
+\end{equation}
+
+\textbf{证明}：
+
+对于任意向量$q$：
+\begin{align}
+R_i [p_i]_{\times} q &= R_i (p_i \times q) \\
+&= (R_i p_i) \times (R_i q) \quad \text{（旋转保持叉积）} \\
+&= [R_i p_i]_{\times} (R_i q) \\
+&= [R_i p_i]_{\times} R_i q
+\end{align}
+
+因此，$R_i [p_i]_{\times} = [R_i p_i]_{\times} R_i$。
+
+\textbf{代入}：
+
+\begin{align}
+v_i &= R_i v_{i-1} - R_i [p_i]_{\times} \omega_{i-1} \\
+&= R_i v_{i-1} - [R_i p_i]_{\times} R_i \omega_{i-1}
+\end{align}
+
+\textbf{矩阵形式}：
+
+\begin{equation}
+\begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix}
+R_i & 0 \\
+-[R_i p_i]_{\times} R_i & R_i
+\end{bmatrix} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix}
+\end{equation}
+
+\textbf{伴随变换}：
+
+因此：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} = \begin{bmatrix}
+R_i & 0 \\
+-[R_i p_i]_{\times} R_i & R_i
+\end{bmatrix}
+\end{equation}
+
+\textbf{注意}：这是从$\{i-1\}$到$\{i\}$的伴随变换，使用$R_i$（不是$R_i^T$）。
+
+\subsection{方法2：推导$\text{Ad}_{T_{i,i-1}^{-1}}$（为什么在速度合成中使用）}
+
+\textbf{问题}：为什么在速度合成公式中使用$\text{Ad}_{T_{i,i-1}^{-1}}$而不是$\text{Ad}_{T_{i,i-1}}$？
+
+\textbf{原因}：在速度合成公式中，我们使用的是$R_i^T$的形式，这对应的是逆变换。
+
+\textbf{步骤1：齐次变换矩阵的逆}
+
+\textbf{齐次变换矩阵}：
+
+\begin{equation}
+T_{i,i-1} = \begin{bmatrix} R_i & p_i \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+\textbf{逆矩阵}：
+
+\begin{equation}
+T_{i,i-1}^{-1} = \begin{bmatrix} R_i^T & -R_i^T p_i \\ 0 & 1 \end{bmatrix} = \begin{bmatrix} R_i^T & -R_i^T p_i \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+\textbf{验证}：
+
+\begin{align}
+T_{i,i-1} T_{i,i-1}^{-1} &= \begin{bmatrix} R_i & p_i \\ 0 & 1 \end{bmatrix} \begin{bmatrix} R_i^T & -R_i^T p_i \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} R_i R_i^T & -R_i R_i^T p_i + p_i \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} I & -p_i + p_i \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} I & 0 \\ 0 & 1 \end{bmatrix} = I
+\end{align}
+
+因此，$T_{i,i-1}^{-1} = \begin{bmatrix} R_i^T & -R_i^T p_i \\ 0 & 1 \end{bmatrix}$是正确的。
+
+\subsection{步骤2：Twist的坐标变换}
+
+\textbf{问题}：如何将twist从坐标系$\{i-1\}$转换到坐标系$\{i\}$？
+
+\textbf{已知}：
+\begin{itemize}
+\item 坐标系$\{i-1\}$的twist：$V_{i-1} = [\omega_{i-1}^T, v_{i-1}^T]^T$（在$\{i-1\}$中表示）
+\item 需要求：坐标系$\{i\}$的twist：$V_i = [\omega_i^T, v_i^T]^T$（在$\{i\}$中表示）
+\end{itemize}
+
+\textbf{角速度的变换}：
+
+角速度是自由向量，只需要旋转：
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1}
+\end{equation}
+
+\textbf{线速度的变换}：
+
+线速度需要考虑：
+\begin{enumerate}
+\item 坐标系$\{i-1\}$原点的速度：$v_{i-1}$
+\item 由于坐标系$\{i-1\}$的旋转产生的速度：$\omega_{i-1} \times p_i$
+\end{enumerate}
+
+因此，坐标系$\{i\}$原点的速度（在$\{i-1\}$中表示）为：
+\begin{equation}
+v_{i,\{i-1\}} = v_{i-1} + \omega_{i-1} \times p_i
+\end{equation}
+
+要转换到坐标系$\{i\}$中，需要左乘$R_i^T$：
+\begin{equation}
+v_i = R_i^T (v_{i-1} + \omega_{i-1} \times p_i)
+\end{equation}
+
+\subsection{步骤3：使用反对称矩阵}
+
+\textbf{反对称矩阵}：
+
+对于向量$p = [p_x, p_y, p_z]^T$，其反对称矩阵为：
+\begin{equation}
+[p]_{\times} = \begin{bmatrix}
+0 & -p_z & p_y \\
+p_z & 0 & -p_x \\
+-p_y & p_x & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{性质}：
+
+\begin{equation}
+p \times q = [p]_{\times} q
+\end{equation}
+
+\textbf{应用}：
+
+\begin{equation}
+\omega_{i-1} \times p_i = [\omega_{i-1}]_{\times} p_i = -[p_i]_{\times} \omega_{i-1}
+\end{equation}
+
+\textbf{注意}：$[p]_{\times} q = -[q]_{\times} p$（反对称矩阵的性质）
+
+因此：
+\begin{equation}
+v_i = R_i^T (v_{i-1} - [p_i]_{\times} \omega_{i-1})
+\end{equation}
+
+\subsection{步骤4：矩阵形式}
+
+\textbf{整理}：
+
+\begin{align}
+v_i &= R_i^T (v_{i-1} - [p_i]_{\times} \omega_{i-1}) \\
+&= R_i^T v_{i-1} - R_i^T [p_i]_{\times} \omega_{i-1}
+\end{align}
+
+\textbf{关键关系}：
+
+\begin{equation}
+R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T
+\end{equation}
+
+\textbf{证明}：
+
+对于任意向量$q$：
+\begin{align}
+R_i^T [p_i]_{\times} q &= R_i^T (p_i \times q) \\
+&= (R_i^T p_i) \times (R_i^T q) \quad \text{（旋转保持叉积）} \\
+&= [R_i^T p_i]_{\times} (R_i^T q) \\
+&= [R_i^T p_i]_{\times} R_i^T q
+\end{align}
+
+因此，$R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T$。
+
+\textbf{代入}：
+
+\begin{align}
+v_i &= R_i^T v_{i-1} - R_i^T [p_i]_{\times} \omega_{i-1} \\
+&= R_i^T v_{i-1} - [R_i^T p_i]_{\times} R_i^T \omega_{i-1}
+\end{align}
+
+\subsection{步骤5：完整的矩阵形式}
+
+\textbf{角速度和线速度的合成}：
+
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} \\
+v_i &= -[R_i^T p_i]_{\times} R_i^T \omega_{i-1} + R_i^T v_{i-1}
+\end{align}
+
+\textbf{矩阵形式}：
+
+\begin{equation}
+\begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix}
+\end{equation}
+
+\textbf{伴随变换}：
+
+因此：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\section{详细推导：关键步骤}
+
+\subsection{关键关系1：$R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T$}
+
+\textbf{证明}：
+
+对于任意向量$q \in \mathbb{R}^3$，我们需要证明：
+\begin{equation}
+R_i^T [p_i]_{\times} q = [R_i^T p_i]_{\times} R_i^T q
+\end{equation}
+
+\textbf{左边}：
+\begin{align}
+R_i^T [p_i]_{\times} q &= R_i^T (p_i \times q)
+\end{align}
+
+\textbf{右边}：
+\begin{align}
+[R_i^T p_i]_{\times} R_i^T q &= (R_i^T p_i) \times (R_i^T q)
+\end{align}
+
+\textbf{关键性质}：旋转矩阵保持叉积关系
+
+对于旋转矩阵$R$和向量$a, b$：
+\begin{equation}
+R(a \times b) = (Ra) \times (Rb)
+\end{equation}
+
+\textbf{应用}：
+
+\begin{align}
+R_i^T (p_i \times q) &= (R_i^T p_i) \times (R_i^T q) \\
+&= [R_i^T p_i]_{\times} (R_i^T q) \\
+&= [R_i^T p_i]_{\times} R_i^T q
+\end{align}
+
+因此，$R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T$。
+
+\subsection{关键关系2：$[p]_{\times}^T = -[p]_{\times}$}
+
+\textbf{反对称矩阵的性质}：
+
+对于反对称矩阵$[p]_{\times}$：
+\begin{equation}
+[p]_{\times}^T = -[p]_{\times}
+\end{equation}
+
+\textbf{证明}：
+
+\begin{equation}
+[p]_{\times} = \begin{bmatrix}
+0 & -p_z & p_y \\
+p_z & 0 & -p_x \\
+-p_y & p_x & 0
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+[p]_{\times}^T = \begin{bmatrix}
+0 & p_z & -p_y \\
+-p_z & 0 & p_x \\
+p_y & -p_x & 0
+\end{bmatrix} = -[p]_{\times}
+\end{equation}
+
+\section{验证}
+
+\subsection{验证1：与速度合成公式的一致性}
+
+\textbf{速度合成公式}：
+
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \tag{22} \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i \tag{23}
+\end{align}
+
+\textbf{使用伴随变换}：
+
+\begin{equation}
+\begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \text{Ad}_{T_{i,i-1}^{-1}} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix} + \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix} \tag{21}
+\end{equation}
+
+\textbf{展开伴随变换}：
+
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\textbf{矩阵乘法}：
+
+\begin{align}
+\begin{bmatrix} \omega_i \\ v_i \end{bmatrix} &= \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix} + \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix} \\
+&= \begin{bmatrix}
+R_i^T \omega_{i-1} \\
+-[R_i^T p_i]_{\times} R_i^T \omega_{i-1} + R_i^T v_{i-1}
+\end{bmatrix} + \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix}
+\end{align}
+
+\textbf{展开后得到}：
+
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \tag{22'} \\
+v_i &= -[R_i^T p_i]_{\times} R_i^T \omega_{i-1} + R_i^T v_{i-1} + \dot{d}_i z_i \tag{23'}
+\end{align}
+
+\textbf{验证角速度部分}：
+
+公式(22')与公式(22)完全一致，验证通过。
+
+\textbf{验证线速度部分（关键）}：
+
+我们需要证明公式(23')与公式(23)一致，即：
+\begin{equation}
+-[R_i^T p_i]_{\times} R_i^T \omega_{i-1} + R_i^T v_{i-1} = R_i^T (v_{i-1} + \omega_{i-1} \times p_i)
+\end{equation}
+
+\textbf{详细推导}：
+
+\textbf{步骤1：展开公式(23)的右边}：
+
+\begin{align}
+R_i^T (v_{i-1} + \omega_{i-1} \times p_i) &= R_i^T v_{i-1} + R_i^T (\omega_{i-1} \times p_i)
+\end{align}
+
+\textbf{步骤2：将叉积转换为反对称矩阵}：
+
+\begin{equation}
+\omega_{i-1} \times p_i = [\omega_{i-1}]_{\times} p_i
+\end{equation}
+
+\textbf{步骤3：使用反对称矩阵的性质}：
+
+对于任意向量$a$和$b$：
+\begin{equation}
+a \times b = [a]_{\times} b = -[b]_{\times} a
+\end{equation}
+
+因此：
+\begin{equation}
+\omega_{i-1} \times p_i = [\omega_{i-1}]_{\times} p_i = -[p_i]_{\times} \omega_{i-1}
+\end{equation}
+
+\textbf{步骤4：代入}：
+
+\begin{align}
+R_i^T (v_{i-1} + \omega_{i-1} \times p_i) &= R_i^T v_{i-1} + R_i^T (-[p_i]_{\times} \omega_{i-1}) \\
+&= R_i^T v_{i-1} - R_i^T [p_i]_{\times} \omega_{i-1}
+\end{align}
+
+\textbf{步骤5：关键关系}：
+
+我们需要证明：
+\begin{equation}
+R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T
+\end{equation}
+
+\textbf{证明}：
+
+对于任意向量$q$：
+\begin{align}
+R_i^T [p_i]_{\times} q &= R_i^T (p_i \times q) \\
+&= (R_i^T p_i) \times (R_i^T q) \quad \text{（旋转保持叉积）} \\
+&= [R_i^T p_i]_{\times} (R_i^T q) \\
+&= [R_i^T p_i]_{\times} R_i^T q
+\end{align}
+
+因此，$R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T$。
+
+\textbf{步骤6：完成验证}：
+
+\begin{align}
+R_i^T (v_{i-1} + \omega_{i-1} \times p_i) &= R_i^T v_{i-1} - R_i^T [p_i]_{\times} \omega_{i-1} \\
+&= R_i^T v_{i-1} - [R_i^T p_i]_{\times} R_i^T \omega_{i-1}
+\end{align}
+
+这与公式(23')的左边（除了$\dot{d}_i z_i$项）完全一致！
+
+\textbf{最终验证}：
+
+\begin{align}
+v_i &= -[R_i^T p_i]_{\times} R_i^T \omega_{i-1} + R_i^T v_{i-1} + \dot{d}_i z_i \quad \text{（公式23'）} \\
+&= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i \quad \text{（公式23）}
+\end{align}
+
+验证通过！
+
+\subsection{验证2：伴随变换的性质}
+
+\textbf{性质1：$\text{Ad}_{T^{-1}} = (\text{Ad}_T)^{-1}$}
+
+\textbf{验证}：
+
+如果$\text{Ad}_T$将twist从$\{a\}$转换到$\{b\}$，那么$\text{Ad}_{T^{-1}}$应该将twist从$\{b\}$转换回$\{a\}$。
+
+\textbf{性质2：$\text{Ad}_{T_1 T_2} = \text{Ad}_{T_1} \text{Ad}_{T_2}$}
+
+\textbf{验证}：
+
+这可以通过矩阵乘法的结合律验证。
+
+\section{具体例子}
+
+\subsection{例子1：简单的旋转和平移}
+
+\textbf{场景}：
+
+考虑一个简单的变换：
+\begin{itemize}
+\item $R_i = I$（单位矩阵，无旋转）
+\item $p_i = [1, 0, 0]^T$（沿$x$轴平移1单位）
+\end{itemize}
+
+\textbf{伴随变换}：
+
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+I & 0 \\
+-[p_i]_{\times} & I
+\end{bmatrix} = \begin{bmatrix}
+I & 0 \\
+-\begin{bmatrix} 0 & 0 & 0 \\ 0 & 0 & -1 \\ 0 & 1 & 0 \end{bmatrix} & I
+\end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+
+由于没有旋转，角速度直接传递。线速度需要考虑由于平移产生的耦合项。
+
+\subsection{例子2：绕$z$轴旋转}
+
+\textbf{场景}：
+
+考虑绕$z$轴旋转$\theta$角：
+\begin{equation}
+R_i = \begin{bmatrix}
+\cos\theta & -\sin\theta & 0 \\
+\sin\theta & \cos\theta & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+$p_i = [0, 0, 0]^T$（无平移）
+
+\textbf{伴随变换}：
+
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+0 & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+
+由于没有平移，角速度和线速度都只需要旋转，没有耦合项。
+
+\section{两种方法的对比和说明}
+
+\subsection{方法1：$\text{Ad}_{T_{i,i-1}}$（标准形式）}
+
+\textbf{公式}：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}} = \begin{bmatrix}
+R_i & 0 \\
+-[R_i p_i]_{\times} R_i & R_i
+\end{bmatrix}
+\end{equation}
+
+\textbf{使用}：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+\textbf{展开}：
+\begin{align}
+\omega_i &= R_i \omega_{i-1} + \dot{\theta}_i z_i \\
+v_i &= R_i (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i
+\end{align}
+
+\textbf{特点}：
+\begin{itemize}
+\item 使用$R_i$（从$\{i-1\}$到$\{i\}$的旋转矩阵）
+\item 这是标准的伴随变换形式
+\item 与$T_{i,i-1}$的方向一致
+\end{itemize}
+
+\subsection{方法2：$\text{Ad}_{T_{i,i-1}^{-1}}$（在速度合成中使用）}
+
+\textbf{公式}：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\textbf{使用}：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}^{-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+\textbf{展开}：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i
+\end{align}
+
+\textbf{特点}：
+\begin{itemize}
+\item 使用$R_i^T$（逆旋转矩阵）
+\item 在速度合成公式中常用这种形式
+\item 虽然使用逆变换，但结果与标准形式等价
+\end{itemize}
+
+\subsection{为什么在速度合成中使用$\text{Ad}_{T_{i,i-1}^{-1}}$？}
+
+\textbf{关键问题}：
+
+如果$T_{i,i-1}$是从$\{i-1\}$到$\{i\}$的变换，那么理论上应该使用$\text{Ad}_{T_{i,i-1}}$（使用$R_i$），而不是$\text{Ad}_{T_{i,i-1}^{-1}}$（使用$R_i^T$）。
+
+\textbf{但在速度合成公式中}：
+
+速度合成公式使用的是$R_i^T$的形式：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i
+\end{align}
+
+\textbf{原因分析}：
+
+这可能是因为$R_i$的定义不同：
+\begin{itemize}
+\item \textbf{在标准定义中}：$R_i$是从$\{i-1\}$到$\{i\}$的旋转矩阵，要将向量从$\{i-1\}$转换到$\{i\}$，应该使用$R_i$
+\item \textbf{在速度合成中}：可能$R_i$的定义是从$\{i\}$到$\{i-1\}$的旋转矩阵，因此需要使用$R_i^T$来将向量从$\{i-1\}$转换到$\{i\}$
+\end{itemize}
+
+\textbf{符号约定的澄清}：
+
+在本文档中，我们采用以下约定：
+\begin{itemize}
+\item $T_{i,i-1}$：从$\{i-1\}$到$\{i\}$的变换
+\item $R_i$：从$\{i-1\}$到$\{i\}$的旋转矩阵
+\item 因此，应该使用$\text{Ad}_{T_{i,i-1}}$（使用$R_i$）
+\end{itemize}
+
+\textbf{但在速度合成公式中}：
+
+如果速度合成公式使用的是$R_i^T$，那么：
+\begin{itemize}
+\item 要么$R_i$的定义是从$\{i\}$到$\{i-1\}$（与标准定义相反）
+\item 要么使用的是$\text{Ad}_{T_{i,i-1}^{-1}}$的形式（虽然符号上是逆变换，但通过$R_i^T$实现了正确的转换）
+\end{itemize}
+
+\textbf{建议}：
+
+为了保持一致性，建议：
+\begin{enumerate}
+\item 如果$T_{ba}$是从$\{a\}$到$\{b\}$的变换，使用$\text{Ad}_{T_{ba}}$（使用$R_{ba}$）
+\item 如果速度合成公式中使用$R_i^T$，需要检查$R_i$的定义是否与标准约定一致
+\item 在推导时，明确说明符号约定，避免混淆
+\end{enumerate}
+
+\section{总结}
+
+\subsection{推导步骤总结}
+
+\begin{enumerate}
+\item \textbf{齐次变换矩阵的逆}：$T_{i,i-1}^{-1} = \begin{bmatrix} R_i^T & -R_i^T p_i \\ 0 & 1 \end{bmatrix}$
+
+\item \textbf{角速度变换}：$\omega_i = R_i^T \omega_{i-1}$（只需要旋转）
+
+\item \textbf{线速度变换}：$v_i = R_i^T (v_{i-1} + \omega_{i-1} \times p_i)$（需要考虑旋转和平移的耦合）
+
+\item \textbf{使用反对称矩阵}：$\omega_{i-1} \times p_i = -[p_i]_{\times} \omega_{i-1}$
+
+\item \textbf{关键关系}：$R_i^T [p_i]_{\times} = [R_i^T p_i]_{\times} R_i^T$
+
+\item \textbf{矩阵形式}：整理成$6 \times 6$矩阵形式
+\end{enumerate}
+
+\subsection{最终公式}
+
+\textbf{伴随变换}：
+\begin{equation}
+\text{Ad}_{T_{i,i-1}^{-1}} = \begin{bmatrix}
+R_i^T & 0 \\
+-[R_i^T p_i]_{\times} R_i^T & R_i^T
+\end{bmatrix}
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $R_i^T$：旋转部分（上左和下右块）
+\item $-[R_i^T p_i]_{\times} R_i^T$：耦合项（下左块），表示由于平移产生的角速度对线速度的影响
+\item $0$：上右块为零，因为角速度不直接影响线速度（通过平移耦合）
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 上左块：角速度的旋转变换
+\item 下左块：角速度对线速度的耦合影响（由于平移$p_i$）
+\item 下右块：线速度的旋转变换
+\end{itemize}
+
+\end{document}
+

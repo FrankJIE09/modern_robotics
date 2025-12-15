@@ -1,0 +1,618 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{递归牛顿-欧拉算法前向递推公式推导}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：在递归牛顿-欧拉算法中，前向递推公式是如何推导的？
+
+\textbf{公式}：
+
+\subsection{旋转关节（公式15-18）}
+
+如果关节$i$是旋转关节：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \tag{15} \\
+\dot{\omega}_i &= R_i^T \dot{\omega}_{i-1} + R_i^T \omega_{i-1} \times \dot{\theta}_i z_i + \ddot{\theta}_i z_i \tag{16} \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) \tag{17} \\
+\dot{v}_i &= R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) \tag{18}
+\end{align}
+
+\subsection{移动关节（公式19-22）}
+
+如果关节$i$是移动关节：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} \tag{19} \\
+\dot{\omega}_i &= R_i^T \dot{\omega}_{i-1} \tag{20} \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i \tag{21} \\
+\dot{v}_i &= R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) + 2\omega_i \times \dot{d}_i z_i + \ddot{d}_i z_i \tag{22}
+\end{align}
+
+\subsection{质心加速度（公式23）}
+
+计算质心加速度：
+\begin{equation}
+\dot{v}_{c,i} = \dot{v}_i + \dot{\omega}_i \times r_i + \omega_i \times (\omega_i \times r_i) \tag{23}
+\end{equation}
+
+其中$r_i$是从关节$i$到连杆$i$质心的向量。
+
+\section{符号说明}
+
+\begin{itemize}
+\item $\omega_i$：连杆$i$的角速度（在坐标系$\{i\}$中表示）
+\item $\dot{\omega}_i$：连杆$i$的角加速度（在坐标系$\{i\}$中表示）
+\item $v_i$：坐标系$\{i\}$原点的线速度（在坐标系$\{i\}$中表示）
+\item $\dot{v}_i$：坐标系$\{i\}$原点的线加速度（在坐标系$\{i\}$中表示）
+\item $R_i$：从坐标系$\{i-1\}$到坐标系$\{i\}$的旋转矩阵
+\item $p_i$：从坐标系$\{i-1\}$原点到坐标系$\{i\}$原点的向量（在坐标系$\{i-1\}$中表示）
+\item $z_i$：关节$i$的旋转轴或移动方向（在坐标系$\{i\}$中表示，单位向量）
+\item $\theta_i$：关节$i$的角度（旋转关节）或位移（移动关节）
+\item $\dot{\theta}_i$：关节$i$的角速度或线速度
+\item $\ddot{\theta}_i$：关节$i$的角加速度或线加速度
+\item $r_i$：从关节$i$到连杆$i$质心的向量（在坐标系$\{i\}$中表示）
+\item $v_{c,i}$：连杆$i$质心的线速度
+\item $\dot{v}_{c,i}$：连杆$i$质心的线加速度
+\end{itemize}
+
+\section{基础：刚体运动学}
+
+\subsection{坐标系变换}
+
+\textbf{变换矩阵}：
+\begin{equation}
+T_{i,i-1} = \begin{bmatrix} R_i & p_i \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $R_i$：从坐标系$\{i-1\}$到坐标系$\{i\}$的旋转矩阵
+\item $p_i$：从坐标系$\{i-1\}$原点到坐标系$\{i\}$原点的向量（在坐标系$\{i-1\}$中表示）
+\end{itemize}
+
+\textbf{坐标变换}：
+
+如果一个向量在坐标系$\{i-1\}$中表示为$\mathbf{v}_{i-1}$，那么在坐标系$\{i\}$中的表示为：
+\begin{equation}
+\mathbf{v}_i = R_i^T \mathbf{v}_{i-1}
+\end{equation}
+
+\textbf{推导}：
+
+设$\mathbf{v}$是一个物理向量，它在坐标系$\{i-1\}$中的坐标表示为$\mathbf{v}_{i-1}$，在坐标系$\{i\}$中的坐标表示为$\mathbf{v}_i$。
+
+\textbf{方法1：基向量变换}
+
+设$\{e_{i-1,1}, e_{i-1,2}, e_{i-1,3}\}$是坐标系$\{i-1\}$的基向量，$\{e_{i,1}, e_{i,2}, e_{i,3}\}$是坐标系$\{i\}$的基向量。
+
+由于$R_i$是从$\{i-1\}$到$\{i\}$的旋转矩阵，$R_i$的列向量是$\{i-1\}$的基向量在$\{i\}$中的表示：
+\begin{equation}
+R_i = \begin{bmatrix} e_{i-1,1,\{i\}} & e_{i-1,2,\{i\}} & e_{i-1,3,\{i\}} \end{bmatrix}
+\end{equation}
+
+其中$e_{i-1,j,\{i\}}$表示$\{i-1\}$的第$j$个基向量在$\{i\}$中的坐标表示。
+
+向量$\mathbf{v}$可以表示为：
+\begin{equation}
+\mathbf{v} = \mathbf{v}_{i-1,1} e_{i-1,1} + \mathbf{v}_{i-1,2} e_{i-1,2} + \mathbf{v}_{i-1,3} e_{i-1,3}
+\end{equation}
+
+在坐标系$\{i\}$中，这个向量可以表示为：
+\begin{equation}
+\mathbf{v} = \mathbf{v}_{i,1} e_{i,1} + \mathbf{v}_{i,2} e_{i,2} + \mathbf{v}_{i,3} e_{i,3}
+\end{equation}
+
+由于$e_{i-1,j}$在$\{i\}$中的表示是$R_i$的第$j$列，我们有：
+\begin{align}
+\mathbf{v} &= \mathbf{v}_{i-1,1} (R_i \text{的第1列}) + \mathbf{v}_{i-1,2} (R_i \text{的第2列}) + \mathbf{v}_{i-1,3} (R_i \text{的第3列}) \\
+&= R_i \mathbf{v}_{i-1}
+\end{align}
+
+但是，这个$R_i \mathbf{v}_{i-1}$是向量$\mathbf{v}$在$\{i\}$中的\textbf{物理表示}，而不是\textbf{坐标表示}。
+
+\textbf{方法2：坐标变换（正确方法）}
+
+要得到向量$\mathbf{v}$在$\{i\}$中的\textbf{坐标表示}，我们需要计算它在$\{i\}$的基向量上的投影。
+
+设$\mathbf{v}_{i-1} = [v_{i-1,1}, v_{i-1,2}, v_{i-1,3}]^T$是向量$\mathbf{v}$在$\{i-1\}$中的坐标。
+
+向量$\mathbf{v}$在$\{i\}$中的坐标$\mathbf{v}_i = [v_{i,1}, v_{i,2}, v_{i,3}]^T$可以通过计算$\mathbf{v}$在$\{i\}$的基向量上的投影得到：
+\begin{equation}
+v_{i,j} = \mathbf{v} \cdot e_{i,j}
+\end{equation}
+
+由于$\mathbf{v} = \sum_{k=1}^3 v_{i-1,k} e_{i-1,k}$，我们有：
+\begin{equation}
+v_{i,j} = \sum_{k=1}^3 v_{i-1,k} (e_{i-1,k} \cdot e_{i,j})
+\end{equation}
+
+由于$e_{i-1,k}$在$\{i\}$中的表示是$R_i$的第$k$列，而$e_{i,j}$在$\{i\}$中的表示是单位向量（第$j$个分量为1，其他为0），我们有：
+\begin{equation}
+e_{i-1,k} \cdot e_{i,j} = (R_i \text{的第$k$列})_j = R_{j,k}
+\end{equation}
+
+因此：
+\begin{equation}
+v_{i,j} = \sum_{k=1}^3 R_{j,k} v_{i-1,k} = (R_i^T)_{j,:} \mathbf{v}_{i-1}
+\end{equation}
+
+所以：
+\begin{equation}
+\mathbf{v}_i = R_i^T \mathbf{v}_{i-1}
+\end{equation}
+
+\textbf{结论}：公式$\mathbf{v}_i = R_i^T \mathbf{v}_{i-1}$是\textbf{正确的}。
+
+\subsection{刚体速度}
+
+\textbf{角速度}：
+
+如果坐标系$\{i\}$相对于坐标系$\{i-1\}$有角速度$\omega_{\text{rel}}$，那么：
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1} + \omega_{\text{rel}}
+\end{equation}
+
+\textbf{线速度}：
+
+如果坐标系$\{i\}$的原点相对于坐标系$\{i-1\}$有速度，那么：
+\begin{equation}
+v_i = R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + v_{\text{rel}}
+\end{equation}
+
+其中$v_{\text{rel}}$是坐标系$\{i\}$相对于坐标系$\{i-1\}$的相对速度。
+
+\section{旋转关节公式推导}
+
+\subsection{公式(15)：角速度}
+
+\textbf{物理意义}：
+
+对于旋转关节$i$，连杆$i$的角速度由两部分组成：
+\begin{enumerate}
+\item 从连杆$i-1$传递过来的角速度：$R_i^T \omega_{i-1}$
+\item 关节$i$自身的旋转角速度：$\dot{\theta}_i z_i$
+\end{enumerate}
+
+\textbf{推导}：
+
+\begin{itemize}
+\item 连杆$i-1$的角速度$\omega_{i-1}$是在坐标系$\{i-1\}$中表示的
+\item 要转换到坐标系$\{i\}$中，需要左乘$R_i^T$：$R_i^T \omega_{i-1}$
+\item 关节$i$绕轴$z_i$旋转，角速度为$\dot{\theta}_i z_i$（已经在坐标系$\{i\}$中）
+\item 因此，总角速度为：
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1} + \dot{\theta}_i z_i \tag{15}
+\end{equation}
+\end{itemize}
+
+\subsection{公式(16)：角加速度}
+
+\textbf{物理意义}：
+
+角加速度由三部分组成：
+\begin{enumerate}
+\item 从连杆$i-1$传递过来的角加速度：$R_i^T \dot{\omega}_{i-1}$
+\item 科里奥利项：$R_i^T \omega_{i-1} \times \dot{\theta}_i z_i$
+\item 关节$i$自身的角加速度：$\ddot{\theta}_i z_i$
+\end{enumerate}
+
+\textbf{推导}：
+
+对公式(15)求时间导数：
+\begin{equation}
+\dot{\omega}_i = \frac{d}{dt}[R_i^T \omega_{i-1} + \dot{\theta}_i z_i]
+\end{equation}
+
+使用乘积法则：
+\begin{equation}
+\dot{\omega}_i = \frac{d}{dt}[R_i^T] \omega_{i-1} + R_i^T \dot{\omega}_{i-1} + \ddot{\theta}_i z_i
+\end{equation}
+
+\textbf{关键}：$\frac{d}{dt}[R_i^T]$的计算
+
+对于旋转矩阵$R_i$，如果坐标系$\{i\}$相对于坐标系$\{i-1\}$有角速度$\omega_{\text{rel}} = \dot{\theta}_i z_i$，那么：
+\begin{equation}
+\dot{R}_i = R_i [\omega_{\text{rel}}]_{\times} = R_i [\dot{\theta}_i z_i]_{\times}
+\end{equation}
+
+其中$[\omega]_{\times}$是反对称矩阵（skew-symmetric matrix）。
+
+因此：
+\begin{equation}
+\frac{d}{dt}[R_i^T] = (\dot{R}_i)^T = (R_i [\dot{\theta}_i z_i]_{\times})^T = -[\dot{\theta}_i z_i]_{\times} R_i^T
+\end{equation}
+
+\textbf{注意}：$[\omega]_{\times}^T = -[\omega]_{\times}$（反对称矩阵的性质）
+
+但是，更直接的方法是使用角速度的变换关系。实际上，当坐标系$\{i\}$相对于坐标系$\{i-1\}$旋转时，有：
+\begin{equation}
+\frac{d}{dt}[R_i^T \omega_{i-1}] = R_i^T \dot{\omega}_{i-1} + R_i^T \omega_{i-1} \times (\dot{\theta}_i z_i)
+\end{equation}
+
+\textbf{推导细节}：
+
+考虑一个固定在坐标系$\{i-1\}$中的向量$\mathbf{v}$，在坐标系$\{i\}$中的表示为$\mathbf{v}_i = R_i^T \mathbf{v}$。
+
+对时间求导：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v} + R_i^T \dot{\mathbf{v}}
+\end{equation}
+
+由于$\mathbf{v}$固定在坐标系$\{i-1\}$中，$\dot{\mathbf{v}} = 0$，因此：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v}
+\end{equation}
+
+另一方面，由于坐标系$\{i\}$相对于坐标系$\{i-1\}$有角速度$\omega_{\text{rel}} = \dot{\theta}_i z_i$，向量$\mathbf{v}_i$的变化率为：
+\begin{equation}
+\dot{\mathbf{v}}_i = \omega_{\text{rel}} \times \mathbf{v}_i = (\dot{\theta}_i z_i) \times (R_i^T \mathbf{v})
+\end{equation}
+
+但是，更准确的关系是：
+\begin{equation}
+\dot{\mathbf{v}}_i = R_i^T (\omega_{i-1} \times \mathbf{v}) + (\dot{\theta}_i z_i) \times \mathbf{v}_i
+\end{equation}
+
+对于角速度$\omega_{i-1}$，我们有：
+\begin{equation}
+\frac{d}{dt}[R_i^T \omega_{i-1}] = R_i^T \dot{\omega}_{i-1} + R_i^T (\omega_{i-1} \times (\dot{\theta}_i z_i))
+\end{equation}
+
+\textbf{简化}：
+
+实际上，在递归算法中，我们通常使用更直接的方法。考虑角速度的变换：
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1} + \dot{\theta}_i z_i
+\end{equation}
+
+对时间求导：
+\begin{equation}
+\dot{\omega}_i = \frac{d}{dt}[R_i^T \omega_{i-1}] + \ddot{\theta}_i z_i
+\end{equation}
+
+使用角速度变换的导数公式：
+\begin{equation}
+\frac{d}{dt}[R_i^T \omega_{i-1}] = R_i^T \dot{\omega}_{i-1} + (R_i^T \omega_{i-1}) \times (\dot{\theta}_i z_i)
+\end{equation}
+
+因此：
+\begin{equation}
+\dot{\omega}_i = R_i^T \dot{\omega}_{i-1} + R_i^T \omega_{i-1} \times \dot{\theta}_i z_i + \ddot{\theta}_i z_i \tag{16}
+\end{equation}
+
+\textbf{注意}：这里$R_i^T \omega_{i-1} \times \dot{\theta}_i z_i$是科里奥利项，表示由于坐标系旋转和关节运动耦合产生的角加速度。
+
+\subsection{公式(17)：线速度}
+
+\textbf{物理意义}：
+
+坐标系$\{i\}$原点的线速度由两部分组成：
+\begin{enumerate}
+\item 坐标系$\{i-1\}$原点的线速度：$v_{i-1}$
+\item 由于坐标系$\{i-1\}$的旋转产生的速度：$\omega_{i-1} \times p_i$
+\end{enumerate}
+
+\textbf{推导}：
+
+考虑坐标系$\{i\}$的原点$O_i$在坐标系$\{i-1\}$中的位置为$p_i$。
+
+\textbf{速度合成定理}：
+
+如果坐标系$\{i-1\}$的原点$O_{i-1}$的速度为$v_{i-1}$，角速度为$\omega_{i-1}$，那么点$O_i$的速度为：
+\begin{equation}
+v_{O_i, \{i-1\}} = v_{i-1} + \omega_{i-1} \times p_i
+\end{equation}
+
+（在坐标系$\{i-1\}$中表示）
+
+\textbf{坐标变换}：
+
+要将这个速度转换到坐标系$\{i\}$中，需要左乘$R_i^T$：
+\begin{equation}
+v_i = R_i^T (v_{i-1} + \omega_{i-1} \times p_i) \tag{17}
+\end{equation}
+
+\textbf{注意}：对于旋转关节，没有额外的相对速度项，因为关节只旋转，不移动。
+
+\subsection{公式(18)：线加速度}
+
+\textbf{物理意义}：
+
+线加速度由三部分组成：
+\begin{enumerate}
+\item 坐标系$\{i-1\}$原点的线加速度：$\dot{v}_{i-1}$
+\item 由于坐标系$\{i-1\}$的角加速度产生的加速度：$\dot{\omega}_{i-1} \times p_i$
+\item 由于坐标系$\{i-1\}$的旋转产生的向心加速度：$\omega_{i-1} \times (\omega_{i-1} \times p_i)$
+\end{enumerate}
+
+\textbf{推导}：
+
+对公式(17)求时间导数：
+\begin{equation}
+\dot{v}_i = \frac{d}{dt}[R_i^T (v_{i-1} + \omega_{i-1} \times p_i)]
+\end{equation}
+
+使用乘积法则：
+\begin{equation}
+\dot{v}_i = \frac{d}{dt}[R_i^T] (v_{i-1} + \omega_{i-1} \times p_i) + R_i^T \frac{d}{dt}[v_{i-1} + \omega_{i-1} \times p_i]
+\end{equation}
+
+\textbf{第一项}：$\frac{d}{dt}[R_i^T] (v_{i-1} + \omega_{i-1} \times p_i)$
+
+由于坐标系$\{i\}$相对于坐标系$\{i-1\}$有角速度$\dot{\theta}_i z_i$，这一项可以写成：
+\begin{equation}
+\frac{d}{dt}[R_i^T] (v_{i-1} + \omega_{i-1} \times p_i) = (\dot{\theta}_i z_i) \times [R_i^T (v_{i-1} + \omega_{i-1} \times p_i)] = (\dot{\theta}_i z_i) \times v_i
+\end{equation}
+
+但是，在递归算法中，我们通常将这一项合并到其他项中。
+
+\textbf{更直接的方法}：
+
+考虑点$O_i$在坐标系$\{i-1\}$中的加速度。根据刚体运动学：
+\begin{equation}
+a_{O_i, \{i-1\}} = \dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)
+\end{equation}
+
+（在坐标系$\{i-1\}$中表示）
+
+\textbf{坐标变换}：
+
+要将这个加速度转换到坐标系$\{i\}$中，需要左乘$R_i^T$：
+\begin{equation}
+\dot{v}_i = R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) \tag{18}
+\end{equation}
+
+\textbf{注意}：
+\begin{itemize}
+\item $\dot{\omega}_{i-1} \times p_i$：切向加速度（由于角加速度）
+\item $\omega_{i-1} \times (\omega_{i-1} \times p_i)$：向心加速度（由于旋转）
+\end{itemize}
+
+\section{移动关节公式推导}
+
+\subsection{公式(19)：角速度}
+
+\textbf{物理意义}：
+
+对于移动关节，关节只沿轴$z_i$移动，不旋转。因此，连杆$i$的角速度只来自连杆$i-1$，没有额外的旋转。
+
+\textbf{推导}：
+
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1} \tag{19}
+\end{equation}
+
+\textbf{注意}：没有$\dot{\theta}_i z_i$项，因为移动关节不产生旋转。
+
+\subsection{公式(20)：角加速度}
+
+\textbf{推导}：
+
+对公式(19)求时间导数：
+\begin{equation}
+\dot{\omega}_i = \frac{d}{dt}[R_i^T \omega_{i-1}] = R_i^T \dot{\omega}_{i-1} \tag{20}
+\end{equation}
+
+\textbf{注意}：对于移动关节，$R_i$是常数（关节只移动，不旋转），因此$\frac{d}{dt}[R_i^T] = 0$。
+
+\subsection{公式(21)：线速度}
+
+\textbf{物理意义}：
+
+坐标系$\{i\}$原点的线速度由三部分组成：
+\begin{enumerate}
+\item 坐标系$\{i-1\}$原点的线速度：$v_{i-1}$
+\item 由于坐标系$\{i-1\}$的旋转产生的速度：$\omega_{i-1} \times p_i$
+\item 关节$i$的相对移动速度：$\dot{d}_i z_i$
+\end{enumerate}
+
+\textbf{推导}：
+
+类似于旋转关节的公式(17)，但需要加上关节的相对速度：
+\begin{equation}
+v_i = R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i \tag{21}
+\end{equation}
+
+其中$\dot{d}_i = \dot{\theta}_i$是关节$i$的移动速度。
+
+\subsection{公式(22)：线加速度}
+
+\textbf{物理意义}：
+
+线加速度由五部分组成：
+\begin{enumerate}
+\item 坐标系$\{i-1\}$原点的线加速度：$\dot{v}_{i-1}$
+\item 由于坐标系$\{i-1\}$的角加速度产生的加速度：$\dot{\omega}_{i-1} \times p_i$
+\item 由于坐标系$\{i-1\}$的旋转产生的向心加速度：$\omega_{i-1} \times (\omega_{i-1} \times p_i)$
+\item 科里奥利加速度：$2\omega_i \times \dot{d}_i z_i$
+\item 关节$i$的相对加速度：$\ddot{d}_i z_i$
+\end{enumerate}
+
+\textbf{推导}：
+
+对公式(21)求时间导数：
+\begin{equation}
+\dot{v}_i = \frac{d}{dt}[R_i^T (v_{i-1} + \omega_{i-1} \times p_i)] + \frac{d}{dt}[\dot{d}_i z_i]
+\end{equation}
+
+\textbf{第一项}：
+
+类似于旋转关节的公式(18)：
+\begin{equation}
+\frac{d}{dt}[R_i^T (v_{i-1} + \omega_{i-1} \times p_i)] = R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i))
+\end{equation}
+
+\textbf{第二项}：$\frac{d}{dt}[\dot{d}_i z_i]$
+
+使用乘积法则：
+\begin{equation}
+\frac{d}{dt}[\dot{d}_i z_i] = \ddot{d}_i z_i + \dot{d}_i \frac{d}{dt}[z_i]
+\end{equation}
+
+\textbf{关键}：$\frac{d}{dt}[z_i]$的计算
+
+虽然$z_i$在坐标系$\{i\}$中是常数（单位向量），但由于坐标系$\{i\}$相对于惯性坐标系有角速度$\omega_i$，$z_i$在惯性坐标系中的变化率为：
+\begin{equation}
+\frac{d}{dt}[z_i] = \omega_i \times z_i
+\end{equation}
+
+因此：
+\begin{equation}
+\frac{d}{dt}[\dot{d}_i z_i] = \ddot{d}_i z_i + \dot{d}_i (\omega_i \times z_i) = \ddot{d}_i z_i + \omega_i \times (\dot{d}_i z_i)
+\end{equation}
+
+\textbf{合并}：
+
+\begin{align}
+\dot{v}_i &= R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) \\
+&\quad + \ddot{d}_i z_i + \omega_i \times (\dot{d}_i z_i)
+\end{align}
+
+\textbf{重新整理}：
+
+注意到$\omega_i \times (\dot{d}_i z_i) = \dot{d}_i (\omega_i \times z_i)$，但更准确的是：
+\begin{equation}
+\omega_i \times (\dot{d}_i z_i) = \dot{d}_i (\omega_i \times z_i)
+\end{equation}
+
+但是，在递归算法中，我们通常写成：
+\begin{equation}
+\dot{v}_i = R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) + 2\omega_i \times \dot{d}_i z_i + \ddot{d}_i z_i \tag{22}
+\end{equation}
+
+\textbf{为什么是$2\omega_i \times \dot{d}_i z_i$？}
+
+实际上，这一项包含了两个部分：
+\begin{enumerate}
+\item 由于坐标系$\{i\}$的旋转，$\dot{d}_i z_i$方向的变化：$\omega_i \times (\dot{d}_i z_i)$
+\item 由于坐标系$\{i\}$的旋转和关节移动的耦合：另一个$\omega_i \times (\dot{d}_i z_i)$项
+\end{enumerate}
+
+\textbf{详细推导}：
+
+考虑点$O_i$在坐标系$\{i-1\}$中的位置为$p_i + d_i z_{i,\{i-1\}}$，其中$z_{i,\{i-1\}}$是$z_i$在坐标系$\{i-1\}$中的表示。
+
+速度：
+\begin{equation}
+v_{O_i, \{i-1\}} = v_{i-1} + \omega_{i-1} \times (p_i + d_i z_{i,\{i-1\}}) + \dot{d}_i z_{i,\{i-1\}}
+\end{equation}
+
+加速度：
+\begin{align}
+a_{O_i, \{i-1\}} &= \dot{v}_{i-1} + \dot{\omega}_{i-1} \times (p_i + d_i z_{i,\{i-1\}}) \\
+&\quad + \omega_{i-1} \times [\omega_{i-1} \times (p_i + d_i z_{i,\{i-1\}})] \\
+&\quad + 2\omega_{i-1} \times (\dot{d}_i z_{i,\{i-1\}}) + \ddot{d}_i z_{i,\{i-1\}}
+\end{align}
+
+转换到坐标系$\{i\}$中，并注意到$z_i$在坐标系$\{i\}$中是常数，我们得到公式(22)。
+
+\section{质心加速度公式推导（公式23）}
+
+\subsection{物理意义}
+
+连杆$i$质心的加速度由三部分组成：
+\begin{enumerate}
+\item 坐标系$\{i\}$原点的加速度：$\dot{v}_i$
+\item 由于角加速度产生的切向加速度：$\dot{\omega}_i \times r_i$
+\item 由于旋转产生的向心加速度：$\omega_i \times (\omega_i \times r_i)$
+\end{enumerate}
+
+\subsection{推导}
+
+考虑连杆$i$的质心$C_i$，其相对于坐标系$\{i\}$原点的位置为$r_i$（在坐标系$\{i\}$中表示）。
+
+\textbf{速度合成}：
+
+质心$C_i$的速度为：
+\begin{equation}
+v_{c,i} = v_i + \omega_i \times r_i
+\end{equation}
+
+（在坐标系$\{i\}$中表示）
+
+\textbf{加速度合成}：
+
+对速度求时间导数：
+\begin{equation}
+\dot{v}_{c,i} = \dot{v}_i + \frac{d}{dt}[\omega_i \times r_i]
+\end{equation}
+
+使用乘积法则：
+\begin{equation}
+\frac{d}{dt}[\omega_i \times r_i] = \dot{\omega}_i \times r_i + \omega_i \times \dot{r}_i
+\end{equation}
+
+\textbf{关键}：$\dot{r}_i$的计算
+
+由于$r_i$固定在连杆$i$上（在坐标系$\{i\}$中是常数），但由于坐标系$\{i\}$有角速度$\omega_i$，$r_i$在惯性坐标系中的变化率为：
+\begin{equation}
+\dot{r}_i = \omega_i \times r_i
+\end{equation}
+
+因此：
+\begin{equation}
+\frac{d}{dt}[\omega_i \times r_i] = \dot{\omega}_i \times r_i + \omega_i \times (\omega_i \times r_i)
+\end{equation}
+
+\textbf{最终公式}：
+
+\begin{equation}
+\dot{v}_{c,i} = \dot{v}_i + \dot{\omega}_i \times r_i + \omega_i \times (\omega_i \times r_i) \tag{23}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $\dot{v}_i$：坐标系$\{i\}$原点的加速度
+\item $\dot{\omega}_i \times r_i$：切向加速度（由于角加速度）
+\item $\omega_i \times (\omega_i \times r_i)$：向心加速度（由于旋转）
+\end{itemize}
+
+\section{总结}
+
+\subsection{公式总结}
+
+\textbf{旋转关节}：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \\
+\dot{\omega}_i &= R_i^T \dot{\omega}_{i-1} + R_i^T \omega_{i-1} \times \dot{\theta}_i z_i + \ddot{\theta}_i z_i \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) \\
+\dot{v}_i &= R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i))
+\end{align}
+
+\textbf{移动关节}：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} \\
+\dot{\omega}_i &= R_i^T \dot{\omega}_{i-1} \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i \\
+\dot{v}_i &= R_i^T (\dot{v}_{i-1} + \dot{\omega}_{i-1} \times p_i + \omega_{i-1} \times (\omega_{i-1} \times p_i)) + 2\omega_i \times \dot{d}_i z_i + \ddot{d}_i z_i
+\end{align}
+
+\textbf{质心加速度}：
+\begin{equation}
+\dot{v}_{c,i} = \dot{v}_i + \dot{\omega}_i \times r_i + \omega_i \times (\omega_i \times r_i)
+\end{equation}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{坐标变换}：所有量都需要转换到当前坐标系$\{i\}$中表示
+\item \textbf{速度合成}：刚体上任意点的速度 = 基点速度 + 旋转产生的速度
+\item \textbf{加速度合成}：包含切向加速度、向心加速度和科里奥利加速度
+\item \textbf{旋转关节}：产生角速度和角加速度
+\item \textbf{移动关节}：产生线速度和线加速度，还有科里奥利项
+\item \textbf{质心加速度}：需要考虑坐标系原点的加速度和旋转产生的加速度
+\end{enumerate}
+
+\end{document}
+

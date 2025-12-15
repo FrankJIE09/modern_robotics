@@ -1,0 +1,670 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{阻抗控制的两种实现方式：Twist/Wrench vs 解耦}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在阻抗控制中，行为(11.64)有两种实现方式：
+
+\begin{enumerate}
+\item \textbf{使用twists和wrenches}（不解耦）：
+\begin{itemize}
+\item 将$f_{\text{ext}}$替换为wrench $F_{\text{ext}}$
+\item 将$\dot{x}$替换为twist $V$
+\item 将$\ddot{x}$替换为$\dot{V}$
+\item 将$x$替换为指数坐标$S\theta$
+\end{itemize}
+
+\item \textbf{解耦方式}：
+\begin{itemize}
+\item 将线性和旋转行为分开处理
+\end{itemize}
+\end{enumerate}
+
+\textbf{问题}：
+\begin{enumerate}
+\item 前者（使用twists和wrenches）是否解耦？
+\item 两种方法有什么区别？
+\item 各自的优缺点是什么？
+\end{enumerate}
+
+\section{原始方程回顾}
+
+\subsection{方程(11.64)}
+
+\textbf{原始阻抗控制方程}：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x \in \mathbb{R}^n$：任务空间配置（最小坐标集）
+\item 例如：$x \in \mathbb{R}^3$（只有位置，没有旋转）
+\item $M, B, K$：虚拟质量、阻尼、刚度矩阵
+\item $f_{\text{ext}}$：外力
+\end{itemize}
+
+\textbf{限制}：
+\begin{itemize}
+\item 这个方程只适用于\textbf{最小坐标集}
+\item 例如：只有位置$x \in \mathbb{R}^3$，没有旋转
+\item 不能直接表示SE(3)中的完整6维位姿
+\end{itemize}
+
+\section{方法1：使用Twists和Wrenches（耦合方式）}
+
+\subsection{替换规则}
+
+\textbf{替换}：
+\begin{align}
+f_{\text{ext}} &\to F_{\text{ext}} \quad \text{（wrench，6维）} \\
+\dot{x} &\to V \quad \text{（twist，6维）} \\
+\ddot{x} &\to \dot{V} \quad \text{（twist的导数，6维）} \\
+x &\to S\theta \quad \text{（指数坐标，6维）}
+\end{align}
+
+\textbf{注意}：
+\begin{itemize}
+\item $F_{\text{ext}}$可以是体坐标系wrench $F_b$或空间坐标系wrench $F_s$
+\item $V$可以是体坐标系twist $V_b$或空间坐标系twist $V_s$
+\item $S\theta$是SE(3)的指数坐标表示
+\end{itemize}
+
+\subsection{替换后的方程}
+
+\textbf{使用twists和wrenches的阻抗控制方程}：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}} \tag{11.64-twist}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M \in \mathbb{R}^{6 \times 6}$：虚拟质量矩阵（6维）
+\item $B \in \mathbb{R}^{6 \times 6}$：虚拟阻尼矩阵（6维）
+\item $K(S\theta)$：虚拟刚度项（依赖于指数坐标$S\theta$）
+\item $F_{\text{ext}} \in \mathbb{R}^6$：外力wrench（6维）
+\item $V \in \mathbb{R}^6$：twist（6维）
+\item $\dot{V} \in \mathbb{R}^6$：twist的导数（6维）
+\end{itemize}
+
+\subsection{是否解耦？}
+
+\textbf{答案}：\textcolor{red}{不解耦}！
+
+\textbf{原因}：
+\begin{itemize}
+\item 矩阵$M, B, K$是$6 \times 6$的，通常是\textbf{非对角}的
+\item 旋转和平移之间存在\textbf{耦合}
+\item 例如：旋转运动可能影响平移，平移运动可能影响旋转
+\end{itemize}
+
+\textbf{耦合的例子}：
+\begin{itemize}
+\item 如果$M$不是对角矩阵，旋转加速度$\dot{\omega}$会影响平移加速度$\dot{v}$
+\item 如果$B$不是对角矩阵，旋转速度$\omega$会影响平移速度$v$
+\item 如果$K$不是对角矩阵，旋转位置$S\theta_{\text{rot}}$会影响平移位置$S\theta_{\text{trans}}$
+\end{itemize}
+
+\subsection{矩阵结构}
+
+\textbf{一般形式}（耦合）：
+\begin{equation}
+M = \begin{bmatrix}
+M_{\omega\omega} & M_{\omega v} \\
+M_{v\omega} & M_{vv}
+\end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M_{\omega\omega} \in \mathbb{R}^{3 \times 3}$：旋转-旋转耦合
+\item $M_{\omega v} \in \mathbb{R}^{3 \times 3}$：旋转-平移耦合
+\item $M_{v\omega} \in \mathbb{R}^{3 \times 3}$：平移-旋转耦合
+\item $M_{vv} \in \mathbb{R}^{3 \times 3}$：平移-平移耦合
+\end{itemize}
+
+\textbf{如果$M_{\omega v} \neq 0$或$M_{v\omega} \neq 0$}：
+\begin{itemize}
+\item 旋转和平移是耦合的
+\item 旋转运动会影响平移，平移运动会影响旋转
+\end{itemize}
+
+\section{方法2：解耦方式}
+
+\subsection{基本思想}
+
+\textbf{解耦}：将线性和旋转行为分开处理。
+
+\textbf{方法}：
+\begin{itemize}
+\item 将6维问题分解为两个独立的3维问题
+\item 线性部分（平移）：3维
+\item 旋转部分：3维
+\item 两者独立处理，互不影响
+\end{itemize}
+
+\subsection{解耦后的方程}
+
+\textbf{线性部分（平移）}：
+\begin{equation}
+M_{\text{trans}}\ddot{p} + B_{\text{trans}}\dot{p} + K_{\text{trans}}p = f_{\text{ext,trans}} \tag{11.64-trans}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $p \in \mathbb{R}^3$：位置
+\item $\dot{p} \in \mathbb{R}^3$：线速度
+\item $\ddot{p} \in \mathbb{R}^3$：线加速度
+\item $M_{\text{trans}}, B_{\text{trans}}, K_{\text{trans}} \in \mathbb{R}^{3 \times 3}$：平移的虚拟质量、阻尼、刚度矩阵
+\item $f_{\text{ext,trans}} \in \mathbb{R}^3$：外力（平移部分）
+\end{itemize}
+
+\textbf{旋转部分}：
+\begin{equation}
+M_{\text{rot}}\dot{\omega} + B_{\text{rot}}\omega + K_{\text{rot}}\theta_{\text{rot}} = m_{\text{ext}} \tag{11.64-rot}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\theta_{\text{rot}} \in \mathbb{R}^3$：旋转角度（或指数坐标的旋转部分）
+\item $\omega \in \mathbb{R}^3$：角速度
+\item $\dot{\omega} \in \mathbb{R}^3$：角加速度
+\item $M_{\text{rot}}, B_{\text{rot}}, K_{\text{rot}} \in \mathbb{R}^{3 \times 3}$：旋转的虚拟质量、阻尼、刚度矩阵
+\item $m_{\text{ext}} \in \mathbb{R}^3$：外力矩（旋转部分）
+\end{itemize}
+
+\subsection{解耦的矩阵结构}
+
+\textbf{解耦的虚拟质量矩阵}：
+\begin{equation}
+M = \begin{bmatrix}
+M_{\text{rot}} & 0 \\
+0 & M_{\text{trans}}
+\end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M_{\text{rot}} \in \mathbb{R}^{3 \times 3}$：旋转质量矩阵（对角或非对角，但只影响旋转）
+\item $M_{\text{trans}} \in \mathbb{R}^{3 \times 3}$：平移质量矩阵（对角或非对角，但只影响平移）
+\item 非对角块为零：$M_{\omega v} = 0$，$M_{v\omega} = 0$
+\end{itemize}
+
+\textbf{解耦的虚拟阻尼矩阵}：
+\begin{equation}
+B = \begin{bmatrix}
+B_{\text{rot}} & 0 \\
+0 & B_{\text{trans}}
+\end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\end{equation}
+
+\textbf{解耦的虚拟刚度矩阵}：
+\begin{equation}
+K = \begin{bmatrix}
+K_{\text{rot}} & 0 \\
+0 & K_{\text{trans}}
+\end{bmatrix} \in \mathbb{R}^{6 \times 6}
+\end{equation}
+
+\section{两种方法的对比}
+
+\subsection{方法1：使用Twists和Wrenches（耦合）}
+
+\textbf{方程形式}：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item \textbf{耦合}：旋转和平移之间存在耦合
+\item \textbf{矩阵结构}：$M, B, K$是$6 \times 6$的，通常非对角
+\item \textbf{耦合项}：$M_{\omega v} \neq 0$，$M_{v\omega} \neq 0$（一般情况）
+\item \textbf{物理意义}：更准确地描述旋转和平移之间的相互作用
+\end{itemize}
+
+\textbf{优点}：
+\begin{itemize}
+\item \textbf{更准确}：可以描述旋转和平移之间的耦合
+\item \textbf{更通用}：适用于一般情况
+\item \textbf{符合物理}：实际系统中旋转和平移往往是耦合的
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item \textbf{复杂}：需要设计$6 \times 6$的耦合矩阵
+\item \textbf{参数多}：需要确定36个参数（对于每个矩阵）
+\item \textbf{难以调参}：耦合项的影响难以直观理解
+\end{itemize}
+
+\subsection{方法2：解耦方式}
+
+\textbf{方程形式}：
+\begin{align}
+M_{\text{trans}}\ddot{p} + B_{\text{trans}}\dot{p} + K_{\text{trans}}p &= f_{\text{ext,trans}} \\
+M_{\text{rot}}\dot{\omega} + B_{\text{rot}}\omega + K_{\text{rot}}\theta_{\text{rot}} &= m_{\text{ext}}
+\end{align}
+
+\textbf{特点}：
+\begin{itemize}
+\item \textbf{解耦}：旋转和平移完全独立
+\item \textbf{矩阵结构}：$M, B, K$是块对角的
+\item \textbf{耦合项}：$M_{\omega v} = 0$，$M_{v\omega} = 0$
+\item \textbf{物理意义}：假设旋转和平移互不影响
+\end{itemize}
+
+\textbf{优点}：
+\begin{itemize}
+\item \textbf{简单}：只需要设计两个独立的$3 \times 3$矩阵
+\item \textbf{参数少}：每个矩阵只需要9个参数（总共18个）
+\item \textbf{易于调参}：旋转和平移可以独立调整
+\item \textbf{直观}：物理意义清晰
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item \textbf{近似}：忽略了旋转和平移之间的耦合
+\item \textbf{不准确}：如果实际系统存在耦合，模型不准确
+\item \textbf{限制}：只适用于耦合可以忽略的情况
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：耦合情况}
+
+\textbf{场景}：机器人末端执行器有非对称质量分布
+
+\textbf{虚拟质量矩阵}（耦合）：
+\begin{equation}
+M = \begin{bmatrix}
+M_{\omega\omega} & M_{\omega v} \\
+M_{v\omega} & M_{vv}
+\end{bmatrix} = \begin{bmatrix}
+I_{\text{rot}} & M_{\text{coupling}} \\
+M_{\text{coupling}}^T & m_{\text{trans}}I
+\end{bmatrix}
+\end{equation}
+
+其中$M_{\text{coupling}} \neq 0$表示旋转和平移的耦合。
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 当机器人旋转时，由于非对称质量分布，会产生平移加速度
+\item 当机器人平移时，由于非对称质量分布，会产生旋转加速度
+\end{itemize}
+
+\textbf{使用耦合方式}：
+\begin{itemize}
+\item 可以准确描述这种耦合
+\item 需要设计耦合项$M_{\text{coupling}}$
+\end{itemize}
+
+\textbf{使用解耦方式}：
+\begin{itemize}
+\item 忽略耦合项$M_{\text{coupling}} = 0$
+\item 模型不准确，但实现简单
+\end{itemize}
+
+\subsection{例子2：解耦情况}
+
+\textbf{场景}：机器人末端执行器质量分布对称，且旋转中心与质心重合
+
+\textbf{虚拟质量矩阵}（解耦）：
+\begin{equation}
+M = \begin{bmatrix}
+I_{\text{rot}} & 0 \\
+0 & m_{\text{trans}}I
+\end{bmatrix}
+\end{equation}
+
+其中非对角块为零。
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 旋转运动不影响平移
+\item 平移运动不影响旋转
+\end{itemize}
+
+\textbf{使用解耦方式}：
+\begin{itemize}
+\item 准确描述系统
+\item 实现简单
+\end{itemize}
+
+\textbf{使用耦合方式}：
+\begin{itemize}
+\item 也可以使用，但增加了不必要的复杂性
+\end{itemize}
+
+\section{指数坐标$S\theta$的解释}
+
+\subsection{什么是指数坐标？}
+
+\textbf{指数坐标}：SE(3)群元素的参数化表示。
+
+\textbf{定义}：
+\begin{equation}
+X = \exp([S\theta])
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $S \in \mathbb{R}^6$：screw轴（螺旋轴）
+\item $\theta \in \mathbb{R}$：沿螺旋轴的位移
+\item $[S\theta]$：twist的矩阵表示
+\item $\exp$：SE(3)的指数映射
+\end{itemize}
+
+\textbf{更常用的形式}：
+\begin{equation}
+X = \exp([\xi])
+\end{equation}
+
+其中$\xi = S\theta \in \mathbb{R}^6$是twist。
+
+\subsection{在阻抗控制中的使用}
+
+\textbf{位置表示}：
+\begin{itemize}
+\item 在原始方程中：$x \in \mathbb{R}^n$（最小坐标）
+\item 在twist/wrench方式中：$S\theta$（指数坐标）
+\item 两者都表示位置/位姿
+\end{itemize}
+
+\textbf{刚度项}：
+\begin{equation}
+K(S\theta)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 虚拟弹簧的恢复力
+\item 依赖于当前位姿（用指数坐标表示）
+\item 如果偏离平衡位置，产生恢复力
+\end{itemize}
+
+\section{选择建议}
+
+\subsection{何时使用耦合方式（Twist/Wrench）？}
+
+\begin{itemize}
+\item \textbf{系统存在明显耦合}：
+\begin{itemize}
+\item 非对称质量分布
+\item 旋转中心与质心不重合
+\item 复杂的几何形状
+\end{itemize}
+
+\item \textbf{需要高精度}：
+\begin{itemize}
+\item 对精度要求高
+\item 耦合项的影响不可忽略
+\end{itemize}
+
+\item \textbf{有足够的建模能力}：
+\begin{itemize}
+\item 可以准确建模耦合项
+\item 有足够的参数辨识能力
+\end{itemize}
+\end{itemize}
+
+\subsection{何时使用解耦方式？}
+
+\begin{itemize}
+\item \textbf{系统近似解耦}：
+\begin{itemize}
+\item 质量分布对称
+\item 旋转中心与质心重合
+\item 耦合项很小，可以忽略
+\end{itemize}
+
+\item \textbf{实现简单优先}：
+\begin{itemize}
+\item 需要快速实现
+\item 参数调优简单
+\item 不需要高精度
+\end{itemize}
+
+\item \textbf{独立控制旋转和平移}：
+\begin{itemize}
+\item 旋转和平移有不同的控制目标
+\item 需要独立调整参数
+\end{itemize}
+\end{itemize}
+
+\section{导纳控制中的耦合问题}
+
+\subsection{导纳控制也会遇到耦合问题}
+
+\textbf{问题}：导纳控制中是否也会有耦合问题？
+
+\textbf{答案}：\textcolor{red}{是的！}导纳控制也会遇到同样的耦合问题。
+
+\subsection{导纳控制的方程}
+
+\textbf{标准导纳控制方程}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64-admittance}
+\end{equation}
+
+\textbf{使用twists和wrenches的导纳控制方程}：
+\begin{equation}
+M\dot{V}_d + BV + K(S\theta) = F_{\text{ext}} \tag{11.64-admittance-twist}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F_{\text{ext}} \in \mathbb{R}^6$：感测到的外力wrench（6维）
+\item $V \in \mathbb{R}^6$：当前twist（6维）
+\item $\dot{V}_d \in \mathbb{R}^6$：期望的twist加速度（6维）
+\item $M, B, K \in \mathbb{R}^{6 \times 6}$：虚拟质量、阻尼、刚度矩阵
+\end{itemize}
+
+\subsection{耦合问题的表现}
+
+\textbf{如果矩阵$M, B, K$是耦合的}（非对角）：
+\begin{itemize}
+\item 旋转外力矩$m_{\text{ext}}$会影响平移加速度$\dot{v}_d$
+\item 平移外力$f_{\text{ext}}$会影响旋转加速度$\dot{\omega}_d$
+\item 旋转和平移之间存在耦合
+\end{itemize}
+
+\textbf{具体例子}：
+
+假设虚拟质量矩阵是耦合的：
+\begin{equation}
+M = \begin{bmatrix}
+M_{\omega\omega} & M_{\omega v} \\
+M_{v\omega} & M_{vv}
+\end{bmatrix}
+\end{equation}
+
+其中$M_{\omega v} \neq 0$，$M_{v\omega} \neq 0$。
+
+\textbf{导纳控制方程展开}：
+\begin{align}
+\begin{bmatrix}
+M_{\omega\omega} & M_{\omega v} \\
+M_{v\omega} & M_{vv}
+\end{bmatrix}
+\begin{bmatrix}
+\dot{\omega}_d \\
+\dot{v}_d
+\end{bmatrix}
++ 
+\begin{bmatrix}
+B_{\omega\omega} & B_{\omega v} \\
+B_{v\omega} & B_{vv}
+\end{bmatrix}
+\begin{bmatrix}
+\omega \\
+v
+\end{bmatrix}
++ 
+\begin{bmatrix}
+K_{\omega\omega} & K_{\omega v} \\
+K_{v\omega} & K_{vv}
+\end{bmatrix}
+\begin{bmatrix}
+\theta_{\text{rot}} \\
+\theta_{\text{trans}}
+\end{bmatrix}
+= 
+\begin{bmatrix}
+m_{\text{ext}} \\
+f_{\text{ext}}
+\end{bmatrix}
+\end{align}
+
+\textbf{耦合项的影响}：
+\begin{itemize}
+\item $M_{\omega v}\dot{v}_d$：平移加速度对旋转加速度的影响
+\item $M_{v\omega}\dot{\omega}_d$：旋转加速度对平移加速度的影响
+\item $B_{\omega v}v$：平移速度对旋转阻尼的影响
+\item $B_{v\omega}\omega$：旋转速度对平移阻尼的影响
+\item $K_{\omega v}\theta_{\text{trans}}$：平移位置对旋转刚度的影响
+\item $K_{v\omega}\theta_{\text{rot}}$：旋转位置对平移刚度的影响
+\end{itemize}
+
+\subsection{解耦的导纳控制}
+
+\textbf{解耦方式}：将旋转和平移分开处理。
+
+\textbf{旋转部分}：
+\begin{equation}
+M_{\text{rot}}\dot{\omega}_d + B_{\text{rot}}\omega + K_{\text{rot}}\theta_{\text{rot}} = m_{\text{ext}}
+\end{equation}
+
+\textbf{平移部分}：
+\begin{equation}
+M_{\text{trans}}\dot{v}_d + B_{\text{trans}}v + K_{\text{trans}}\theta_{\text{trans}} = f_{\text{ext}}
+\end{equation}
+
+\textbf{解耦的矩阵结构}：
+\begin{equation}
+M = \begin{bmatrix}
+M_{\text{rot}} & 0 \\
+0 & M_{\text{trans}}
+\end{bmatrix}, \quad
+B = \begin{bmatrix}
+B_{\text{rot}} & 0 \\
+0 & B_{\text{trans}}
+\end{bmatrix}, \quad
+K = \begin{bmatrix}
+K_{\text{rot}} & 0 \\
+0 & K_{\text{trans}}
+\end{bmatrix}
+\end{equation}
+
+\subsection{导纳控制 vs 阻抗控制的耦合}
+
+\textbf{相同点}：
+\begin{itemize}
+\item 两者都会遇到旋转-平移耦合问题
+\item 耦合的来源相同：虚拟质量、阻尼、刚度矩阵的非对角项
+\item 解耦方法相同：使用块对角矩阵
+\end{itemize}
+
+\textbf{不同点}：
+\begin{itemize}
+\item \textbf{阻抗控制}：感测运动，产生力（耦合体现在力的产生上）
+\item \textbf{导纳控制}：感测力，产生运动（耦合体现在运动的产生上）
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 在阻抗控制中：旋转运动可能产生平移力（如果$M_{\omega v} \neq 0$）
+\item 在导纳控制中：旋转力矩可能产生平移加速度（如果$M_{\omega v} \neq 0$）
+\item 两者是对偶的
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键区别}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{特性} & \textbf{Twist/Wrench方式} & \textbf{解耦方式} \\
+\hline
+耦合性 & \textcolor{red}{耦合} & \textcolor{green}{解耦} \\
+\hline
+矩阵结构 & $6 \times 6$，一般非对角 & $6 \times 6$，块对角 \\
+\hline
+耦合项 & $M_{\omega v} \neq 0$ & $M_{\omega v} = 0$ \\
+\hline
+参数数量 & 36个（每个矩阵） & 18个（每个矩阵） \\
+\hline
+复杂度 & 高 & 低 \\
+\hline
+准确性 & 高（如果建模准确） & 中等（忽略耦合） \\
+\hline
+适用场景 & 存在明显耦合 & 耦合可忽略 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{导纳控制中的耦合}
+
+\begin{enumerate}
+\item \textbf{导纳控制也会遇到耦合问题}
+\begin{itemize}
+\item 如果虚拟质量矩阵$M$是耦合的，旋转力矩会影响平移加速度
+\item 如果虚拟阻尼矩阵$B$是耦合的，旋转速度会影响平移阻尼
+\item 如果虚拟刚度矩阵$K$是耦合的，旋转位置会影响平移刚度
+\end{itemize}
+
+\item \textbf{解耦方法相同}
+\begin{itemize}
+\item 使用块对角矩阵
+\item 将旋转和平移分开处理
+\item 独立设计旋转和平移的阻抗参数
+\end{itemize}
+
+\item \textbf{与阻抗控制对偶}
+\begin{itemize}
+\item 阻抗控制：运动$\to$力（耦合体现在力的产生）
+\item 导纳控制：力$\to$运动（耦合体现在运动的产生）
+\item 两者遇到相同的耦合问题
+\end{itemize}
+\end{enumerate}
+
+\subsection{核心结论}
+
+\begin{enumerate}
+\item \textbf{Twist/Wrench方式}：
+\begin{itemize}
+\item \textcolor{red}{不解耦}
+\item 旋转和平移之间存在耦合
+\item 更准确，但更复杂
+\end{itemize}
+
+\item \textbf{解耦方式}：
+\begin{itemize}
+\item \textcolor{green}{解耦}
+\item 旋转和平移完全独立
+\item 更简单，但可能不够准确
+\end{itemize}
+
+\item \textbf{选择依据}：
+\begin{itemize}
+\item 如果系统存在明显耦合：使用Twist/Wrench方式
+\item 如果耦合可以忽略：使用解耦方式
+\item 如果实现简单优先：使用解耦方式
+\end{itemize}
+\end{enumerate}
+
+\end{document}
+

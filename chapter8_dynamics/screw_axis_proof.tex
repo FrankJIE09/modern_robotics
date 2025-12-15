@@ -1,0 +1,392 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{关节$i$的螺旋轴$A_i$的证明}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：如何证明$A_i = [\omega_i^T, v_i^T]^T$是关节$i$的螺旋轴（screw axis），并且在坐标系$\{i\}$中表示？
+
+\textbf{需要证明}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\textbf{注意}：这里的$\omega_i$和$v_i$不是坐标系$\{i\}$的绝对角速度和线速度，而是关节$i$的螺旋轴的角速度部分和线速度部分。
+
+\textbf{更准确的定义}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_{\text{rel}} \\ v_{\text{rel}} \end{bmatrix} = \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_{\text{rel}} = \dot{\theta}_i z_i$：关节$i$的相对角速度（在$\{i\}$中表示）
+\item $v_{\text{rel}} = \dot{d}_i z_i$：关节$i$的相对线速度（在$\{i\}$中表示）
+\end{itemize}
+
+\textbf{符号说明}：在原始文档中，$A_i$中的$\omega_i$和$v_i$实际上指的是关节$i$的角速度和线速度部分，即$\omega_{\text{rel}}$和$v_{\text{rel}}$。
+
+\section{螺旋轴（Screw Axis）的定义}
+
+\subsection{基本定义}
+
+\textbf{螺旋轴}：螺旋轴是一个6维向量，描述了刚体的瞬时运动，包括：
+\begin{itemize}
+\item 角速度部分：$\omega \in \mathbb{R}^3$（3维）
+\item 线速度部分：$v \in \mathbb{R}^3$（3维）
+\end{itemize}
+
+\textbf{完整形式}：
+\begin{equation}
+S = \begin{bmatrix} \omega \\ v \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\subsection{物理意义}
+
+\textbf{螺旋运动}：
+\begin{itemize}
+\item 刚体的任意运动都可以表示为绕某个轴的旋转和沿该轴的平移的组合
+\item 这个轴称为螺旋轴（screw axis）
+\item 螺旋轴描述了运动的瞬时状态
+\end{itemize}
+
+\textbf{关节的螺旋轴}：
+\begin{itemize}
+\item 对于关节$i$，螺旋轴$A_i$描述了关节$i$的运动
+\item $A_i$的角速度部分：关节$i$的旋转轴方向
+\item $A_i$的线速度部分：关节$i$的移动方向（如果有）
+\end{itemize}
+
+\section{旋转关节的螺旋轴}
+
+\subsection{纯旋转关节}
+
+\textbf{关节特性}：
+\begin{itemize}
+\item 关节$i$只能绕轴$z_i$旋转
+\item 没有平移运动
+\end{itemize}
+
+\textbf{螺旋轴的角速度部分}：
+
+关节$i$的旋转轴为$z_i$（在坐标系$\{i\}$中表示），角速度为$\dot{\theta}_i$，因此：
+\begin{equation}
+\omega_i = \dot{\theta}_i z_i
+\end{equation}
+
+\textbf{螺旋轴的线速度部分}：
+
+对于纯旋转关节，没有平移运动，因此：
+\begin{equation}
+v_i = 0
+\end{equation}
+
+\textbf{螺旋轴}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix} \dot{\theta}_i z_i \\ 0 \end{bmatrix} = \dot{\theta}_i \begin{bmatrix} z_i \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{归一化形式}：
+
+如果$z_i$是单位向量，那么归一化的螺旋轴为：
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ 0 \end{bmatrix}
+\end{equation}
+
+而$\dot{\theta}_i$是速度参数。
+
+\section{移动关节的螺旋轴}
+
+\subsection{纯移动关节}
+
+\textbf{关节特性}：
+\begin{itemize}
+\item 关节$i$只能沿轴$z_i$移动
+\item 没有旋转运动
+\end{itemize}
+
+\textbf{螺旋轴的角速度部分}：
+
+对于纯移动关节，没有旋转运动，因此：
+\begin{equation}
+\omega_i = 0
+\end{equation}
+
+\textbf{螺旋轴的线速度部分}：
+
+关节$i$的移动方向为$z_i$（在坐标系$\{i\}$中表示），速度为$\dot{d}_i$，因此：
+\begin{equation}
+v_i = \dot{d}_i z_i
+\end{equation}
+
+\textbf{螺旋轴}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix} 0 \\ \dot{d}_i z_i \end{bmatrix} = \dot{d}_i \begin{bmatrix} 0 \\ z_i \end{bmatrix}
+\end{equation}
+
+\textbf{归一化形式}：
+
+如果$z_i$是单位向量，那么归一化的螺旋轴为：
+\begin{equation}
+A_i = \begin{bmatrix} 0 \\ z_i \end{bmatrix}
+\end{equation}
+
+而$\dot{d}_i$是速度参数。
+
+\section{螺旋关节的螺旋轴}
+
+\subsection{螺旋运动}
+
+\textbf{关节特性}：
+\begin{itemize}
+\item 关节$i$同时绕轴$z_i$旋转和沿轴$z_i$移动
+\item 旋转和移动是耦合的
+\end{itemize}
+
+\textbf{螺旋轴的角速度部分}：
+
+关节$i$绕轴$z_i$旋转，角速度为$\dot{\theta}_i$：
+\begin{equation}
+\omega_i = \dot{\theta}_i z_i
+\end{equation}
+
+\textbf{螺旋轴的线速度部分}：
+
+关节$i$沿轴$z_i$移动，速度为$h \dot{\theta}_i$（其中$h$是螺旋节距）：
+\begin{equation}
+v_i = h \dot{\theta}_i z_i
+\end{equation}
+
+\textbf{螺旋轴}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix} \dot{\theta}_i z_i \\ h \dot{\theta}_i z_i \end{bmatrix} = \dot{\theta}_i \begin{bmatrix} z_i \\ h z_i \end{bmatrix}
+\end{equation}
+
+\textbf{归一化形式}：
+
+如果$z_i$是单位向量，那么归一化的螺旋轴为：
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ h z_i \end{bmatrix}
+\end{equation}
+
+而$\dot{\theta}_i$是速度参数。
+
+\section{一般形式的证明}
+
+\subsection{关节的螺旋轴定义}
+
+\textbf{定义}：关节$i$的螺旋轴$A_i$是一个6维向量，描述了关节$i$的运动：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $\omega_i \in \mathbb{R}^3$：关节$i$的角速度部分（在坐标系$\{i\}$中表示）
+\item $v_i \in \mathbb{R}^3$：关节$i$的线速度部分（在坐标系$\{i\}$中表示）
+\end{itemize}
+
+\subsection{从关节运动推导}
+
+\textbf{关节运动的一般形式}：
+
+关节$i$的运动可以表示为：
+\begin{itemize}
+\item 角速度：$\omega_i = \dot{\theta}_i z_i$（如果有关节旋转）
+\item 线速度：$v_i = \dot{d}_i z_i$（如果有关节移动）
+\end{itemize}
+
+\textbf{螺旋轴}：
+
+因此，关节$i$的螺旋轴为：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} = \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix}
+\end{equation}
+
+\textbf{归一化形式}：
+
+如果$z_i$是单位向量，那么归一化的螺旋轴为：
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ \frac{\dot{d}_i}{\dot{\theta}_i} z_i \end{bmatrix} = \begin{bmatrix} z_i \\ h z_i \end{bmatrix}
+\end{equation}
+
+其中$h = \frac{\dot{d}_i}{\dot{\theta}_i}$是螺旋节距（对于纯旋转关节，$h = 0$；对于纯移动关节，$h = \infty$）。
+
+\section{在速度合成中的应用}
+
+\subsection{速度合成公式}
+
+\textbf{使用螺旋轴的速度合成}：
+
+坐标系$\{i\}$的twist可以表示为：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}^{-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+\textbf{展开形式}：
+
+\begin{align}
+\begin{bmatrix} \omega_i \\ v_i \end{bmatrix} &= \text{Ad}_{T_{i,i-1}^{-1}} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix} + \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} \dot{\theta}_i \\
+&= \text{Ad}_{T_{i,i-1}^{-1}} \begin{bmatrix} \omega_{i-1} \\ v_{i-1} \end{bmatrix} + \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix}
+\end{align}
+
+\textbf{验证}：
+
+这与速度合成公式一致：
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \dot{\theta}_i z_i \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + \dot{d}_i z_i
+\end{align}
+
+其中$\dot{\theta}_i z_i$和$\dot{d}_i z_i$正是$A_i \dot{\theta}_i$的角速度和线速度部分。
+
+\section{在坐标系$\{i\}$中表示}
+
+\subsection{为什么在$\{i\}$中表示？}
+
+\textbf{原因1：与关节轴定义一致}
+
+关节轴$z_i$在坐标系$\{i\}$中定义：
+\begin{equation}
+z_i = \begin{bmatrix} z_{i,x} \\ z_{i,y} \\ z_{i,z} \end{bmatrix}_{\{i\}}
+\end{equation}
+
+因此，螺旋轴$A_i$也在坐标系$\{i\}$中表示：
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ h z_i \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{原因2：便于递归计算}
+
+在递归算法中，所有量都在当前坐标系$\{i\}$中表示：
+\begin{itemize}
+\item $\omega_i$：在$\{i\}$中表示
+\item $v_i$：在$\{i\}$中表示
+\item $A_i$：在$\{i\}$中表示
+\end{itemize}
+
+这样便于计算和合成。
+
+\section{具体例子}
+
+\subsection{例子1：旋转关节}
+
+\textbf{场景}：
+
+关节$i$是旋转关节，旋转轴$z_i = [0, 0, 1]^T$（在$\{i\}$中表示）。
+
+\textbf{螺旋轴}：
+
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 0 \\ 0 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 角速度部分：$[0, 0, 1]^T$（绕$z$轴旋转）
+\item 线速度部分：$[0, 0, 0]^T$（无平移）
+\end{itemize}
+
+\subsection{例子2：移动关节}
+
+\textbf{场景}：
+
+关节$i$是移动关节，移动方向$z_i = [0, 0, 1]^T$（在$\{i\}$中表示）。
+
+\textbf{螺旋轴}：
+
+\begin{equation}
+A_i = \begin{bmatrix} 0 \\ z_i \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 角速度部分：$[0, 0, 0]^T$（无旋转）
+\item 线速度部分：$[0, 0, 1]^T$（沿$z$轴移动）
+\end{itemize}
+
+\subsection{例子3：螺旋关节}
+
+\textbf{场景}：
+
+关节$i$是螺旋关节，螺旋轴$z_i = [0, 0, 1]^T$（在$\{i\}$中表示），螺旋节距$h = 0.005$ m/rad。
+
+\textbf{螺旋轴}：
+
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ h z_i \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 0 \\ 0.005 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 角速度部分：$[0, 0, 1]^T$（绕$z$轴旋转）
+\item 线速度部分：$[0, 0, 0.005]^T$（沿$z$轴移动，每弧度移动0.005 m）
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{定义}：
+\begin{itemize}
+\item $A_i = [\omega_i^T, v_i^T]^T$是关节$i$的螺旋轴
+\item $\omega_i$：关节$i$的角速度部分
+\item $v_i$：关节$i$的线速度部分
+\end{itemize}
+
+\item \textbf{表示}：
+\begin{itemize}
+\item $A_i$在坐标系$\{i\}$中表示
+\item 原因：与关节轴$z_i$的定义一致
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 描述了关节$i$的运动（旋转和/或平移）
+\item 对于旋转关节：$A_i = [z_i^T, 0^T]^T$
+\item 对于移动关节：$A_i = [0^T, z_i^T]^T$
+\item 对于螺旋关节：$A_i = [z_i^T, (h z_i)^T]^T$
+\end{itemize}
+
+\item \textbf{应用}：
+\begin{itemize}
+\item 在速度合成公式中使用：$V_i = \text{Ad}_{T_{i,i-1}^{-1}}(V_{i-1}) + A_i \dot{\theta}_i$
+\item 统一表示不同关节类型的运动
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{关节$i$的螺旋轴}：
+\begin{equation}
+A_i = \begin{bmatrix} \omega_{\text{rel}} \\ v_{\text{rel}} \end{bmatrix} = \begin{bmatrix} \dot{\theta}_i z_i \\ \dot{d}_i z_i \end{bmatrix} \quad \text{（在$\{i\}$中表示）}
+\end{equation}
+
+\textbf{符号说明}：
+\begin{itemize}
+\item 在原始文档中，为了简化，有时写成$A_i = [\omega_i^T, v_i^T]^T$
+\item 但这里的$\omega_i$和$v_i$实际上指的是$\omega_{\text{rel}}$和$v_{\text{rel}}$
+\item 即关节$i$的相对角速度和相对线速度，而不是坐标系$\{i\}$的绝对角速度和线速度
+\end{itemize}
+
+\textbf{归一化形式}：
+\begin{equation}
+A_i = \begin{bmatrix} z_i \\ h z_i \end{bmatrix} \quad \text{（在$\{i\}$中表示）}
+\end{equation}
+
+其中$h$是螺旋节距（对于纯旋转关节，$h = 0$；对于纯移动关节，$h = \infty$；对于螺旋关节，$h$是有限值）。
+
+\end{document}
+

@@ -1,0 +1,245 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{固定在坐标系中的向量：为什么$\dot{\mathbf{v}} = 0$？}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：为什么如果向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，那么$\dot{\mathbf{v}} = 0$？
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $\mathbf{v} \in \mathbb{R}^3$：三维向量
+\item $\{i-1\}$：坐标系$\{i-1\}$
+\item $\dot{\mathbf{v}}$：向量$\mathbf{v}$对时间的导数
+\end{itemize}
+
+\section{基本概念}
+
+\subsection{什么是"固定在坐标系中"？}
+
+\textbf{定义}：向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，意味着：
+\begin{itemize}
+\item 在坐标系$\{i-1\}$中观察，向量$\mathbf{v}$的分量是常数
+\item 向量$\mathbf{v}$与坐标系$\{i-1\}$一起运动（平移和旋转）
+\item 向量$\mathbf{v}$在坐标系$\{i-1\}$中的表示不随时间变化
+\end{itemize}
+
+\subsection{坐标表示}
+
+如果向量$\mathbf{v}$在坐标系$\{i-1\}$中的表示为：
+\begin{equation}
+\mathbf{v}_{\{i-1\}} = \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix}_{\{i-1\}}
+\end{equation}
+
+那么"固定在坐标系$\{i-1\}$中"意味着：
+\begin{equation}
+\frac{d}{dt} \begin{bmatrix} v_x \\ v_y \\ v_z \end{bmatrix}_{\{i-1\}} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+即向量$\mathbf{v}$在坐标系$\{i-1\}$中的分量对时间的导数为零。
+
+\section{为什么$\dot{\mathbf{v}} = 0$？}
+
+\subsection{关键理解}
+
+\textbf{重要点}：$\dot{\mathbf{v}} = 0$是相对于坐标系$\{i-1\}$的导数，不是绝对导数。
+
+\textbf{说明}：
+\begin{itemize}
+\item $\dot{\mathbf{v}}$表示向量$\mathbf{v}$在坐标系$\{i-1\}$中对时间的导数
+\item 由于$\mathbf{v}$固定在坐标系$\{i-1\}$中，其在该坐标系中的分量是常数
+\item 因此，$\dot{\mathbf{v}} = 0$（在坐标系$\{i-1\}$中）
+\end{itemize}
+
+\subsection{详细解释}
+
+\textbf{步骤1}：向量在坐标系中的表示
+
+向量$\mathbf{v}$在坐标系$\{i-1\}$中的表示为：
+\begin{equation}
+\mathbf{v} = v_x \mathbf{e}_{x,\{i-1\}} + v_y \mathbf{e}_{y,\{i-1\}} + v_z \mathbf{e}_{z,\{i-1\}}
+\end{equation}
+
+其中$\mathbf{e}_{x,\{i-1\}}, \mathbf{e}_{y,\{i-1\}}, \mathbf{e}_{z,\{i-1\}}$是坐标系$\{i-1\}$的基向量。
+
+\textbf{步骤2}：对时间求导
+
+对时间求导：
+\begin{equation}
+\dot{\mathbf{v}} = \dot{v}_x \mathbf{e}_{x,\{i-1\}} + v_x \dot{\mathbf{e}}_{x,\{i-1\}} + \dot{v}_y \mathbf{e}_{y,\{i-1\}} + v_y \dot{\mathbf{e}}_{y,\{i-1\}} + \dot{v}_z \mathbf{e}_{z,\{i-1\}} + v_z \dot{\mathbf{e}}_{z,\{i-1\}}
+\end{equation}
+
+\textbf{步骤3}：固定在坐标系中的含义
+
+如果向量$\mathbf{v}$固定在坐标系$\{i-1\}$中：
+\begin{itemize}
+\item 分量是常数：$\dot{v}_x = 0$，$\dot{v}_y = 0$，$\dot{v}_z = 0$
+\item 基向量在坐标系$\{i-1\}$中是常数（因为我们在坐标系$\{i-1\}$中观察）
+\end{itemize}
+
+\textbf{因此}：
+\begin{equation}
+\dot{\mathbf{v}} = 0 \cdot \mathbf{e}_{x,\{i-1\}} + v_x \cdot 0 + 0 \cdot \mathbf{e}_{y,\{i-1\}} + v_y \cdot 0 + 0 \cdot \mathbf{e}_{z,\{i-1\}} + v_z \cdot 0 = 0
+\end{equation}
+
+\textbf{结论}：$\dot{\mathbf{v}} = 0$（在坐标系$\{i-1\}$中）。
+
+\section{与其他坐标系的关系}
+
+\subsection{在另一个坐标系中的表示}
+
+虽然向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，但在其他坐标系（如坐标系$\{i\}$）中，其表示会随时间变化。
+
+\textbf{坐标变换}：
+\begin{equation}
+\mathbf{v}_i = R_i^T \mathbf{v}
+\end{equation}
+
+其中$\mathbf{v}_i$是向量$\mathbf{v}$在坐标系$\{i\}$中的表示。
+
+\textbf{对时间求导}：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v} + R_i^T \dot{\mathbf{v}}
+\end{equation}
+
+\textbf{由于$\dot{\mathbf{v}} = 0$（在坐标系$\{i-1\}$中）}：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v}
+\end{equation}
+
+\textbf{物理意义}：虽然向量$\mathbf{v}$在坐标系$\{i-1\}$中是固定的，但由于坐标系$\{i\}$相对于坐标系$\{i-1\}$有相对运动，向量$\mathbf{v}$在坐标系$\{i\}$中的表示会随时间变化。
+
+\section{具体例子}
+
+\subsection{例子1：位置向量}
+
+考虑从坐标系$\{i-1\}$原点到坐标系$\{i\}$原点的向量$p_i$。
+
+\textbf{性质}：
+\begin{itemize}
+\item $p_i$固定在坐标系$\{i-1\}$中（对于旋转关节）
+\item 在坐标系$\{i-1\}$中，$p_i$的分量是常数
+\item 因此，$\dot{p}_i = 0$（在坐标系$\{i-1\}$中）
+\end{itemize}
+
+\textbf{注意}：虽然$p_i$在坐标系$\{i-1\}$中是固定的，但在其他坐标系中，其表示会随时间变化。
+
+\subsection{例子2：速度向量}
+
+考虑坐标系$\{i-1\}$原点的速度$v_{i-1}$。
+
+\textbf{关键点}：
+\begin{itemize}
+\item $v_{i-1}$是速度向量，不是固定在坐标系$\{i-1\}$中的向量
+\item $v_{i-1}$在坐标系$\{i-1\}$中的分量可能随时间变化
+\item 因此，$\dot{v}_{i-1} \neq 0$（一般情况下）
+\end{itemize}
+
+\textbf{但是}：如果我们考虑一个固定在坐标系$\{i-1\}$中的向量（如位置向量$p_i$），那么$\dot{p}_i = 0$。
+
+\subsection{例子3：角速度向量}
+
+考虑坐标系$\{i-1\}$的角速度$\omega_{i-1}$。
+
+\textbf{关键点}：
+\begin{itemize}
+\item $\omega_{i-1}$是角速度向量，不是固定在坐标系$\{i-1\}$中的向量
+\item $\omega_{i-1}$在坐标系$\{i-1\}$中的分量可能随时间变化
+\item 因此，$\dot{\omega}_{i-1} \neq 0$（一般情况下）
+\end{itemize}
+
+\section{在递归算法中的应用}
+
+\subsection{应用场景}
+
+在递归牛顿-欧拉算法中，我们经常遇到固定在坐标系中的向量。
+
+\textbf{例子}：考虑一个固定在坐标系$\{i-1\}$中的向量$\mathbf{v}$，在坐标系$\{i\}$中的表示为$\mathbf{v}_i = R_i^T \mathbf{v}$。
+
+\textbf{对时间求导}：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v} + R_i^T \dot{\mathbf{v}}
+\end{equation}
+
+\textbf{由于$\mathbf{v}$固定在坐标系$\{i-1\}$中，$\dot{\mathbf{v}} = 0$}：
+\begin{equation}
+\dot{\mathbf{v}}_i = \frac{d}{dt}[R_i^T] \mathbf{v}
+\end{equation}
+
+\textbf{另一方面}：由于坐标系$\{i\}$相对于坐标系$\{i-1\}$有角速度$\omega_{\text{rel}} = \dot{\theta}_i z_i$，向量$\mathbf{v}_i$的变化率为：
+\begin{equation}
+\dot{\mathbf{v}}_i = \omega_{\text{rel}} \times \mathbf{v}_i = (\dot{\theta}_i z_i) \times (R_i^T \mathbf{v})
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+\frac{d}{dt}[R_i^T] \mathbf{v} = (\dot{\theta}_i z_i) \times (R_i^T \mathbf{v})
+\end{equation}
+
+\section{常见误解}
+
+\subsection{误解1：绝对导数为零}
+
+\textbf{误解}：如果向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，那么其绝对导数也为零。
+
+\textbf{纠正}：
+\begin{itemize}
+\item $\dot{\mathbf{v}} = 0$是相对于坐标系$\{i-1\}$的导数
+\item 在其他坐标系中，向量$\mathbf{v}$的表示可能随时间变化
+\item 绝对导数（在惯性坐标系中）不一定为零
+\end{itemize}
+
+\subsection{误解2：所有向量都固定}
+
+\textbf{误解}：所有在坐标系$\{i-1\}$中表示的向量都是固定的。
+
+\textbf{纠正}：
+\begin{itemize}
+\item 只有与坐标系$\{i-1\}$一起运动的向量才是固定的
+\item 速度、加速度等向量不是固定的
+\item 位置向量（如$p_i$）可能是固定的（对于旋转关节）
+\end{itemize}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{定义}：向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，意味着其在坐标系$\{i-1\}$中的分量是常数。
+
+\item \textbf{导数}：如果向量$\mathbf{v}$固定在坐标系$\{i-1\}$中，那么$\dot{\mathbf{v}} = 0$（在坐标系$\{i-1\}$中）。
+
+\item \textbf{坐标变换}：虽然向量$\mathbf{v}$在坐标系$\{i-1\}$中是固定的，但在其他坐标系中，其表示会随时间变化。
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item "固定在坐标系中"是相对于该坐标系的
+\item $\dot{\mathbf{v}} = 0$是相对于坐标系$\{i-1\}$的导数
+\item 在其他坐标系中，向量$\mathbf{v}$的表示可能随时间变化
+\item 这是理解递归算法中坐标变换的关键
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 递归牛顿-欧拉算法中的速度合成
+\item 旋转矩阵导数的推导
+\item 坐标变换中的向量导数
+\item 刚体运动学中的位置向量
+\end{itemize}
+
+\end{document}
+

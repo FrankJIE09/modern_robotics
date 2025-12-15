@@ -1,0 +1,371 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么$\dot{v}_0 = g$（重力加速度）？}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：在递归牛顿-欧拉算法中，为什么$\dot{v}_0 = g$（重力加速度）？
+
+\textbf{公式}：
+\begin{equation}
+\dot{v}_0 = g \quad \text{（重力加速度）} \tag{14}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\dot{v}_0$：基座坐标系$\{0\}$的线加速度
+\item $g$：重力加速度向量（在基座坐标系中表示）
+\end{itemize}
+
+\textbf{注意}：在某些文献中，可能写成$\dot{V}_0 = (0, -g)$，这取决于$g$的符号约定。在本文档中，我们使用$\dot{v}_0 = g$的约定。
+
+\section{物理意义}
+
+\subsection{关键思想}
+
+\textbf{核心思想}：将重力视为基座坐标系的"向上"加速度。
+
+\textbf{等价原理}：
+\begin{itemize}
+\item 在重力场中，所有物体都受到向下的重力加速度（例如，$g_{\text{物理}} = [0, 0, -9.8]^T$）
+\item 等价地，可以认为基座坐标系以加速度$g$向上加速（例如，$g = [0, 0, +9.8]^T$）
+\item 这样，在基座坐标系中，所有物体都感受到"向上"的加速度$g$
+\end{itemize}
+
+\textbf{类比}：
+\begin{itemize}
+\item 就像在加速上升的电梯中，所有物体都感受到向下的"惯性力"
+\item 在重力场中，可以认为基座坐标系以加速度$g$向上加速
+\item 这样，在基座坐标系中，所有物体都感受到向上的加速度$g$
+\end{itemize}
+
+\subsection{为什么是$g$而不是$-g$？}
+
+\textbf{符号约定}：
+
+在本文档使用的递归牛顿-欧拉算法中，定义：
+\begin{equation}
+\dot{v}_0 = g
+\end{equation}
+
+\textbf{原因}：
+\begin{itemize}
+\item 在本文档中，$g$定义为\textbf{向上的重力加速度向量}（在基座坐标系中表示）
+\item 例如，如果$z$轴向上，重力在物理上向下，那么$g = [0, 0, +9.8]^T$（向上）
+\item 这样，$\dot{v}_0 = g$表示基座坐标系以加速度$g$向上加速
+\item 等价于重力场中，所有物体受到向下的重力加速度
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 基座坐标系以加速度$\dot{v}_0 = g$向上加速
+\item 等价于重力场中，所有物体受到向下的重力加速度（物理上的$-g$）
+\end{itemize}
+
+\textbf{注意}：不同的文献可能使用不同的符号约定：
+\begin{itemize}
+\item \textbf{约定1}（本文档）：$g$定义为向上的加速度，$\dot{v}_0 = g$
+\item \textbf{约定2}（某些文献）：$g$定义为向下的重力加速度，$\dot{v}_0 = -g$
+\end{itemize}
+
+两种约定在物理上是等价的，只是符号定义不同。
+
+\section{数学推导}
+
+\subsection{从惯性坐标系到基座坐标系}
+
+\textbf{惯性坐标系中的重力}：
+
+在惯性坐标系（固定在地面上）中，重力加速度为$g_{\text{inertial}}$，通常：
+\begin{equation}
+g_{\text{inertial}} = \begin{bmatrix} 0 \\ 0 \\ -9.8 \end{bmatrix} \text{ m/s}^2
+\end{equation}
+
+（假设$z$轴向上）
+
+\textbf{基座坐标系中的重力}：
+
+如果基座坐标系$\{0\}$相对于惯性坐标系有旋转$R_0$，那么：
+\begin{equation}
+g = R_0^T g_{\text{inertial}}
+\end{equation}
+
+\textbf{基座加速度}：
+
+为了在基座坐标系中模拟重力，我们设置：
+\begin{equation}
+\dot{v}_0 = g
+\end{equation}
+
+其中$g$是向上的重力加速度向量（在基座坐标系中表示）。
+
+\textbf{验证}：
+
+考虑一个在基座坐标系中的点，其位置为$p$（在基座坐标系中表示）。
+
+\textbf{在惯性坐标系中}：
+\begin{itemize}
+\item 该点受到重力加速度：$g_{\text{inertial}}$
+\item 在基座坐标系中的表示：$g = R_0^T g_{\text{inertial}}$
+\end{itemize}
+
+\textbf{在基座坐标系中}：
+\begin{itemize}
+\item 如果基座以加速度$\dot{v}_0 = g$向上加速
+\item 那么该点在基座坐标系中感受到的加速度为：$g$（向上）
+\item 这等价于在惯性坐标系中受到重力加速度$g_{\text{inertial}}$（向下）
+\end{itemize}
+
+\section{在递归算法中的作用}
+
+\subsection{递归牛顿-欧拉算法}
+
+\textbf{前向递推}：
+
+从基座到末端，计算每个连杆的速度和加速度：
+\begin{align}
+V_i &= \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i \tag{8.51} \\
+\dot{V}_i &= \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i \tag{8.52}
+\end{align}
+
+\textbf{初始化}：
+\begin{equation}
+V_0 = 0, \quad \dot{v}_0 = g
+\end{equation}
+
+\textbf{为什么这样初始化？}
+
+\textbf{原因1：重力补偿}
+
+通过设置$\dot{v}_0 = g$，重力效应会自动传播到所有连杆：
+\begin{itemize}
+\item 基座的加速度$\dot{v}_0 = g$通过前向递推传播
+\item 每个连杆的加速度都包含了重力效应
+\item 不需要单独计算重力项
+\end{itemize}
+
+\textbf{原因2：统一处理}
+
+所有加速度（包括重力）都通过相同的递推公式处理：
+\begin{itemize}
+\item 关节加速度：$A_i \ddot{\theta}_i$
+\item 科里奥利加速度：$\text{ad}_{V_i}(A_i)\dot{\theta}_i$
+\item 重力加速度：通过$\dot{v}_0 = g$传播
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子：单连杆机器人}
+
+\textbf{场景}：
+\begin{itemize}
+\item 基座固定在地面上
+\item 一个旋转关节，连杆质量为$m$
+\item 重力加速度：$g = [0, 0, -9.8]^T$（向下）
+\end{itemize}
+
+\textbf{初始化}：
+\begin{equation}
+\dot{v}_0 = g = \begin{bmatrix} 0 \\ 0 \\ +9.8 \end{bmatrix}
+\end{equation}
+
+（假设$z$轴向上，$g$定义为向上的加速度）
+
+\textbf{前向递推}：
+\begin{equation}
+\dot{V}_1 = \text{Ad}_{T_{1,0}}(\dot{V}_0) + \text{ad}_{V_1}(A_1)\dot{\theta}_1 + A_1 \ddot{\theta}_1
+\end{equation}
+
+\textbf{结果}：
+\begin{itemize}
+\item $\dot{V}_1$包含了重力效应
+\item 在后续的后向递推中，重力会自动包含在力和力矩计算中
+\end{itemize}
+
+\section{等价性证明}
+
+\subsection{方法1：直接计算重力}
+
+\textbf{传统方法}：
+\begin{itemize}
+\item 单独计算重力项：$g(\theta) = \frac{\partial U}{\partial \theta}$
+\item 其中$U$是势能：$U = \sum_{i=1}^n m_i g^T p_{c,i}$
+\item $p_{c,i}$是连杆$i$质心在基座坐标系中的位置
+\end{itemize}
+
+\subsection{方法2：通过基座加速度}
+
+\textbf{递归方法}：
+\begin{itemize}
+\item 设置$\dot{V}_0 = (0, -g)$
+\item 通过前向递推传播重力效应
+\item 在后向递推中自动计算重力项
+\end{itemize}
+
+\subsection{等价性}
+
+\textbf{两种方法等价}：
+
+\textbf{证明思路}：
+
+考虑一个质量为$m$的质点，位置为$p$（在基座坐标系中）。
+
+\textbf{方法1}：
+\begin{itemize}
+\item 重力势能：$U = mg^T p$
+\item 重力：$f_g = -\nabla U = -mg$
+\end{itemize}
+
+\textbf{方法2}：
+\begin{itemize}
+\item 基座加速度：$\dot{v}_0 = -g$
+\item 在基座坐标系中，质点感受到的加速度：$g$（向上）
+\item 惯性力：$f_{\text{inertial}} = -m \cdot g = -mg$
+\end{itemize}
+
+\textbf{结论}：
+\begin{itemize}
+\item 两种方法得到相同的重力项
+\item 方法2（通过基座加速度）更统一，适合递归算法
+\end{itemize}
+
+\section{符号约定说明}
+
+\subsection{不同的符号约定}
+
+\textbf{约定1}（本书使用）：
+\begin{equation}
+\dot{V}_0 = (0, -g)
+\end{equation}
+
+其中$g$是重力加速度向量（在基座坐标系中表示）。
+
+\textbf{约定2}（某些文献）：
+\begin{equation}
+\dot{V}_0 = (0, g)
+\end{equation}
+
+其中$g$是重力加速度向量，但符号约定不同。
+
+\textbf{关键}：
+\begin{itemize}
+\item 重要的是理解物理意义
+\item 符号约定可能因文献而异
+\item 需要根据具体算法调整
+\end{itemize}
+
+\subsection{本书的约定}
+
+\textbf{本书的定义}：
+\begin{itemize}
+\item $g \in \mathbb{R}^3$：重力加速度向量（在基座坐标系中表示）
+\item 通常：$g = [0, 0, -9.8]^T$（如果$z$轴向上）
+\item $\dot{V}_0 = (0, -g) = (0, [0, 0, +9.8]^T)$
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 基座坐标系以加速度$[0, 0, +9.8]^T$向上加速
+\item 等价于重力场中，所有物体受到向下的重力加速度$[0, 0, -9.8]^T$
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{在递归算法中的使用}
+
+\textbf{完整算法}：
+
+\textbf{初始化}：
+\begin{align}
+V_0 &= 0 \\
+\dot{v}_0 &= g
+\end{align}
+
+\textbf{前向递推}（$i = 1$到$n$）：
+\begin{align}
+T_{i,i-1} &= e^{-[A_i]\theta_i} M_{i,i-1} \\
+V_i &= \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i \\
+\dot{V}_i &= \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i
+\end{align}
+
+\textbf{后向递推}（$i = n$到$1$）：
+\begin{align}
+F_i &= \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - \text{ad}_{V_i}^T(G_i V_i) \\
+\tau_i &= F_i^T A_i
+\end{align}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 重力效应通过$\dot{v}_0 = g$自动包含
+\item 不需要单独计算重力项
+\item 所有加速度（关节、科里奥利、重力）统一处理
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 将重力视为基座坐标系的"向上"加速度
+\item $\dot{v}_0 = g$表示基座以加速度$g$向上加速
+\item 等价于重力场中，所有物体受到向下的重力加速度（物理上的$-g$）
+\end{itemize}
+
+\item \textbf{数学表示}：
+\begin{equation}
+\dot{v}_0 = g
+\end{equation}
+其中$g$是向上的重力加速度向量（在基座坐标系中表示）。
+
+\item \textbf{在算法中的作用}：
+\begin{itemize}
+\item 通过前向递推，重力效应自动传播到所有连杆
+\item 在后向递推中，重力自动包含在力和力矩计算中
+\item 不需要单独计算重力项
+\end{itemize}
+
+\item \textbf{等价性}：
+\begin{itemize}
+\item 这种方法等价于直接计算重力项$g(\theta)$
+\item 但更统一，适合递归算法
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{初始化}：
+\begin{equation}
+\dot{v}_0 = g \tag{14}
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $g \in \mathbb{R}^3$：向上的重力加速度向量（在基座坐标系中表示）
+\item 通常：$g = [0, 0, +9.8]^T$（如果$z$轴向上，$g$定义为向上的加速度）
+\item $\dot{v}_0 = g = [0, 0, +9.8]^T$（基座向上加速）
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 基座坐标系以加速度$g$向上加速
+\item 等价于重力场中，所有物体受到向下的重力加速度（物理上的$-g$）
+\item 这样，重力效应自动包含在递归算法中
+\end{itemize}
+
+\textbf{注意}：不同的文献可能使用不同的符号约定。在本文档中，$g$定义为向上的加速度，因此$\dot{v}_0 = g$。如果$g$定义为向下的重力加速度，则应使用$\dot{v}_0 = -g$。
+
+\end{document}
+

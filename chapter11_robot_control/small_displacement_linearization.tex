@@ -1,0 +1,440 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{小位移线性化：将$\ddot{x}$, $\dot{x}$, $x$替换为$\Delta \ddot{x}$, $\Delta \dot{x}$, $\Delta x$}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在阻抗控制中，我们经常看到这样的表述：
+
+"We could also replace $\ddot{x}$, $\dot{x}$, and $x$ with small displacements $\Delta \ddot{x}$, $\Delta \dot{x}$, and $\Delta x$ from reference values in a controlled motion of the robot."
+
+\textbf{问题}：
+\begin{enumerate}
+\item 什么是参考值（reference values）？
+\item 如何定义小位移$\Delta \ddot{x}$, $\Delta \dot{x}$, $\Delta x$？
+\item 如何进行替换？
+\item 为什么这样做？
+\end{enumerate}
+
+\section{基本概念}
+
+\subsection{参考轨迹}
+
+\textbf{参考值}：在受控运动中，机器人沿着期望的参考轨迹运动。
+
+\textbf{参考轨迹}：
+\begin{itemize}
+\item $x_r(t)$：参考位置（期望位置）
+\item $\dot{x}_r(t)$：参考速度（期望速度）
+\item $\ddot{x}_r(t)$：参考加速度（期望加速度）
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 这是机器人应该遵循的理想轨迹
+\item 例如：沿着直线移动，或沿着圆弧移动
+\end{itemize}
+
+\subsection{实际状态}
+
+\textbf{实际状态}：
+\begin{itemize}
+\item $x(t)$：实际位置
+\item $\dot{x}(t)$：实际速度
+\item $\ddot{x}(t)$：实际加速度
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 这是机器人实际的状态
+\item 由于干扰、误差等原因，可能与参考轨迹不同
+\end{itemize}
+
+\subsection{小位移（扰动）}
+
+\textbf{定义}：小位移是实际状态与参考状态的差值。
+
+\begin{align}
+\Delta x(t) &= x(t) - x_r(t) \quad \text{（位置扰动）} \\
+\Delta \dot{x}(t) &= \dot{x}(t) - \dot{x}_r(t) \quad \text{（速度扰动）} \\
+\Delta \ddot{x}(t) &= \ddot{x}(t) - \ddot{x}_r(t) \quad \text{（加速度扰动）}
+\end{align}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $\Delta x$：位置误差（偏离参考轨迹的距离）
+\item $\Delta \dot{x}$：速度误差（偏离参考速度的大小）
+\item $\Delta \ddot{x}$：加速度误差（偏离参考加速度的大小）
+\end{itemize}
+
+\section{替换过程}
+
+\subsection{原始方程}
+
+\textbf{阻抗控制方程}：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x, \dot{x}, \ddot{x}$：实际状态
+\item $M, B, K$：虚拟质量、阻尼、刚度矩阵
+\item $f_{\text{ext}}$：外力
+\end{itemize}
+
+\subsection{替换步骤}
+
+\textbf{步骤1：定义参考状态}
+
+假设机器人沿着参考轨迹$x_r(t)$运动，参考状态满足：
+\begin{equation}
+M\ddot{x}_r + B\dot{x}_r + Kx_r = f_{\text{ext},r}
+\end{equation}
+
+其中$f_{\text{ext},r}$是参考外力（如果没有外力，$f_{\text{ext},r} = 0$）。
+
+\textbf{步骤2：定义小位移}
+
+\begin{align}
+x &= x_r + \Delta x \\
+\dot{x} &= \dot{x}_r + \Delta \dot{x} \\
+\ddot{x} &= \ddot{x}_r + \Delta \ddot{x}
+\end{align}
+
+\textbf{步骤3：代入原始方程}
+
+将替换代入方程(11.64)：
+\begin{align}
+M(\ddot{x}_r + \Delta \ddot{x}) + B(\dot{x}_r + \Delta \dot{x}) + K(x_r + \Delta x) &= f_{\text{ext}} \\
+M\ddot{x}_r + M\Delta \ddot{x} + B\dot{x}_r + B\Delta \dot{x} + Kx_r + K\Delta x &= f_{\text{ext}}
+\end{align}
+
+\textbf{步骤4：整理}
+
+将参考项和扰动项分开：
+\begin{align}
+(M\ddot{x}_r + B\dot{x}_r + Kx_r) + (M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x) &= f_{\text{ext}} \\
+f_{\text{ext},r} + (M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x) &= f_{\text{ext}}
+\end{align}
+
+\textbf{步骤5：得到扰动方程}
+
+定义外力扰动：$\Delta f_{\text{ext}} = f_{\text{ext}} - f_{\text{ext},r}$
+
+得到扰动方程：
+\begin{equation}
+M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}} \tag{11.64-perturbation}
+\end{equation}
+
+\subsection{最终结果}
+
+\textbf{扰动方程}：
+\begin{equation}
+M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}
+\end{equation}
+
+\textbf{与原始方程对比}：
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{原始方程} & \textbf{扰动方程} \\
+\hline
+$M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}}$ & $M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}$ \\
+\hline
+$x, \dot{x}, \ddot{x}$：实际状态 & $\Delta x, \Delta \dot{x}, \Delta \ddot{x}$：扰动 \\
+\hline
+$f_{\text{ext}}$：总外力 & $\Delta f_{\text{ext}}$：外力扰动 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{为什么这样做？}
+
+\subsection{线性化}
+
+\textbf{目的}：将非线性系统线性化，简化分析。
+
+\textbf{假设}：
+\begin{itemize}
+\item 扰动$\Delta x$, $\Delta \dot{x}$, $\Delta \ddot{x}$很小
+\item 系统在参考轨迹附近运动
+\item 可以忽略高阶项
+\end{itemize}
+
+\textbf{优点}：
+\begin{itemize}
+\item 扰动方程是线性的（即使原始系统可能是非线性的）
+\item 可以使用线性系统理论分析
+\item 更容易设计和分析控制器
+\end{itemize}
+
+\subsection{小扰动分析}
+
+\textbf{应用场景}：
+\begin{itemize}
+\item 分析系统对扰动的响应
+\item 设计控制器使扰动最小化
+\item 评估系统的稳定性
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果扰动方程稳定，系统会回到参考轨迹
+\item 如果扰动很小，系统性能良好
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：跟踪直线轨迹}
+
+\textbf{参考轨迹}：
+\begin{itemize}
+\item $x_r(t) = v_0 t$（匀速直线运动）
+\item $\dot{x}_r(t) = v_0$（常数速度）
+\item $\ddot{x}_r(t) = 0$（零加速度）
+\end{itemize}
+
+\textbf{实际状态}：
+\begin{itemize}
+\item $x(t) = v_0 t + \Delta x(t)$
+\item $\dot{x}(t) = v_0 + \Delta \dot{x}(t)$
+\item $\ddot{x}(t) = \Delta \ddot{x}(t)$
+\end{itemize}
+
+\textbf{扰动方程}：
+\begin{equation}
+M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果$\Delta f_{\text{ext}} = 0$（无外力扰动），且初始扰动很小
+\item 系统会逐渐回到参考轨迹：$\Delta x \to 0$
+\end{itemize}
+
+\subsection{例子2：跟踪圆弧轨迹}
+
+\textbf{参考轨迹}：
+\begin{itemize}
+\item $x_r(t) = R\cos(\omega t)$（圆弧运动）
+\item $\dot{x}_r(t) = -R\omega\sin(\omega t)$
+\item $\ddot{x}_r(t) = -R\omega^2\cos(\omega t)$
+\end{itemize}
+
+\textbf{实际状态}：
+\begin{itemize}
+\item $x(t) = R\cos(\omega t) + \Delta x(t)$
+\item $\dot{x}(t) = -R\omega\sin(\omega t) + \Delta \dot{x}(t)$
+\item $\ddot{x}(t) = -R\omega^2\cos(\omega t) + \Delta \ddot{x}(t)$
+\end{itemize}
+
+\textbf{扰动方程}：
+\begin{equation}
+M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}
+\end{equation}
+
+\textbf{注意}：即使参考轨迹是时变的，扰动方程的形式相同。
+
+\section{在控制律中的应用}
+
+\subsection{原始控制律}
+
+\textbf{阻抗控制律}（方程11.65）：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right)
+\end{equation}
+
+\subsection{使用小位移替换}
+
+\textbf{替换}：
+\begin{align}
+x &= x_r + \Delta x \\
+\dot{x} &= \dot{x}_r + \Delta \dot{x} \\
+\ddot{x} &= \ddot{x}_r + \Delta \ddot{x}
+\end{align}
+
+\textbf{控制律变为}：
+\begin{align}
+\tau &= J^T(\theta)\Big[\tilde{\Lambda}(\theta)(\ddot{x}_r + \Delta \ddot{x}) + \tilde{\eta}(\theta, \dot{x}_r + \Delta \dot{x}) \\
+&\quad - (M(\ddot{x}_r + \Delta \ddot{x}) + B(\dot{x}_r + \Delta \dot{x}) + K(x_r + \Delta x))\Big]
+\end{align}
+
+\textbf{展开}：
+\begin{align}
+\tau &= J^T(\theta)\Big[\tilde{\Lambda}(\theta)\ddot{x}_r + \tilde{\Lambda}(\theta)\Delta \ddot{x} + \tilde{\eta}(\theta, \dot{x}_r + \Delta \dot{x}) \\
+&\quad - M\ddot{x}_r - M\Delta \ddot{x} - B\dot{x}_r - B\Delta \dot{x} - Kx_r - K\Delta x\Big]
+\end{align}
+
+\textbf{分离参考项和扰动项}：
+\begin{align}
+\tau &= J^T(\theta)\Big[(\tilde{\Lambda}(\theta)\ddot{x}_r + \tilde{\eta}(\theta, \dot{x}_r) - M\ddot{x}_r - B\dot{x}_r - Kx_r) \\
+&\quad + (\tilde{\Lambda}(\theta)\Delta \ddot{x} + \tilde{\eta}(\theta, \dot{x}_r + \Delta \dot{x}) - \tilde{\eta}(\theta, \dot{x}_r) - M\Delta \ddot{x} - B\Delta \dot{x} - K\Delta x)\Big]
+\end{align}
+
+\subsection{线性化近似}
+
+\textbf{如果扰动很小}，可以线性化$\tilde{\eta}(\theta, \dot{x}_r + \Delta \dot{x})$：
+\begin{equation}
+\tilde{\eta}(\theta, \dot{x}_r + \Delta \dot{x}) \approx \tilde{\eta}(\theta, \dot{x}_r) + \frac{\partial \tilde{\eta}}{\partial \dot{x}}\Big|_{\dot{x}_r} \Delta \dot{x}
+\end{equation}
+
+\textbf{简化后的控制律}：
+\begin{align}
+\tau &\approx J^T(\theta)\Big[(\tilde{\Lambda}(\theta)\ddot{x}_r + \tilde{\eta}(\theta, \dot{x}_r) - M\ddot{x}_r - B\dot{x}_r - Kx_r) \\
+&\quad + (\tilde{\Lambda}(\theta) - M)\Delta \ddot{x} + \left(\frac{\partial \tilde{\eta}}{\partial \dot{x}}\Big|_{\dot{x}_r} - B\right)\Delta \dot{x} - K\Delta x\Big]
+\end{align}
+
+\section{优势和应用}
+
+\subsection{优势}
+
+\begin{enumerate}
+\item \textbf{线性化}：
+\begin{itemize}
+\item 扰动方程是线性的
+\item 可以使用线性系统理论
+\item 更容易分析和设计
+\end{itemize}
+
+\item \textbf{分离关注点}：
+\begin{itemize}
+\item 参考轨迹跟踪：处理$(\tilde{\Lambda}\ddot{x}_r + \tilde{\eta} - M\ddot{x}_r - B\dot{x}_r - Kx_r)$
+\item 扰动抑制：处理$(\tilde{\Lambda}\Delta \ddot{x} + \cdots - M\Delta \ddot{x} - B\Delta \dot{x} - K\Delta x)$
+\end{itemize}
+
+\item \textbf{简化计算}：
+\begin{itemize}
+\item 如果参考轨迹已知，可以预先计算参考项
+\item 只需要实时计算扰动项
+\item 降低计算复杂度
+\end{itemize}
+\end{enumerate}
+
+\subsection{应用场景}
+
+\begin{enumerate}
+\item \textbf{轨迹跟踪}：
+\begin{itemize}
+\item 参考轨迹：期望的轨迹
+\item 扰动：跟踪误差
+\item 目标：使扰动最小化
+\end{itemize}
+
+\item \textbf{扰动抑制}：
+\begin{itemize}
+\item 参考轨迹：标称轨迹
+\item 扰动：外力干扰
+\item 目标：抑制扰动的影响
+\end{itemize}
+
+\item \textbf{稳定性分析}：
+\begin{itemize}
+\item 分析扰动方程的稳定性
+\item 如果扰动方程稳定，系统会回到参考轨迹
+\end{itemize}
+\end{enumerate}
+
+\section{注意事项}
+
+\subsection{小扰动假设}
+
+\textbf{关键假设}：扰动$\Delta x$, $\Delta \dot{x}$, $\Delta \ddot{x}$必须很小。
+
+\textbf{如果扰动很大}：
+\begin{itemize}
+\item 线性化近似不成立
+\item 需要保留高阶项
+\item 或者使用非线性分析
+\end{itemize}
+
+\textbf{如何确保扰动小？}
+\begin{itemize}
+\item 设计好的控制器
+\item 使用前馈补偿
+\item 快速响应扰动
+\end{itemize}
+
+\subsection{参考轨迹的选择}
+
+\textbf{要求}：
+\begin{itemize}
+\item 参考轨迹应该是可行的（物理上可实现）
+\item 参考轨迹应该满足动力学约束
+\item 参考轨迹应该平滑（避免大的加速度）
+\end{itemize}
+
+\section{总结}
+
+\subsection{替换过程总结}
+
+\begin{enumerate}
+\item \textbf{定义参考轨迹}：$x_r(t)$, $\dot{x}_r(t)$, $\ddot{x}_r(t)$
+
+\item \textbf{定义小位移}：
+\begin{align}
+\Delta x &= x - x_r \\
+\Delta \dot{x} &= \dot{x} - \dot{x}_r \\
+\Delta \ddot{x} &= \ddot{x} - \ddot{x}_r
+\end{align}
+
+\item \textbf{替换}：
+\begin{align}
+x &= x_r + \Delta x \\
+\dot{x} &= \dot{x}_r + \Delta \dot{x} \\
+\ddot{x} &= \ddot{x}_r + \Delta \ddot{x}
+\end{align}
+
+\item \textbf{代入方程}：将替换代入原始方程
+
+\item \textbf{分离项}：将参考项和扰动项分开
+
+\item \textbf{得到扰动方程}：$M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}$
+\end{enumerate}
+
+\subsection{关键公式}
+
+\begin{enumerate}
+\item \textbf{小位移定义}：
+\begin{align}
+\Delta x &= x - x_r \\
+\Delta \dot{x} &= \dot{x} - \dot{x}_r \\
+\Delta \ddot{x} &= \ddot{x} - \ddot{x}_r
+\end{align}
+
+\item \textbf{扰动方程}：
+\begin{equation}
+M\Delta \ddot{x} + B\Delta \dot{x} + K\Delta x = \Delta f_{\text{ext}}
+\end{equation}
+
+\item \textbf{替换关系}：
+\begin{align}
+x &= x_r + \Delta x \\
+\dot{x} &= \dot{x}_r + \Delta \dot{x} \\
+\ddot{x} &= \ddot{x}_r + \Delta \ddot{x}
+\end{align}
+\end{enumerate}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item \textbf{参考轨迹}：机器人应该遵循的理想轨迹
+\item \textbf{小位移}：实际状态与参考状态的偏差
+\item \textbf{扰动方程}：描述偏差如何演化
+\item \textbf{目标}：使扰动最小化，系统回到参考轨迹
+\end{itemize}
+
+\end{document}
+

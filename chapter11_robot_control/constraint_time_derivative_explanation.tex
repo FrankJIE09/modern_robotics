@@ -1,0 +1,347 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么速度满足约束时，加速度也必须满足约束？}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在混合运动-力控制中，我们经常看到这样的推理：
+
+\textbf{已知}：约束$A(\theta)V = 0$在所有时间都满足
+
+\textbf{结论}：对时间求导得到$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+
+\textbf{问题}：
+\begin{enumerate}
+\item 为什么如果速度满足约束，加速度也必须满足约束？
+\item 为什么对$AV = 0$求导，它的导数也要为0？
+\end{enumerate}
+
+\section{基本数学原理}
+
+\subsection{恒等式的导数}
+
+\textbf{基本事实}：如果两个函数在所有时间都相等，那么它们的导数也相等。
+
+\textbf{数学表述}：
+\begin{itemize}
+\item 如果$f(t) = g(t)$对所有$t$成立
+\item 那么$\frac{d}{dt}f(t) = \frac{d}{dt}g(t)$对所有$t$成立
+\end{itemize}
+
+\textbf{证明}（直观理解）：
+\begin{itemize}
+\item 如果两个函数在所有时间都相等，它们的图像完全重合
+\item 那么在任何时刻，它们的斜率（导数）也必须相等
+\item 否则它们会在某个时刻分离，这与"所有时间都相等"矛盾
+\end{itemize}
+
+\subsection{应用到约束}
+
+\textbf{约束条件}：
+\begin{equation}
+A(\theta)V = 0 \quad \text{（对所有时间$t$）}
+\end{equation}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 这不是"在某个时刻"成立，而是"在所有时间"都成立
+\item 这是一个\textbf{恒等式}，不是方程
+\end{itemize}
+
+\textbf{对时间求导}：
+\begin{align}
+\frac{d}{dt}[A(\theta)V] &= \frac{d}{dt}[0] \\
+\frac{d}{dt}[A(\theta)V] &= 0
+\end{align}
+
+\textbf{为什么右边是0？}
+\begin{itemize}
+\item 因为$0$是常数，常数的导数是$0$
+\item 如果$AV = 0$（常数），那么$\frac{d}{dt}(AV) = 0$
+\end{itemize}
+
+\section{详细推导}
+
+\subsection{约束的时间导数}
+
+\textbf{约束}：
+\begin{equation}
+A(\theta)V = 0 \quad \text{（对所有时间$t$）} \tag{1}
+\end{equation}
+
+\textbf{对时间求导}：
+
+使用乘积法则：
+\begin{align}
+\frac{d}{dt}[A(\theta)V] &= \frac{d}{dt}[A(\theta)] \cdot V + A(\theta) \cdot \frac{dV}{dt} \\
+&= \dot{A}(\theta)V + A(\theta)\dot{V}
+\end{align}
+
+\textbf{关键点}：
+\begin{itemize}
+\item $A(\theta)$依赖于$\theta$，而$\theta$依赖于时间$t$
+\item 因此$\dot{A}(\theta) = \frac{\partial A}{\partial \theta}\dot{\theta}$（链式法则）
+\item $V$是速度，$\dot{V}$是加速度
+\end{itemize}
+
+\textbf{结果}：
+\begin{equation}
+\dot{A}(\theta)V + A(\theta)\dot{V} = 0 \tag{2}
+\end{equation}
+
+\subsection{为什么加速度必须满足约束？}
+
+\textbf{从方程(2)}：
+\begin{equation}
+A(\theta)\dot{V} = -\dot{A}(\theta)V
+\end{equation}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 如果速度$V$满足约束$A(\theta)V = 0$
+\item 那么加速度$\dot{V}$必须满足$A(\theta)\dot{V} = -\dot{A}(\theta)V$
+\item 这确保了约束在所有时间都满足
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果速度满足约束，但加速度不满足约束
+\item 那么速度会"偏离"约束
+\item 这会导致约束在下一个时刻不再满足
+\item 因此，加速度必须满足约束，以保持约束在所有时间都满足
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：简单约束}
+
+\textbf{约束}：$v_z = 0$（不能沿$z$轴运动）
+
+\textbf{速度约束}：
+\begin{equation}
+v_z(t) = 0 \quad \text{（对所有时间$t$）}
+\end{equation}
+
+\textbf{对时间求导}：
+\begin{equation}
+\frac{d}{dt}[v_z(t)] = \frac{d}{dt}[0] = 0
+\end{equation}
+
+\textbf{结果}：
+\begin{equation}
+\dot{v}_z(t) = 0
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果$v_z = 0$（不能沿$z$轴运动）
+\item 那么$\dot{v}_z = 0$（不能沿$z$轴加速）
+\item 否则，如果$\dot{v}_z \neq 0$，速度$v_z$会从$0$变为非零，违反约束
+\end{itemize}
+
+\subsection{例子2：配置依赖的约束}
+
+\textbf{约束}：$A(\theta)V = 0$，其中$A(\theta)$依赖于配置$\theta$
+
+\textbf{速度约束}：
+\begin{equation}
+A(\theta(t))V(t) = 0 \quad \text{（对所有时间$t$）}
+\end{equation}
+
+\textbf{对时间求导}：
+\begin{align}
+\frac{d}{dt}[A(\theta(t))V(t)] &= 0 \\
+\dot{A}(\theta(t))V(t) + A(\theta(t))\dot{V}(t) &= 0
+\end{align}
+
+\textbf{结果}：
+\begin{equation}
+A(\theta)\dot{V} = -\dot{A}(\theta)V
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 即使约束矩阵$A(\theta)$依赖于配置$\theta$
+\item 加速度$\dot{V}$也必须满足约束
+\item 额外的项$-\dot{A}(\theta)V$补偿了约束矩阵的变化
+\end{itemize}
+
+\section{为什么必须对所有时间成立？}
+
+\subsection{关键区别}
+
+\textbf{情况1：约束在某个时刻成立}
+\begin{itemize}
+\item 如果$A(\theta)V = 0$只在$t = t_0$成立
+\item 那么对时间求导不一定得到$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+\item 因为约束可能在下一个时刻不再成立
+\end{itemize}
+
+\textbf{情况2：约束在所有时间成立}
+\begin{itemize}
+\item 如果$A(\theta)V = 0$对所有时间$t$成立
+\item 那么这是一个恒等式
+\item 对时间求导必须得到$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+\item 这确保了约束在所有时间都满足
+\end{itemize}
+
+\subsection{物理类比}
+
+\textbf{类比}：想象你在一条直线上行走
+
+\begin{itemize}
+\item \textbf{约束}：你必须在直线上（$y = 0$）
+\item \textbf{速度约束}：你的速度方向必须沿着直线（$v_y = 0$）
+\item \textbf{加速度约束}：你的加速度方向也必须沿着直线（$\dot{v}_y = 0$）
+\end{itemize}
+
+\textbf{为什么？}
+\begin{itemize}
+\item 如果$v_y = 0$但$\dot{v}_y \neq 0$
+\item 那么在下一个时刻，$v_y$会变为非零
+\item 你会偏离直线，违反约束
+\item 因此，$\dot{v}_y = 0$是必要的
+\end{itemize}
+
+\section{数学严格证明}
+
+\subsection{定理}
+
+\textbf{定理}：如果$A(\theta(t))V(t) = 0$对所有$t \in [t_0, t_1]$成立，那么
+\begin{equation}
+A(\theta(t))\dot{V}(t) + \dot{A}(\theta(t))V(t) = 0
+\end{equation}
+对所有$t \in (t_0, t_1)$成立。
+
+\textbf{证明}：
+
+由于$A(\theta(t))V(t) = 0$对所有$t$成立，这是一个恒等式。
+
+对时间求导（使用乘积法则）：
+\begin{align}
+\frac{d}{dt}[A(\theta(t))V(t)] &= \frac{d}{dt}[0] \\
+\frac{dA(\theta(t))}{dt}V(t) + A(\theta(t))\frac{dV(t)}{dt} &= 0 \\
+\dot{A}(\theta(t))V(t) + A(\theta(t))\dot{V}(t) &= 0
+\end{align}
+
+因此，$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$对所有$t$成立。$\square$
+
+\subsection{反证法}
+
+\textbf{假设}：$A(\theta)V = 0$对所有$t$成立，但$A(\theta)\dot{V} + \dot{A}(\theta)V \neq 0$在某个时刻$t_0$成立。
+
+\textbf{推导}：
+
+在时刻$t_0$附近，使用泰勒展开：
+\begin{align}
+A(\theta(t_0 + \Delta t))V(t_0 + \Delta t) &\approx A(\theta(t_0))V(t_0) + \frac{d}{dt}[A(\theta)V]\Big|_{t=t_0}\Delta t \\
+&= 0 + [A(\theta)\dot{V} + \dot{A}(\theta)V]\Big|_{t=t_0}\Delta t
+\end{align}
+
+如果$A(\theta)\dot{V} + \dot{A}(\theta)V \neq 0$，那么：
+\begin{equation}
+A(\theta(t_0 + \Delta t))V(t_0 + \Delta t) \approx [A(\theta)\dot{V} + \dot{A}(\theta)V]\Big|_{t=t_0}\Delta t \neq 0
+\end{equation}
+
+这与"$A(\theta)V = 0$对所有$t$成立"矛盾。
+
+因此，$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$必须成立。$\square$
+
+\section{在混合控制中的应用}
+
+\subsection{为什么需要加速度约束？}
+
+\textbf{问题}：在设计控制器时，为什么需要确保加速度满足约束？
+
+\textbf{答案}：
+\begin{enumerate}
+\item \textbf{保持约束}：如果加速度不满足约束，速度会偏离约束
+\item \textbf{计算拉格朗日乘数}：需要加速度约束来计算约束力
+\item \textbf{设计控制器}：控制器必须产生满足约束的加速度
+\end{enumerate}
+
+\subsection{控制器设计}
+
+\textbf{要求}：任何请求的加速度$\dot{V}_d$应该满足
+\begin{equation}
+A(\theta)\dot{V}_d = 0
+\end{equation}
+
+\textbf{为什么？}
+\begin{itemize}
+\item 如果系统状态已经满足$A(\theta)V = 0$
+\item 那么加速度$\dot{V}_d$必须满足$A(\theta)\dot{V}_d = 0$
+\item 这确保了约束在所有时间都满足
+\end{itemize}
+
+\textbf{实现}：
+\begin{itemize}
+\item 使用投影矩阵$P$将加速度投影到约束子空间
+\item 确保$A(\theta)P\dot{V}_d = 0$
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心原理}
+
+\begin{enumerate}
+\item \textbf{恒等式的导数}：
+\begin{itemize}
+\item 如果$f(t) = g(t)$对所有$t$成立
+\item 那么$\frac{d}{dt}f(t) = \frac{d}{dt}g(t)$对所有$t$成立
+\end{itemize}
+
+\item \textbf{应用到约束}：
+\begin{itemize}
+\item 如果$A(\theta)V = 0$对所有$t$成立
+\item 那么$\frac{d}{dt}[A(\theta)V] = 0$对所有$t$成立
+\item 即$A(\theta)\dot{V} + \dot{A}(\theta)V = 0$
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 如果速度满足约束，加速度也必须满足约束
+\item 否则速度会偏离约束，导致约束不再满足
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+\begin{enumerate}
+\item \textbf{速度约束}：
+\begin{equation}
+A(\theta)V = 0
+\end{equation}
+
+\item \textbf{加速度约束}（从速度约束求导得到）：
+\begin{equation}
+A(\theta)\dot{V} + \dot{A}(\theta)V = 0
+\end{equation}
+
+\item \textbf{如果约束矩阵是常数}（$\dot{A} = 0$）：
+\begin{equation}
+A\dot{V} = 0
+\end{equation}
+\end{enumerate}
+
+\subsection{实际应用}
+
+\begin{itemize}
+\item \textbf{控制器设计}：确保产生的加速度满足约束
+\item \textbf{约束力计算}：使用加速度约束计算拉格朗日乘数
+\item \textbf{稳定性分析}：约束必须在所有时间都满足
+\end{itemize}
+
+\end{document}
+

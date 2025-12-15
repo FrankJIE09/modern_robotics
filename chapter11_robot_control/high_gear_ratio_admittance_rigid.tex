@@ -1,0 +1,484 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{高度齿轮传动机器人的导纳控制与刚性环境模拟}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：为什么高度齿轮传动的机器人的导纳控制可以很好地模拟刚性环境？
+
+\textbf{原文}：
+\begin{quote}
+模拟低质量环境对于导纳控制的机器人来说是具有挑战性的，因为小的力产生大的加速度。有效的大增益可能产生不稳定。然而，高度齿轮传动的机器人的导纳控制可以很好地模拟刚性环境。
+\end{quote}
+
+\section{高度齿轮传动的特点}
+
+\subsection{齿轮传动的原理}
+
+\textbf{齿轮比（Gear Ratio）}：
+\begin{equation}
+N = \frac{\omega_m}{\omega_j} = \frac{\tau_j}{\tau_m}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_m$：电机角速度（输入）
+\item $\omega_j$：关节角速度（输出）
+\item $\tau_m$：电机力矩（输入）
+\item $\tau_j$：关节力矩（输出）
+\item $N$：齿轮比（通常$N > 1$，表示减速）
+\end{itemize}
+
+\textbf{高度齿轮传动}：$N \gg 1$（例如，$N = 100$或更大）
+
+\subsection{高度齿轮传动的特性}
+
+\textbf{从电机侧看}：
+\begin{itemize}
+\item 电机需要较小的力矩$\tau_m$就能产生较大的关节力矩$\tau_j = N\tau_m$
+\item 电机可以高速旋转$\omega_m$，但关节速度$\omega_j = \omega_m/N$较慢
+\item 电机惯性$I_m$被"放大"到关节侧：$I_j = N^2 I_m$
+\end{itemize}
+
+\textbf{从关节侧看}：
+\begin{itemize}
+\item 关节力矩$\tau_j$很大（相对于电机力矩）
+\item 关节速度$\omega_j$较慢
+\item 关节惯性$I_j$很大（$I_j = N^2 I_m$）
+\item \textbf{很难被推动}（高阻抗）
+\end{itemize}
+
+\subsection{反向驱动性}
+
+\textbf{反向驱动性（Backdrivability）}：
+\begin{itemize}
+\item 定义：从关节侧推动机器人，使其运动的难易程度
+\item 高度齿轮传动的机器人：\textbf{很难反向驱动}
+\item 原因：需要很大的力才能克服齿轮的摩擦和惯性
+\end{itemize}
+
+\textbf{数学分析}：
+
+假设用户施加力$f_{\text{ext}}$在末端执行器上，产生的关节力矩为：
+\begin{equation}
+\tau_{\text{ext}} = J^T(\theta) f_{\text{ext}}
+\end{equation}
+
+要推动关节，需要克服：
+\begin{enumerate}
+\item 齿轮摩擦：$\tau_{\text{friction}}$
+\item 关节惯性：$I_j \ddot{\theta}$
+\item 电机惯性（放大后）：$N^2 I_m \ddot{\theta}$
+\end{enumerate}
+
+\textbf{总阻力}：
+\begin{equation}
+\tau_{\text{resistance}} = \tau_{\text{friction}} + (I_j + N^2 I_m)\ddot{\theta}
+\end{equation}
+
+由于$N^2 I_m$很大，$\tau_{\text{resistance}}$很大，因此很难推动。
+
+\section{导纳控制的工作原理}
+
+\subsection{导纳控制公式}
+
+\textbf{导纳控制公式}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64-admittance}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $f_{\text{ext}}$：用户施加的力（由力传感器测量）
+\item $x, \dot{x}$：当前位置和速度（由编码器和转速计测量）
+\item $M, B, K$：虚拟质量、阻尼和刚度
+\item $\ddot{x}_d$：期望加速度（计算得到）
+\end{itemize}
+
+\textbf{求解期望加速度}：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx) \tag{11.66}
+\end{equation}
+
+\subsection{导纳控制的实现步骤}
+
+\textbf{步骤1：测量外力}
+\begin{itemize}
+\item 使用力-力矩传感器测量$f_{\text{ext}}$
+\item 测量当前位置$x$和速度$\dot{x}$
+\end{itemize}
+
+\textbf{步骤2：计算期望加速度}
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx)
+\end{equation}
+
+\textbf{步骤3：转换为关节加速度}
+\begin{equation}
+\ddot{\theta}_d = J^{\dagger}(\theta)(\ddot{x}_d - \dot{J}(\theta)\dot{\theta})
+\end{equation}
+
+\textbf{步骤4：计算关节力矩}
+\begin{equation}
+\tau = M(\theta)\ddot{\theta}_d + C(\theta, \dot{\theta})\dot{\theta} + g(\theta)
+\end{equation}
+
+\textbf{步骤5：执行控制}
+\begin{itemize}
+\item 电机产生力矩$\tau_m = \tau/N$（因为$\tau_j = N\tau_m$）
+\item 关节产生加速度$\ddot{\theta}$
+\item 末端执行器产生加速度$\ddot{x}$
+\end{itemize}
+
+\section{为什么高度齿轮传动适合模拟刚性环境？}
+
+\subsection{刚性环境的特征}
+
+\textbf{刚性环境}：
+\begin{itemize}
+\item 高刚度$K$（很大）
+\item 小的位移$x$产生大的力$Kx$
+\item 很难推动（高阻抗）
+\item 位置变化很小，即使有外力
+\end{itemize}
+
+\textbf{数学表示}：
+\begin{equation}
+f = Kx \quad \Rightarrow \quad x = \frac{f}{K}
+\end{equation}
+
+如果$K$很大，即使$f$很大，$x$也很小。
+
+\subsection{高度齿轮传动的优势}
+
+\textbf{优势1：高阻抗特性}
+
+\textbf{从关节侧看}：
+\begin{itemize}
+\item 高度齿轮传动的机器人本身就有高阻抗
+\item 很难被推动（因为$N^2 I_m$很大）
+\item 即使不控制，位置也相对稳定
+\end{itemize}
+
+\textbf{在导纳控制中}：
+\begin{itemize}
+\item 机器人主动响应力，产生运动
+\item 但由于高阻抗，运动很小
+\item 即使有外力$f_{\text{ext}}$，位置变化$x$也很小
+\end{itemize}
+
+\textbf{优势2：精确的位置控制}
+
+\textbf{高齿轮比的优势}：
+\begin{itemize}
+\item 电机可以产生很大的关节力矩$\tau_j = N\tau_m$
+\item 可以精确控制位置（即使有外力干扰）
+\item 位置误差很小
+\end{itemize}
+
+\textbf{在导纳控制中}：
+\begin{itemize}
+\item 计算期望加速度$\ddot{x}_d$
+\item 转换为关节力矩$\tau$
+\item 高齿轮比使得可以产生很大的$\tau_j$，精确跟踪$\ddot{x}_d$
+\item 结果：位置控制精确，即使有外力
+\end{itemize}
+
+\textbf{优势3：稳定性}
+
+\textbf{高阻抗的稳定性}：
+\begin{itemize}
+\item 高阻抗意味着系统"硬"，不容易振荡
+\item 即使有噪声或延迟，系统也相对稳定
+\end{itemize}
+
+\textbf{在导纳控制中}：
+\begin{itemize}
+\item 高齿轮比提供额外的"阻尼"（通过高惯性）
+\item 减少振荡和不稳定
+\item 即使虚拟刚度$K$很大，系统也稳定
+\end{itemize}
+
+\subsection{数学分析}
+
+\textbf{导纳控制公式}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{对于刚性环境}，$K$很大，因此：
+\begin{equation}
+Kx \approx f_{\text{ext}} \quad \Rightarrow \quad x \approx \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\textbf{高度齿轮传动的效果}：
+
+\textbf{1. 实际阻抗增加}：
+
+由于高齿轮比，实际关节惯性$I_j = N^2 I_m$很大，这增加了系统的实际阻抗。
+
+\textbf{有效刚度}：
+\begin{equation}
+K_{\text{effective}} = K + K_{\text{mechanical}}
+\end{equation}
+
+其中$K_{\text{mechanical}}$是由高齿轮比产生的机械刚度。
+
+\textbf{2. 位置误差减小}：
+
+由于$K_{\text{effective}}$很大，位置误差$x$很小：
+\begin{equation}
+x = \frac{f_{\text{ext}}}{K_{\text{effective}}} \approx \frac{f_{\text{ext}}}{K + K_{\text{mechanical}}}
+\end{equation}
+
+\textbf{3. 控制精度提高}：
+
+高齿轮比使得可以产生很大的关节力矩，精确跟踪期望加速度：
+\begin{equation}
+\tau_j = N\tau_m = N \cdot \frac{\tau_{\text{computed}}}{N} = \tau_{\text{computed}}
+\end{equation}
+
+（实际上，由于齿轮效率$\eta < 1$，$\tau_j = \eta N\tau_m$，但仍然很大）
+
+\section{与低质量环境模拟的对比}
+
+\subsection{低质量环境的特征}
+
+\textbf{低质量环境}：
+\begin{itemize}
+\item 小质量$M$（很小）
+\item 小的力$f_{\text{ext}}$产生大的加速度$\ddot{x}_d = M^{-1}f_{\text{ext}}$
+\item 很容易推动（低阻抗）
+\item 位置变化很大，即使有小的外力
+\end{itemize}
+
+\textbf{数学表示}：
+\begin{equation}
+M\ddot{x}_d = f_{\text{ext}} \quad \Rightarrow \quad \ddot{x}_d = \frac{f_{\text{ext}}}{M}
+\end{equation}
+
+如果$M$很小，即使$f_{\text{ext}}$很小，$\ddot{x}_d$也很大。
+
+\subsection{为什么导纳控制难以模拟低质量环境？}
+
+\textbf{问题1：需要大的加速度}
+
+\textbf{对于低质量环境}：
+\begin{equation}
+\ddot{x}_d = M^{-1}(f_{\text{ext}} - B\dot{x} - Kx) \approx M^{-1}f_{\text{ext}}
+\end{equation}
+
+如果$M$很小，$\ddot{x}_d$很大。
+
+\textbf{对于高度齿轮传动的机器人}：
+\begin{itemize}
+\item 关节速度$\omega_j = \omega_m/N$较慢
+\item 难以产生大的加速度$\ddot{x}_d$
+\item 因为$\ddot{x}_d = J(\theta)\ddot{\theta} + \dot{J}(\theta)\dot{\theta}$，而$\ddot{\theta}$受限于$\omega_m$和$N$
+\end{itemize}
+
+\textbf{问题2：有效增益很大}
+
+\textbf{有效增益}：
+\begin{equation}
+K_{\text{effective}} = \frac{f_{\text{ext}}}{\Delta x} = \frac{M\ddot{x}_d + B\dot{x} + Kx}{\Delta x}
+\end{equation}
+
+如果$M$很小，$\ddot{x}_d$很大，$K_{\text{effective}}$很大。
+
+\textbf{在高增益下}：
+\begin{itemize}
+\item 系统容易不稳定
+\item 对噪声和延迟敏感
+\item 可能振荡
+\end{itemize}
+
+\textbf{问题3：反向驱动性要求}
+
+\textbf{低质量环境需要}：
+\begin{itemize}
+\item 机器人容易被推动（低阻抗）
+\item 小的力产生大的运动
+\end{itemize}
+
+\textbf{高度齿轮传动的机器人}：
+\begin{itemize}
+\item 很难被推动（高阻抗）
+\item 不适合模拟低质量环境
+\end{itemize}
+
+\subsection{为什么高度齿轮传动不适合模拟低质量环境？}
+
+\textbf{原因1：高阻抗}
+
+\textbf{高度齿轮传动的机器人}：
+\begin{itemize}
+\item 从关节侧看，阻抗很高（$N^2 I_m$很大）
+\item 很难被推动
+\item 不适合模拟低阻抗（低质量）环境
+\end{itemize}
+
+\textbf{原因2：速度限制}
+
+\textbf{高度齿轮传动的机器人}：
+\begin{itemize}
+\item 关节速度$\omega_j = \omega_m/N$较慢
+\item 难以产生大的加速度$\ddot{x}_d$
+\item 不适合模拟低质量环境（需要大的加速度）
+\end{itemize}
+
+\textbf{原因3：控制困难}
+
+\textbf{在导纳控制中}：
+\begin{itemize}
+\item 需要快速响应外力
+\item 需要产生大的加速度
+\item 高度齿轮传动的机器人难以做到这一点
+\end{itemize}
+
+\section{为什么高度齿轮传动适合模拟刚性环境？}
+
+\subsection{总结}
+
+\textbf{高度齿轮传动的机器人的特点}：
+\begin{enumerate}
+\item \textbf{高阻抗}：很难被推动（$N^2 I_m$很大）
+\item \textbf{精确控制}：可以产生很大的关节力矩，精确控制位置
+\item \textbf{稳定性}：高阻抗提供额外的阻尼，减少振荡
+\end{enumerate}
+
+\textbf{刚性环境的特征}：
+\begin{enumerate}
+\item \textbf{高刚度}：小的位移产生大的力
+\item \textbf{高阻抗}：很难推动
+\item \textbf{位置稳定}：即使有外力，位置变化也很小
+\end{enumerate}
+
+\textbf{匹配性}：
+\begin{itemize}
+\item 高度齿轮传动的机器人的高阻抗特性与刚性环境的高阻抗特性匹配
+\item 可以精确控制位置，即使有外力干扰
+\item 系统稳定，不容易振荡
+\end{itemize}
+
+\subsection{在导纳控制中的表现}
+
+\textbf{导纳控制公式}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{对于刚性环境}，$K$很大，因此：
+\begin{equation}
+x \approx \frac{f_{\text{ext}}}{K}
+\end{equation}
+
+\textbf{高度齿轮传动的效果}：
+\begin{enumerate}
+\item \textbf{实际阻抗增加}：$K_{\text{effective}} = K + K_{\text{mechanical}}$很大
+\item \textbf{位置误差减小}：$x = f_{\text{ext}}/K_{\text{effective}}$很小
+\item \textbf{控制精度提高}：可以产生很大的关节力矩，精确跟踪期望加速度
+\item \textbf{稳定性提高}：高阻抗提供额外的阻尼，减少振荡
+\end{enumerate}
+
+\section{实际例子}
+
+\subsection{例子1：刚性环境模拟}
+
+\textbf{场景}：
+\begin{itemize}
+\item 虚拟刚度：$K = 10000$ N/m（很大）
+\item 用户施加力：$f_{\text{ext}} = 10$ N
+\item 期望位置变化：$x = f_{\text{ext}}/K = 0.001$ m（1毫米）
+\end{itemize}
+
+\textbf{高度齿轮传动的机器人}：
+\begin{itemize}
+\item 高齿轮比：$N = 100$
+\item 关节惯性：$I_j = N^2 I_m = 10000 I_m$（很大）
+\item 可以产生很大的关节力矩：$\tau_j = N\tau_m = 100\tau_m$
+\item 精确控制位置，位置误差很小（约1毫米）
+\end{itemize}
+
+\textbf{结果}：成功模拟刚性环境。
+
+\subsection{例子2：低质量环境模拟（困难）}
+
+\textbf{场景}：
+\begin{itemize}
+\item 虚拟质量：$M = 0.1$ kg（很小）
+\item 用户施加力：$f_{\text{ext}} = 1$ N
+\item 期望加速度：$\ddot{x}_d = f_{\text{ext}}/M = 10$ m/s²（很大）
+\end{itemize}
+
+\textbf{高度齿轮传动的机器人}：
+\begin{itemize}
+\item 关节速度较慢：$\omega_j = \omega_m/N = \omega_m/100$
+\item 难以产生大的加速度：$\ddot{x}_d = J(\theta)\ddot{\theta} + \dot{J}(\theta)\dot{\theta}$
+\item 由于$\ddot{\theta}$受限于$\omega_m$和$N$，$\ddot{x}_d$难以达到10 m/s²
+\end{itemize}
+
+\textbf{结果}：难以模拟低质量环境。
+
+\section{总结}
+
+\subsection{核心结论}
+
+\begin{enumerate}
+\item \textbf{高度齿轮传动的特点}：
+\begin{itemize}
+\item 高阻抗（很难被推动）
+\item 精确的位置控制能力
+\item 稳定性好
+\end{itemize}
+
+\item \textbf{刚性环境的特征}：
+\begin{itemize}
+\item 高刚度（小的位移产生大的力）
+\item 高阻抗（很难推动）
+\item 位置稳定
+\end{itemize}
+
+\item \textbf{匹配性}：
+\begin{itemize}
+\item 高度齿轮传动的机器人的高阻抗特性与刚性环境的高阻抗特性匹配
+\item 在导纳控制中，可以很好地模拟刚性环境
+\item 但难以模拟低质量环境（需要低阻抗和大的加速度）
+\end{itemize}
+
+\item \textbf{导纳控制的优势}：
+\begin{itemize}
+\item 感测力，产生运动
+\item 高度齿轮传动提供额外的机械阻抗
+\item 使得虚拟刚度$K$可以设置得很大，而不导致不稳定
+\item 位置控制精确，即使有外力干扰
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+\textbf{导纳控制}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{高度齿轮传动的效果}：
+\begin{equation}
+K_{\text{effective}} = K + K_{\text{mechanical}} \quad \Rightarrow \quad x = \frac{f_{\text{ext}}}{K_{\text{effective}}}
+\end{equation}
+
+\textbf{结果}：位置误差$x$很小，成功模拟刚性环境。
+
+\end{document}
+

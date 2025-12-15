@@ -1,0 +1,380 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{从任务空间wrench到关节力矩的转换}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：要产生末端执行器加速度$\dot{V}$，需要施加wrench $F$，然后这个$F$再通过$J^T$去算到$\tau$吗？
+
+\textbf{简短回答}：\textbf{是的，完全正确！}
+
+\section{完整流程}
+
+\subsection{步骤1：任务空间动力学}
+
+\textbf{任务空间动力学方程}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\textbf{含义}：
+\begin{itemize}
+\item 要产生末端执行器加速度$\dot{V}$，需要施加wrench $F$
+\item $F$包括两部分：
+\begin{enumerate}
+\item 惯性力：$\Lambda(\theta)\dot{V}$（产生加速度所需的力）
+\item 科里奥利、向心力和重力：$\eta(\theta, V)$（由于速度和位置产生的力）
+\end{enumerate}
+\end{itemize}
+
+\subsection{步骤2：从wrench到关节力矩}
+
+\textbf{虚功原理}：
+\begin{equation}
+\tau = J^T(\theta)F \tag{8.51}
+\end{equation}
+
+\textbf{含义}：
+\begin{itemize}
+\item 任务空间wrench $F$在关节空间中的等效力矩是$\tau = J^T(\theta)F$
+\item 这表示"产生相同的功率"
+\end{itemize}
+
+\subsection{完整流程总结}
+
+\textbf{流程}：
+\begin{enumerate}
+\item \textbf{计算需要的wrench}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V)
+\end{equation}
+其中$\dot{V}_d$是期望的末端执行器加速度。
+
+\item \textbf{转换为关节力矩}：
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+\end{enumerate}
+
+\textbf{完整公式}：
+\begin{equation}
+\tau = J^T(\theta)\left[\Lambda(\theta)\dot{V}_d + \eta(\theta, V)\right] \tag{*}
+\end{equation}
+
+\section{虚功原理的推导}
+
+\subsection{功率守恒}
+
+\textbf{虚功原理}告诉我们，关节空间和任务空间之间的功率是守恒的：
+\begin{equation}
+P_{\text{joint}} = P_{\text{task}}
+\end{equation}
+
+\textbf{关节空间功率}：
+\begin{equation}
+P_{\text{joint}} = \tau^T\dot{\theta}
+\end{equation}
+
+\textbf{任务空间功率}：
+\begin{equation}
+P_{\text{task}} = F^T V
+\end{equation}
+
+其中$V = J(\theta)\dot{\theta}$是末端执行器的twist。
+
+\subsection{推导过程}
+
+\textbf{步骤1：功率相等}
+\begin{equation}
+\tau^T\dot{\theta} = F^T V
+\end{equation}
+
+\textbf{步骤2：代入速度关系}
+\begin{equation}
+V = J(\theta)\dot{\theta}
+\end{equation}
+
+因此：
+\begin{equation}
+\tau^T\dot{\theta} = F^T J(\theta)\dot{\theta}
+\end{equation}
+
+\textbf{步骤3：提取$\dot{\theta}$}
+\begin{equation}
+(\tau^T - F^T J(\theta))\dot{\theta} = 0
+\end{equation}
+
+\textbf{步骤4：对所有$\dot{\theta}$成立}
+由于这个关系对所有$\dot{\theta}$都成立，因此：
+\begin{equation}
+\tau^T = F^T J(\theta)
+\end{equation}
+
+\textbf{步骤5：转置}
+\begin{equation}
+\tau = J^T(\theta)F \tag{8.51}
+\end{equation}
+
+\section{实际应用：任务空间控制}
+
+\subsection{控制目标}
+
+\textbf{目标}：控制末端执行器跟踪期望轨迹
+
+\textbf{期望量}：
+\begin{itemize}
+\item 期望位置：$X_d$
+\item 期望速度：$V_d$
+\item 期望加速度：$\dot{V}_d$
+\end{itemize}
+
+\subsection{控制律设计}
+
+\textbf{步骤1：计算位置和速度误差}
+
+\textbf{位置误差}（使用指数坐标）：
+\begin{equation}
+X_e = \log(X^{-1} X_d)
+\end{equation}
+
+\textbf{速度误差}：
+\begin{equation}
+V_e = [\text{Ad}_{X^{-1}X_d}]V_d - V
+\end{equation}
+
+\textbf{步骤2：计算期望加速度}
+
+\textbf{PID控制}：
+\begin{equation}
+\dot{V}_d = \dot{V}_{d,\text{ref}} + K_p X_e + K_i \int X_e dt + K_d V_e
+\end{equation}
+
+其中$\dot{V}_{d,\text{ref}}$是参考加速度（前馈项）。
+
+\textbf{步骤3：计算需要的wrench}
+
+\textbf{使用任务空间动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\textbf{或者添加反馈项}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V) + K_p X_e + K_d V_e
+\end{equation}
+
+\textbf{步骤4：转换为关节力矩}
+
+\textbf{使用虚功原理}：
+\begin{equation}
+\tau = J^T(\theta)F \tag{8.51}
+\end{equation}
+
+\textbf{完整控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left[\Lambda(\theta)\dot{V}_d + \eta(\theta, V) + K_p X_e + K_d V_e\right] \tag{11.47}
+\end{equation}
+
+\section{数学验证}
+
+\subsection{从任务空间到关节空间}
+
+\textbf{任务空间动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\textbf{转换为关节空间}：
+\begin{equation}
+\tau = J^T(\theta)F = J^T(\theta)\left[\Lambda(\theta)\dot{V} + \eta(\theta, V)\right]
+\end{equation}
+
+\textbf{展开}：
+\begin{align}
+\tau &= J^T(\theta)\Lambda(\theta)\dot{V} + J^T(\theta)\eta(\theta, V) \\
+&= J^T(\theta)J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{V} + J^T(\theta)\eta(\theta, V) \\
+&= M(\theta)J^{-1}(\theta)\dot{V} + J^T(\theta)\eta(\theta, V)
+\end{align}
+
+\textbf{代入$\dot{V} = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}$}：
+\begin{align}
+\tau &= M(\theta)J^{-1}(\theta)(\dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}) + J^T(\theta)\eta(\theta, V) \\
+&= M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta} + M(\theta)\ddot{\theta} + J^T(\theta)\eta(\theta, V)
+\end{align}
+
+\textbf{代入$\eta(\theta, V)$的定义}：
+\begin{align}
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V \\
+&= J^{-T}(\theta)h(\theta, \dot{\theta}) - J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{J}(\theta)J^{-1}(\theta)V
+\end{align}
+
+\textbf{代入$V = J(\theta)\dot{\theta}$}：
+\begin{align}
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, \dot{\theta}) - J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta} \\
+&= J^{-T}(\theta)h(\theta, \dot{\theta}) - J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta}
+\end{align}
+
+\textbf{因此}：
+\begin{align}
+J^T(\theta)\eta(\theta, V) &= h(\theta, \dot{\theta}) - M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta}
+\end{align}
+
+\textbf{代入$\tau$的表达式}：
+\begin{align}
+\tau &= M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta} + M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - M(\theta)J^{-1}(\theta)\dot{J}(\theta)\dot{\theta} \\
+&= M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{align}
+
+\textbf{这正是关节空间动力学方程(8.82)！}
+
+\section{物理意义}
+
+\subsection{为什么需要这个转换？}
+
+\textbf{任务空间控制的优势}：
+\begin{itemize}
+\item 直接控制末端执行器的运动
+\item 更直观（我们关心的是末端执行器的位置，而不是关节角度）
+\item 便于处理任务约束
+\end{itemize}
+
+\textbf{但执行器在关节空间}：
+\begin{itemize}
+\item 电机产生的是关节力矩$\tau$
+\item 不能直接产生任务空间wrench $F$
+\item 需要通过$J^T(\theta)$转换
+\end{itemize}
+
+\subsection{转换的物理意义}
+
+\textbf{虚功原理的物理意义}：
+\begin{itemize}
+\item 关节空间和任务空间的功率是守恒的
+\item 如果任务空间wrench $F$产生功率$F^T V$
+\item 那么关节空间力矩$\tau$产生相同的功率$\tau^T\dot{\theta}$
+\item 因此$\tau = J^T(\theta)F$
+\end{itemize}
+
+\textbf{具体例子}：
+
+假设末端执行器需要产生力$F = [0, 0, 10, 0, 0, 0]^T$（沿$z$轴10 N的力）。
+
+\textbf{步骤1}：计算需要的wrench
+\begin{equation}
+F = [0, 0, 10, 0, 0, 0]^T
+\end{equation}
+
+\textbf{步骤2}：转换为关节力矩
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+
+\textbf{结果}：
+\begin{itemize}
+\item 每个关节的力矩$\tau_i$取决于雅可比矩阵$J(\theta)$
+\item 如果关节$i$对$z$方向运动有贡献，那么$\tau_i \neq 0$
+\item 如果关节$i$对$z$方向运动没有贡献，那么$\tau_i = 0$
+\end{itemize}
+
+\section{完整控制流程示例}
+
+\subsection{任务空间轨迹跟踪}
+
+\textbf{输入}：
+\begin{itemize}
+\item 期望轨迹：$X_d(t), V_d(t), \dot{V}_d(t)$
+\item 当前状态：$X(t), V(t)$
+\item 关节角度：$\theta(t)$
+\end{itemize}
+
+\textbf{步骤1：计算误差}
+\begin{align}
+X_e &= \log(X^{-1} X_d) \\
+V_e &= [\text{Ad}_{X^{-1}X_d}]V_d - V
+\end{align}
+
+\textbf{步骤2：计算期望加速度}
+\begin{equation}
+\dot{V}_d = \dot{V}_{d,\text{ref}} + K_p X_e + K_d V_e
+\end{equation}
+
+\textbf{步骤3：计算需要的wrench}
+\begin{equation}
+F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V) + K_p X_e + K_d V_e
+\end{equation}
+
+\textbf{步骤4：转换为关节力矩}
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+
+\textbf{步骤5：执行控制}
+\begin{itemize}
+\item 将$\tau$发送给执行器
+\item 执行器产生关节力矩
+\item 机器人运动
+\item 重复步骤1-5
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{任务空间动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+告诉我们，要产生加速度$\dot{V}$，需要wrench $F$。
+
+\item \textbf{虚功原理}：
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+告诉我们，任务空间wrench $F$在关节空间中的等效力矩是$\tau$。
+
+\item \textbf{完整流程}：
+\begin{enumerate}
+\item 计算需要的wrench：$F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V)$
+\item 转换为关节力矩：$\tau = J^T(\theta)F$
+\end{enumerate}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 任务空间控制更直观
+\item 但执行器在关节空间
+\item 需要通过$J^T(\theta)$转换
+\item 转换基于功率守恒（虚功原理）
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{任务空间动力学}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\textbf{虚功原理}：
+\begin{equation}
+\tau = J^T(\theta)F \tag{8.51}
+\end{equation}
+
+\textbf{完整控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left[\Lambda(\theta)\dot{V}_d + \eta(\theta, V) + K_p X_e + K_d V_e\right] \tag{11.47}
+\end{equation}
+
+\end{document}
+

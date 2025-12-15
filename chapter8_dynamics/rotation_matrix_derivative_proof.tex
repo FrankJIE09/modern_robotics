@@ -1,0 +1,419 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{旋转矩阵导数公式证明：$[\omega_s] R = \dot{R}$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：证明旋转矩阵$R(t) \in SO(3)$对时间的导数满足：
+\begin{equation}
+[\omega_s] R = \dot{R}
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $R(t) \in SO(3)$：旋转矩阵（随时间变化）
+\item $\omega_s \in \mathbb{R}^3$：空间角速度（spatial angular velocity）
+\item $[\omega_s]$：角速度$\omega_s$的反对称矩阵（skew-symmetric matrix）
+\item $\dot{R} = \frac{dR}{dt}$：旋转矩阵对时间的导数
+\end{itemize}
+
+\section{符号说明}
+
+\subsection{反对称矩阵}
+
+对于向量$\omega = [\omega_x, \omega_y, \omega_z]^T \in \mathbb{R}^3$，其反对称矩阵定义为：
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item $[\omega]^T = -[\omega]$（反对称性）
+\item $[\omega] v = \omega \times v$（对任意向量$v$）
+\item $[\omega]^2 = \omega \omega^T - \|\omega\|^2 I$（其中$I$是单位矩阵）
+\end{itemize}
+
+\subsection{旋转矩阵的性质}
+
+旋转矩阵$R \in SO(3)$满足：
+\begin{itemize}
+\item $R^T R = I$（正交性）
+\item $\det(R) = 1$（行列式为1）
+\item $R^{-1} = R^T$（逆矩阵等于转置）
+\end{itemize}
+
+\section{证明方法1：从旋转矩阵的指数表示出发}
+
+\subsection{旋转矩阵的指数表示}
+
+任意旋转矩阵可以表示为：
+\begin{equation}
+R(t) = \exp([\theta(t) n(t)]_{\times})
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\theta(t)$：旋转角度
+\item $n(t)$：旋转轴（单位向量）
+\item $[\theta n]_{\times}$：反对称矩阵
+\end{itemize}
+
+\textbf{注意}：这里使用$[\cdot]_{\times}$表示反对称矩阵，与$[\cdot]$等价。
+
+\subsection{对旋转矩阵求导}
+
+对$R(t) = \exp([\theta(t) n(t)]_{\times})$求时间导数：
+\begin{equation}
+\dot{R}(t) = \frac{d}{dt} \exp([\theta(t) n(t)]_{\times})
+\end{equation}
+
+\textbf{关键步骤}：使用矩阵指数的导数公式。
+
+对于矩阵$A(t)$，如果$A(t)$和$\dot{A}(t)$可交换，那么：
+\begin{equation}
+\frac{d}{dt} \exp(A(t)) = \exp(A(t)) \dot{A}(t) = \dot{A}(t) \exp(A(t))
+\end{equation}
+
+但是，对于旋转矩阵，我们需要更一般的结果。
+
+\subsection{使用旋转的物理意义}
+
+\textbf{物理直观}：旋转矩阵$R(t)$描述了一个坐标系相对于固定坐标系的旋转。
+
+如果该坐标系有角速度$\omega_s$（在固定坐标系中表示），那么旋转矩阵的导数应该与角速度相关。
+
+\textbf{关键观察}：对于固定在旋转坐标系中的向量$\mathbf{v}$，其在固定坐标系中的表示为：
+\begin{equation}
+\mathbf{v}_{\text{fixed}} = R(t) \mathbf{v}_{\text{body}}
+\end{equation}
+
+对时间求导：
+\begin{equation}
+\dot{\mathbf{v}}_{\text{fixed}} = \dot{R}(t) \mathbf{v}_{\text{body}}
+\end{equation}
+
+另一方面，由于旋转，向量$\mathbf{v}_{\text{fixed}}$的变化率为：
+\begin{equation}
+\dot{\mathbf{v}}_{\text{fixed}} = \omega_s \times \mathbf{v}_{\text{fixed}} = [\omega_s] \mathbf{v}_{\text{fixed}}
+\end{equation}
+
+因此：
+\begin{equation}
+[\omega_s] \mathbf{v}_{\text{fixed}} = \dot{R}(t) \mathbf{v}_{\text{body}}
+\end{equation}
+
+由于$\mathbf{v}_{\text{fixed}} = R(t) \mathbf{v}_{\text{body}}$，代入得：
+\begin{equation}
+[\omega_s] R(t) \mathbf{v}_{\text{body}} = \dot{R}(t) \mathbf{v}_{\text{body}}
+\end{equation}
+
+由于$\mathbf{v}_{\text{body}}$是任意的，因此：
+\begin{equation}
+[\omega_s] R(t) = \dot{R}(t)
+\end{equation}
+
+\textbf{证毕}。
+
+\section{证明方法2：从旋转矩阵的列向量出发}
+
+\subsection{旋转矩阵的列向量表示}
+
+旋转矩阵$R(t)$可以表示为：
+\begin{equation}
+R(t) = \begin{bmatrix}
+\mathbf{r}_1(t) & \mathbf{r}_2(t) & \mathbf{r}_3(t)
+\end{bmatrix}
+\end{equation}
+
+其中$\mathbf{r}_1(t), \mathbf{r}_2(t), \mathbf{r}_3(t)$是$R(t)$的三个列向量，它们构成标准正交基。
+
+\subsection{列向量的导数}
+
+对旋转矩阵求导：
+\begin{equation}
+\dot{R}(t) = \begin{bmatrix}
+\dot{\mathbf{r}}_1(t) & \dot{\mathbf{r}}_2(t) & \dot{\mathbf{r}}_3(t)
+\end{bmatrix}
+\end{equation}
+
+\textbf{关键观察}：列向量$\mathbf{r}_i(t)$是固定在旋转坐标系中的单位向量在固定坐标系中的表示。
+
+由于旋转，这些向量的变化率为：
+\begin{equation}
+\dot{\mathbf{r}}_i(t) = \omega_s \times \mathbf{r}_i(t) = [\omega_s] \mathbf{r}_i(t)
+\end{equation}
+
+因此：
+\begin{align}
+\dot{R}(t) &= \begin{bmatrix}
+[\omega_s] \mathbf{r}_1(t) & [\omega_s] \mathbf{r}_2(t) & [\omega_s] \mathbf{r}_3(t)
+\end{bmatrix} \\
+&= [\omega_s] \begin{bmatrix}
+\mathbf{r}_1(t) & \mathbf{r}_2(t) & \mathbf{r}_3(t)
+\end{bmatrix} \\
+&= [\omega_s] R(t)
+\end{align}
+
+\textbf{证毕}。
+
+\section{证明方法3：从旋转矩阵的正交性约束出发}
+
+\subsection{正交性约束}
+
+旋转矩阵满足：
+\begin{equation}
+R^T(t) R(t) = I
+\end{equation}
+
+对时间求导：
+\begin{equation}
+\frac{d}{dt}[R^T(t) R(t)] = \dot{R}^T(t) R(t) + R^T(t) \dot{R}(t) = 0
+\end{equation}
+
+因此：
+\begin{equation}
+R^T(t) \dot{R}(t) = -[\dot{R}^T(t) R(t)]^T = -[R^T(t) \dot{R}(t)]^T
+\end{equation}
+
+这说明$R^T(t) \dot{R}(t)$是反对称矩阵。
+
+\subsection{定义角速度}
+
+定义体角速度（body angular velocity）：
+\begin{equation}
+[\omega_b] = R^T(t) \dot{R}(t)
+\end{equation}
+
+由于$R^T(t) \dot{R}(t)$是反对称矩阵，存在唯一的向量$\omega_b$使得：
+\begin{equation}
+[\omega_b] = R^T(t) \dot{R}(t)
+\end{equation}
+
+\textbf{空间角速度与体角速度的关系}：
+\begin{equation}
+\omega_s = R(t) \omega_b
+\end{equation}
+
+\textbf{证明}：
+\begin{align}
+[\omega_s] &= [R(t) \omega_b] \\
+&= R(t) [\omega_b] R^T(t) \quad \text{（反对称矩阵的相似变换）}
+\end{align}
+
+\textbf{注意}：对于反对称矩阵$[\omega]$和旋转矩阵$R$，有：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\textbf{证明}：对于任意向量$v$：
+\begin{align}
+R [\omega] R^T v &= R (\omega \times (R^T v)) \\
+&= (R \omega) \times (R R^T v) \quad \text{（旋转保持叉积）} \\
+&= (R \omega) \times v \\
+&= [R \omega] v
+\end{align}
+
+因此$R [\omega] R^T = [R \omega]$。
+
+\subsection{推导空间角速度公式}
+
+从$[\omega_b] = R^T(t) \dot{R}(t)$出发：
+\begin{align}
+\dot{R}(t) &= R(t) [\omega_b] \\
+&= R(t) [R^T(t) \omega_s] \\
+&= R(t) R^T(t) [\omega_s] R(t) \quad \text{（使用相似变换）} \\
+&= [\omega_s] R(t) \quad \text{（因为$R R^T = I$）}
+\end{align}
+
+\textbf{更直接的方法}：
+\begin{align}
+[\omega_b] &= R^T(t) \dot{R}(t) \\
+\dot{R}(t) &= R(t) [\omega_b] \\
+&= R(t) [R^T(t) \omega_s] \\
+&= [\omega_s] R(t) \quad \text{（因为$R [R^T \omega_s] = [\omega_s] R$）}
+\end{align}
+
+\textbf{证毕}。
+
+\section{证明方法4：使用旋转的无穷小表示}
+
+\subsection{无穷小旋转}
+
+在时间$dt$内，旋转矩阵从$R(t)$变为$R(t+dt)$。
+
+\textbf{无穷小旋转矩阵}：
+\begin{equation}
+R(t+dt) = R(t) (I + [\omega_b] dt + O(dt^2))
+\end{equation}
+
+其中$\omega_b$是体角速度（在旋转坐标系中表示）。
+
+\textbf{展开}：
+\begin{align}
+R(t+dt) &= R(t) + R(t) [\omega_b] dt + O(dt^2) \\
+&= R(t) + [R(t) \omega_b] R(t) dt + O(dt^2) \quad \text{（使用相似变换）} \\
+&= R(t) + [\omega_s] R(t) dt + O(dt^2)
+\end{align}
+
+因此：
+\begin{equation}
+\dot{R}(t) = \lim_{dt \to 0} \frac{R(t+dt) - R(t)}{dt} = [\omega_s] R(t)
+\end{equation}
+
+\textbf{证毕}。
+
+\section{空间角速度与体角速度的关系}
+
+\subsection{定义}
+
+\textbf{空间角速度}（spatial angular velocity）$\omega_s$：
+\begin{itemize}
+\item 在固定坐标系中表示
+\item 满足：$[\omega_s] R = \dot{R}$
+\end{itemize}
+
+\textbf{体角速度}（body angular velocity）$\omega_b$：
+\begin{itemize}
+\item 在旋转坐标系中表示
+\item 满足：$R [\omega_b] = \dot{R}$
+\end{itemize}
+
+\subsection{关系推导}
+
+从$[\omega_s] R = \dot{R}$和$R [\omega_b] = \dot{R}$：
+\begin{align}
+[\omega_s] R &= R [\omega_b] \\
+[\omega_s] &= R [\omega_b] R^T \\
+&= [R \omega_b] \quad \text{（反对称矩阵的相似变换）}
+\end{align}
+
+因此：
+\begin{equation}
+\omega_s = R \omega_b
+\end{equation}
+
+\textbf{逆关系}：
+\begin{equation}
+\omega_b = R^T \omega_s
+\end{equation}
+
+\section{应用示例}
+
+\subsection{示例1：绕固定轴旋转}
+
+考虑绕$z$轴旋转，旋转角度为$\theta(t)$：
+\begin{equation}
+R(t) = \begin{bmatrix}
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+\sin\theta(t) & \cos\theta(t) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{直接求导}：
+\begin{equation}
+\dot{R}(t) = \dot{\theta}(t) \begin{bmatrix}
+-\sin\theta(t) & -\cos\theta(t) & 0 \\
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{空间角速度}：
+\begin{equation}
+\omega_s = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}(t) \end{bmatrix}
+\end{equation}
+
+\textbf{验证}：
+\begin{align}
+[\omega_s] R &= \begin{bmatrix}
+0 & -\dot{\theta}(t) & 0 \\
+\dot{\theta}(t) & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix} \begin{bmatrix}
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+\sin\theta(t) & \cos\theta(t) & 0 \\
+0 & 0 & 1
+\end{bmatrix} \\
+&= \dot{\theta}(t) \begin{bmatrix}
+-\sin\theta(t) & -\cos\theta(t) & 0 \\
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+0 & 0 & 0
+\end{bmatrix} \\
+&= \dot{R}(t) \quad \checkmark
+\end{align}
+
+\subsection{示例2：一般旋转}
+
+对于任意旋转矩阵$R(t)$和空间角速度$\omega_s(t)$，公式$[\omega_s] R = \dot{R}$成立。
+
+\textbf{应用}：在机器人学中，这个公式用于：
+\begin{itemize}
+\item 计算旋转矩阵的导数
+\item 从旋转矩阵的导数提取角速度
+\item 在动力学方程中建立角速度与旋转的关系
+\end{itemize}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{基本公式}：
+\begin{equation}
+[\omega_s] R = \dot{R}
+\end{equation}
+
+\item \textbf{等价形式}：
+\begin{align}
+\dot{R} &= [\omega_s] R \quad \text{（空间角速度）} \\
+\dot{R} &= R [\omega_b] \quad \text{（体角速度）}
+\end{align}
+
+\item \textbf{角速度关系}：
+\begin{equation}
+\omega_s = R \omega_b, \quad \omega_b = R^T \omega_s
+\end{equation}
+
+\item \textbf{反对称矩阵关系}：
+\begin{equation}
+[\omega_s] = R [\omega_b] R^T = [R \omega_b]
+\end{equation}
+\end{enumerate}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item 旋转矩阵的导数反映了坐标系的旋转速度
+\item 空间角速度$\omega_s$是在固定坐标系中表示的角速度
+\item 体角速度$\omega_b$是在旋转坐标系中表示的角速度
+\item 两者通过旋转矩阵$R$相互转换
+\end{itemize}
+
+\subsection{应用}
+
+这个公式在以下领域有重要应用：
+\begin{itemize}
+\item 机器人运动学：描述关节旋转
+\item 刚体动力学：建立角速度与旋转的关系
+\item 姿态控制：计算姿态误差的导数
+\item 导航系统：处理姿态更新
+\end{itemize}
+
+\end{document}
+

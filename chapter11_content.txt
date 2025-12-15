@@ -1,0 +1,2196 @@
+11.1         Control System Overview
+A typical control block diagram is shown in Figure 11.1(a). The sensors are
+typically: potentiometers, encoders, or resolvers for joint position and angle
+sensing; tachometers for joint velocity sensing; joint force–torque sensors; and/or
+multi-axis force–torque sensors at the “wrist” between the end of the arm and
+the end-effector. The controller samples the sensors and updates its control
+signals to the actuators at a rate of hundreds to a few thousands of Hz. In
+most robotic applications control update rates higher than this are of limited
+benefit, given the time constants associated with the dynamics of the robot and
+environment. In our analysis we will ignore the fact that the sampling time is
+nonzero and treat controllers as if they were implemented in continuous time.
+    While tachometers can be used for direct velocity sensing, a common ap-
+proach is to use a digital filter to numerically-difference the position signals at
+successive timesteps. A low-pass filter is often used in combination with the dif-
+ferencing filter to reduce the high-frequency signal content due to quantization
+of the differenced position signals.
+    As discussed in Section 8.9, there are a number of different technologies for
+creating mechanical power, transforming the speeds and forces, and transmitting
+to the robot joints. In this chapter we lump each joint’s amplifier, actuator, and
+transmission together and treat them as a transformer from low-power control
+signals to forces and torques. This assumption, along with the assumption of
+perfect sensors, allows us to simplify the block diagram of Figure 11.1(a) to
+the one shown in Figure 11.1(b), where the controller produces the forces and
+torques directly. The rest of this chapter deals with the control algorithms that
+go inside the “controller” box in Figure 11.1(b).
+    Real robot systems are subject to flexibility and vibrations in the joints and
+links, backlash at the gears and transmissions, actuator saturation limits, and
+limited resolution of the sensors. These raise significant issues in design and
+control but they are beyond the scope of this chapter.
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                             405
+
+
+                             low                       high                         forces
+ desired                    power                     power                          and
+behavior                   controls                  controls        actuators     torques    dynamics of
+             controller                 amplifiers                      and                     arm and
+                                                                   transmissions              environment
+                                                          local
+                                                        feedback
+
+                                                                                    motions
+                                                                                      and
+                                                                                     forces
+               sensors
+
+
+                                                         (a)
+
+
+
+                                               forces                        motions
+                    desired                     and                            and
+                   behavior                   torques     dynamics of         forces
+                                controller                  arm and
+                                                          environment
+
+
+
+
+                                                         (b)
+
+Figure 11.1: (a) A typical robot control system. An inner control loop is used to help
+the amplifier and actuator to achieve the desired force or torque. For example, a DC
+motor amplifier in torque control mode may sense the current actually flowing through
+the motor and implement a local controller to better match the desired current, since
+the current is proportional to the torque produced by the motor. Alternatively the
+motor controller may directly sense the torque by using a strain gauge on the motor’s
+output gearing, and close a local torque-control loop using that feedback. (b) A
+simplified model with ideal sensors and a controller block that directly produces forces
+and torques. This assumes ideal behavior of the amplifier and actuator blocks in part
+(a). Not shown are the disturbance forces that can be injected before the dynamics
+block, or disturbance forces or motions injected after the dynamics block.
+
+
+11.2         Error Dynamics
+In this section we focus on the controlled dynamics of a single joint, as the
+concepts generalize easily to the case of a multi-joint robot.
+   If the desired joint position is θd (t) and the actual joint position is θ(t) then
+we define the joint error to be
+
+                                       θe (t) = θd (t) − θ(t).
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+406                                                                          11.2. Error Dynamics
+
+
+The differential equation governing the evolution of the joint error θe (t) of the
+controlled system is called the error dynamics. The purpose of the feedback
+controller is to create an error dynamics such that θe (t) tends to zero, or a small
+value, as t increases.
+
+11.2.1        Error Response
+A common way to test how well a controller works is to specify a nonzero initial
+error θe (0) and see how quickly, and how completely, the controller reduces
+the initial error. We define the (unit) error response to be the response
+θe (t), t > 0, of the controlled system for the initial conditions θe (0) = 1 and
+θ̇e (0) = θ̈e (0) = · · · = 0.
+     An ideal controller would drive the error to zero instantly and keep the
+error at zero for all time. In practice it takes time to reduce the error, and
+the error may never be completely eliminated. As illustrated in Figure 11.2,
+a typical error response θe (t) can be described by a transient response and
+a steady-state response. The steady-state response is characterized by the
+steady-state error ess , which is the asymptotic error θe (t) as t → ∞. The
+transient response is characterized by the overshoot and (2%) settling time.
+The 2% settling time is the first time T such that |θe (t) − ess | ≤ 0.02(θe (0) − ess )
+for all t ≥ T (see the pair of long-dashed lines). Overshoot occurs if the error
+response initially overshoots the final steady-state error, and in this case the
+overshoot is defined as
+                                               θe,min − ess
+                             overshoot =                    × 100%,
+                                               θe (0) − ess
+
+where θe,min is the least positive value achieved by the error.
+  A good error response is characterized by
+      • little or no steady-state error,
+      • little or no overshoot, and
+      • a short 2% settling time.
+
+11.2.2        Linear Error Dynamics
+In this chapter we work primarily with linear systems with error dynamics
+described by linear ordinary differential equations of the form
+
+                  ap θe(p) + ap−1 θe(p−1) + · · · + a2 θ̈e + a1 θ̇e + a0 θe = c.                 (11.1)
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                             407
+
+
+           1
+
+
+
+
+         θe
+
+
+
+
+   ess
+           0
+                                                                                                  t
+                                                           2% settling time
+                                   overshoot
+
+
+Figure 11.2: An example error response showing steady-state error ess , the overshoot,
+and the 2% settling time.
+
+
+This is a pth-order differential equation, because p time derivatives of θe are
+present. The differential equation (11.1) is homogeneous if the constant c is
+zero and nonhomogeneous if c 6= 0.
+   For homogeneous (c = 0) linear error dynamics, the pth-order differential
+equation (11.1) can be rewritten as
+                               1
+                   θe(p) = −      (ap−1 θe(p−1) + · · · + a2 θ̈e + a1 θ̇e + a0 θe )
+                               ap
+                        = −a0p−1 θe(p−1) − · · · − a02 θ̈e − a01 θ̇e − a00 θe .                  (11.2)
+
+This pth-order differential equation can be expressed as p coupled first-order
+differential equations by defining the vector x = (x1 , . . . , xp ), where
+
+                                       x1 = θ e ,
+                                       x2 = ẋ1 = θ̇e ,
+                                        .. ..
+                                         . .
+                                       xp = ẋp−1 = θe(p−1) ,
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+408                                                                          11.2. Error Dynamics
+
+
+and writing Equation (11.2) as
+                             ẋp = −a00 x1 − a01 x2 − · · · − a0p−1 xp .
+Then ẋ(t) = Ax(t), where
+                                                                            
+                   0      1               0      ···       0          0
+                0        0               1      ···       0          0      
+                                                                            
+                ..       ..              ..     ..        ..         ..     
+                                                   .                        
+           A= .           .               .                .          .      ∈ Rp×p .
+                0        0              0       ···      1          0       
+                                                                            
+                0        0              0       ···      0          1       
+                  −a00 −a01             −a02     ···    −a0p−2     −a0p−1
+By analogy with the scalar first-order differential equation ẋ(t) = ax(t), which
+has solution x(t) = eat x(0), the vector differential equation ẋ(t) = Ax(t) has so-
+lution x(t) = eAt x(0) using the matrix exponential, as we saw in Section 3.2.3.1.
+Also analogous to the scalar differential equation, whose solution converges to
+the equilibrium x = 0 from any initial condition if a is negative, the differential
+equation ẋ(t) = Ax(t) converges to x = 0 if the matrix A is negative definite,
+i.e., all eigenvalues of A (which may be complex) have negative real components.
+     The eigenvalues of A are given by the roots of the characteristic polynomial
+of A, i.e., the complex values s satisfying
+          det(sI − A) = sp + a0p−1 sp−1 + · · · + a02 s2 + a01 s + a00 = 0.                      (11.3)
+Equation (11.3) is also the characteristic equation associated with the pth-order
+differential equation (11.1).
+    A necessary condition for each root of Equation (11.3) to have a negative real
+component is that all coefficients a00 , . . . , a0p−1 must be positive. This condition
+is also sufficient for p = 1 and 2. For p = 3, the condition a02 a01 > a00 must also
+hold. For higher-order systems, other conditions must hold.
+    If each root of Equation (11.3) has a negative real component, we call the
+error dynamics stable. If any of the roots has a positive real component, the
+error dynamics are unstable, and the error kθe (t)k can grow without bound as
+t → ∞.
+    For second-order error dynamics, a good mechanical analogy to keep in mind
+is the linear mass–spring–damper (Figure 11.3). The position of the mass m is
+θe and an external force f is applied to the mass. The damper applies a force
+−bθ̇e to the mass, where b is the damping constant, and the spring applies a
+force −kθe to the mass, where k is the spring constant. Therefore the equation
+of motion of the mass can be written as
+                                      mθ̈e + bθ̇e + kθe = f.                                     (11.4)
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           409
+
+
+                                          k                        θe
+
+                                                         m              f
+
+                                           b
+
+                        Figure 11.3: A linear mass–spring–damper.
+
+
+In the limit as the mass m approaches zero, the second-order dynamics (11.4)
+reduces to the first-order dynamics
+
+                                           bθ̇e + kθe = f.                                       (11.5)
+
+By the first-order dynamics, an external force generates a velocity rather than
+an acceleration.
+    In the following subsections we consider the first- and second-order error
+responses for the homogeneous case (f = 0) with b, k > 0, ensuring that the
+error dynamics are stable and that the error converges to zero (ess = 0).
+
+11.2.2.1      First-Order Error Dynamics
+The first-order error dynamics (11.5) with f = 0 can be written in the form
+                                                    k
+                                        θ̇e (t) +     θe (t) = 0
+                                                    b
+or
+                                        1
+                               θ̇e (t) + θe (t) = 0,                         (11.6)
+                                        t
+where t = b/k is called the time constant of the first-order differential equation.
+The solution to the differential equation (11.6) is
+
+                                        θe (t) = e−t/t θe (0).                                   (11.7)
+
+The time constant t is the time at which the first-order exponential decay has
+decayed to approximately 37% of its initial value. The error response θe (t) is
+defined by the initial condition θe (0) = 1. Plots of the error response are shown
+in Figure 11.4 for different time constants. The steady-state error is zero, there
+is no overshoot in the decaying exponential error response, and the 2% settling
+time is determined by solving
+                                       θe (t)
+                                              = 0.02 = e−t/t
+                                       θe (0)
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+410                                                                          11.2. Error Dynamics
+
+
+                                     1
+
+                                                    t decreasing
+                                θe
+
+
+                                     0
+                                                   time
+
+   Figure 11.4: The first-order error response for three different time constants t.
+
+
+for t. Solving, we get
+                                ln 0.02 = −t/t → t = 3.91t,
+a 2% settling time of approximately 4t. The response gets faster as the spring
+constant k increases or the damping constant b decreases.
+
+11.2.2.2      Second-Order Error Dynamics
+The second-order error dynamics
+                                             b          k
+                                 θ̈e (t) +     θ̇e (t) + θe (t) = 0
+                                             m          m
+can be written in the standard second-order form
+                               θ̈e (t) + 2ζωn θ̇e (t) + ωn2 θe (t) = 0,                          (11.8)
+where ωn is called the natural frequency
+                                   p     and ζ is called√the damping ratio.
+For the mass–spring–damper, ωn = k/m and ζ = b/(2 km). The two roots
+of the characteristic polynomial
+                                         s2 + 2ζωn s + ωn2 = 0                                   (11.9)
+are
+                           p                                                 p
+      s1 = −ζωn + ωn           ζ2 − 1        and       s2 = −ζωn − ωn         ζ 2 − 1.         (11.10)
+The second-order error dynamics (11.8) is stable if and only if ζωn > 0 and
+ωn2 > 0.
+    If the error dynamics is stable, then there are three types of solutions θe (t)
+to the differential equation, depending on whether the roots s1,2 are real and
+unequal (ζ > 1), real and equal (ζ = 1), or complex conjugates (ζ < 1).
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           411
+
+
+    • Overdamped: ζ > 1. The roots s1,2 are real and distinct, and the
+      solution to the differential equation (11.8) is
+
+                                         θe (t) = c1 es1 t + c2 es2 t ,
+
+       where c1 and c2 can be calculated from the initial conditions. The response
+       is the sum of two decaying exponentials, with time constants t1 = −1/s1
+       and t2 = −1/s2 . The “slower” time constant
+                                               p       in the solution is given by
+       the less negative root, s1 = −ζωn + ωn ζ 2 − 1.
+       The initial conditions for the (unit) error response are θe (0) = 1 and
+       θ̇e (0) = 0, and the constants c1 and c2 can be calculated as
+
+                            1     ζ                                       1     ζ
+                     c1 =     + p                     and       c2 =        − p      .
+                            2 2 ζ2 − 1                                    2 2 ζ2 − 1
+
+    • Critically damped: ζ = 1. The roots s1,2 = −ωn are equal and real,
+      and the solution is
+                           θe (t) = (c1 + c2 t)e−ωn t ,
+       i.e., a decaying exponential multiplied by a linear function of time. The
+       time constant of the decaying exponential is t = 1/ωn . For the error
+       response with θe (0) = 1 and θ̇e (0) = 0,
+
+                                      c1 = 1        and        c2 = ωn .
+
+    • Underdamped: ζ < 1. The   p roots s1,2 are complex conjugates at s1,2 =
+      −ζωn ± jωd , where ωd = ωn 1 − ζ 2 is the damped natural frequency.
+      The solution is
+
+                               θe (t) = (c1 cos ωd t + c2 sin ωd t) e−ζωn t ,
+
+       i.e., a decaying exponential (time constant t = 1/(ζωn )) multiplied by a
+       sinusoid. For the error response with θe (0) = 1 and θ̇e (0) = 0,
+
+                                                                   ζ
+                                 c1 = 1         and         c2 = p       .
+                                                                  1 − ζ2
+
+Example root locations for the overdamped, critically damped, and under-
+damped cases, as well as their error responses θe (t), are shown in Figure 11.5.
+This figure also shows the relationship between the root locations and proper-
+ties of the transient response: roots further to the left in the complex plane
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+412                                                                          11.2. Error Dynamics
+
+
+                  Im(s)                           Im(s)                            Im(s)
+                                                                                             ωd
+           s2      s1                         s1,2                                    ωn
+
+                          Re(s)                            Re(s)                  −ζωn       Re(s)
+      −1/t 2 −1/t 1                          − ωn
+
+
+       overdamped (ζ > 1)          critically damped (ζ = 1) underdamped (ζ < 1)
+
+
+       θe                                                                     Im(s)
+                                                          increasing
+        1                                                 overshoot,
+                overdamped
+                                                          oscillation
+                      critically damped
+
+       0                                                                               Re(s)
+                                              t
+                  underdamped                                          shorter    unstable
+                                                                    settling time
+
+Figure 11.5: (Top) Example root locations for overdamped, critically damped, and
+underdamped second-order systems. (Bottom left) Error responses for overdamped,
+critically damped, and underdamped second-order systems. (Bottom right) Relation-
+ship of the root locations to properties of the transient response.
+
+
+correspond to shorter settling times, and roots further away from the real axis
+correspond to greater overshoot and oscillation. These general relationships be-
+tween root locations and transient response properties also hold for higher-order
+systems with more than two roots.
+    If the second-order error dynamics (11.8) is stable, the steady-state error ess
+is zero regardless of whether the error dynamics is overdamped, underdamped,
+or critically damped. The 2% settling time is approximately 4t, where t cor-
+responds to the “slower” root s1 if the error dynamics is overdamped. The
+overshoot is zero for overdamped and critically damped error dynamics and, for
+underdamped error dynamics, the overshoot can be calculated by finding the
+first time (after t = 0) where the error response satisfies θ̇e = 0. This is the
+peak of the overshoot, and it occurs at
+                                             tp = π/ωd .
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           413
+
+
+Substituting this into the underdamped error response, we get
+                                                                !
+                         π                  π        ζ            π
+     θe (tp ) = θe                = cos ωd       +p        sin ωd       e−ζωn π/ωd
+                         ωd                 ωd      1 − ζ2        ωd
+                                          √ 2
+                                  = −e−πζ/ 1−ζ .
+                                                                 √ 2
+Therefore, by our definition of overshoot, the overshoot is e−πζ/ 1−ζ × 100%.
+Thus ζ = 0.1 gives an overshoot of 73%, ζ = 0.5 gives an overshoot of 16%, and
+ζ = 0.8 gives an overshoot of 1.5%.
+
+
+11.3         Motion Control with Velocity Inputs
+As discussed in Chapter 8, we typically assume that there is direct control of
+the forces or torques at robot joints, and the robot’s dynamics transforms those
+controls to joint accelerations. In some cases, however, we can assume that
+there is direct control of the joint velocities, for example when the actuators are
+stepper motors. In this case the velocity of a joint is determined directly by
+the frequency of the pulse train sent to the stepper.1 Another example occurs
+when the amplifier for an electric motor is placed in velocity control mode – the
+amplifier attempts to achieve the joint velocity requested by the user, rather
+than a joint force or torque.
+    In this section we will assume that the control inputs are joint velocities.
+In Section 11.4, and indeed in the rest of the chapter, the control inputs are
+assumed to be joint forces and torques.
+    The motion control task can be expressed in joint space or task space. When
+the trajectory is expressed in task space, the controller is fed a steady stream
+of end-effector configurations Xd (t), and the goal is to command joint velocities
+that cause the robot to track this trajectory. In joint space, the controller is fed
+a steady stream of desired joint positions θd (t).
+    The main ideas are well illustrated by a robot with a single joint, so we begin
+there and then generalize to a multi-joint robot.
+   1 This assumes that the torque requirements are low enough that the stepper motor can
+
+keep up with the pulse train.
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+414                                                11.3. Motion Control with Velocity Inputs
+
+
+11.3.1        Motion Control of a Single Joint
+11.3.1.1      Feedforward Control
+Given a desired joint trajectory θd (t), the simplest type of control would be to
+choose the commanded velocity θ̇(t) as
+
+                                            θ̇(t) = θ̇d (t),                                   (11.11)
+
+where θ̇d (t) comes from the desired trajectory. This is called a feedforward or
+open-loop controller, since no feedback (sensor data) is needed to implement
+it.
+
+11.3.1.2      Feedback Control
+In practice, position errors will accumulate over time under the feedforward
+control law (11.11). An alternative strategy is to measure the actual position
+of each joint continually and implement a feedback controller.
+
+P Control and First-Order Error Dynamics The simplest feedback con-
+troller is
+                   θ̇(t) = Kp (θd (t) − θ(t)) = Kp θe (t),  (11.12)
+where Kp > 0. This controller is called a proportional controller, or P con-
+troller, because it creates a corrective control proportional to the position error
+θe (t) = θd (t) − θ(t). In other words, the constant control gain Kp acts some-
+what like a virtual spring that tries to pull the actual joint position to the
+desired joint position.
+     The P controller is an example of a linear controller, as it creates a con-
+trol signal that is a linear combination of the error θe (t) and possibly its time
+derivatives and time integrals.
+     The case where θd (t) is constant, i.e., θ̇d (t) = 0, is called setpoint control.
+In setpoint control, the error dynamics
+
+                                                     *0
+                                       θ̇e (t) =   (t) − θ̇(t)
+                                                 θ̇d
+                                                     
+
+is written as follows after substituting in the P controller θ̇(t) = Kp θe (t):
+
+                       θ̇e (t) = −Kp θe (t) → θ̇e (t) + Kp θe (t) = 0.
+
+This is a first-order error dynamic equation (11.6) with time constant t = 1/Kp .
+The decaying exponential error response is illustrated in Figure 11.4. The
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           415
+
+
+steady-state error is zero, there is no overshoot, and the 2% settling time is
+4/Kp . A larger Kp means a faster response.
+     Now consider the case where θd (t) is not constant but θ̇d (t) is constant, i.e.,
+θ̇d (t) = c. Then the error dynamics under the P controller can be written
+                             θ̇e (t) = θ̇d (t) − θ̇(t) = c − Kp θe (t),
+which we rewrite as
+                                       θ̇e (t) + Kp θe (t) = c.
+This is a first-order nonhomogeneous linear differential equation with solution
+                                                
+                                 c             c
+                       θe (t) =    + θe (0) −      e−Kp t ,
+                                Kp            Kp
+which converges to the nonzero value c/Kp as time goes to infinity. Unlike the
+case of setpoint control, the steady-state error ess is nonzero; the joint position
+always lags behind the moving reference. The steady-state error c/Kp can be
+made small by choosing the control gain Kp large, but there are practical limits
+on how large Kp can be. For one thing, real joints have velocity limits that may
+prevent the realization of the large commanded velocities associated with a large
+Kp . For another, large values of Kp may cause instability when implemented by
+a discrete-time digital controller – the large gain may result in a large change in
+θe during a single servo cycle, meaning that the control action late in the servo
+cycle is in response to sensor data that is no longer relevant.
+
+PI Control and Second-Order Error Dynamics An alternative to using
+a large gain Kp is to introduce another term in the control law. A proportional-
+integral controller, or PI controller, adds a term that is proportional to the
+time-integral of the error:
+                                                Z t
+                         θ̇(t) = Kp θe (t) + Ki     θe (t) dt,          (11.13)
+                                                             0
+
+where t is the current time and t is the variable of integration. The PI controller
+block diagram is illustrated in Figure 11.6.
+   With this controller, the error dynamics for a constant θ̇d (t) becomes
+                                               Z t
+                      θ̇e (t) + Kp θe (t) + Ki     θe (t) dt = c.
+                                                         0
+
+Taking the time derivative of this dynamics, we get
+                                θ̈e (t) + Kp θ̇e (t) + Ki θe (t) = 0.                          (11.14)
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+416                                                 11.3. Motion Control with Velocity Inputs
+
+
+    θd    +          θe                                             +         θ̇
+                                               Kp                                       robot
+               Σ                                                        Σ
+           −                                                      +                       dt
+
+                                                                                             θ
+                                   dt          Ki
+
+
+
+Figure 11.6: The block diagram of a PI controller that produces a commanded
+velocity θ̇ as input to the robot.
+
+
+We can rewrite this equation
+                         √      in the standard second-order√ form (11.8), with
+natural frequency ωn = Ki and damping ratio ζ = Kp /(2 Ki ).
+    Relating the PI controller of Equation (11.14) to the mass–spring–damper
+of Figure 11.3, the gain Kp plays the role of b/m for the mass–spring–damper (a
+larger Kp means a larger damping constant b), and the gain Ki plays the role
+of k/m (a larger Ki means a larger spring constant k).
+    The PI-controlled error dynamics equation is stable if Ki > 0 and Kp > 0,
+and the roots of the characteristic equation are
+                                          r
+                                    Kp       Kp2
+                           s1,2 = −     ±        − Ki .
+                                     2         4
+Let’s hold Kp equal to 20 and plot the roots in the complex plane as Ki grows
+from zero (Figure 11.7). This plot, or any plot of the roots as one parameter is
+varied, is called a root locus.
+    For Ki = 0, the characteristic equation s2 +Kp s+Ki = s2 +20s = s(s+20) =
+0 has roots at s1 = 0 and s2 = −20. As Ki increases, the roots move toward
+each other on the real axis of the s-plane as shown in the left-hand panel in
+Figure 11.7. Because the roots
+                            √ are real and unequal, the error dynamics equation
+is overdamped (ζ = Kp /(2 Ki ) > 1, case I) and the error response is sluggish
+due to the time constant t1 = −1/s1 of the exponential corresponding to the
+“slow” root. As Ki increases, the damping ratio decreases, the “slow” root
+moves left (while the “fast” root moves right), and the response gets faster.
+When Ki reaches 100, the two roots meet at s1,2 = −10 = −ωn = Kp /2, and
+the error dynamics equation is critically damped (ζ = 1, case II). The error
+response has a short 2% settling time of 4t = 4/(ζωn ) = 0.4 s and no overshoot
+or oscillation. As Ki continues to grow, the damping ratio ζ falls below 1 and
+the roots move√vertically off the real axis, becoming complex conjugates at
+s1,2 = −10 ± j Ki − 100 (case III). The error dynamics is underdamped, and
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           417
+
+
+
+
+                    III
+                                                                               I
+                                                                          II
+      I             II        I
+                                                                    III
+                    III
+
+
+
+
+Figure 11.7: (Left) The complex roots of the characteristic equation of the error
+dynamics of the PI velocity-controlled joint for a fixed Kp = 20 as Ki increases from
+zero. This is known as a root locus plot. (Right) The error response to an initial
+error θe = 1, θ̇e = 0, is shown for overdamped (ζ = 1.5, Ki = 44.4, case I), critically
+damped (ζ = 1, Ki = 100, case II), and underdamped (ζ = 0.5, Ki = 400, case III)
+cases.
+
+
+the response begins to exhibit overshoot and oscillation as Ki increases. The
+settling time is unaffected as the time constant t = 1/(ζωn ) remains constant.
+    According to our simple model of the PI controller, we could always choose
+Kp and Ki for critical damping (Ki = Kp2 /4) and increase Kp and Ki without
+bound to make the error response arbitrarily fast. As described above, however,
+there are practical limits. Within these practical limits, Kp and Ki should be
+chosen to yield critical damping.
+    Figure 11.8 shows for comparison the performances of a P controller and a PI
+controller attempting to track a constant-velocity trajectory. The proportional
+gain Kp is the same in both cases, while Ki = 0 for the P controller. From the
+shape of the response, it appears that Ki in the PI controller was chosen to be
+a bit too large, making the system underdamped. It is also clear that ess = 0
+for the PI controller but ess 6= 0 for the P controller, agreeing with our analysis
+above.
+    If the desired velocity θ̇d (t) is anything other than constant, the PI controller
+cannot be expected to eliminate steady-state error completely. If it changes
+slowly, however, then a well-designed PI controller can be expected to provide
+better tracking performance than a P controller.
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+418                                                11.3. Motion Control with Velocity Inputs
+
+
+      1.0                                                       0.2
+                                                                                     P control
+
+                 PI control
+   θ 0.5                                                   θe    0
+                              P control                                        PI control
+
+         0                                                  –0.2
+             0            0.5              1.0                        0              0.5           1.0
+                        time (s)                                                   time (s)
+
+Figure 11.8: The motion of P-controlled and PI-controlled joints, with initial position
+error, tracking a reference trajectory (dashed) where θ̇d (t) is constant. (Left) The
+responses θ(t). (Right) The error responses θe (t) = θd (t) − θ(t).
+
+
+11.3.1.3         Feedforward Plus Feedback Control
+A drawback of feedback control is that an error is required before the joint
+begins to move. It would be preferable to use our knowledge of the desired
+trajectory θd (t) to initiate motion before any error accumulates.
+    We can combine the advantages of feedforward control, which commands
+motion even when there is no error, with the advantages of feedback control,
+which limits the accumulation of error, as follows:
+
+                                                                Z t
+                          θ̇(t) = θ̇d (t) + Kp θe (t) + Ki            θe (t) dt.                 (11.15)
+                                                                 0
+
+
+This feedforward–feedback controller, illustrated in Figure 11.9, is our preferred
+control law for producing a commanded velocity to the joint.
+
+11.3.2           Motion Control of a Multi-joint Robot
+The single-joint PI feedback plus feedforward controller (11.15) generalizes im-
+mediately to robots with n joints. The reference position θd (t) and actual po-
+sition θ(t) are now n-vectors, and the gains Kp and Ki are diagonal n × n
+matrices of the form kp I and ki I, where the scalars kp and ki are positive and
+I is the n × n identity matrix. Each joint is subject to the same stability and
+performance analysis as the single joint in Section 11.3.1.
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           419
+
+
+    θ̇d
+
+
+          +                                                             +
+    θd               θe                                                       θ̇        robot
+               Σ                                 Kp                   Σ
+                                                                   +                      dt
+           −                                                         +
+                                                                                             θ
+                                    dt           Ki
+
+
+
+Figure 11.9: The block diagram of feedforward plus PI feedback control that pro-
+duces a commanded velocity θ̇ as input to the robot.
+
+
+11.3.3         Task-Space Motion Control
+We can express the feedforward plus feedback control law in task space. Let
+X(t) ∈ SE(3) be the configuration of the end-effector as a function of time
+and Vb (t) be the end-effector twist expressed in the end-effector frame {b}, i.e.,
+[Vb ] = X −1 Ẋ. The desired motion is given by Xd (t) and [Vd ] = Xd−1 Ẋd . A
+task-space version of the control law (11.15) is
+
+                                                                   Z t
+            Vb (t) = [Ad   X −1 X   d
+                                        ]Vd (t) + Kp Xe (t) + Ki         Xe (t) dt.              (11.16)
+                                                                    0
+
+
+The term [AdX −1 Xd ]Vd expresses the feedforward twist Vd in the actual end-
+effector frame at X (which could also be written Xsb ) rather than the desired
+end-effector frame Xd (which could also be written Xsd ). When the end-effector
+is at the desired configuration (X = Xd ), this term reduces to Vd . Also, the
+configuration error Xe (t) is not simply Xd (t) − X(t), since it does not make
+sense to subtract elements of SE(3). Instead, as we saw in Section 6.2, Xe
+should refer to the twist which, if followed for unit time, takes X to Xd . The
+se(3) representation of this twist, expressed in the end-effector frame, is [Xe ] =
+log(X −1 Xd ).
+    As in Section 11.3.2, the diagonal gain matrices Kp , Ki ∈ R6×6 take the form
+kp I and ki I, respectively, where kp , ki > 0.
+    The commanded joint velocities θ̇ realizing Vb from the control law (11.16)
+can be calculated using the inverse velocity kinematics from Section 6.3,
+                                              θ̇ = Jb† (θ)Vb ,
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+420                                       11.4. Motion Control with Torque or Force Inputs
+
+
+where Jb† (θ) is the pseudoinverse of the body Jacobian.
+   Motion control in task space can be defined using other representations of the
+end-effector configuration and velocity. For example, for a minimal coordinate
+representation of the end-effector configuration x ∈ Rm , the control law can be
+written
+                                                  Z t
+        ẋ(t) = ẋd (t) + Kp (xd (t) − x(t)) + Ki     (xd (t) − x(t)) dt. (11.17)
+                                                            0
+
+For a hybrid configuration representation X = (R, p), with velocities represented
+by (ωb , ṗ):
+               T                                             Z t
+      ωb (t)       R (t)Rd (t) 0        ωd (t)
+               =                                  + Kp Xe (t) + Ki     Xe (t) dt,
+       ṗ(t)             0        I     ṗd (t)                     0
+                                                                             (11.18)
+where                                                 
+                                    log(RT (d)Rd (t))
+                         Xe (t) =                        .
+                                       pd (t) − p(t)
+   Figure 11.10 shows the performance of the control law (11.16), where the
+end-effector velocity is the body twist Vb , and the performance of the control
+law (11.18), where the end-effector velocity is (ωb , ṗ). The control task is to
+stabilize Xd at the origin from the initial configuration
+                                                     
+                              0 −1 0                      1
+                     R0 =  1 0 0  ,            p0 =  1  .
+                              0 0 1                       0
+
+The feedforward velocity is zero and Ki = 0. Figure 11.10 shows the different
+paths followed by the end-effector. The decoupling of linear and angular control
+in the control law (11.18) is visible in the straight-line motion of the origin of
+the end-effector frame.
+    An application of the control law (11.16) to mobile manipulation can be
+found in Section 13.5.
+
+
+11.4         Motion Control with Torque or Force Inputs
+Stepper-motor-controlled robots are generally limited to applications with low
+or predictable force–torque requirements. Also, robot-control engineers do not
+rely on the velocity-control modes of off-the-shelf amplifiers for electric motors,
+because these velocity-control algorithms do not make use of a dynamic model
+of the robot. Instead, robot-control engineers use amplifiers in torque-control
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           421
+
+
+
+
+Figure 11.10: (Left) The end-effector configuration converging to the origin under
+the control law (11.16), where the end-effector velocity is represented as the body twist
+Vb . (Right) The end-effector configuration converging to the origin under the control
+law (11.18), where the end-effector velocity is represented as (ωb , ṗ).
+
+
+mode: the input to the amplifier is the desired torque (or force). This allows
+the robot-control engineer to use a dynamic model of the robot in the design of
+the control law.
+    In this section, the controller generates joint torques and forces to try to
+track a desired trajectory in joint space or task space. Once again, the main
+ideas are well illustrated by a robot with a single joint, so we begin there and
+then generalize to a multi-joint robot.
+
+11.4.1        Motion Control of a Single Joint
+Consider a single motor attached to a single link, as shown in Figure 11.11. Let
+τ be the motor’s torque and θ be the angle of the link. The dynamics can be
+written as
+                             τ = M θ̈ + mgr cos θ,                       (11.19)
+where M is the scalar inertia of the link about the axis of rotation, m is the
+mass of the link, r is the distance from the axis to the center of mass of the link,
+and g ≥ 0 is the gravitational acceleration.
+    According to the model (11.19) there is no dissipation: if the link were
+made to move and τ were then set to zero, the link would move forever. This
+is unrealistic, of course; there is bound to be friction at the various bearings,
+gears, and transmissions. Friction modeling is an active research area, but in a
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+422                                       11.4. Motion Control with Torque or Force Inputs
+
+
+
+
+                                          r
+                                                                  θ
+
+
+
+                                                    mg
+
+Figure 11.11: A single-joint robot rotating under gravity. The center of mass is
+indicated by the checkered disk.
+
+
+simple model, rotational friction is due to viscous friction forces, so that
+
+                                              τfric = bθ̇,                                     (11.20)
+
+where b > 0. Adding the friction torque, our final model is
+
+                                   τ = M θ̈ + mgr cos θ + bθ̇,                                 (11.21)
+
+which we may write more compactly as
+
+                                        τ = M θ̈ + h(θ, θ̇),                                   (11.22)
+
+where h contains all terms that depend only on the state, not the acceleration.
+   For concreteness in the following simulations, we set M = 0.5 kg m2 , m =
+1 kg, r = 0.1 m, and b = 0.1 N m s/rad. In some examples the link moves in
+a horizontal plane, so g = 0. In other examples, the link moves in a vertical
+                       2
+plane, so g = 9.81 m/s .
+
+11.4.1.1      Feedback Control: PID Control
+A common feedback controller is linear proportional-integral-derivative con-
+trol, or PID control. The PID controller is simply the PI controller (Equa-
+tion (11.13)) with an added term proportional to the time derivative of the
+error,
+                                    Z
+                      τ = Kp θe + Ki θe (t)dt + Kd θ̇e ,             (11.23)
+
+
+where the control gains Kp , Ki , and Kd are positive. The proportional gain Kp
+acts as a virtual spring that tries to reduce the position error θe = θd − θ. The
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           423
+
+
+    θd    +          θe                                             +         τ
+                 Σ                             Kp                       Σ               arm
+                                                                                      dynamics
+           −                                                      +
+                                                                         +
+                                                                                             θ
+                                   dt          Ki
+
+
+                                  d
+                                               Kd
+                                  dt
+
+
+                     Figure 11.12: Block diagram of a PID controller.
+
+
+derivative gain Kd acts as a virtual damper that tries to reduce the velocity error
+θ̇e = θ̇d − θ̇. The integral gain can be used to reduce or eliminate steady-state
+errors. The PID controller block diagram is given in Figure 11.12.
+
+PD Control and Second-Order Error Dynamics For now let’s consider
+the case where Ki = 0. This is known as PD control. Let’s also assume the
+robot moves in a horizontal plane (g = 0). Substituting the PD control law into
+the dynamics (11.21), we get
+
+                            M θ̈ + bθ̇ = Kp (θd − θ) + Kd (θ̇d − θ̇).                            (11.24)
+
+If the control objective is setpoint control at a constant θd with θ̇d = θ̈d = 0,
+then θe = θd − θ, θ̇e = −θ̇, and θ̈e = −θ̈. Equation (11.24) can be rewritten as
+
+                                M θ̈e + (b + Kd )θ̇e + Kp θe = 0,                                (11.25)
+
+or, in the standard second-order form (11.8), as
+                 b + Kd       Kp
+         θ̈e +          θ̇e +    θe = 0         →     θ̈e + 2ζωn θ̇e + ωn2 θe = 0,               (11.26)
+                   M          M
+where the damping ratio ζ and the natural frequency ωn are
+                                                  r
+                        b + Kd                       Kp
+                  ζ= p              and      ωn =       .
+                       2 Kp M                        M
+
+For stability, b + Kd and Kp must be positive. If the error dynamics equation is
+stable then the steady-state error is zero. For no overshoot and a fast response,
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+424                                       11.4. Motion Control with Torque or Force Inputs
+
+
+the gains Kd and Kp should be chosen to satisfy critical damping (ζ = 1). For a
+fast response, Kp should be chosen to be as high as possible, subject to practical
+issues such as actuator saturation, undesired rapid torque changes (chattering),
+vibrations of the structure due to unmodeled flexibility in the joints and links,
+and possibly even instability due to the finite servo rate frequency.
+
+PID Control and Third-Order Error Dynamics Now consider the case
+of setpoint control where the link moves in a vertical plane (g > 0). With the
+PD control law above, the error dynamics can now be written
+
+                          M θ̈e + (b + Kd )θ̇e + Kp θe = mgr cos θ.                            (11.27)
+
+This implies that the joint comes to rest at a configuration θ satisfying Kp θe =
+mgr cos θ, i.e., the final error θe is nonzero when θd 6= ±π/2. The reason is that
+the robot must provide a nonzero torque to hold the link at rest at θ 6= ±π/2,
+but the PD control law creates a nonzero torque at rest only if θe 6= 0. We can
+make this steady-state error small by increasing the gain Kp but, as discussed
+above, there are practical limits.
+    To eliminate the steady-state error, we return to the PID controller by setting
+Ki > 0. This allows a nonzero steady-state torque even with zero position error;
+only the integrated error must be nonzero. Figure 11.13 demonstrates the effect
+of adding the integral term to the controller.
+    To see how this works, write down the setpoint error dynamics
+                                                  Z
+                 M θ̈e + (b + Kd )θ̇e + Kp θe + Ki θe (t)dt = τdist ,       (11.28)
+
+where τdist is a disturbance torque substituted for the gravity term mgr cos θ.
+Taking derivatives of both sides, we get the third-order error dynamics
+
+                        M θe(3) + (b + Kd )θ̈e + Kp θ̇e + Ki θe = τ̇dist .                     (11.29)
+
+If τdist is constant then the right-hand side of Equation (11.29) is zero, and its
+characteristic equation is
+                                     b + Kd 2 Kp    Ki
+                              s3 +         s +   s+    = 0.                                    (11.30)
+                                       M       M    M
+If all roots of Equation (11.30) have a negative real part then the error dynamics
+is stable, and θe converges to zero. (While the disturbance torque due to gravity
+is not constant as the link rotates, it approaches a constant as θ̇ goes to zero,
+and therefore similar reasoning holds close to the equilibrium θe = 0.)
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           425
+
+
+
+                                                  P term
+                                                                                  desired config =
+                                                                                  PID final config
+     1                                             D term
+
+θe             PD control                        P term                 g          PD final config
+                                                          I term
+                  PID control
+     0                                                                      initial config
+                                                   D term
+     0                5                  10
+                   time (s)                          controls
+
+Figure 11.13: (Left) The tracking errors for a PD controller with Kd = 2 N m s/rad
+and Kp = 2.205 N m/rad for critical damping, and a PID controller with the same
+PD gains and Ki = 1 N m/(rad s). The arm starts at θ(0) = −π/2, θ̇(0) = 0, with
+a goal state θd = 0, θ̇d = 0. (Middle) The individual contributions of the terms in
+the PD and PID control laws. Note that the nonzero I (integral) term for the PID
+controller allows the P (proportional) term to drop to zero. (Right) The initial and
+final configurations, with the center of mass indicated by checkered disks.
+
+
+    For all the roots of Equation (11.30) to have a negative real component, the
+following conditions on the control gains must be satisfied for stability (Sec-
+tion 11.2.2.2):
+
+                                                       Kd     > −b
+                                                       Kp     > 0
+                                 (b + Kd )Kp
+                                             > Ki             > 0.
+                                      M
+Thus the new gain Ki must satisfy both a lower and an upper bound (Fig-
+ure 11.14). A reasonable design strategy is to choose Kp and Kd for a good
+transient response and then choose Ki large enough that it is helpful in reducing
+or eliminating steady-state errors but small enough that it does not significantly
+impact stability. In the example of Figure 11.13, the relatively large Ki wors-
+ens the transient response, giving significant overshoot, but steady-state error
+is eliminated.
+    In practice, Ki = 0 for many robot controllers, since stability is paramount.
+Other techniques can be employed to limit the adverse stability effects of integral
+control, such as integrator anti-windup, which places a limit on how large
+the error integral is allowed to grow.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+426                                       11.4. Motion Control with Torque or Force Inputs
+
+
+                                                           Im(s)
+
+
+
+
+                                                                          Re(s)
+
+
+
+
+Figure 11.14: The movement of the three roots of Equation (11.30) as Ki increases
+from zero. First a PD controller is chosen with Kp and Kd yielding critical damping,
+giving rise to two collocated roots on the negative real axis. Adding an infinitesimal
+gain Ki > 0 creates a third root at the origin. As we increase Ki , one of the two
+collocated roots moves to the left on the negative real axis while the other two roots
+move toward each other, meet, break away from the real axis, begin curving to the
+right, and finally move into the right half-plane when Ki = (b + Kd )Kp /M . The
+system is unstable for larger values of Ki .
+
+
+    Pseudocode for the PID control algorithm is given in Figure 11.15.
+    While our analysis has focused on setpoint control, the PID controller applies
+perfectly well to trajectory following, where θ̇d (t) 6= 0. Integral control will not
+eliminate tracking error along arbitrary trajectories, however.
+
+11.4.1.2      Feedforward Control
+Another strategy for trajectory following is to use a model of the robot’s dy-
+namics to proactively generate torques instead of waiting for errors. Let the
+controller’s model of the dynamics be
+
+                                      τ = M̃ (θ)θ̈ + h̃(θ, θ̇),                                (11.31)
+
+where the model is perfect if M̃ (θ) = M (θ) and h̃(θ, θ̇) = h(θ, θ̇). Note that the
+inertia model M̃ (θ) is written as a function of the configuration θ. While the
+inertia of our simple one-joint robot is not a function of configuration, writing
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           427
+
+
+
+  time = 0                        // dt = servo cycle time
+  eint = 0                        // error integral
+  qprev = senseAngle              // initial joint angle q
+  loop
+    [qd,qdotd] = trajectory(time) // from trajectory generator
+
+     q = senseAngle                             // sense actual joint angle
+     qdot = (q - qprev)/dt                      // simple velocity calculation
+     qprev = q
+
+     e = qd - q
+     edot = qdotd - qdot
+     eint = eint + e*dt
+
+     tau = Kp*e + Kd*edot + Ki*eint
+     commandTorque(tau)
+
+    time = time + dt
+  end loop
+
+
+
+                        Figure 11.15: Pseudocode for PID control.
+
+
+the equations in this way allows us to re-use Equation (11.31) for multi-joint
+systems in Section 11.4.2.
+    Given θd , θ̇d , and θ̈d from a trajectory generator, the feedforward torque is
+calculated as
+                           τ (t) = M̃ (θd (t))θ̈d (t) + h̃(θd (t), θ̇d (t)).                   (11.32)
+
+If the model of the robot dynamics is exact, and there are no initial state errors,
+then the robot follows the desired trajectory exactly.
+    A pseudocode implementation of feedforward control is given in Figure 11.16.
+    Figure 11.17 shows two examples of feedforward-trajectory following for the
+link under gravity. Here, the controller’s dynamic model is correct except that
+it has r̃ = 0.08 m, when actually r = 0.1 m. In Task 1 the error stays small, as
+unmodeled gravity effects provide a spring-like force to θ = −π/2, accelerating
+the robot at the beginning and decelerating it at the end. In Task 2, unmodeled
+gravity effects act against the desired motion, resulting in a larger tracking error.
+    Because there are always modeling errors, feedforward control is always used
+in conjunction with feedback, as discussed next.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+428                                       11.4. Motion Control with Torque or Force Inputs
+
+
+
+  time = 0                                       // dt = servo cycle time
+  loop
+    [qd,qdotd,qdotdotd] = trajectory(time)       // trajectory generator
+    tau = Mtilde(qd)*qdotdotd + htilde(qd,qdotd) // calculate dynamics
+    commandTorque(tau)
+    time = time + dt
+  end loop
+
+
+
+                    Figure 11.16: Pseudocode for feedforward control.
+
+                                                       −π/4
+                                                                     actual
+
+   Task 1                                                   θ                   desired
+
+
+                                                      −3π/4
+
+
+
+                                                        3π/4
+                                                                        desired
+
+                                                            θ
+   Task 2
+                                                         π/4                    actual
+                                              g
+
+                                                                0       1      2          3        4
+                                                                            time (s)
+
+Figure 11.17: Results of feedforward control with an incorrect model: r̃ = 0.08 m,
+but r = 0.1 m. The desired trajectory in Task 1 is θd (t) = −π/2 − (π/4) cos(t) for
+0 ≤ t ≤ π. The desired trajectory for Task 2 is θd (t) = π/2 − (π/4) cos(t), 0 ≤ t ≤ π.
+
+
+11.4.1.3      Feedforward Plus Feedback Linearization
+All practical controllers use feedback, as no model of robot and environment
+dynamics will be perfect. Nonetheless, a good model can be used to improve
+performance and simplify analysis.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           429
+
+
+   Let’s combine PID control with a model of the robot dynamics {M̃ , h̃} to
+achieve the error dynamics
+                                              Z
+                     θ̈e + Kd θ̇e + Kp θe + Ki θe (t)dt = c        (11.33)
+
+along arbitrary trajectories, not just to a setpoint. The error dynamics (11.33)
+and a proper choice of PID gains ensure exponential decay of the trajectory
+error.
+    Since θ̈e = θ̈d − θ̈, to achieve the error dynamics (11.33) we choose the robot’s
+commanded acceleration to be
+                                            θ̈ = θ̈d − θ̈e ,
+then combine this with Equation (11.33) to get
+                                                                Z
+                           θ̈ = θ̈d + Kd θ̇e + Kp θe + Ki           θe (t)dt.                  (11.34)
+
+Substituting θ̈ from Equation (11.34) into a model of the robot dynamics {M̃ , h̃},
+we get the feedforward plus feedback linearizing controller, also called
+the inverse dynamics controller or the computed torque controller:
+                                    Z                 
+          τ = M̃ (θ) θ̈d + Kp θe + Ki θe (t)dt + Kd θ̇e + h̃(θ, θ̇).                           (11.35)
+
+
+This controller includes a feedforward component due to the use of the planned
+acceleration θ̈d and is called feedback linearizing because feedback of θ and θ̇
+is used to generate the linear error dynamics. The h̃(θ, θ̇) term cancels the
+dynamics that depends nonlinearly on the state, and the inertia model M̃ (θ)
+converts the desired joint accelerations into joint torques, realizing the simple
+linear error dynamics (11.33).
+    A block diagram of the computed torque controller is shown in Figure 11.18.
+The gains Kp , Ki , and Kd are chosen to place the roots of the characteristic
+equation so as to achieve good transient response. In practice Ki is often chosen
+to be zero.
+    Figure 11.19 shows the typical behavior of computed torque control relative
+to feedforward and feedback only. Pseudocode is given in Figure 11.20.
+
+11.4.2        Motion Control of a Multi-joint Robot
+The methods applied above for a single-joint robot carry over directly to n-joint
+robots. The difference is that the dynamics (11.22) now takes the more general,
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+430                                       11.4. Motion Control with Torque or Force Inputs
+
+
+   θ̈d
+                                        +
+           +      θe     PID      θ̈fb     θ̈                         +        τ      arm          θ, θ̇
+θd , θ̇d       Σ       controller        Σ              M̃ (θ)θ̈           Σ       d ynamics
+                                       +                               +
+                −
+
+                                                                      h̃(θ, θ̇)
+
+
+Figure 11.18: Computed torque control. The feedforward acceleration θ̈d is added to
+the acceleration θ̈fb computed by the PID feedback controller to create the commanded
+acceleration θ̈.
+
+
+
+
+                                                                          dt
+
+
+
+
+Figure 11.19: Performance of feedforward only (ff), feedback only (fb), and com-
+puted torque control (ff+fb). The PID gains are taken from Figure 11.13, and the
+feedforward modeling error is taken from Figure 11.17. The desired motion is Task 2
+from Figure 11.17 (left-hand plot). The center plot R shows the tracking performance of
+the three controllers. The right-hand plot shows τ 2 (t)dt, a standard measure of the
+control effort, for each of the three controllers. These plots show typical behavior: the
+computed torque controller yields better tracking than either feedforward or feedback
+alone, with less control effort than feedback alone.
+
+
+vector-valued, form
+                                      τ = M (θ)θ̈ + h(θ, θ̇),                                  (11.36)
+where the n × n positive-definite mass matrix M is now a function of the con-
+figuration θ. In general, the components of the dynamics (11.36) are coupled –
+the acceleration of a joint is a function of the positions, velocities, and torques
+at other joints.
+    We distinguish between two types of control for multi-joint robots: decen-
+tralized control, where each joint is controlled separately with no sharing of
+information between joints, and centralized control, where full state informa-
+tion for each of the n joints is available to calculate the controls for each joint.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           431
+
+
+
+  time = 0                                 // dt = cycle time
+  eint = 0                                 // error integral
+  qprev = senseAngle                       // initial joint angle q
+  loop
+    [qd,qdotd,qdotdotd] = trajectory(time) // from trajectory generator
+
+     q = senseAngle                                          // sense actual joint angle
+     qdot = (q - qprev)/dt                                   // simple velocity calculation
+     qprev = q
+
+     e = qd - q
+     edot = qdotd - qdot
+     eint = eint + e*dt
+
+     tau = Mtilde(q)*(qdotdotd+Kp*e+Kd*edot+Ki*eint) + htilde(q,qdot)
+     commandTorque(tau)
+
+    time = time + dt
+  end loop
+
+
+
+             Figure 11.20: Pseudocode for the computed torque controller.
+
+
+11.4.2.1      Decentralized Multi-joint Control
+The simplest method for controlling a multi-joint robot is to apply at each
+joint an independent controller, such as the single-joint controllers discussed
+in Section 11.4.1. Decentralized control is appropriate when the dynamics are
+decoupled, at least approximately. The dynamics are decoupled when the ac-
+celeration of each joint depends only on the torque, position, and velocity of
+that joint. This requires that the mass matrix be diagonal, as in Cartesian or
+gantry robots, where the first three axes are prismatic and orthogonal. This
+kind of robot is equivalent to three single-joint systems.
+    Approximate decoupling is also achieved in highly geared robots in the ab-
+sence of gravity. The mass matrix M (θ) is nearly diagonal, as it is dominated
+by the apparent inertias of the motors themselves (see Section 8.9.2). Signifi-
+cant friction at the individual joints also contributes to the decoupling of the
+dynamics.
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+432                                       11.4. Motion Control with Torque or Force Inputs
+
+
+11.4.2.2      Centralized Multi-joint Control
+When gravity forces and torques are significant and coupled, or when the mass
+matrix M (θ) is not well approximated by a diagonal matrix, decentralized con-
+trol may not yield acceptable performance. In this case the computed torque
+controller (11.35) of Figure 11.18 can be generalized to a multi-joint robot. The
+configurations θ and θd and the error θe = θd − θ are now n-vectors, and the
+positive scalar gains become positive-definite matrices Kp , Ki , Kd :
+
+                                               Z                       
+          τ = M̃ (θ) θ̈d + Kp θe + Ki               θe (t)dt + Kd θ̇e       + h̃(θ, θ̇).       (11.37)
+
+
+Typically, we choose the gain matrices as kp I, ki I, and kd I, where kp , ki , and
+kd are nonnegative scalars. Commonly, ki is chosen to be zero. In the case of an
+exact dynamics model for M̃ and h̃, the error dynamics of each joint reduces to
+the linear dynamics (11.33). The block diagram and pseudocode for this control
+algorithm are found in Figures 11.18 and 11.20, respectively.
+    Implementing the control law (11.37) requires calculating potentially com-
+plex dynamics. We may not have a good model of these dynamics, or the
+equations may be too computationally expensive to calculate at servo rate. In
+this case, if the desired velocities and accelerations are small, an approximation
+to (11.37) can be obtained using only PID control and gravity compensation:
+                                               Z
+                         τ = Kp θe + Ki             θe (t)dt + Kd θ̇e + g̃(θ).                 (11.38)
+
+
+With zero friction, perfect gravity compensation, and PD setpoint control (Ki =
+0 and θ̇d = θ̈d = 0), the controlled dynamics can be written as
+                              M (θ)θ̈ + C(θ, θ̇)θ̇ = Kp θe − Kd θ̇,                            (11.39)
+
+where the Coriolis and centripetal terms are written C(θ, θ̇)θ̇. We can now
+define a virtual “error energy,” which is the sum of an “error potential energy”
+stored in the virtual spring Kp and an “error kinetic energy”:
+                                              1 T       1
+                            V (θe , θ̇e ) =    θ Kp θe + θ̇eT M (θ)θ̇e .                       (11.40)
+                                              2 e       2
+Since θ̇d = 0, this reduces to
+                                              1 T       1
+                             V (θe , θ̇) =     θ Kp θe + θ̇T M (θ)θ̇.                          (11.41)
+                                              2 e       2
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           433
+
+
+    Taking the time derivative and substituting (11.39) into it, we get
+                                       1
+        V̇ = −θ̇T Kp θe + θ̇T M (θ)θ̈ + θ̇T Ṁ (θ)θ̇
+                                       2
+                                                      1
+           = −θ̇ Kp θe + θ̇ Kp θe − Kd θ̇ − C(θ, θ̇)θ̇ + θ̇T Ṁ (θ)θ̇.
+                T           T
+                                                                                               (11.42)
+                                                        2
+
+Rearranging, and using the fact that Ṁ − 2C is skew symmetric (Proposi-
+tion 8.1.2), we get
+
+                                                                               :0
+                                                          1 T            
+                                                                                 
+                     T             T                                    
+          V̇ = −θ̇ Kp θe + θ̇              Kp θe − Kd θ̇ + θ̇ Ṁ (θ)
+                                                                   − 2C(θ, θ̇) θ̇
+                                                                      
+                                                          2 
+                                                          
+              = −θ̇T Kd θ̇ ≤ 0.                                                     (11.43)
+
+This shows that the error energy is decreasing when θ̇ 6= 0. If θ̇ = 0 and θ 6= θd ,
+the virtual spring ensures that θ̈ 6= 0, so θ̇e will again become nonzero and more
+error energy will be dissipated. Thus, by the Krasovskii–LaSalle invariance
+principle (Exercise 11.12), the total error energy decreases monotonically and
+the robot converges to rest at θd (θe = 0) from any initial state.
+
+11.4.3        Task-Space Motion Control
+In Section 11.4.2 we focused on motion control in joint space. On the one hand,
+this is convenient because joint limits are easily expressed in this space, and the
+robot should be able to execute any joint-space path respecting these limits.
+Trajectories are naturally described by the joint variables, and there are no
+issues of singularities or redundancy.
+    On the other hand, since the robot interacts with the external environment
+and objects in it, it may be more convenient to express the motion as a trajectory
+of the end-effector in task space. Let the end-effector trajectory be specified by
+(X(t), Vb (t)), where X ∈ SE(3) and [Vb ] = X −1 Ẋ, i.e., the twist Vb is expressed
+in the end-effector frame {b}. Provided that the corresponding trajectory in
+joint space is feasible, we now have two options for control: (1) convert to
+a joint-space trajectory and proceed with controls as in Section 11.4.2 or (2)
+express the robot dynamics and control law in the task space.
+    The first option is to convert the trajectory to joint space. The forward
+kinematics are X = T (θ) and Vb = Jb (θ)θ̇. Then the joint-space trajectory is
+
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+434                                                                             11.5. Force Control
+
+
+obtained from the task-space trajectory using inverse kinematics (Chapter 6):
+
+       (inverse kinematics) θ(t) = T −1 (X(t)),                                                (11.44)
+                                     θ̇(t) = Jb† (θ(t))Vb (t),                                 (11.45)
+                                                                                   
+                                     θ̈(t) = Jb† (θ(t)) V̇b (t) − J˙b (θ(t))θ̇(t) .            (11.46)
+
+A drawback of this approach is that we must calculate the inverse kinematics,
+Jb† , and J˙b , which may require significant computing power.
+     The second option is to express the robot’s dynamics in task-space coordi-
+nates, as discussed in Section 8.6. Recall the task-space dynamics
+
+                                    Fb = Λ(θ)V̇b + η(θ, Vb ).
+
+The joint forces and torques τ are related to the wrenches Fb expressed in the
+end-effector frame by τ = JbT (θ)Fb .
+   We can now write a control law in task space inspired by the computed
+torque control law in joint coordinates (11.37),
+
+τ=
+                                               Z                            
+                d
+JbT (θ) Λ̃(θ)      ([AdX −1 Xd ]Vd ) + Kp Xe + Ki Xe (t)dt + Kd Ve + η̃(θ, Vb ) ,
+                dt
+                                                                         (11.47)
+                                                                    d
+where {Λ̃, η̃} represents the controller’s dynamics model and dt      ([AdX −1 Xd ]Vd )
+is the feedforward acceleration expressed in the actual end-effector frame at X
+(this term can be approximated as V̇d at states close to the reference state). The
+configuration error Xe satisfies [Xe ] = log(X −1 Xd ): Xe is the twist, expressed in
+the end-effector frame, which, if followed for unit time, would move the current
+configuration X to the desired configuration Xd . The velocity error is calculated
+as
+                             Ve = [AdX −1 Xd ]Vd − V.
+The transform [AdX −1 Xd ] expresses the reference twist Vd , which is expressed
+in the frame Xd , as a twist in the end-effector frame at X, in which the actual
+velocity V is represented, so the two expressions can be differenced.
+
+
+11.5         Force Control
+When the task is not to create motions at the end-effector but to apply forces and
+torques to the environment, force control is needed. Pure force control is only
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           435
+
+
+possible if the environment provides resistance forces in every direction (e.g.,
+if the end-effector is embedded in concrete or attached to a spring providing
+resistance in every motion direction). Pure force control is something of an
+abstraction, as robots are usually able to move freely in at least some direction.
+It is a useful abstraction, however, that leads to hybrid motion-force control as
+discussed in Section 11.6.
+    In ideal force control, the force applied by the end-effector is unaffected by
+disturbance motions applied to the end-effector. This is dual to the case of ideal
+motion control, where the motion is unaffected by disturbance forces.
+    Let Ftip be the wrench applied by the manipulator to the environment. The
+manipulator dynamics can be written as
+                     M (θ)θ̈ + c(θ, θ̇) + g(θ) + b(θ̇) + J T (θ)Ftip = τ,                      (11.48)
+where Ftip and J(θ) are defined in the same frame (the space frame or the end-
+effector frame). Since the robot typically moves slowly (or not at all) during a
+force control task, we can ignore the acceleration and velocity terms to get
+                                      g(θ) + J T (θ)Ftip = τ.                                  (11.49)
+   In the absence of any direct measurements of the force–torque at the robot
+end-effector, joint-angle feedback alone can be used to implement the force-
+control law
+                              τ = g̃(θ) + J T (θ)Fd ,                 (11.50)
+where g̃(θ) is a model of the gravitational torques and Fd is the desired wrench.
+This control law requires a good model for gravity compensation as well as
+precise control of the torques produced at the robot joints. In the case of a DC
+electric motor without gearing, torque control can be achieved by current control
+of the motor. In the case of a highly geared actuator, a large friction torque in
+the gearing can degrade the quality of torque control achieved using only current
+control. In this case, the output of the gearing can be instrumented with strain
+gauges to measure the joint torque directly; this information is fed back to a
+local controller that modulates the motor current to achieve the desired output
+torque.
+    Another solution is to equip the robot arm with a six-axis force-torque sensor
+between the arm and the end-effector to directly measure the end-effector wrench
+Ftip (Figure 11.21). Consider a PI force controller2 with a feedforward term and
+   2 Derivative control is not typically relevant for two reasons: (1) force measurements are
+
+often noisy, so their computed time derivatives are nearly meaningless; and (2) we are assuming
+the direct control of the joint torques and forces, and our simple rigid-body dynamics models
+imply direct transmission to the end-effector forces – there is no dynamics that integrates our
+control commands to produce the desired behavior, unlike with motion control.
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+436                                                                             11.5. Force Control
+
+
+
+
+                                                                 six-axis
+                                                               force-torque
+                                                                  sensor
+
+
+Figure 11.21: A six-axis force–torque sensor mounted between a robot arm and its
+end-effector.
+
+
+gravity compensation,
+
+                                                               Z           
+                              T
+             τ = g̃(θ) + J (θ) Fd + Kf p Fe + Kf i                  Fe (t)dt ,                 (11.51)
+
+
+where Fe = Fd − Ftip and Kf p and Kf i are positive-definite proportional and
+integral gain matrices, respectively. In the case of perfect gravity modeling,
+plugging the force controller (11.51) into the dynamics (11.49), we get the error
+dynamics                                 Z
+                          Kf p Fe + Kf i Fe (t)dt = 0.                    (11.52)
+
+In the case of a nonzero but constant force disturbance on the right-hand side
+of (11.52), arising from an incorrect model of g̃(θ), for example, we take the
+derivative to get
+                             Kf p Ḟe + Kf i Fe = 0,                   (11.53)
+showing that Fe converges to zero for positive-definite Kf p and Kf i .
+    The control law (11.51) is simple and appealing but potentially dangerous
+if incorrectly applied. If there is nothing for the robot to push against, it
+will accelerate in a failing attempt to create end-effector forces. Since a typical
+force-control task requires little motion, we can limit this acceleration by adding
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           437
+
+
+velocity damping. This gives the modified control law
+
+                                          Z                  
+                       T
+      τ = g̃(θ) + J (θ) Fd + Kf p Fe + Kf i Fe (t)dt − Kdamp V ,                               (11.54)
+
+
+where Kdamp is positive definite.
+
+
+11.6         Hybrid Motion–Force Control
+Most tasks requiring the application of controlled forces also require the gener-
+ation of controlled motions. Hybrid motion-force control is used to achieve
+this. If the the task space is n-dimensional then we are free to specify n of
+the 2n forces and motions at any time t; the other n are determined by the
+environment. Apart from this constraint, we also should not specify forces and
+motions in the “same direction,” as then they are not independent.
+    For example, consider a two-dimensional environment modeled by a damper,
+f = Benv v, where                            
+                                         2 1
+                               Benv =            .
+                                         1 1
+Defining the components of v and f as (v1 , v2 ) and (f1 , f2 ), we have f1 = 2v1 +v2
+and f2 = v1 + v2 . We have n = 2 freedoms to choose among the 2n = 4
+velocities and forces at any time. As an example, we can specify both f1 and
+v1 independently, because Benv is not diagonal. Then v2 and f2 are determined
+by Benv . We cannot independently control both f1 and 2v1 + v2 , as these are
+in the “same direction” according to the environment.
+
+11.6.1        Natural and Artificial Constraints
+A particularly interesting case occurs when the environment is infinitely stiff
+(rigid constraints) in k directions and unconstrained in n − k directions. In
+this case, we cannot choose which of the 2n motions and forces to specify – the
+contact with the environment chooses the k directions in which the robot can
+freely apply forces and the n−k directions of free motion. For example, consider
+a task space with the n = 6 dimensions of SE(3). Then a robot firmly grasping
+a cabinet door has 6 − k = 1 motion freedom of its end-effector, i.e., rotation
+about the cabinet hinges, and therefore k = 5 force freedoms; the robot can
+apply any wrench that has zero moment about the axis of the hinges without
+moving the door.
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+438                                                         11.6. Hybrid Motion–Force Control
+
+
+    As another example, a robot writing on a chalkboard may freely control the
+force into the board (k = 1), but it cannot penetrate the board; it may freely
+move with 6 − k = 5 degrees of freedom (two specifying the motion of the tip of
+the chalk in the plane of the board and three describing the orientation of the
+chalk), but it cannot independently control the forces in these directions.
+    The chalk example comes with two caveats. The first is due to friction –
+the chalk-wielding robot can actually control forces tangent to the plane of the
+board provided that the requested motion in the plane of the board is zero and
+the requested tangential forces do not exceed the static friction limit determined
+by the friction coefficient and the normal force into the board (see the discussion
+of friction modeling in Section 12.2). Within this regime, the robot has three
+motion freedoms (rotations about three axes intersecting at the contact between
+the chalk and the board) and three linear force freedoms. Second, the robot
+could decide to pull away from the board. In this regime, the robot would
+have six motion freedoms and no force freedoms. Thus the configuration of the
+robot is not the only factor determining the directions of the motion and force
+freedoms. Nonetheless, in this section we consider the simplified case where the
+motion and force freedoms are determined solely by the robot’s configuration,
+and all constraints are equality constraints. For example, the inequality velocity
+constraint of the board (the chalk cannot penetrate the board) is treated as an
+equality constraint (the robot also does not pull the chalk away from the board).
+    As a final example, consider a robot erasing a frictionless chalkboard us-
+ing an eraser modeled as a rigid block (Figure 11.22). Let X(t) ∈ SE(3)
+be the configuration of the block’s frame {b} relative to a space frame {s}.
+The body-frame twist and wrench are written Vb = (ωx , ωy , ωz , vx , vy , vz ) and
+Fb = (mx , my , mz , fx , fy , fz ), respectively. Maintaining contact with the board
+puts k = 3 constraints on the twist:
+
+                                               ωx = 0,
+                                               ωy = 0,
+                                               vz = 0.
+
+In the language of Chapter 2, these velocity constraints are holonomic – the
+differential constraints can be integrated to give configuration constraints.
+    These constraints are called natural constraints, specified by the en-
+vironment. There are 6 − k = 3 natural constraints on the wrench, too:
+mz = fx = fy = 0. In light of the natural constraints, we can freely spec-
+ify any twist of the eraser satisfying the k = 3 velocity constraints and any
+wrench satisfying the 6 − k = 3 wrench constraints (provided that fz < 0, to
+maintain contact with the board). These motion and force specifications are
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           439
+
+
+
+
+                                                              ẑb
+                                                                       ŷb
+                                 ẑs
+                                                            {b}
+                                                                      x̂b
+                         x̂s    {s}
+                                        ŷs
+
+
+
+
+Figure 11.22: The fixed space frame {s} is attached to the chalkboard and the body
+frame {b} is attached to the center of the eraser.
+
+
+called artificial constraints. Below is an example set of artificial constraints
+with the corresponding natural constraints:
+
+                          natural constraint         artificial constraint
+                                 ωx = 0                    mx = 0
+                                 ωy = 0                    my = 0
+                                 mz = 0                    ωz = 0
+                                 fx = 0                    vx = k1
+                                 fy = 0                    vy = 0
+                                 vz = 0                    fz = k 2 < 0
+
+    The artificial constraints cause the eraser to move with vx = k1 while apply-
+ing a constant force k2 against the board.
+
+11.6.2        A Hybrid Motion–Force Controller
+We now return to the problem of designing a hybrid motion–force controller. If
+the environment is rigid, then we can express the k natural constraints on the
+velocity in task space as the Pfaffian constraints
+
+                                              A(θ)V = 0,                                       (11.55)
+
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+440                                                         11.6. Hybrid Motion–Force Control
+
+
+where A(θ) ∈ Rk×6 for twists V ∈ R6 . This formulation includes holonomic and
+nonholonomic constraints.
+   If the task-space dynamics of the robot (Section 8.6), in the absence of
+constraints, is given by
+                            F = Λ(θ)V̇ + η(θ, V),
+where τ = J T (θ)F are the joint torques and forces created by the actuators,
+then the constrained dynamics, following Section 8.7, is
+
+                               F = Λ(θ)V̇ + η(θ, V) + AT (θ)λ,                                 (11.56)
+                                                      | {z }
+                                                                 Ftip
+
+
+where λ ∈ Rk are Lagrange multipliers and Ftip is the wrench that the robot
+applies against the constraints. The requested wrench Fd must lie in the column
+space of AT (θ).
+   Since Equation (11.55) must be satisfied at all times, we can replace it by
+the time derivative
+                               A(θ)V̇ + Ȧ(θ)V = 0.                      (11.57)
+To ensure that Equation (11.57) is satisfied when the system state already sat-
+isfies A(θ)V = 0, any requested acceleration V̇d should satisfy A(θ)V̇d = 0.
+     Now solving Equation (11.56) for V̇, substituting the result into (11.57), and
+solving for λ, we get
+
+                          λ = (AΛ−1 AT )−1 (AΛ−1 (F − η) − AV̇),                               (11.58)
+
+where we have used −AV̇ = ȦV from Equation (11.57). Using Equation (11.58),
+we can calculate the wrench Ftip = AT (θ)λ that the robot applies against the
+constraints.
+   Substituting Equation (11.58) into Equation (11.56) and manipulating, the
+n equations of the constrained dynamics (11.56) can be expressed as the n − k
+independent motion equations
+
+                              P (θ)F = P (θ)(Λ(θ)V̇ + η(θ, V)),                                (11.59)
+
+where
+                               P = I − AT (AΛ−1 AT )−1 AΛ−1                                    (11.60)
+and I is the identity matrix. The n × n matrix P (θ) has rank n − k and
+projects an arbitrary manipulator wrench F onto the subspace of wrenches that
+move the end-effector tangent to the constraints. The rank-k matrix I − P (θ)
+projects an arbitrary wrench F onto the subspace of wrenches that act against
+the constraints. Thus P partitions the n-dimensional force space into wrenches
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           441
+
+
+that address the motion control task and wrenches that address the force control
+task.
+   Our hybrid motion–force controller is simply the sum of a task-space motion
+controller, derived from the computed torque control law (11.47), and a task-
+space force controller (11.51), each projected to generate forces in its appropriate
+subspace. Assuming wrenches and twists expressed in the end-effector frame
+{b},
+                                                           Z                  
+      T                       d
+τ = Jb (θ) P (θ) Λ̃(θ)          ([AdX −1 Xd ]Vd ) + Kp Xe + Ki Xe (t)dt + Kd Ve
+                             dt
+             |                                     {z                              }
+                                              motion control
+                                                     Z       
+              + (I − P (θ)) Fd + Kf p Fe + Kf i Fe (t)dt
+                |                        {z                   }
+                                    force control
+                                   
+              +      η̃(θ, Vb )       .                                      (11.61)
+                     | {z }
+                    Coriolis and gravity
+
+Because the dynamics of the two controllers are decoupled by the orthogonal
+projections P and I − P , the controller inherits the error dynamics and stabil-
+ity analyses of the individual force and motion controllers on their respective
+subspaces.
+    A difficulty in implementing the hybrid control law (11.61) in rigid environ-
+ments is knowing the form of the constraints A(θ)V = 0 active at any time.
+This is necessary to specify the desired motion and force and to calculate the
+projections, but any model of the environment will have some uncertainty. One
+approach to dealing with this issue is to use a real-time estimation algorithm
+to identify the constraint directions on the basis of force feedback. Another is
+to sacrifice some performance by choosing low feedback gains, which makes the
+motion controller “soft” and the force controller more tolerant of force error.
+We can also build passive compliance into the structure of the robot itself to
+achieve a similar effect. In any case, some passive compliance is unavoidable,
+owing to flexibility in the joints and links.
+
+
+11.7         Impedance Control
+Ideal hybrid motion–force control in rigid environments demands extremes in
+robot impedance, which characterizes the change in endpoint motion as a func-
+tion of disturbance forces. Ideal motion control corresponds to high impedance
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+442                                                                      11.7. Impedance Control
+
+
+                                       k
+                                                     m
+
+                                      b                            x
+
+Figure 11.23: A robot creating a one-dof mass–spring–damper virtual environment.
+A human hand applies a force f to the haptic interface.
+
+
+(little change in motion due to force disturbances) while ideal force control cor-
+responds to low impedance (little change in force due to motion disturbances).
+In practice, there are limits to a robot’s achievable impedance range.
+    In this section we consider the problem of impedance control, where the
+robot end-effector is asked to render particular mass, spring, and damper prop-
+erties.3 For example, a robot used as a haptic surgical simulator could be tasked
+with mimicking the mass, stiffness, and damping properties of a virtual surgical
+instrument in contact with virtual tissue.
+    The dynamics for a one-dof robot rendering an impedance can be written
+
+                                        mẍ + bẋ + kx = f,                                    (11.62)
+
+where x is the position, m is the mass, b is the damping, k is the stiffness,
+and f is the force applied by the user (Figure 11.23). Loosely, we say that the
+robot renders high impedance if one or more of the {m, b, k} parameters, usually
+including b or k, is large. Similarly, we say that the impedance is low if all these
+parameters are small.
+    More formally, taking the Laplace transform4 of Equation (11.62), we get
+
+                                  (ms2 + bs + k)X(s) = F (s),                                  (11.63)
+
+and the impedance is defined by the transfer function from position perturba-
+tions to forces, Z(s) = F (s)/X(s). Thus impedance is frequency dependent,
+with a low-frequency response dominated by the spring and a high-frequency
+response dominated by the mass. The admittance, Y (s), is the inverse of the
+impedance: Y (s) = Z −1 (s) = X(s)/F (s).
+    A good motion controller is characterized by high impedance (low admit-
+tance), since ∆X = Y ∆F . If the admittance Y is small then force perturbations
+   3 A popular subcategory of impedance control is stiffness control or compliance control,
+
+where the robot renders a virtual spring only.
+   4 If you are unfamiliar with the Laplace transform and transfer functions, do not panic! We
+
+do not need the details here.
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           443
+
+
+∆F produce only small position perturbations ∆X. Similarly, a good force con-
+troller is characterized by low impedance (high admittance), since ∆F = Z∆X
+and a small Z implies that motion perturbations produce only small force per-
+turbations.
+    The goal of impedance control is to implement the task-space behavior
+
+                                    M ẍ + B ẋ + Kx = fext ,                                  (11.64)
+
+where x ∈ Rn is the task-space configuration in a minimum set of coordinates,
+e.g., x ∈ R3 ; M, B, and K are the positive-definite virtual mass, damping, and
+stiffness matrices to be simulated by the robot, and fext is a force applied to the
+robot, perhaps by a user. The values of M, B, and K may change, depending
+on the location in the virtual environment, in order to represent distinct objects
+for instance, but we focus on the case of constant values. We could also replace
+ẍ, ẋ, and x with small displacements ∆ẍ, ∆ẋ, and ∆x from reference values
+in a controlled motion of the robot, but we will dispense with any such extra
+notation here.
+     The behavior (11.64) could be implemented in terms of twists and wrenches
+instead, replacing fext by the (body or spatial) wrench Fext , ẋ by the twist V,
+ẍ by V̇, and x by the exponential coordinates Sθ. Alternatively, the linear and
+rotational behaviors can be decoupled, as discussed in Section 11.4.3.
+     There are two common ways to achieve the behavior (11.64).
+    • The robot senses the endpoint motion x(t) and commands joint torques
+      and forces to create −fext , the force to display to the user. Such a robot
+      is called impedance controlled, as it implements a transfer function
+      Z(s) from motions to forces. Theoretically, an impedance-controlled robot
+      should only be coupled to an admittance-type environment.
+    • The robot senses fext using a wrist force–torque sensor and controls its
+      motions in response. Such a robot is called admittance controlled, as it
+      implements a transfer function Y (s) from forces to motions. Theoretically,
+      an admittance-controlled robot should only be coupled to an impedance-
+      type environment.
+
+11.7.1        Impedance-Control Algorithm
+In an impedance-control algorithm, encoders, tachometers, and possibly ac-
+celerometers are used to estimate the joint and endpoint positions, velocities,
+and possibly accelerations. Often impedance-controlled robots are not equipped
+with a wrist force–torque sensor and instead rely on their ability to precisely
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+444                                                                      11.7. Impedance Control
+
+
+control joint torques to render the appropriate end-effector force −fext (Equa-
+tion (11.64)). A good control law might be
+                                                                
+                                                                            
+       τ = J T (θ)          Λ̃(θ)ẍ + η̃(θ, ẋ)        − (M ẍ + B ẋ + Kx)  ,               (11.65)
+                             |       {z        }          |       {z       }
+                        arm dynamics compensation                    fext
+
+
+where the task-space dynamics model {Λ̃, η̃} is expressed in terms of the co-
+ordinates x. Addition of an end-effector force–torque sensor allows the use of
+feedback terms to achieve more closely the desired interaction force −fext .
+    In the control law (11.65), it is assumed that ẍ, ẋ, and x are measured di-
+rectly. Measurement of the acceleration ẍ is likely to be noisy, and there is the
+problem of attempting to compensate for the robot’s mass after the acceleration
+has been sensed. Therefore, it is not uncommon to eliminate the mass compen-
+sation term Λ̃(θ)ẍ and to set M = 0. The mass of the arm will be apparent
+to the user, but impedance-controlled manipulators are often designed to be
+lightweight. It is also not uncommon to assume small velocities and replace the
+nonlinear dynamics compensation with a simpler gravity-compensation model.
+    Problems can arise when (11.65) is used to simulate stiff environments (the
+case of large K). On the one hand, small changes in position, measured by
+encoders for example, lead to large changes in motor torques. This effective
+high gain, coupled with delays, sensor quantization, and sensor errors, can lead
+to oscillatory behavior or instability. On the other hand, the effective gains are
+low when emulating low-impedance environments. A lightweight backdrivable
+manipulator can excel at emulating such environments.
+
+11.7.2        Admittance-Control Algorithm
+In an admittance-control algorithm the force fext applied by the user is sensed
+by the wrist load cell, and the robot responds with an end-effector acceleration
+satisfying Equation (11.64). A simple approach is to calculate the desired end-
+effector acceleration ẍd according to
+
+                                    M ẍd + B ẋ + Kx = fext ,
+
+where (x, ẋ) is the current state. Solving, we get
+
+                                 ẍd = M −1 (fext − B ẋ − Kx).                                (11.66)
+
+For the Jacobian J(θ) defined by ẋ = J(θ)θ̇, the desired joint accelerations θ̈d
+can be solved as
+                                                ˙ θ̇),
+                           θ̈d = J † (θ)(ẍd − J(θ)
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           445
+
+
+and inverse dynamics used to calculate the commanded joint forces and torques
+τ . Simplified versions of this control law can be obtained when the goal is to
+simulate only a spring or a damper. To make the response smoother in the face
+of noisy force measurements, the force readings can be low-pass filtered.
+    Simulating a low-mass environment is challenging for admittance-controlled
+robots, as small forces produce large accelerations. The effective large gains can
+produce instability. Admittance control by a highly geared robot can excel at
+emulating stiff environments, however.
+
+
+11.8         Low-Level Joint Force/Torque Control
+Throughout this chapter we have been assuming that each joint produces the
+torque or force requested of it. In practice this ideal is not exactly achieved, and
+there are different approaches to approximating it. Some of the most common
+approaches using electric motors (Section 8.9.1) are listed below, along with
+their advantages and disadvantages relative to the previously listed approach.
+Here we assume a revolute joint and a rotary motor.
+
+Current Control of a Direct-Drive Motor In this configuration, each joint
+has a motor amplifier and an electric motor with no gearhead. The torque of
+the motor approximately obeys the relationship τ = kt I, i.e., the torque is pro-
+portional to the current through the motor. The amplifier takes the requested
+torque, divides by the torque constant kt , and generates the motor current I. To
+create the desired current, a current sensor integrated with the amplifier contin-
+uously measures the actual current through the motor, and the amplifier uses a
+local feedback control loop to adjust the time-averaged voltage across the motor
+to achieve the desired current. This local feedback loop runs at a higher rate
+than the control loop that generates the requested torques. A typical example
+is 10 kHz for the local current control loop and 1 kHz for the outer control loop
+requesting joint torques.
+    An issue with this configuration is that often an ungeared motor must be
+quite large to create sufficient torque for the application. The configuration can
+work if the motors are fixed to the ground and connected to the end-effector
+through cables or a closed-chain linkage. If the motors are moving, as do the
+motors at the joints of a serial chain, for example, large ungeared motors are
+often impractical.
+
+Current Control of a Geared Motor This configuration is similar to the
+previous one, except that the motor has a gearhead (Section 8.9.1). A gear ratio
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+446                                              11.8. Low-Level Joint Force/Torque Control
+
+
+G > 1 increases the torque available to the joint.
+Advantage: A smaller motor can provide the necessary torques. The motor
+also operates at higher speeds, where it is more efficient at converting electrical
+power to mechanical power.
+Disadvantage: The gearhead introduces backlash (the output of the gearhead
+can move without the input moving, making motion control near zero velocity
+challenging) and friction. Backlash can be nearly eliminated by using particular
+types of gearing, such as harmonic drive gears. Friction, however, cannot be
+eliminated. The nominal torque at the gearhead output is Gkt I, but friction in
+the gearhead reduces the torque available and creates significant uncertainty in
+the torque actually produced.
+
+Current Control of a Geared Motor with Local Strain Gauge Feedback
+This configuration is similar to the previous one, except that the harmonic drive
+gearing is instrumented with strain gauges that sense how much torque is actu-
+ally being delivered at the output of the gearhead. This torque information is
+used by the amplifier in a local feedback controller to adjust the current in the
+motor so as to achieve the requested torque.
+Advantage: Putting the sensor at the output of the gearing allows compensa-
+tion of frictional uncertainties.
+Disadvantage: There is additional complexity of the joint configuration. Also,
+harmonic drive gearing achieves near-zero backlash by introducing some tor-
+sional compliance in the gearset, and the added dynamics due to the presence
+of this torsional spring can complicate high-speed motion control.
+
+Series Elastic Actuator A series elastic actuator (SEA) consists of an elec-
+tric motor with a gearhead (often a harmonic drive gearhead) and a torsional
+spring attaching the output of the gearhead to the output of the actuator. It is
+similar to the previous configuration, except that the torsional spring constant
+of the added spring is much lower than the spring constant of the harmonic
+drive gearing. The angular deflection ∆φ of the spring is often measured by
+optical, magnetic, or capacitive encoders. The torque delivered to the output
+of the actuator is k∆φ, where k is the torsional spring constant. The spring’s
+deflection is fed to a local feedback controller that controls the current to the
+motor so as to achieve the desired spring deflection, and therefore the desired
+torque.
+Advantage: The addition of the torsional spring makes the joint naturally
+“soft,” and therefore well suited for human-robot interaction tasks. It also pro-
+tects the gearing and motor from shocks at the output, such as when the output
+link hits something hard in the environment.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           447
+
+
+
+
+             output cross                    custom planar torsional spring
+            roller bearing
+                                                                             spring output
+                                                                             position sensor
+                                                                              spring input
+                                                                             position sensor
+                                                                             frameless
+       harmonic drive                                                        brushless
+          gear set                                                           DC motor
+
+                           hollow bore           incremental optical encoder
+
+Figure 11.24: (Top left) The Robonaut 2 on the International Space Station. (Top
+middle) R2’s hip joint SEA. (Top right) The custom torsional spring. The outer ring
+of hole mounts connects to the harmonic gearhead output, and the inner ring of hole
+mounts is the output of the SEA, connecting to the next link. The spring is designed
+with hard stops after approximately 0.07 rad of deflection. (Bottom) A cross-section
+of the SEA. The deflection ∆φ of the torsional spring is determined by differencing the
+deflection readings at the spring input and the spring output. The optical encoder and
+spring deflection sensors provide an estimate of the joint angle. The motor controller–
+amplifier is located at the SEA, and it communicates with the centralized controller
+using a serial communication protocol. The hollow bore allows cables to pass through
+the interior of the SEA. All images courtesy of NASA.
+
+
+Disadvantage: There is additional complexity of the joint configuration. Also,
+the added dynamics due to the softer spring make it more challenging to control
+high-speed or high-frequency motions at the output.
+   In 2011, NASA’s Robonaut 2 (R2) became the first humanoid robot in space,
+performing operations on the International Space Station. Robonaut 2 incor-
+porates a number of SEAs, including the hip actuator shown in Figure 11.24.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+448                                                                             11.9. Other Topics
+
+
+11.9         Other Topics
+Robust Control While all stable feedback controllers confer some amount of
+robustness of operation to uncertainty, the field of robust control deals with de-
+signing controllers that explicitly guarantee the performance of a robot subject
+to bounded parametric uncertainties such as those in its inertial properties.
+
+Adaptive Control The adaptive control of robots involves estimating the
+robot’s inertial or other parameters during execution and updating the control
+law in real time to incorporate those estimates.
+
+Iterative Learning Control Iterative learning control (ILC) generally fo-
+cuses on repetitive tasks. If a robot performs the same pick-and-place operation
+over and over again, the trajectory errors from the previous execution can be
+used to modify the feedforward control for the next execution. In this way,
+the robot improves its performance over time, driving the execution error to-
+ward zero. This type of learning control differs from adaptive control in that the
+“learned” information is generally nonparametric and useful only for a single tra-
+jectory. However, ILC can account for effects that have not been parametrized
+in a particular model.
+
+Passive Compliance and Flexible Manipulators All robots unavoidably
+have some passive compliance. Modeling this compliance can be as simple as
+assuming torsional springs at each revolute joint (e.g., to account for finite stiff-
+ness in the flexsplines of harmonic drive gearing) or as complicated as treating
+links as flexible beams. Two significant effects of flexibility are (1) a mismatch
+between the motor angle reading, the true joint angle, and the endpoint loca-
+tion of the attached link, and (2) increased order of the dynamics of the robot.
+These issues raise challenging problems in control, particularly when the vibra-
+tion modes are at low frequencies.
+    Some robots are specifically designed for passive compliance, particularly
+those meant for contact interactions with humans or the environment. Such
+robots may sacrifice motion-control performance in favor of safety. One passively
+compliant actuator is the series elastic actuator, described above.
+
+Variable-Impedance Actuators The impedance of a joint is typically con-
+trolled using a feedback control law, as described in Section 11.7. There are
+limits to the bandwidth of this control, however; a joint that is actively con-
+trolled to behave as a spring will only achieve spring-like behavior in respect of
+low-frequency perturbations.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           449
+
+
+    A new class of actuators, called variable-impedance or variable-stiffness
+actuators, is intended to give actuators desired passive mechanical impedance
+without the bandwidth limitations of an active control law. As an example, a
+variable-stiffness actuator may consist of two motors, with one motor indepen-
+dently controlling the mechanical stiffness of the joint (e.g., using the setpoint
+of an internal nonlinear spring) while the other motor produces a torque.
+
+
+11.10          Summary
+    • The performance of a feedback controller is often tested by specifying a
+      nonzero initial error θe (0). The error response is typically characterized
+      by the overshoot, the 2% settling time, and the steady-state error.
+    • The linear error dynamics
+                      ap θe(p) + ap−1 θe(p−1) + · · · + a2 θ̈e + a1 θ̇e + a0 θe = 0
+       is stable, and all initial errors converge to zero, if and only if all the
+       complex roots s1 , . . . , sp of the characteristic equation
+                          ap sp + ap−1 sp−1 + · · · + a2 s2 + a1 s + a0 = 0
+       have real components less than zero, i.e., Re(si ) < 0 for all i = 1, . . . , p.
+    • Stable second-order linear error dynamics can be written in the standard
+      form
+                              θ̈e + 2ζωn θ̇e + ωn2 θe = 0,
+       where ζ is the damping ratio and ωn is the natural frequency. The roots
+       of the characteristic equation are
+                                               p
+                               s1,2 = −ζωn ± ωn ζ 2 − 1.
+       The error dynamics are overdamped if ζ > 1, critically damped if ζ = 1,
+       and underdamped if ζ < 1.
+    • The feedforward plus PI feedback controller generating joint velocity com-
+      mands for a multi-joint robot is
+                                                       Z t
+                      θ̇(t) = θ̇d (t) + Kp θe (t) + Ki     θe (t) dt,
+                                                                    0
+
+       where Kp = kp I and Ki = ki I. The joint error θe (t) converges to zero
+       as t goes to infinity, for setpoint control or constant reference velocities,
+       provided that kp > 0 and ki > 0.
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+450                                                                                11.10. Summary
+
+
+      • A task-space version of the feedforward plus PI feedback controller gener-
+        ating twists expressed in the end-effector frame is written
+                                                               Z t
+                  Vb (t) = [AdX −1 Xd ]Vd (t) + Kp Xe (t) + Ki     Xe (t) dt,
+                                                                            0
+
+        where [Xe ] = log(X −1 Xd ).
+      • The PID joint-space feedback controller generating joint forces and torques
+        is                                 Z
+                           τ = Kp θe + Ki θe (t)dt + Kd θ̇e ,
+
+        where θe = θd − θ and θd is the vector of the desired joint angles.
+      • The joint-space computed torque controller is
+                                          Z                 
+                τ = M̃ (θ) θ̈d + Kp θe + Ki θe (t)dt + Kd θ̇e + h̃(θ, θ̇).
+
+        This controller cancels nonlinear terms, uses feedforward control to proac-
+        tively generate the desired acceleration θ̈d , and uses linear feedback control
+        for stabilization.
+      • For robots without joint friction and a perfect model of gravity forces,
+        joint-space PD setpoint control plus gravity compensation,
+
+                                        τ = Kp θe + Kd θ̇ + g̃(θ),
+
+        yields global convergence to θe = 0 by the Krasovskii–LaSalle invariance
+        principle.
+      • Task-space force control can be achieved by the controller
+                                                   Z                  
+             τ = g̃(θ) + J T (θ) Fd + Kf p Fe + Kf i Fe (t)dt − Kdamp V ,
+
+        consisting of gravity compensation, feedforward force control, PI force
+        feedback, and damping to prevent fast motion.
+      • Rigid constraints in the environment specify 6 − k free motion directions
+        and k constraint directions in which forces can be applied. These con-
+        straints can be represented as A(θ)V = 0. A wrench F can be partitioned
+        as F = P (θ)F + (I − P (θ))F, where P (θ) projects onto wrenches that
+        move the end-effector tangent to the constraints and I −P (θ) projects onto
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+Chapter 11. Robot Control                                                                           451
+
+
+       wrenches that act against the constraints. The projection matrix P (θ) is
+       written in terms of the task-space mass matrix Λ(θ) and constraints A(θ)
+       as
+                            P = I − AT (AΛ−1 AT )−1 AΛ−1 .
+
+    • An impedance controller measures end-effector motions and creates end-
+      point forces to mimic a mass–spring–damper system. An admittance
+      controller measures end-effector forces and creates endpoint motions to
+      achieve the same purpose.
+
+
+11.11          Software
+Software functions associated with this chapter are listed below.
+taulist = ComputedTorque(thetalist,dthetalist,eint,g,
+Mlist,Glist,Slist,thetalistd,dthetalistd,ddthetalistd,Kp,Ki,Kd)
+This function computes the joint controls τ for the computed torque control
+law (11.35) at a particular time instant. The inputs are the n-vectors of joint
+variables, joint velocities, and joint error integrals; the gravity vector g; a list
+of transforms Mi−1,i describing the link center of mass locations; a list of link
+spatial inertia matrices Gi ; a list of joint screw axes Si expressed in the base
+frame; the n-vectors θd , θ̇d , and θ̈d describing the desired motion; and the scalar
+PID gains kp , ki , and kd , where the gain matrices are just Kp = kp I, Ki = ki I,
+and Kd = kd I.
+[taumat,thetamat] = SimulateControl(thetalist,dthetalist,g,
+Ftipmat,Mlist,Glist,Slist,thetamatd,dthetamatd,ddthetamatd,
+gtilde,Mtildelist,Gtildelist,Kp,Ki,Kd,dt,intRes)
+This function simulates the computed torque controller (11.35) over a given
+desired trajectory. The inputs include the initial state of the robot, given by
+θ(0) and θ̇(0); the gravity vector g; an N × 6 matrix of wrenches applied by
+the end-effector, where each of the N rows corresponds to an instant in time
+in the trajectory; a list of transforms Mi−1,i describing the link center-of-mass
+locations; a list of link spatial-inertia matrices Gi ; a list of joint screw axes Si
+expressed in the base frame; the N × n matrices of the desired joint positions,
+velocities, and accelerations, where each of the N rows corresponds to an instant
+in time; a (possibly incorrect) model of the gravity vector; a (possibly incorrect)
+model of the transforms Mi−1,i ; a (possibly incorrect) model of the link inertia
+matrices; the scalar PID gains kp , ki , and kd , where the gain matrices are
+Kp = kp I, Ki = ki I, and Kd = kd I; the timestep between each of the N rows
+
+
+May 2017 preprint of Modern Robotics, Lynch and Park, Cambridge U. Press, 2017. http://modernrobotics.org
+452                                                                  11.12. Notes and References
+
+
+in the matrices defining the desired trajectory; and the number of integration
+steps to take during each timestep.
+
+
+11.12          Notes and References
+The computed torque controller originates from research in the 1970’s [137, 106,
+9, 145], and issues with its practical implementation (e.g., its computational
+complexity and modeling errors) have driven much of the subsequent research
+in nonlinear control, robust control, iterative learning control, and adaptive

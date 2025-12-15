@@ -1,0 +1,553 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{递归牛顿-欧拉算法后向递推公式推导}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：在递归牛顿-欧拉算法中，后向递推公式是如何推导的？
+
+\textbf{公式}：
+
+\subsection{初始化（末端）}
+
+\begin{equation}
+f_{n+1} = 0, \quad \mu_{n+1} = 0
+\end{equation}
+
+\subsection{力和力矩递推}
+
+对于每个关节$i = n, n-1, \ldots, 1$：
+\begin{align}
+f_i &= R_{i+1} f_{i+1} + m_i \dot{v}_{c,i} \tag{24} \\
+\mu_i &= R_{i+1} \mu_{i+1} + r_i \times f_i + I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) \tag{25}
+\end{align}
+
+\subsection{关节力矩计算}
+
+\begin{itemize}
+\item 如果关节$i$是旋转关节：
+\begin{equation}
+\tau_i = \mu_i^T z_i \tag{26}
+\end{equation}
+
+\item 如果关节$i$是移动关节：
+\begin{equation}
+\tau_i = f_i^T z_i \tag{27}
+\end{equation}
+\end{itemize}
+
+\section{符号说明}
+
+\begin{itemize}
+\item $f_i$：作用在连杆$i$上的力（在坐标系$\{i\}$中表示）
+\item $\mu_i$：作用在连杆$i$上的力矩（在坐标系$\{i\}$中表示，相对于坐标系$\{i\}$的原点）
+\item $f_{i+1}$：作用在连杆$i+1$上的力（在坐标系$\{i+1\}$中表示）
+\item $\mu_{i+1}$：作用在连杆$i+1$上的力矩（在坐标系$\{i+1\}$中表示）
+\item $R_{i+1}$：从坐标系$\{i+1\}$到坐标系$\{i\}$的旋转矩阵
+\item $m_i$：连杆$i$的质量
+\item $\dot{v}_{c,i}$：连杆$i$质心的线加速度（在坐标系$\{i\}$中表示）
+\item $r_i$：从坐标系$\{i\}$原点到连杆$i$质心的向量（在坐标系$\{i\}$中表示）
+\item $I_i$：连杆$i$在质心处的惯性张量（在坐标系$\{i\}$中表示）
+\item $\omega_i$：连杆$i$的角速度（在坐标系$\{i\}$中表示）
+\item $\dot{\omega}_i$：连杆$i$的角加速度（在坐标系$\{i\}$中表示）
+\item $z_i$：关节$i$的旋转轴或移动方向（在坐标系$\{i\}$中表示，单位向量）
+\item $\tau_i$：关节$i$的驱动力矩（旋转关节）或驱动力（移动关节）
+\end{itemize}
+
+\section{基础：刚体动力学}
+
+\subsection{牛顿第二定律}
+
+对于刚体，牛顿第二定律可以写成：
+\begin{equation}
+\mathbf{F} = m \mathbf{a}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\mathbf{F}$：作用在刚体上的合力
+\item $m$：刚体的质量
+\item $\mathbf{a}$：刚体质心的加速度
+\end{itemize}
+
+\subsection{欧拉方程}
+
+对于刚体的旋转运动，欧拉方程为：
+\begin{equation}
+\boldsymbol{\mu} = I \dot{\boldsymbol{\omega}} + \boldsymbol{\omega} \times (I \boldsymbol{\omega})
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\boldsymbol{\mu}$：作用在刚体上的合力矩（相对于质心）
+\item $I$：刚体在质心处的惯性张量
+\item $\dot{\boldsymbol{\omega}}$：刚体的角加速度
+\item $\boldsymbol{\omega}$：刚体的角速度
+\end{itemize}
+
+\textbf{注意}：$\boldsymbol{\omega} \times (I \boldsymbol{\omega})$是科里奥利项，表示由于旋转产生的力矩。
+
+\subsection{力的合成}
+
+作用在连杆$i$上的总力等于：
+\begin{equation}
+f_i = f_{\text{传递}} + f_{\text{惯性}}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $f_{\text{传递}}$：从连杆$i+1$传递过来的力
+\item $f_{\text{惯性}}$：连杆$i$的惯性力（$m_i \dot{v}_{c,i}$）
+\end{itemize}
+
+\subsection{力矩的合成}
+
+作用在连杆$i$上的总力矩（相对于坐标系$\{i\}$的原点）等于：
+\begin{equation}
+\mu_i = \mu_{\text{传递}} + \mu_{\text{力臂}} + \mu_{\text{惯性}}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\mu_{\text{传递}}$：从连杆$i+1$传递过来的力矩
+\item $\mu_{\text{力臂}}$：由于力$f_i$不在原点产生的力矩（$r_i \times f_i$）
+\item $\mu_{\text{惯性}}$：连杆$i$的惯性力矩（$I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)$）
+\end{itemize}
+
+\section{公式(24)：力的递推}
+
+\subsection{物理意义}
+
+作用在连杆$i$上的力由两部分组成：
+\begin{enumerate}
+\item 从连杆$i+1$传递过来的力：$R_{i+1} f_{i+1}$
+\item 连杆$i$的惯性力：$m_i \dot{v}_{c,i}$
+\end{enumerate}
+
+\subsection{推导}
+
+\textbf{步骤1：力的传递}
+
+考虑连杆$i$和连杆$i+1$之间的连接。作用在连杆$i+1$上的力$f_{i+1}$（在坐标系$\{i+1\}$中表示）需要转换到坐标系$\{i\}$中。
+
+\textbf{坐标变换}：
+
+如果一个力在坐标系$\{i+1\}$中表示为$f_{i+1}$，那么在坐标系$\{i\}$中的表示为：
+\begin{equation}
+f_{\text{传递}} = R_{i+1} f_{i+1}
+\end{equation}
+
+其中$R_{i+1}$是从坐标系$\{i+1\}$到坐标系$\{i\}$的旋转矩阵。
+
+\textbf{注意}：力是自由向量（free vector），不依赖于作用点，因此只需要旋转，不需要平移。
+
+\textbf{步骤2：惯性力}
+
+根据牛顿第二定律，连杆$i$的惯性力为：
+\begin{equation}
+f_{\text{惯性}} = m_i \dot{v}_{c,i}
+\end{equation}
+
+其中$\dot{v}_{c,i}$是连杆$i$质心的加速度（在前向递推中已计算）。
+
+\textbf{步骤3：力的合成}
+
+作用在连杆$i$上的总力为：
+\begin{equation}
+f_i = f_{\text{传递}} + f_{\text{惯性}} = R_{i+1} f_{i+1} + m_i \dot{v}_{c,i} \tag{24}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $R_{i+1} f_{i+1}$：从后续连杆传递过来的力
+\item $m_i \dot{v}_{c,i}$：连杆$i$的惯性力（与加速度方向相反）
+\end{itemize}
+
+\section{公式(25)：力矩的递推}
+
+\subsection{物理意义}
+
+作用在连杆$i$上的力矩（相对于坐标系$\{i\}$的原点）由四部分组成：
+\begin{enumerate}
+\item 从连杆$i+1$传递过来的力矩：$R_{i+1} \mu_{i+1}$
+\item 由于力$f_i$不在原点产生的力矩：$r_i \times f_i$
+\item 由于角加速度产生的惯性力矩：$I_i \dot{\omega}_i$
+\item 由于旋转产生的科里奥利力矩：$\omega_i \times (I_i \omega_i)$
+\end{enumerate}
+
+\subsection{推导}
+
+\textbf{步骤1：力矩的传递}
+
+作用在连杆$i+1$上的力矩$\mu_{i+1}$（在坐标系$\{i+1\}$中表示，相对于坐标系$\{i+1\}$的原点）需要转换到坐标系$\{i\}$中。
+
+\textbf{坐标变换}：
+
+如果一个力矩在坐标系$\{i+1\}$中表示为$\mu_{i+1}$，那么在坐标系$\{i\}$中的表示为：
+\begin{equation}
+\mu_{\text{传递}} = R_{i+1} \mu_{i+1}
+\end{equation}
+
+\textbf{注意}：力矩也是自由向量，只需要旋转，不需要平移。
+
+\textbf{步骤2：力臂产生的力矩}
+
+作用在连杆$i$上的力$f_i$作用在质心处（或通过质心），但我们需要计算相对于坐标系$\{i\}$原点的力矩。
+
+\textbf{力矩定义}：
+
+如果一个力$f$作用在点$P$，相对于点$O$的力矩为：
+\begin{equation}
+\mu = r_{OP} \times f
+\end{equation}
+
+其中$r_{OP}$是从点$O$到点$P$的向量。
+
+在我们的情况下：
+\begin{itemize}
+\item 点$O$：坐标系$\{i\}$的原点
+\item 点$P$：连杆$i$的质心
+\item $r_i$：从坐标系$\{i\}$原点到质心的向量
+\item $f_i$：作用在连杆$i$上的力
+\end{itemize}
+
+因此：
+\begin{equation}
+\mu_{\text{力臂}} = r_i \times f_i
+\end{equation}
+
+\textbf{步骤3：惯性力矩}
+
+根据欧拉方程，连杆$i$的惯性力矩（相对于质心）为：
+\begin{equation}
+\mu_{\text{惯性,质心}} = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\end{equation}
+
+\textbf{关键问题}：这个力矩是相对于质心的，但我们需要相对于坐标系$\{i\}$原点的力矩。
+
+\textbf{力矩的平移}：
+
+如果惯性力矩$\mu_{\text{惯性,质心}}$是相对于质心的，那么相对于坐标系$\{i\}$原点的总惯性力矩为：
+\begin{equation}
+\mu_{\text{惯性}} = \mu_{\text{惯性,质心}} + r_i \times (m_i \dot{v}_{c,i})
+\end{equation}
+
+但是，我们已经将惯性力$m_i \dot{v}_{c,i}$包含在$f_i$中了，因此：
+\begin{equation}
+\mu_{\text{惯性}} = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\end{equation}
+
+\textbf{详细推导}：
+
+考虑连杆$i$的质心$C_i$，其相对于坐标系$\{i\}$原点的位置为$r_i$。
+
+\textbf{质心的加速度}：
+
+质心的加速度为（在前向递推中已计算）：
+\begin{equation}
+\dot{v}_{c,i} = \dot{v}_i + \dot{\omega}_i \times r_i + \omega_i \times (\omega_i \times r_i)
+\end{equation}
+
+\textbf{质心的惯性力}：
+
+根据牛顿第二定律，质心的惯性力为：
+\begin{equation}
+f_{\text{惯性,质心}} = m_i \dot{v}_{c,i}
+\end{equation}
+
+\textbf{质心的惯性力矩}：
+
+根据欧拉方程，相对于质心的惯性力矩为：
+\begin{equation}
+\mu_{\text{惯性,质心}} = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\end{equation}
+
+\textbf{相对于原点的总力矩}：
+
+相对于坐标系$\{i\}$原点的总力矩为：
+\begin{align}
+\mu_{\text{惯性}} &= \mu_{\text{惯性,质心}} + r_i \times f_{\text{惯性,质心}} \\
+&= I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) + r_i \times (m_i \dot{v}_{c,i})
+\end{align}
+
+但是，由于$f_i$已经包含了$m_i \dot{v}_{c,i}$，而$r_i \times f_i$已经包含了$r_i \times (m_i \dot{v}_{c,i})$，因此我们只需要：
+\begin{equation}
+\mu_{\text{惯性}} = I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i)
+\end{equation}
+
+\textbf{步骤4：力矩的合成}
+
+作用在连杆$i$上的总力矩（相对于坐标系$\{i\}$的原点）为：
+\begin{align}
+\mu_i &= \mu_{\text{传递}} + \mu_{\text{力臂}} + \mu_{\text{惯性}} \\
+&= R_{i+1} \mu_{i+1} + r_i \times f_i + I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) \tag{25}
+\end{align}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $R_{i+1} \mu_{i+1}$：从后续连杆传递过来的力矩
+\item $r_i \times f_i$：由于力$f_i$不在原点产生的力矩
+\item $I_i \dot{\omega}_i$：由于角加速度产生的惯性力矩
+\item $\omega_i \times (I_i \omega_i)$：由于旋转产生的科里奥利力矩
+\end{itemize}
+
+\section{公式(26)和(27)：关节力矩计算}
+
+\subsection{旋转关节（公式26）}
+
+\textbf{物理意义}：
+
+对于旋转关节，关节只能绕轴$z_i$旋转。因此，只有沿$z_i$方向的力矩分量需要由驱动器提供。
+
+\textbf{推导}：
+
+作用在连杆$i$上的总力矩$\mu_i$可以分解为：
+\begin{equation}
+\mu_i = \mu_{i,\parallel} + \mu_{i,\perp}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\mu_{i,\parallel}$：沿$z_i$方向的分量（需要驱动器提供）
+\item $\mu_{i,\perp}$：垂直于$z_i$的分量（由关节结构提供，不需要驱动器）
+\end{itemize}
+
+\textbf{投影}：
+
+沿$z_i$方向的力矩分量为：
+\begin{equation}
+\mu_{i,\parallel} = (\mu_i^T z_i) z_i
+\end{equation}
+
+\textbf{关节力矩}：
+
+关节$i$的驱动力矩为：
+\begin{equation}
+\tau_i = \mu_i^T z_i \tag{26}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 只有沿关节轴方向的力矩分量需要驱动器提供
+\item 垂直于关节轴的力矩分量由关节结构（轴承、约束等）提供
+\end{itemize}
+
+\subsection{移动关节（公式27）}
+
+\textbf{物理意义}：
+
+对于移动关节，关节只能沿轴$z_i$移动。因此，只有沿$z_i$方向的力分量需要由驱动器提供。
+
+\textbf{推导}：
+
+作用在连杆$i$上的总力$f_i$可以分解为：
+\begin{equation}
+f_i = f_{i,\parallel} + f_{i,\perp}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $f_{i,\parallel}$：沿$z_i$方向的分量（需要驱动器提供）
+\item $f_{i,\perp}$：垂直于$z_i$的分量（由关节结构提供，不需要驱动器）
+\end{itemize}
+
+\textbf{投影}：
+
+沿$z_i$方向的力分量为：
+\begin{equation}
+f_{i,\parallel} = (f_i^T z_i) z_i
+\end{equation}
+
+\textbf{关节力}：
+
+关节$i$的驱动力为：
+\begin{equation}
+\tau_i = f_i^T z_i \tag{27}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 只有沿关节轴方向的力分量需要驱动器提供
+\item 垂直于关节轴的力分量由关节结构（导轨、约束等）提供
+\end{itemize}
+
+\section{初始化：末端条件}
+
+\subsection{公式}
+
+\begin{equation}
+f_{n+1} = 0, \quad \mu_{n+1} = 0
+\end{equation}
+
+\subsection{物理意义}
+
+\textbf{假设}：末端执行器没有受到外部力或力矩（或外部力/力矩已经在前向递推中考虑）。
+
+\textbf{如果有外部力/力矩}：
+
+如果末端执行器受到外部力$f_{\text{ext}}$和力矩$\mu_{\text{ext}}$（在末端执行器坐标系中表示），那么：
+\begin{align}
+f_{n+1} &= f_{\text{ext}} \\
+\mu_{n+1} &= \mu_{\text{ext}}
+\end{align}
+
+\textbf{在递归算法中}：
+
+通常，外部力/力矩可以：
+\begin{enumerate}
+\item 直接设置为$f_{n+1}$和$\mu_{n+1}$
+\item 或者在前向递推中通过设置$\dot{v}_0$来考虑（对于重力）
+\end{enumerate}
+
+\section{完整算法流程}
+
+\subsection{前向递推（从基座到末端）}
+
+\begin{enumerate}
+\item \textbf{初始化}：
+\begin{align}
+\omega_0 &= 0 \\
+\dot{\omega}_0 &= 0 \\
+v_0 &= 0 \\
+\dot{v}_0 &= g
+\end{align}
+
+\item \textbf{对于每个关节$i = 1, \ldots, n$}：
+\begin{itemize}
+\item 计算$\omega_i$、$\dot{\omega}_i$、$v_i$、$\dot{v}_i$（根据关节类型）
+\item 计算$\dot{v}_{c,i}$
+\end{itemize}
+\end{enumerate}
+
+\subsection{后向递推（从末端到基座）}
+
+\begin{enumerate}
+\item \textbf{初始化}：
+\begin{equation}
+f_{n+1} = 0, \quad \mu_{n+1} = 0
+\end{equation}
+
+\item \textbf{对于每个关节$i = n, n-1, \ldots, 1$}：
+\begin{itemize}
+\item 计算$f_i$（公式24）
+\item 计算$\mu_i$（公式25）
+\item 计算$\tau_i$（公式26或27）
+\end{itemize}
+\end{enumerate}
+
+\section{详细例子：单连杆机器人}
+
+\subsection{场景}
+
+\begin{itemize}
+\item 基座固定在地面上
+\item 一个旋转关节，连杆质量为$m$，长度为$L$
+\item 连杆质心在连杆中心
+\item 重力加速度：$g$
+\end{itemize}
+
+\subsection{前向递推}
+
+\textbf{初始化}：
+\begin{align}
+\omega_0 &= 0 \\
+\dot{\omega}_0 &= 0 \\
+v_0 &= 0 \\
+\dot{v}_0 &= g
+\end{align}
+
+\textbf{关节1（旋转关节）}：
+\begin{align}
+\omega_1 &= \dot{\theta}_1 z_1 \\
+\dot{\omega}_1 &= \ddot{\theta}_1 z_1 \\
+v_1 &= R_1^T (v_0 + \omega_0 \times p_1) = 0 \\
+\dot{v}_1 &= R_1^T (\dot{v}_0 + \dot{\omega}_0 \times p_1 + \omega_0 \times (\omega_0 \times p_1)) = R_1^T g
+\end{align}
+
+\textbf{质心加速度}：
+\begin{equation}
+\dot{v}_{c,1} = \dot{v}_1 + \dot{\omega}_1 \times r_1 + \omega_1 \times (\omega_1 \times r_1)
+\end{equation}
+
+其中$r_1$是从关节1到质心的向量。
+
+\subsection{后向递推}
+
+\textbf{初始化}：
+\begin{equation}
+f_2 = 0, \quad \mu_2 = 0
+\end{equation}
+
+\textbf{关节1}：
+
+\textbf{力}：
+\begin{equation}
+f_1 = R_2 f_2 + m_1 \dot{v}_{c,1} = m_1 \dot{v}_{c,1}
+\end{equation}
+
+\textbf{力矩}：
+\begin{equation}
+\mu_1 = R_2 \mu_2 + r_1 \times f_1 + I_1 \dot{\omega}_1 + \omega_1 \times (I_1 \omega_1)
+\end{equation}
+
+由于$R_2 \mu_2 = 0$，我们有：
+\begin{equation}
+\mu_1 = r_1 \times f_1 + I_1 \dot{\omega}_1 + \omega_1 \times (I_1 \omega_1)
+\end{equation}
+
+\textbf{关节力矩}：
+\begin{equation}
+\tau_1 = \mu_1^T z_1
+\end{equation}
+
+\section{总结}
+
+\subsection{公式总结}
+
+\textbf{后向递推}：
+\begin{align}
+f_i &= R_{i+1} f_{i+1} + m_i \dot{v}_{c,i} \tag{24} \\
+\mu_i &= R_{i+1} \mu_{i+1} + r_i \times f_i + I_i \dot{\omega}_i + \omega_i \times (I_i \omega_i) \tag{25}
+\end{align}
+
+\textbf{关节力矩}：
+\begin{itemize}
+\item 旋转关节：$\tau_i = \mu_i^T z_i$ \tag{26}
+\item 移动关节：$\tau_i = f_i^T z_i$ \tag{27}
+\end{itemize}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{力的传递}：从后续连杆传递过来的力需要坐标变换（旋转）
+\item \textbf{惯性力}：根据牛顿第二定律，$f_{\text{惯性}} = m \dot{v}_c$
+\item \textbf{力矩的传递}：从后续连杆传递过来的力矩需要坐标变换（旋转）
+\item \textbf{力臂力矩}：由于力不在原点，产生力矩$r \times f$
+\item \textbf{惯性力矩}：根据欧拉方程，包含角加速度项和科里奥利项
+\item \textbf{关节力矩}：只有沿关节轴方向的分量需要驱动器提供
+\item \textbf{递归结构}：从末端到基座，逐步计算每个连杆的力和力矩
+\end{enumerate}
+
+\subsection{计算复杂度}
+
+\begin{itemize}
+\item 前向递推：$O(n)$
+\item 后向递推：$O(n)$
+\item 总复杂度：$O(n)$（线性时间复杂度）
+\end{itemize}
+
+这比拉格朗日方法的$O(n^3)$要高效得多，特别适合实时控制应用。
+
+\end{document}
+

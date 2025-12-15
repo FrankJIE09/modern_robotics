@@ -1,0 +1,425 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{反对称矩阵的相似变换：$R [\omega] R^T = [R \omega]$}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：什么是反对称矩阵的相似变换？为什么 $R [\omega] R^T = [R \omega]$？
+
+\textbf{符号说明}：
+\begin{itemize}
+\item $R \in SO(3)$：旋转矩阵（正交矩阵，$R^T R = I$）
+\item $\omega \in \mathbb{R}^3$：三维向量（通常表示角速度）
+\item $[\omega] \in \mathbb{R}^{3 \times 3}$：向量$\omega$的反对称矩阵
+\item $R \omega$：旋转矩阵$R$作用于向量$\omega$的结果
+\item $[R \omega]$：向量$R \omega$的反对称矩阵
+\end{itemize}
+
+\section{基本概念}
+
+\subsection{反对称矩阵的定义}
+
+对于向量$\omega = [\omega_x, \omega_y, \omega_z]^T \in \mathbb{R}^3$，其反对称矩阵定义为：
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item $[\omega]^T = -[\omega]$（反对称性）
+\item $[\omega] v = \omega \times v$（对任意向量$v$）
+\item $\det([\omega]) = 0$（奇异矩阵）
+\end{itemize}
+
+\subsection{相似变换的定义}
+
+对于矩阵$A$和可逆矩阵$P$，相似变换定义为：
+\begin{equation}
+B = P A P^{-1}
+\end{equation}
+
+矩阵$A$和$B$称为相似矩阵，它们具有相同的特征值。
+
+\section{主要定理}
+
+\subsection{反对称矩阵的相似变换定理}
+
+\textbf{定理}：对于旋转矩阵$R \in SO(3)$和向量$\omega \in \mathbb{R}^3$，有：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\textbf{注意}：由于$R \in SO(3)$，有$R^{-1} = R^T$，因此相似变换可以写成$R [\omega] R^T$。
+
+\section{证明方法1：从叉乘关系出发}
+
+\subsection{关键观察}
+
+反对称矩阵与叉乘的关系：
+\begin{equation}
+[\omega] v = \omega \times v
+\end{equation}
+
+旋转矩阵保持叉积的性质：
+\begin{equation}
+R(a \times b) = (Ra) \times (Rb)
+\end{equation}
+
+\subsection{证明过程}
+
+对于任意向量$v \in \mathbb{R}^3$，我们需要证明：
+\begin{equation}
+R [\omega] R^T v = [R \omega] v
+\end{equation}
+
+\textbf{左边}：
+\begin{align}
+R [\omega] R^T v &= R (\omega \times (R^T v)) \quad \text{（因为$[\omega] R^T v = \omega \times (R^T v)$）}
+\end{align}
+
+\textbf{使用旋转保持叉积的性质}：
+\begin{align}
+R (\omega \times (R^T v)) &= (R \omega) \times (R R^T v) \\
+&= (R \omega) \times v \quad \text{（因为$R R^T = I$）}
+\end{align}
+
+\textbf{右边}：
+\begin{equation}
+[R \omega] v = (R \omega) \times v
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+R [\omega] R^T v = (R \omega) \times v = [R \omega] v
+\end{equation}
+
+由于$v$是任意的，因此：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\textbf{证毕}。
+
+\section{证明方法2：从矩阵元素出发}
+
+\subsection{旋转矩阵的一般形式}
+
+设旋转矩阵$R$为：
+\begin{equation}
+R = \begin{bmatrix}
+r_{11} & r_{12} & r_{13} \\
+r_{21} & r_{22} & r_{23} \\
+r_{31} & r_{32} & r_{33}
+\end{bmatrix}
+\end{equation}
+
+\subsection{反对称矩阵}
+
+向量$\omega = [\omega_x, \omega_y, \omega_z]^T$的反对称矩阵为：
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\subsection{计算 $R \omega$}
+
+\begin{equation}
+R \omega = \begin{bmatrix}
+r_{11} \omega_x + r_{12} \omega_y + r_{13} \omega_z \\
+r_{21} \omega_x + r_{22} \omega_y + r_{23} \omega_z \\
+r_{31} \omega_x + r_{32} \omega_y + r_{33} \omega_z
+\end{bmatrix}
+\end{equation}
+
+\subsection{计算 $[R \omega]$}
+
+\begin{equation}
+[R \omega] = \begin{bmatrix}
+0 & -(r_{31} \omega_x + r_{32} \omega_y + r_{33} \omega_z) & r_{21} \omega_x + r_{22} \omega_y + r_{23} \omega_z \\
+r_{31} \omega_x + r_{32} \omega_y + r_{33} \omega_z & 0 & -(r_{11} \omega_x + r_{12} \omega_y + r_{13} \omega_z) \\
+-(r_{21} \omega_x + r_{22} \omega_y + r_{23} \omega_z) & r_{11} \omega_x + r_{12} \omega_y + r_{13} \omega_z & 0
+\end{bmatrix}
+\end{equation}
+
+\subsection{计算 $R [\omega] R^T$}
+
+通过直接计算矩阵乘法（过程较长，但可以验证），可以得到：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\textbf{证毕}。
+
+\section{证明方法3：使用特征值性质}
+
+\subsection{反对称矩阵的特征值}
+
+反对称矩阵$[\omega]$的特征值为：
+\begin{itemize}
+\item $\lambda_1 = 0$
+\item $\lambda_{2,3} = \pm i \|\omega\|$
+\end{itemize}
+
+\subsection{相似变换保持特征值}
+
+相似变换$R [\omega] R^T$与$[\omega]$具有相同的特征值。
+
+\subsection{反对称矩阵的唯一性}
+
+对于给定的特征值，反对称矩阵是唯一的（在相似变换的意义下）。
+
+由于$R [\omega] R^T$是反对称矩阵，且与$[R \omega]$具有相同的特征值，因此：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\textbf{证毕}。
+
+\section{相关公式}
+
+\subsection{公式1：$R [\omega] R^T = [R \omega]$}
+
+这是标准的相似变换形式。
+
+\subsection{公式2：$R^T [\omega] R = [R^T \omega]$}
+
+对公式1两边同时左乘$R^T$，右乘$R$：
+\begin{align}
+R^T (R [\omega] R^T) R &= R^T [R \omega] R \\
+(R^T R) [\omega] (R^T R) &= R^T [R \omega] R \\
+[\omega] &= R^T [R \omega] R
+\end{align}
+
+因此：
+\begin{equation}
+R^T [R \omega] R = [\omega]
+\end{equation}
+
+或者，令$\omega' = R \omega$，则$\omega = R^T \omega'$，代入得：
+\begin{equation}
+R^T [\omega'] R = [R^T \omega']
+\end{equation}
+
+\subsection{公式3：$R [\omega] = [R \omega] R$}
+
+从公式1出发：
+\begin{align}
+R [\omega] R^T &= [R \omega] \\
+R [\omega] R^T R &= [R \omega] R \\
+R [\omega] &= [R \omega] R \quad \text{（因为$R^T R = I$）}
+\end{align}
+
+\subsection{公式4：$[R \omega] R = R [\omega]$}
+
+这是公式3的另一种写法。
+
+\subsection{公式5：$R^T [\omega] = [R^T \omega] R^T$}
+
+从公式3出发，将$R$替换为$R^T$：
+\begin{equation}
+R^T [\omega] = [R^T \omega] R^T
+\end{equation}
+
+\section{应用示例}
+
+\subsection{示例1：角速度的坐标变换}
+
+\textbf{问题}：将角速度从坐标系$\{A\}$转换到坐标系$\{B\}$。
+
+\textbf{已知}：
+\begin{itemize}
+\item 从$\{A\}$到$\{B\}$的旋转矩阵：$R_{BA}$
+\item 角速度在$\{A\}$中的表示：$\omega_A$
+\end{itemize}
+
+\textbf{角速度在$\{B\}$中的表示}：
+\begin{equation}
+\omega_B = R_{BA} \omega_A
+\end{equation}
+
+\textbf{反对称矩阵的变换}：
+\begin{align}
+[\omega_B] &= [R_{BA} \omega_A] \\
+&= R_{BA} [\omega_A] R_{BA}^T \quad \text{（使用相似变换）}
+\end{align}
+
+\subsection{示例2：空间角速度与体角速度}
+
+\textbf{空间角速度}（spatial angular velocity）$\omega_s$：在固定坐标系中表示。
+
+\textbf{体角速度}（body angular velocity）$\omega_b$：在旋转坐标系中表示。
+
+\textbf{关系}：
+\begin{equation}
+\omega_s = R \omega_b
+\end{equation}
+
+\textbf{反对称矩阵的关系}：
+\begin{align}
+[\omega_s] &= [R \omega_b] \\
+&= R [\omega_b] R^T \quad \text{（使用相似变换）}
+\end{align}
+
+\textbf{逆关系}：
+\begin{align}
+[\omega_b] &= R^T [\omega_s] R \\
+&= [R^T \omega_s]
+\end{align}
+
+\subsection{示例3：伴随变换中的应用}
+
+在伴随变换中，我们经常遇到：
+\begin{equation}
+R [p]_{\times} \omega
+\end{equation}
+
+\textbf{使用相似变换}：
+\begin{align}
+R [p]_{\times} \omega &= R [p]_{\times} R^T (R \omega) \\
+&= [R p]_{\times} (R \omega) \quad \text{（使用相似变换）} \\
+&= (R p) \times (R \omega)
+\end{align}
+
+\textbf{另一种形式}：
+\begin{equation}
+R [p]_{\times} = [R p]_{\times} R
+\end{equation}
+
+\subsection{示例4：速度合成中的应用}
+
+在速度合成中，我们经常遇到：
+\begin{equation}
+R^T [p]_{\times} \omega
+\end{equation}
+
+\textbf{使用相似变换}：
+\begin{align}
+R^T [p]_{\times} \omega &= R^T [p]_{\times} R (R^T \omega) \\
+&= [R^T p]_{\times} (R^T \omega) \quad \text{（使用相似变换）} \\
+&= (R^T p) \times (R^T \omega)
+\end{align}
+
+\textbf{另一种形式}：
+\begin{equation}
+R^T [p]_{\times} = [R^T p]_{\times} R^T
+\end{equation}
+
+\section{几何意义}
+
+\subsection{物理直观}
+
+反对称矩阵$[\omega]$表示绕轴$\omega$的旋转。
+
+相似变换$R [\omega] R^T$表示：
+\begin{itemize}
+\item 先应用旋转$R^T$（将坐标系转换到新坐标系）
+\item 然后应用旋转$[\omega]$（在新坐标系中旋转）
+\item 最后应用旋转$R$（转换回原坐标系）
+\end{itemize}
+
+结果等价于直接应用旋转$[R \omega]$。
+
+\subsection{坐标变换的角度}
+
+从坐标变换的角度看：
+\begin{itemize}
+\item $[\omega]$是在原坐标系中表示的旋转
+\item $R [\omega] R^T$是在新坐标系中表示的相同旋转
+\item $[R \omega]$是新坐标系中旋转轴$\omega$的反对称矩阵
+\end{itemize}
+
+两者等价，因为旋转的物理效果相同。
+
+\section{重要推论}
+
+\subsection{推论1：旋转保持叉积}
+
+从相似变换可以推导出旋转保持叉积：
+\begin{align}
+R(a \times b) &= R [a] b \\
+&= R [a] R^T (R b) \\
+&= [R a] (R b) \quad \text{（使用相似变换）} \\
+&= (R a) \times (R b)
+\end{align}
+
+\subsection{推论2：反对称矩阵的相似性}
+
+所有反对称矩阵在相似变换下保持反对称性：
+\begin{equation}
+(R [\omega] R^T)^T = R [\omega]^T R^T = -R [\omega] R^T
+\end{equation}
+
+因此$R [\omega] R^T$也是反对称矩阵。
+
+\subsection{推论3：特征值的保持}
+
+相似变换保持特征值，因此：
+\begin{equation}
+\text{eig}(R [\omega] R^T) = \text{eig}([\omega])
+\end{equation}
+
+\section{总结}
+
+\subsection{主要公式}
+
+\begin{enumerate}
+\item \textbf{基本相似变换}：
+\begin{equation}
+R [\omega] R^T = [R \omega]
+\end{equation}
+
+\item \textbf{逆相似变换}：
+\begin{equation}
+R^T [\omega] R = [R^T \omega]
+\end{equation}
+
+\item \textbf{左乘形式}：
+\begin{equation}
+R [\omega] = [R \omega] R
+\end{equation}
+
+\item \textbf{转置形式}：
+\begin{equation}
+R^T [\omega] = [R^T \omega] R^T
+\end{equation}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{itemize}
+\item 相似变换将反对称矩阵从一个坐标系转换到另一个坐标系
+\item 旋转矩阵保持叉积的性质是相似变换的基础
+\item 相似变换在机器人学中用于坐标变换和速度合成
+\item 所有形式都是等价的，可以根据需要选择合适的形式
+\end{itemize}
+
+\subsection{应用场景}
+
+\begin{itemize}
+\item 角速度的坐标变换
+\item 空间角速度与体角速度的转换
+\item 伴随变换的推导
+\item 速度合成公式的简化
+\item 动力学方程中的坐标变换
+\end{itemize}
+
+\end{document}
+

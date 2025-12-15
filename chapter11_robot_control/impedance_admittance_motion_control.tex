@@ -1,0 +1,416 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{为什么好的运动控制器需要高阻抗（低导纳）？}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在机器人控制中，我们经常说：
+\begin{itemize}
+\item "一个好的运动控制器的特点是高阻抗（低导纳）"
+\item 因为$\Delta X = Y \Delta F$
+\end{itemize}
+
+\textbf{问题}：
+\begin{enumerate}
+\item 什么是阻抗和导纳？
+\item 为什么运动控制器需要高阻抗（低导纳）？
+\item 公式$\Delta X = Y \Delta F$如何理解？
+\end{enumerate}
+
+\section{阻抗和导纳的定义}
+
+\subsection{基本定义}
+
+\textbf{阻抗（Impedance）$Z$}：
+\begin{equation}
+Z = \frac{F}{X} \quad \text{或} \quad F = ZX
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 阻抗表示产生单位位移所需的力
+\item 高阻抗：需要很大的力才能产生小的位移
+\item 低阻抗：需要小的力就能产生大的位移
+\end{itemize}
+
+\textbf{导纳（Admittance）$Y$}：
+\begin{equation}
+Y = \frac{X}{F} \quad \text{或} \quad X = YF
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 导纳表示单位力产生的位移
+\item 高导纳：小的力就能产生大的位移
+\item 低导纳：大的力只能产生小的位移
+\end{itemize}
+
+\textbf{关系}：
+\begin{equation}
+Y = \frac{1}{Z} \quad \text{或} \quad Z = \frac{1}{Y}
+\end{equation}
+
+\textbf{等价表述}：
+\begin{itemize}
+\item 高阻抗 $\Leftrightarrow$ 低导纳
+\item 低阻抗 $\Leftrightarrow$ 高导纳
+\end{itemize}
+
+\subsection{在频域中的表示}
+
+\textbf{阻抗传递函数}：
+\begin{equation}
+Z(s) = \frac{F(s)}{X(s)}
+\end{equation}
+
+\textbf{导纳传递函数}：
+\begin{equation}
+Y(s) = \frac{X(s)}{F(s)} = \frac{1}{Z(s)}
+\end{equation}
+
+\textbf{对于线性系统}：
+\begin{itemize}
+\item 如果系统是线性的，阻抗和导纳是传递函数
+\item 阻抗和导纳互为倒数
+\end{itemize}
+
+\section{运动控制器的目标}
+
+\subsection{运动控制器的特点}
+
+\textbf{目标}：
+\begin{itemize}
+\item 精确控制位置/运动
+\item 对外力干扰不敏感
+\item 即使有外力干扰，位置变化也很小
+\end{itemize}
+
+\textbf{理想情况}：
+\begin{itemize}
+\item 外力干扰$\Delta F$对位置的影响$\Delta X$应该尽可能小
+\item 即：$\Delta X \to 0$（即使$\Delta F \neq 0$）
+\end{itemize}
+
+\subsection{公式$\Delta X = Y \Delta F$}
+
+\textbf{公式含义}：
+\begin{equation}
+\Delta X = Y \Delta F
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\Delta F$：外力干扰（力的变化）
+\item $\Delta X$：位置变化（位移的变化）
+\item $Y$：导纳
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 外力干扰$\Delta F$通过导纳$Y$产生位置变化$\Delta X$
+\item 导纳$Y$越大，相同的外力干扰$\Delta F$产生的位移变化$\Delta X$越大
+\item 导纳$Y$越小，相同的外力干扰$\Delta F$产生的位移变化$\Delta X$越小
+\end{itemize}
+
+\section{为什么需要高阻抗（低导纳）？}
+
+\subsection{数学分析}
+
+\textbf{从公式$\Delta X = Y \Delta F$}：
+
+如果希望位置变化$\Delta X$小，而外力干扰$\Delta F$是给定的，那么：
+\begin{equation}
+\Delta X = Y \Delta F \quad \Rightarrow \quad Y = \frac{\Delta X}{\Delta F}
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 如果$\Delta X$要小，而$\Delta F$是固定的，那么$Y$必须小
+\item 即：需要\textbf{低导纳}
+\item 由于$Z = 1/Y$，低导纳对应\textbf{高阻抗}
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：高导纳（低阻抗）系统}
+
+设$Y = 10$ m/N（高导纳）
+
+如果外力干扰$\Delta F = 1$ N：
+\begin{equation}
+\Delta X = Y \Delta F = 10 \times 1 = 10 \text{ m}
+\end{equation}
+
+\textbf{问题}：位置变化很大（10米），这对运动控制器来说是不可接受的。
+
+\textbf{例子2：低导纳（高阻抗）系统}
+
+设$Y = 0.01$ m/N（低导纳）
+
+如果外力干扰$\Delta F = 1$ N：
+\begin{equation}
+\Delta X = Y \Delta F = 0.01 \times 1 = 0.01 \text{ m} = 1 \text{ cm}
+\end{equation}
+
+\textbf{优点}：位置变化很小（1厘米），这对运动控制器来说是可以接受的。
+
+\textbf{例子3：理想运动控制器}
+
+理想情况下，$Y = 0$（零导纳，无限大阻抗）
+
+如果外力干扰$\Delta F = 1$ N：
+\begin{equation}
+\Delta X = Y \Delta F = 0 \times 1 = 0 \text{ m}
+\end{equation}
+
+\textbf{优点}：位置变化为零，完全不受外力干扰影响。
+
+\section{阻抗和导纳的物理类比}
+
+\subsection{机械系统类比}
+
+\textbf{弹簧系统}：
+\begin{itemize}
+\item \textbf{硬弹簧}（高刚度$k$）：
+\begin{itemize}
+\item 高阻抗：$Z = k$（大）
+\item 低导纳：$Y = 1/k$（小）
+\item 需要很大的力才能产生小的位移
+\item 外力干扰对位置影响小
+\end{itemize}
+
+\item \textbf{软弹簧}（低刚度$k$）：
+\begin{itemize}
+\item 低阻抗：$Z = k$（小）
+\item 高导纳：$Y = 1/k$（大）
+\item 需要小的力就能产生大的位移
+\item 外力干扰对位置影响大
+\end{itemize}
+\end{itemize}
+
+\textbf{类比}：
+\begin{itemize}
+\item 好的运动控制器应该像"硬弹簧"
+\item 高阻抗（低导纳），对外力干扰不敏感
+\end{itemize}
+
+\subsection{电路系统类比}
+
+\textbf{电路系统}：
+\begin{itemize}
+\item \textbf{高阻抗电路}：
+\begin{itemize}
+\item 电流变化对电压影响小
+\item 类似：力变化对位置影响小
+\end{itemize}
+
+\item \textbf{低阻抗电路}：
+\begin{itemize}
+\item 电流变化对电压影响大
+\item 类似：力变化对位置影响大
+\end{itemize}
+\end{itemize}
+
+\section{与力控制器的对比}
+
+\subsection{力控制器的特点}
+
+\textbf{目标}：
+\begin{itemize}
+\item 精确控制力
+\item 对运动干扰不敏感
+\item 即使有运动干扰，力变化也很小
+\end{itemize}
+
+\textbf{理想情况}：
+\begin{itemize}
+\item 运动干扰$\Delta X$对力的影响$\Delta F$应该尽可能小
+\item 即：$\Delta F \to 0$（即使$\Delta X \neq 0$）
+\end{itemize}
+
+\textbf{公式}：
+\begin{equation}
+\Delta F = Z \Delta X
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 如果$\Delta F$要小，而$\Delta X$是给定的，那么$Z$必须小
+\item 即：需要\textbf{低阻抗}（高导纳）
+\end{itemize}
+
+\subsection{对比总结}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{控制器类型} & \textbf{需要} & \textbf{原因} \\
+\hline
+运动控制器 & 高阻抗（低导纳） & $\Delta X = Y \Delta F$，$Y$小则$\Delta X$小 \\
+\hline
+力控制器 & 低阻抗（高导纳） & $\Delta F = Z \Delta X$，$Z$小则$\Delta F$小 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{实际实现}
+
+\subsection{如何实现高阻抗}
+
+\textbf{方法1：高增益控制}
+\begin{itemize}
+\item 使用大的比例增益$K_p$
+\item 大的$K_p$产生大的恢复力，抵抗外力干扰
+\item 结果：高阻抗
+\end{itemize}
+
+\textbf{方法2：刚性结构}
+\begin{itemize}
+\item 使用刚性机械结构
+\item 减少柔顺性
+\item 结果：高阻抗
+\end{itemize}
+
+\textbf{方法3：快速响应}
+\begin{itemize}
+\item 使用快速的控制回路
+\item 快速检测和补偿外力干扰
+\item 结果：有效的高阻抗
+\end{itemize}
+
+\subsection{阻抗的测量}
+
+\textbf{方法}：
+\begin{itemize}
+\item 施加已知的外力干扰$\Delta F$
+\item 测量位置变化$\Delta X$
+\item 计算导纳：$Y = \Delta X / \Delta F$
+\item 计算阻抗：$Z = 1/Y = \Delta F / \Delta X$
+\end{itemize}
+
+\textbf{好的运动控制器}：
+\begin{itemize}
+\item $Y$应该很小（低导纳）
+\item $Z$应该很大（高阻抗）
+\end{itemize}
+
+\section{数学严格推导}
+
+\subsection{线性系统的阻抗}
+
+\textbf{假设}：系统是线性的，可以用传递函数描述。
+
+\textbf{位置响应}：
+\begin{equation}
+X(s) = Y(s)F(s)
+\end{equation}
+
+\textbf{对于阶跃力干扰}：
+\begin{equation}
+F(s) = \frac{\Delta F}{s}
+\end{equation}
+
+\textbf{位置变化}：
+\begin{equation}
+\Delta X(s) = Y(s) \frac{\Delta F}{s}
+\end{equation}
+
+\textbf{稳态值}（使用终值定理）：
+\begin{equation}
+\Delta X_{ss} = \lim_{s \to 0} s \Delta X(s) = \lim_{s \to 0} Y(s) \Delta F = Y(0) \Delta F
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 稳态位置变化$\Delta X_{ss} = Y(0) \Delta F$
+\item 如果$Y(0)$小，则$\Delta X_{ss}$小
+\item 因此需要低导纳（高阻抗）
+\end{itemize}
+
+\subsection{二阶系统的例子}
+
+\textbf{二阶系统}：
+\begin{equation}
+m\ddot{x} + b\dot{x} + kx = f
+\end{equation}
+
+\textbf{传递函数}：
+\begin{equation}
+\frac{X(s)}{F(s)} = Y(s) = \frac{1}{ms^2 + bs + k}
+\end{equation}
+
+\textbf{直流增益}（$s = 0$）：
+\begin{equation}
+Y(0) = \frac{1}{k}
+\end{equation}
+
+\textbf{结论}：
+\begin{itemize}
+\item 导纳$Y(0) = 1/k$
+\item 如果刚度$k$大，则导纳$Y(0)$小（低导纳）
+\item 如果刚度$k$大，则阻抗$Z = k$大（高阻抗）
+\item 因此，高刚度对应高阻抗（低导纳）
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心结论}
+
+\begin{enumerate}
+\item \textbf{公式}：$\Delta X = Y \Delta F$
+\begin{itemize}
+\item 外力干扰$\Delta F$通过导纳$Y$产生位置变化$\Delta X$
+\end{itemize}
+
+\item \textbf{运动控制器的目标}：
+\begin{itemize}
+\item 位置变化$\Delta X$应该尽可能小
+\item 即使有外力干扰$\Delta F$
+\end{itemize}
+
+\item \textbf{需要的特性}：
+\begin{itemize}
+\item 低导纳$Y$（小）
+\item 高阻抗$Z = 1/Y$（大）
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 高阻抗：需要很大的力才能产生小的位移
+\item 低导纳：小的力只能产生小的位移
+\item 结果：外力干扰对位置影响小
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键公式}
+
+\begin{enumerate}
+\item \textbf{导纳}：$Y = \frac{\Delta X}{\Delta F}$
+\item \textbf{阻抗}：$Z = \frac{\Delta F}{\Delta X} = \frac{1}{Y}$
+\item \textbf{关系}：$\Delta X = Y \Delta F$
+\item \textbf{运动控制器}：需要$Y$小（低导纳），$Z$大（高阻抗）
+\item \textbf{力控制器}：需要$Z$小（低阻抗），$Y$大（高导纳）
+\end{enumerate}
+
+\subsection{实际意义}
+
+\begin{itemize}
+\item \textbf{设计运动控制器时}：应该追求高阻抗（低导纳）
+\item \textbf{设计力控制器时}：应该追求低阻抗（高导纳）
+\item \textbf{测量系统特性时}：可以通过施加力干扰测量位置变化来计算阻抗/导纳
+\item \textbf{评估控制器性能时}：阻抗/导纳是重要的性能指标
+\end{itemize}
+
+\end{document}
+

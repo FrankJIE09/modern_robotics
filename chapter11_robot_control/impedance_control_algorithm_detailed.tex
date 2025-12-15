@@ -1,0 +1,520 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{阻抗控制算法详解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+本文档详细解释阻抗控制算法中的各个要点，包括：
+\begin{enumerate}
+\item 传感器需求
+\item 控制律的推导和含义
+\item 为什么通常不用力传感器
+\item 加速度测量的问题
+\item 质量补偿的问题
+\item 刚性环境和低阻抗环境的问题
+\end{enumerate}
+
+\section{传感器需求}
+
+\subsection{需要的传感器}
+
+\textbf{阻抗控制算法需要的传感器}：
+\begin{itemize}
+\item \textbf{编码器}：测量关节和端点位置
+\item \textbf{转速计}：测量关节和端点速度
+\item \textbf{加速度计}（可选）：测量加速度
+\end{itemize}
+
+\textbf{为什么需要这些传感器？}
+
+\textbf{位置传感器（编码器）}：
+\begin{itemize}
+\item 测量关节角度$\theta$和末端执行器位置$x$
+\item 用于计算位置误差和虚拟弹簧力$Kx$
+\end{itemize}
+
+\textbf{速度传感器（转速计）}：
+\begin{itemize}
+\item 测量关节速度$\dot{\theta}$和末端执行器速度$\dot{x}$
+\item 用于计算速度误差和虚拟阻尼力$B\dot{x}$
+\end{itemize}
+
+\textbf{加速度传感器（可选）}：
+\begin{itemize}
+\item 测量加速度$\ddot{x}$
+\item 用于质量补偿项$\tilde{\Lambda}(\theta)\ddot{x}$
+\item 但加速度测量通常是噪声的，可能不使用
+\end{itemize}
+
+\subsection{不需要的传感器}
+
+\textbf{力-力矩传感器}：
+\begin{itemize}
+\item 通常\textbf{不配备}手腕力-力矩传感器
+\item 依靠精确控制关节力矩的能力来呈现力
+\item 通过控制律计算力，而不是直接测量
+\end{itemize}
+
+\section{控制律的推导}
+
+\subsection{目标}
+
+\textbf{目标}：实现阻抗行为
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+其中$f_{\text{ext}}$是用户施加的力。
+
+\textbf{重新整理}：
+\begin{equation}
+-f_{\text{ext}} = -(M\ddot{x} + B\dot{x} + Kx)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 机器人应该向用户显示力$-f_{\text{ext}}$
+\item 这个力等于虚拟阻抗产生的力
+\end{itemize}
+
+\subsection{任务空间动力学}
+
+\textbf{任务空间动力学方程}：
+\begin{equation}
+F = \tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) \tag{*}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F$：任务空间wrench
+\item $\tilde{\Lambda}(\theta)$：任务空间质量矩阵
+\item $\tilde{\eta}(\theta, \dot{x})$：科里奥利、向心力和重力项
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 要产生加速度$\ddot{x}$，需要力$F = \tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x})$
+\item 这包括惯性力和科里奥利等项
+\end{itemize}
+
+\subsection{控制律的构建}
+
+\textbf{思路}：
+\begin{enumerate}
+\item 计算产生期望加速度所需的力：$\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x})$
+\item 减去虚拟阻抗产生的力：$M\ddot{x} + B\dot{x} + Kx$
+\item 得到实际需要产生的力
+\end{enumerate}
+
+\textbf{控制律}：
+\begin{equation}
+F = \tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx) \tag{11.65-task}
+\end{equation}
+
+\textbf{转换到关节空间}：
+
+使用虚功原理：$\tau = J^T(\theta)F$
+
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right) \tag{11.65}
+\end{equation}
+
+\subsection{各项的物理意义}
+
+\textbf{第一项}：$\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x})$
+\begin{itemize}
+\item 产生实际加速度$\ddot{x}$所需的力
+\item 包括惯性力和科里奥利等项
+\item 这是"补偿项"，补偿机器人的实际动力学
+\end{itemize}
+
+\textbf{第二项}：$-(M\ddot{x} + B\dot{x} + Kx)$
+\begin{itemize}
+\item 虚拟阻抗产生的力
+\item 负号表示"减去"这个力
+\item 使机器人表现得像具有虚拟阻抗的系统
+\end{itemize}
+
+\textbf{结果}：
+\begin{itemize}
+\item 实际产生的力 = 补偿项 - 虚拟阻抗力
+\item 机器人呈现虚拟阻抗特性
+\end{itemize}
+
+\section{为什么通常不用力传感器？}
+
+\subsection{基本原因}
+
+\textbf{阻抗控制的原理}：
+\begin{itemize}
+\item 感测运动，产生力
+\item 不需要直接测量力
+\item 通过控制律计算力
+\end{itemize}
+
+\textbf{为什么可以不用力传感器？}
+\begin{itemize}
+\item 控制律已经计算了需要的力
+\item 通过精确控制关节力矩来实现
+\item 不需要力反馈
+\end{itemize}
+
+\subsection{添加力传感器的好处}
+
+\textbf{如果添加力-力矩传感器}：
+\begin{itemize}
+\item 可以测量实际产生的力$F_{\text{actual}}$
+\item 与期望的力$F_{\text{desired}}$比较
+\item 使用反馈项修正误差
+\item 更接近地实现期望的交互力$-f_{\text{ext}}$
+\end{itemize}
+
+\textbf{改进的控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx) + K_f(F_{\text{desired}} - F_{\text{actual}})\right]
+\end{equation}
+
+其中$K_f$是力反馈增益。
+
+\section{加速度测量的问题}
+
+\subsection{问题1：噪声}
+
+\textbf{加速度测量通常是噪声的}：
+\begin{itemize}
+\item 加速度计容易受到振动、噪声的影响
+\item 测量值可能不准确
+\item 噪声会被放大
+\end{itemize}
+
+\textbf{影响}：
+\begin{itemize}
+\item 质量补偿项$\tilde{\Lambda}(\theta)\ddot{x}$会放大噪声
+\item 导致控制力矩抖动
+\item 影响控制性能
+\end{itemize}
+
+\subsection{问题2：质量补偿的矛盾}
+
+\textbf{矛盾}：
+\begin{itemize}
+\item 感测到加速度$\ddot{x}$后，试图补偿机器人质量
+\item 但补偿后，加速度$\ddot{x}$会改变
+\item 这导致"鸡生蛋，蛋生鸡"的问题
+\end{itemize}
+
+\textbf{具体说明}：
+\begin{enumerate}
+\item 测量加速度$\ddot{x}$
+\item 计算质量补偿项$\tilde{\Lambda}(\theta)\ddot{x}$
+\item 应用控制力矩
+\item 加速度$\ddot{x}$改变（因为力矩改变了）
+\item 需要重新测量，但测量值已经过时
+\end{enumerate}
+
+\subsection{解决方案：消除质量补偿项}
+
+\textbf{方法}：消除质量补偿项$\tilde{\Lambda}(\theta)\ddot{x}$并设置$M = 0$
+
+\textbf{修改后的控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{\eta}(\theta, \dot{x}) - (B\dot{x} + Kx)\right]
+\end{equation}
+
+\textbf{优点}：
+\begin{itemize}
+\item 不需要测量加速度
+\item 避免噪声问题
+\item 避免质量补偿的矛盾
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 机器人质量对用户来说是明显的
+\item 虚拟质量$M = 0$，不能模拟质量
+\item 但可以通过设计轻量级机械臂来减少影响
+\end{itemize}
+
+\section{重力补偿的简化}
+
+\subsection{问题}
+
+\textbf{非线性动力学补偿}：
+\begin{itemize}
+\item $\tilde{\eta}(\theta, \dot{x})$包含科里奥利、向心力和重力项
+\item 计算复杂
+\item 需要精确的动力学模型
+\end{itemize}
+
+\subsection{简化方法}
+
+\textbf{假设小速度}：
+\begin{itemize}
+\item 如果速度$\dot{x}$很小，科里奥利和向心力项可以忽略
+\item 只保留重力项
+\item 使用更简单的重力补偿模型
+\end{itemize}
+
+\textbf{简化后的控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{g}(\theta) - (B\dot{x} + Kx)\right]
+\end{equation}
+
+其中$\tilde{g}(\theta)$是简化的重力补偿项。
+
+\textbf{优点}：
+\begin{itemize}
+\item 计算简单
+\item 不需要完整的动力学模型
+\item 适用于低速应用
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 只适用于小速度
+\item 高速时可能不准确
+\end{itemize}
+
+\section{刚性环境的问题}
+
+\subsection{问题描述}
+
+\textbf{刚性环境}：虚拟刚度$K$很大
+
+\textbf{问题1：高增益导致不稳定}
+
+\textbf{原因}：
+\begin{itemize}
+\item 位置的微小变化$\Delta x$（由编码器测量）
+\item 导致虚拟弹簧力$K\Delta x$很大（因为$K$很大）
+\item 导致电机力矩的大变化
+\item 这种有效的高增益，加上延迟、传感器量化和传感器误差
+\item 可能导致振荡行为或不稳定
+\end{itemize}
+
+\textbf{数学分析}：
+
+假设位置误差$\Delta x = 0.001$ m（1毫米），$K = 10000$ N/m：
+\begin{equation}
+F = K\Delta x = 10000 \times 0.001 = 10 \text{ N}
+\end{equation}
+
+如果编码器有量化误差$\Delta x_{\text{quantization}} = 0.0001$ m：
+\begin{equation}
+F_{\text{error}} = K \times 0.0001 = 1 \text{ N}
+\end{equation}
+
+这个误差力可能导致振荡。
+
+\textbf{问题2：延迟的影响}
+
+\textbf{延迟链}：
+\begin{enumerate}
+\item 编码器测量位置（有延迟）
+\item 计算控制力矩（有延迟）
+\item 电机响应（有延迟）
+\item 位置改变（有延迟）
+\end{enumerate}
+
+\textbf{在高增益下}：
+\begin{itemize}
+\item 延迟导致相位滞后
+\item 相位滞后可能导致不稳定
+\item 特别是当增益很高时
+\end{itemize}
+
+\textbf{问题3：传感器量化}
+
+\textbf{编码器量化}：
+\begin{itemize}
+\item 编码器有有限的分辨率
+\item 位置测量是离散的
+\item 量化误差在高增益下被放大
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 编码器分辨率：0.001 m
+\item 量化误差：$\pm 0.0005$ m
+\item 如果$K = 10000$ N/m，误差力：$\pm 5$ N
+\item 这可能导致振荡
+\end{itemize}
+
+\subsection{低阻抗环境的问题}
+
+\textbf{低阻抗环境}：虚拟刚度$K$很小，虚拟质量$M$很小
+
+\textbf{问题：有效增益很低}
+
+\textbf{原因}：
+\begin{itemize}
+\item 虚拟阻抗参数$M, B, K$都很小
+\item 有效增益很低
+\item 系统响应很慢
+\item 可能无法快速响应
+\end{itemize}
+
+\textbf{优点}：
+\begin{itemize}
+\item 轻量级可反向驱动的机械臂可以很好地模拟这种环境
+\item 因为机械臂本身就很轻，容易推动
+\item 不需要很大的力就能产生运动
+\end{itemize}
+
+\section{控制律的完整理解}
+
+\subsection{控制律(11.65)的完整形式}
+
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right) \tag{11.65}
+\end{equation}
+
+\subsection{各项的作用}
+
+\textbf{第一项}：$\tilde{\Lambda}(\theta)\ddot{x}$
+\begin{itemize}
+\item \textbf{作用}：补偿机器人的惯性
+\item \textbf{问题}：需要测量加速度，可能有噪声
+\item \textbf{解决}：可以消除，设置$M = 0$
+\end{itemize}
+
+\textbf{第二项}：$\tilde{\eta}(\theta, \dot{x})$
+\begin{itemize}
+\item \textbf{作用}：补偿科里奥利、向心力和重力
+\item \textbf{问题}：计算复杂
+\item \textbf{解决}：假设小速度，只保留重力项
+\end{itemize}
+
+\textbf{第三项}：$-(M\ddot{x} + B\dot{x} + Kx)$
+\begin{itemize}
+\item \textbf{作用}：产生虚拟阻抗力
+\item \textbf{问题}：如果$K$很大，可能导致不稳定
+\item \textbf{解决}：选择合适的$K$值，或使用轻量级机械臂
+\end{itemize}
+
+\subsection{简化版本}
+
+\textbf{完全简化的控制律}（假设小速度，无质量补偿）：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{g}(\theta) - (B\dot{x} + Kx)\right]
+\end{equation}
+
+\textbf{适用场景}：
+\begin{itemize}
+\item 低速应用
+\item 轻量级机械臂
+\item 不需要模拟质量
+\end{itemize}
+
+\section{实际设计建议}
+
+\subsection{传感器选择}
+
+\begin{enumerate}
+\item \textbf{必须}：编码器（位置）
+\item \textbf{必须}：转速计（速度）
+\item \textbf{可选}：加速度计（如果使用质量补偿）
+\item \textbf{可选}：力-力矩传感器（如果使用力反馈）
+\end{enumerate}
+
+\subsection{参数选择}
+
+\begin{enumerate}
+\item \textbf{虚拟质量$M$}：
+\begin{itemize}
+\item 如果消除质量补偿项，设置$M = 0$
+\item 如果使用质量补偿，选择较小的$M$（因为机器人质量对用户明显）
+\end{itemize}
+
+\item \textbf{虚拟阻尼$B$}：
+\begin{itemize}
+\item 选择适当的$B$以提供阻尼
+\item 太大：响应慢
+\item 太小：可能振荡
+\end{itemize}
+
+\item \textbf{虚拟刚度$K$}：
+\begin{itemize}
+\item 避免太大（可能导致不稳定）
+\item 避免太小（响应太慢）
+\item 考虑编码器分辨率和延迟
+\end{itemize}
+\end{enumerate}
+
+\subsection{机械设计}
+
+\begin{enumerate}
+\item \textbf{轻量级设计}：
+\begin{itemize}
+\item 减少机器人质量
+\item 使质量对用户不明显
+\item 便于模拟低阻抗环境
+\end{itemize}
+
+\item \textbf{可反向驱动}：
+\begin{itemize}
+\item 设计为可反向驱动
+\item 用户可以轻松推动
+\item 便于模拟低阻抗环境
+\end{itemize}
+\end{enumerate}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{传感器}：
+\begin{itemize}
+\item 需要编码器和转速计
+\item 加速度计可选（但通常不用）
+\item 力传感器可选（用于反馈）
+\end{itemize}
+
+\item \textbf{控制律}：
+\begin{itemize}
+\item 补偿实际动力学：$\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x})$
+\item 减去虚拟阻抗：$-(M\ddot{x} + B\dot{x} + Kx)$
+\item 结果：机器人呈现虚拟阻抗特性
+\end{itemize}
+
+\item \textbf{简化}：
+\begin{itemize}
+\item 可以消除质量补偿项（避免噪声和矛盾）
+\item 可以简化重力补偿（假设小速度）
+\item 适用于轻量级机械臂
+\end{itemize}
+
+\item \textbf{问题}：
+\begin{itemize}
+\item 刚性环境（大$K$）：高增益，可能不稳定
+\item 低阻抗环境（小$M, K$）：低增益，响应慢
+\item 轻量级可反向驱动机械臂适合模拟低阻抗环境
+\end{itemize}
+\end{enumerate}
+
+\subsection{控制律总结}
+
+\textbf{完整形式}：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right)
+\end{equation}
+
+\textbf{简化形式}（无质量补偿，小速度）：
+\begin{equation}
+\tau = J^T(\theta)\left[\tilde{g}(\theta) - (B\dot{x} + Kx)\right]
+\end{equation}
+
+\end{document}
+

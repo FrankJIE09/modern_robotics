@@ -1,0 +1,410 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{零空间和行空间的详细解释}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在解释约束力$F_{\text{constraint}} = A^T(\theta)\lambda$时，我们提到了：
+\begin{itemize}
+\item 约束子空间：由$A(\theta)$的\textbf{零空间}定义
+\item 约束力子空间：由$A^T(\theta)$的\textbf{列空间}定义（即$A(\theta)$的\textbf{行空间}）
+\end{itemize}
+
+\textbf{问题}：
+\begin{enumerate}
+\item 什么是零空间（null space）？
+\item 什么是行空间（row space）？
+\item 它们之间有什么关系？
+\item 在约束力问题中如何应用？
+\end{enumerate}
+
+\section{零空间（Null Space）}
+
+\subsection{定义}
+
+\textbf{零空间}：对于矩阵$A \in \mathbb{R}^{m \times n}$，其零空间定义为：
+\begin{equation}
+\text{Null}(A) = \{x \in \mathbb{R}^n : Ax = 0\}
+\end{equation}
+
+\textbf{通俗理解}：
+\begin{itemize}
+\item 零空间是所有使得$Ax = 0$的向量$x$的集合
+\item 这些向量被矩阵$A$"映射"到零向量
+\item 零空间是$\mathbb{R}^n$的一个子空间
+\end{itemize}
+
+\subsection{性质}
+
+\textbf{性质1：零空间是子空间}
+\begin{itemize}
+\item 如果$x_1, x_2 \in \text{Null}(A)$，那么$x_1 + x_2 \in \text{Null}(A)$
+\item 如果$x \in \text{Null}(A)$，$c$是标量，那么$cx \in \text{Null}(A)$
+\end{itemize}
+
+\textbf{性质2：零空间的维度}
+\begin{itemize}
+\item 如果$A$的秩为$r$，那么$\text{Null}(A)$的维度为$n - r$
+\item 这称为"秩-零度定理"（Rank-Nullity Theorem）
+\end{itemize}
+
+\textbf{性质3：零空间与行空间正交}
+\begin{itemize}
+\item 零空间$\text{Null}(A)$与行空间$\text{Row}(A)$是正交的
+\item 即：如果$x \in \text{Null}(A)$，$y \in \text{Row}(A)$，那么$x^T y = 0$
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：简单矩阵}
+
+设$A = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \end{bmatrix} \in \mathbb{R}^{2 \times 3}$
+
+\textbf{零空间}：
+\begin{align}
+Ax &= 0 \\
+\begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \end{bmatrix} \begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix} &= \begin{bmatrix} 0 \\ 0 \end{bmatrix} \\
+x_1 &= 0 \\
+x_2 &= 0
+\end{align}
+
+因此：
+\begin{equation}
+\text{Null}(A) = \left\{\begin{bmatrix} 0 \\ 0 \\ x_3 \end{bmatrix} : x_3 \in \mathbb{R}\right\} = \text{span}\left\{\begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}\right\}
+\end{equation}
+
+\textbf{维度}：
+\begin{itemize}
+\item $A$的秩：$r = 2$
+\item 零空间的维度：$n - r = 3 - 2 = 1$
+\item 零空间由向量$\begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}$张成
+\end{itemize}
+
+\textbf{例子2：约束矩阵}
+
+设$A(\theta) = \begin{bmatrix} 1 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 \end{bmatrix} \in \mathbb{R}^{3 \times 6}$
+
+\textbf{约束}：$A(\theta)V = 0$，其中$V = \begin{bmatrix} \omega_x \\ \omega_y \\ \omega_z \\ v_x \\ v_y \\ v_z \end{bmatrix}$
+
+\textbf{零空间}：
+\begin{align}
+A(\theta)V &= 0 \\
+\begin{bmatrix} \omega_x \\ \omega_y \\ v_z \end{bmatrix} &= \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix}
+\end{align}
+
+因此：
+\begin{equation}
+\text{Null}(A(\theta)) = \left\{\begin{bmatrix} 0 \\ 0 \\ \omega_z \\ v_x \\ v_y \\ 0 \end{bmatrix} : \omega_z, v_x, v_y \in \mathbb{R}\right\}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 零空间表示所有满足约束的速度$V$
+\item 即：$\omega_x = 0, \omega_y = 0, v_z = 0$
+\item 可以自由运动的方向：$\omega_z, v_x, v_y$（3个自由度）
+\end{itemize}
+
+\section{行空间（Row Space）}
+
+\subsection{定义}
+
+\textbf{行空间}：对于矩阵$A \in \mathbb{R}^{m \times n}$，其行空间定义为：
+\begin{equation}
+\text{Row}(A) = \{A^T y : y \in \mathbb{R}^m\} = \text{Col}(A^T)
+\end{equation}
+
+\textbf{等价定义}：
+\begin{itemize}
+\item 行空间是$A$的所有行的线性组合的集合
+\item 行空间是$A^T$的列空间
+\item 行空间是$\mathbb{R}^n$的一个子空间
+\end{itemize}
+
+\subsection{性质}
+
+\textbf{性质1：行空间是子空间}
+\begin{itemize}
+\item 行空间是$\mathbb{R}^n$的一个子空间
+\item 维度等于$A$的秩$r$
+\end{itemize}
+
+\textbf{性质2：行空间与零空间正交}
+\begin{itemize}
+\item 行空间$\text{Row}(A)$与零空间$\text{Null}(A)$是正交的
+\item 即：如果$x \in \text{Row}(A)$，$y \in \text{Null}(A)$，那么$x^T y = 0$
+\end{itemize}
+
+\textbf{性质3：行空间与列空间的关系}
+\begin{itemize}
+\item 行空间的维度 = 列空间的维度 = $A$的秩$r$
+\item 行空间$\text{Row}(A)$ = 列空间$\text{Col}(A^T)$
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：简单矩阵}
+
+设$A = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \end{bmatrix} \in \mathbb{R}^{2 \times 3}$
+
+\textbf{行空间}：
+\begin{itemize}
+\item 行1：$\begin{bmatrix} 1 & 0 & 0 \end{bmatrix}$
+\item 行2：$\begin{bmatrix} 0 & 1 & 0 \end{bmatrix}$
+\end{itemize}
+
+行空间是所有行的线性组合：
+\begin{equation}
+\text{Row}(A) = \left\{c_1\begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix} + c_2\begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} : c_1, c_2 \in \mathbb{R}\right\} = \text{span}\left\{\begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}\right\}
+\end{equation}
+
+\textbf{维度}：
+\begin{itemize}
+\item $A$的秩：$r = 2$
+\item 行空间的维度：$r = 2$
+\end{itemize}
+
+\textbf{例子2：约束矩阵}
+
+设$A(\theta) = \begin{bmatrix} 1 & 0 & 0 & 0 & 0 & 0 \\ 0 & 1 & 0 & 0 & 0 & 0 \\ 0 & 0 & 0 & 0 & 0 & 1 \end{bmatrix} \in \mathbb{R}^{3 \times 6}$
+
+\textbf{行空间}：
+\begin{itemize}
+\item 行1：$\begin{bmatrix} 1 & 0 & 0 & 0 & 0 & 0 \end{bmatrix}$（对应$\omega_x$方向）
+\item 行2：$\begin{bmatrix} 0 & 1 & 0 & 0 & 0 & 0 \end{bmatrix}$（对应$\omega_y$方向）
+\item 行3：$\begin{bmatrix} 0 & 0 & 0 & 0 & 0 & 1 \end{bmatrix}$（对应$v_z$方向）
+\end{itemize}
+
+行空间：
+\begin{equation}
+\text{Row}(A(\theta)) = \text{span}\left\{\begin{bmatrix} 1 \\ 0 \\ 0 \\ 0 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \\ 0 \\ 0 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 0 \\ 0 \\ 0 \\ 0 \\ 1 \end{bmatrix}\right\}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 行空间表示约束方向
+\item 即：$\omega_x$方向、$\omega_y$方向、$v_z$方向
+\item 约束力必须位于这些方向上
+\end{itemize}
+
+\section{零空间与行空间的关系}
+
+\subsection{正交性}
+
+\textbf{定理}：零空间$\text{Null}(A)$与行空间$\text{Row}(A)$是正交的。
+
+\textbf{证明}：
+
+设$x \in \text{Null}(A)$，$y \in \text{Row}(A)$。
+
+由于$y \in \text{Row}(A)$，存在$z \in \mathbb{R}^m$使得$y = A^T z$。
+
+由于$x \in \text{Null}(A)$，有$Ax = 0$。
+
+计算内积：
+\begin{align}
+x^T y &= x^T (A^T z) \\
+&= (Ax)^T z \\
+&= 0^T z = 0
+\end{align}
+
+因此，$x^T y = 0$，即零空间与行空间正交。$\square$
+
+\subsection{互补性}
+
+\textbf{秩-零度定理}：
+\begin{equation}
+\dim(\text{Null}(A)) + \dim(\text{Row}(A)) = n
+\end{equation}
+
+其中$n$是$A$的列数。
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 零空间和行空间将$\mathbb{R}^n$分解为两个正交的子空间
+\item 零空间的维度 + 行空间的维度 = $n$
+\item 任何向量$x \in \mathbb{R}^n$可以唯一分解为：
+\begin{equation}
+x = x_{\text{null}} + x_{\text{row}}
+\end{equation}
+其中$x_{\text{null}} \in \text{Null}(A)$，$x_{\text{row}} \in \text{Row}(A)$
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子：约束矩阵$A(\theta) \in \mathbb{R}^{3 \times 6}$}
+
+\textbf{维度}：
+\begin{itemize}
+\item $A$的秩：$r = 3$
+\item 零空间的维度：$6 - 3 = 3$
+\item 行空间的维度：$3$
+\item 验证：$3 + 3 = 6$ ✓
+\end{itemize}
+
+\textbf{分解}：
+\begin{itemize}
+\item 任何6维向量$V$可以分解为：
+\begin{equation}
+V = V_{\text{null}} + V_{\text{row}}
+\end{equation}
+\item $V_{\text{null}} \in \text{Null}(A)$：满足约束的速度（自由运动方向）
+\item $V_{\text{row}} \in \text{Row}(A)$：违反约束的速度（约束方向）
+\end{itemize}
+
+\section{在约束力问题中的应用}
+
+\subsection{约束子空间}
+
+\textbf{定义}：约束子空间是速度$V$必须位于的子空间。
+
+\textbf{数学表述}：
+\begin{equation}
+\text{约束子空间} = \text{Null}(A(\theta))
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 所有满足约束$A(\theta)V = 0$的速度$V$
+\item 这些速度可以自由运动，不受约束力影响
+\item 维度：$6 - k$（$k$是约束数量）
+\end{itemize}
+
+\subsection{约束力子空间}
+
+\textbf{定义}：约束力$F_{\text{constraint}}$必须位于的子空间。
+
+\textbf{数学表述}：
+\begin{equation}
+\text{约束力子空间} = \text{Row}(A(\theta)) = \text{Col}(A^T(\theta))
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 约束力必须位于约束方向
+\item 约束力不会影响自由运动方向
+\item 维度：$k$（$k$是约束数量）
+\end{itemize}
+
+\subsection{约束力的形式}
+
+\textbf{约束力}：
+\begin{equation}
+F_{\text{constraint}} = A^T(\theta)\lambda
+\end{equation}
+
+\textbf{为什么？}
+\begin{itemize}
+\item $A^T(\theta)$的列空间 = $\text{Row}(A(\theta))$
+\item 因此$F_{\text{constraint}} = A^T(\theta)\lambda \in \text{Row}(A(\theta))$
+\item 这确保了约束力位于约束力子空间中
+\end{itemize}
+
+\subsection{正交性保证}
+
+\textbf{关键}：约束力与满足约束的速度正交。
+
+\textbf{证明}：
+
+设$V \in \text{Null}(A(\theta))$（满足约束的速度），$F_{\text{constraint}} = A^T(\theta)\lambda$（约束力）。
+
+计算内积：
+\begin{align}
+F_{\text{constraint}}^T V &= (A^T(\theta)\lambda)^T V \\
+&= \lambda^T A(\theta) V \\
+&= \lambda^T \cdot 0 = 0
+\end{align}
+
+因此，$F_{\text{constraint}}^T V = 0$，即约束力与满足约束的速度正交。$\square$
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 约束力不会对满足约束的速度做功
+\item 约束力只影响违反约束的速度
+\item 这确保了约束力不会影响自由运动方向
+\end{itemize}
+
+\section{几何直观}
+
+\subsection{6维空间的分解}
+
+\textbf{6维任务空间}可以分解为两个正交的子空间：
+
+\begin{enumerate}
+\item \textbf{约束子空间}（维度$6-k$）：
+\begin{itemize}
+\item 由$\text{Null}(A(\theta))$定义
+\item 速度$V$可以自由运动的方向
+\item 约束力在这个子空间中为零
+\end{itemize}
+
+\item \textbf{约束力子空间}（维度$k$）：
+\begin{itemize}
+\item 由$\text{Row}(A(\theta))$定义
+\item 约束力$F_{\text{constraint}}$必须位于的方向
+\item 这是约束子空间的正交补空间
+\end{itemize}
+\end{enumerate}
+
+\subsection{投影}
+
+\textbf{投影矩阵}：
+\begin{equation}
+P = I - A^T(A\Lambda^{-1}A^T)^{-1}A\Lambda^{-1}
+\end{equation}
+
+\textbf{作用}：
+\begin{itemize}
+\item $P$将向量投影到约束子空间（$\text{Null}(A)$）
+\item $I - P$将向量投影到约束力子空间（$\text{Row}(A)$）
+\end{itemize}
+
+\section{总结}
+
+\subsection{零空间}
+
+\begin{enumerate}
+\item \textbf{定义}：$\text{Null}(A) = \{x : Ax = 0\}$
+\item \textbf{维度}：$n - r$（$r$是$A$的秩）
+\item \textbf{在约束问题中}：表示满足约束的速度子空间
+\item \textbf{物理意义}：可以自由运动的方向
+\end{enumerate}
+
+\subsection{行空间}
+
+\begin{enumerate}
+\item \textbf{定义}：$\text{Row}(A) = \text{Col}(A^T)$
+\item \textbf{维度}：$r$（$A$的秩）
+\item \textbf{在约束问题中}：表示约束力子空间
+\item \textbf{物理意义}：约束力必须位于的方向
+\end{enumerate}
+
+\subsection{关系}
+
+\begin{enumerate}
+\item \textbf{正交性}：$\text{Null}(A) \perp \text{Row}(A)$
+\item \textbf{互补性}：$\dim(\text{Null}(A)) + \dim(\text{Row}(A)) = n$
+\item \textbf{分解}：任何向量可以唯一分解为零空间分量和行空间分量
+\end{enumerate}
+
+\subsection{在约束力中的应用}
+
+\begin{enumerate}
+\item \textbf{约束子空间}：$\text{Null}(A(\theta))$（速度必须位于）
+\item \textbf{约束力子空间}：$\text{Row}(A(\theta))$（约束力必须位于）
+\item \textbf{约束力形式}：$F_{\text{constraint}} = A^T(\theta)\lambda \in \text{Row}(A(\theta))$
+\item \textbf{正交性}：约束力与满足约束的速度正交
+\end{enumerate}
+
+\end{document}
+

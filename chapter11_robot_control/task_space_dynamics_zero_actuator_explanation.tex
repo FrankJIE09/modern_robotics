@@ -1,0 +1,385 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{任务空间动力学方程中"执行器提供零力和力矩"的含义}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{原文}：
+\begin{quote}
+These are the dynamic equations expressed in end-effector frame coordinates. If an external wrench $F$ is applied to the end-effector frame then, assuming the actuators provide zero forces and torques, the motion of the end-effector frame is governed by these equations.
+\end{quote}
+
+\textbf{中文翻译}：
+\begin{quote}
+这些是用末端执行器坐标系表示的动力学方程。如果对末端执行器坐标系施加外部wrench $F$，那么，假设执行器提供零力和力矩，末端执行器坐标系的运动由这些方程决定。
+\end{quote}
+
+\textbf{问题}：如何理解"假设执行器提供零力和力矩"？
+
+\section{任务空间动力学方程回顾}
+
+\subsection{方程形式}
+
+\textbf{任务空间动力学方程}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $F$：在末端执行器坐标系中表示的wrench（6×1向量，包含力和力矩）
+\item $\Lambda(\theta)$：任务空间质量矩阵（6×6）
+\item $\dot{V}$：末端执行器加速度（twist的导数，6×1）
+\item $\eta(\theta, V)$：任务空间的科里奥利力、向心力和重力项（6×1）
+\end{itemize}
+
+\subsection{方程的物理意义}
+
+\textbf{这个方程描述了}：
+\begin{itemize}
+\item 要产生加速度$\dot{V}$，需要施加wrench $F$
+\item $F$包括两部分：
+\begin{enumerate}
+\item 惯性力：$\Lambda(\theta)\dot{V}$（产生加速度所需的力）
+\item 科里奥利、向心力和重力：$\eta(\theta, V)$（由于速度和位置产生的力）
+\end{enumerate}
+\end{itemize}
+
+\section{"执行器提供零力和力矩"的含义}
+
+\subsection{关节空间动力学}
+
+\textbf{关节空间动力学方程}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \tag{8.82}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\tau$：关节力矩（由执行器提供）
+\item $M(\theta)$：关节空间质量矩阵
+\item $\ddot{\theta}$：关节加速度
+\item $h(\theta, \dot{\theta})$：科里奥利、向心力和重力项
+\end{itemize}
+
+\subsection{执行器提供零力矩的情况}
+
+\textbf{假设}：$\tau = 0$（执行器不提供任何力矩）
+
+\textbf{这意味着}：
+\begin{itemize}
+\item 所有关节的执行器都不产生力矩
+\item 机器人处于"被动"状态
+\item 只有外力作用在机器人上
+\end{itemize}
+
+\textbf{关节空间动力学方程变为}：
+\begin{equation}
+0 = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+其中$F_{\text{ext}}$是作用在末端执行器上的外部wrench。
+
+\textbf{重新整理}：
+\begin{equation}
+J^T(\theta)F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \tag{*}
+\end{equation}
+
+\subsection{转换到任务空间}
+
+\textbf{从关节空间到任务空间}：
+
+使用关系：
+\begin{align}
+V &= J(\theta)\dot{\theta} \tag{8.83} \\
+\dot{V} &= \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta} \tag{8.84}
+\end{align}
+
+\textbf{推导}：
+
+从方程(*)开始：
+\begin{equation}
+J^T(\theta)F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+左乘$J^{-T}(\theta)$：
+\begin{equation}
+F_{\text{ext}} = J^{-T}(\theta)M(\theta)\ddot{\theta} + J^{-T}(\theta)h(\theta, \dot{\theta})
+\end{equation}
+
+从$\dot{V} = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}$，得到：
+\begin{equation}
+\ddot{\theta} = J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)\dot{\theta}) = J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V)
+\end{equation}
+
+代入并整理，得到：
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+其中：
+\begin{align}
+\Lambda(\theta) &= J^{-T}(\theta)M(\theta)J^{-1}(\theta) \tag{8.90} \\
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V \tag{8.91}
+\end{align}
+
+\section{物理意义的理解}
+
+\subsection{关键点}
+
+\textbf{当$\tau = 0$时}：
+\begin{itemize}
+\item 执行器不提供任何力矩
+\item 机器人完全由外力$F_{\text{ext}}$驱动
+\item 末端执行器的运动完全由方程(8.89)决定
+\end{itemize}
+
+\textbf{方程(8.89)的含义}：
+\begin{itemize}
+\item 如果对末端执行器施加外力$F_{\text{ext}}$
+\item 且执行器不提供力矩（$\tau = 0$）
+\item 那么末端执行器会产生加速度$\dot{V}$
+\item 这个加速度由方程(8.89)决定
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：自由落体}
+
+\textbf{场景}：
+\begin{itemize}
+\item 机器人悬挂在空中
+\item 执行器不提供力矩（$\tau = 0$）
+\item 只有重力作用在末端执行器上
+\end{itemize}
+
+\textbf{外力}：
+\begin{equation}
+F_{\text{ext}} = \begin{bmatrix} 0 \\ 0 \\ -mg \\ 0 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+（假设重力沿$z$轴负方向）
+
+\textbf{运动方程}：
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{结果}：
+\begin{itemize}
+\item 末端执行器会加速下落
+\item 加速度$\dot{V}$由方程决定
+\item 这类似于自由落体，但考虑了机器人的动力学
+\end{itemize}
+
+\textbf{例子2：外力推动}
+
+\textbf{场景}：
+\begin{itemize}
+\item 机器人静止
+\item 执行器不提供力矩（$\tau = 0$）
+\item 用户用手推动末端执行器，施加力$f_{\text{hand}}$
+\end{itemize}
+
+\textbf{外力}：
+\begin{equation}
+F_{\text{ext}} = \begin{bmatrix} f_{\text{hand},x} \\ f_{\text{hand},y} \\ f_{\text{hand},z} \\ 0 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{运动方程}：
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{结果}：
+\begin{itemize}
+\item 末端执行器会加速运动
+\item 加速度$\dot{V}$由方程决定
+\item 这类似于推动一个质量-弹簧-阻尼器系统
+\end{itemize}
+
+\section{为什么这个假设很重要？}
+
+\subsection{理解动力学方程}
+
+\textbf{这个假设帮助我们理解}：
+\begin{itemize}
+\item 动力学方程描述的是"如果施加力$F$，会产生什么运动"
+\item 当$\tau = 0$时，只有外力$F_{\text{ext}}$作用
+\item 运动完全由动力学方程决定
+\item 这类似于牛顿第二定律：$F = ma$
+\end{itemize}
+
+\subsection{在控制中的应用}
+
+\textbf{在阻抗控制中}：
+\begin{itemize}
+\item 我们希望机器人表现得像质量-弹簧-阻尼器系统
+\item 方程(8.89)描述了机器人的"自然"动力学
+\item 通过控制律，我们可以修改这个动力学
+\item 但基础仍然是方程(8.89)
+\end{itemize}
+
+\textbf{在力控制中}：
+\begin{itemize}
+\item 我们希望控制末端执行器施加的力
+\item 方程(8.89)告诉我们，要产生某个加速度，需要多大的力
+\item 通过控制律，我们可以产生期望的力
+\end{itemize}
+
+\section{与有执行器力矩的情况对比}
+
+\subsection{有执行器力矩的情况}
+
+\textbf{关节空间动力学}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}} \tag{8.82-full}
+\end{equation}
+
+\textbf{转换到任务空间}：
+\begin{equation}
+J^T(\theta)\tau + F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{重新整理}：
+\begin{equation}
+F_{\text{total}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+其中$F_{\text{total}} = J^T(\theta)\tau + F_{\text{ext}}$是总wrench（执行器产生的wrench + 外部wrench）。
+
+\subsection{对比}
+
+\textbf{当$\tau = 0$时}：
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{当$\tau \neq 0$时}：
+\begin{equation}
+J^T(\theta)\tau + F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{区别}：
+\begin{itemize}
+\item 当$\tau = 0$时，只有外力$F_{\text{ext}}$驱动运动
+\item 当$\tau \neq 0$时，执行器力矩$J^T(\theta)\tau$也驱动运动
+\item 总wrench $F_{\text{total}} = J^T(\theta)\tau + F_{\text{ext}}$决定运动
+\end{itemize}
+
+\section{数学推导的完整性}
+
+\subsection{从关节空间到任务空间}
+
+\textbf{完整推导}：
+
+\textbf{步骤1：关节空间动力学}
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+\textbf{步骤2：假设$\tau = 0$}
+\begin{equation}
+0 = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+\textbf{步骤3：重新整理}
+\begin{equation}
+J^T(\theta)F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{步骤4：左乘$J^{-T}(\theta)$}
+\begin{equation}
+F_{\text{ext}} = J^{-T}(\theta)M(\theta)\ddot{\theta} + J^{-T}(\theta)h(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{步骤5：代入$\ddot{\theta} = J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V)$}
+\begin{equation}
+F_{\text{ext}} = J^{-T}(\theta)M(\theta)J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V) + J^{-T}(\theta)h(\theta, J^{-1}(\theta)V)
+\end{equation}
+
+\textbf{步骤6：展开并整理}
+\begin{align}
+F_{\text{ext}} &= J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{V} \\
+&\quad - J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{J}(\theta)J^{-1}(\theta)V \\
+&\quad + J^{-T}(\theta)h(\theta, J^{-1}(\theta)V)
+\end{align}
+
+\textbf{步骤7：定义$\Lambda(\theta)$和$\eta(\theta, V)$}
+\begin{align}
+\Lambda(\theta) &= J^{-T}(\theta)M(\theta)J^{-1}(\theta) \\
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V
+\end{align}
+
+\textbf{步骤8：得到最终方程}
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{任务空间动力学方程}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+描述要产生加速度$\dot{V}$，需要施加wrench $F$。
+
+\item \textbf{"执行器提供零力和力矩"的含义}：
+\begin{itemize}
+\item 假设$\tau = 0$（所有执行器不产生力矩）
+\item 只有外力$F_{\text{ext}}$作用在末端执行器上
+\item 末端执行器的运动完全由方程(8.89)决定
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 这类似于牛顿第二定律：$F = ma$
+\item 如果施加力$F$，会产生加速度$\dot{V}$
+\item 但这里考虑了机器人的复杂动力学（质量矩阵、科里奥利力等）
+\end{itemize}
+
+\item \textbf{应用}：
+\begin{itemize}
+\item 理解机器人的"自然"动力学
+\item 在阻抗控制中，修改这个动力学
+\item 在力控制中，计算需要的力
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{任务空间动力学方程}（当$\tau = 0$时）：
+\begin{equation}
+F_{\text{ext}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{其中}：
+\begin{align}
+\Lambda(\theta) &= J^{-T}(\theta)M(\theta)J^{-1}(\theta) \\
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V
+\end{align}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果对末端执行器施加外力$F_{\text{ext}}$
+\item 且执行器不提供力矩（$\tau = 0$）
+\item 那么末端执行器会产生加速度$\dot{V}$
+\item 这个加速度由方程决定
+\end{itemize}
+
+\end{document}
+

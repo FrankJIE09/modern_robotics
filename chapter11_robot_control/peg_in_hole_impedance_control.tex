@@ -1,0 +1,549 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{基于阻抗控制的轴孔装配}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{轴孔装配（Peg-in-Hole Assembly）}是机器人操作中的经典任务，涉及将轴（peg）插入孔（hole）中。
+
+\textbf{挑战}：
+\begin{enumerate}
+\item \textbf{位置不确定性}：轴和孔的位置可能不完全对齐
+\item \textbf{接触力}：接触时会产生接触力，可能导致卡住或损坏
+\item \textbf{几何约束}：轴必须沿着孔的轴线方向插入
+\item \textbf{摩擦力}：接触面之间的摩擦力可能阻碍插入
+\end{enumerate}
+
+\textbf{为什么需要阻抗控制？}
+
+阻抗控制允许机器人在接触时表现出柔顺性，自动适应位置误差，避免产生过大的接触力。
+
+\section{轴孔装配的几何和力学分析}
+
+\subsection{几何关系}
+
+\textbf{坐标系定义}：
+\begin{itemize}
+\item 轴坐标系：固定在轴上
+\item 孔坐标系：固定在孔上
+\item 任务坐标系：通常以孔的中心为原点，$z$轴沿孔的轴线方向
+\end{itemize}
+
+\textbf{位置误差}：
+\begin{itemize}
+\item 横向误差：$\Delta x, \Delta y$（垂直于插入方向）
+\item 角度误差：$\Delta \theta_x, \Delta \theta_y$（绕$x$和$y$轴的旋转）
+\item 插入深度：$z$（沿插入方向的位置）
+\end{itemize}
+
+\subsection{接触力分析}
+
+\textbf{接触时的力}：
+\begin{itemize}
+\item 横向接触力：$f_x, f_y$（当轴与孔壁接触时）
+\item 轴向力：$f_z$（插入方向的力）
+\item 接触力矩：$\tau_x, \tau_y$（当轴倾斜时）
+\end{itemize}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果横向误差$\Delta x, \Delta y$很大，轴会与孔壁接触
+\item 如果使用位置控制，机器人会继续尝试移动到目标位置
+\item 这会产生很大的接触力，可能导致卡住或损坏
+\end{itemize}
+
+\section{阻抗控制的基本原理}
+
+\subsection{阻抗控制公式}
+
+\textbf{阻抗控制公式}：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x$：位置误差（相对于平衡位置）
+\item $\dot{x}$：速度
+\item $\ddot{x}$：加速度
+\item $f_{\text{ext}}$：外部力（接触力）
+\item $M$：虚拟质量矩阵
+\item $B$：虚拟阻尼矩阵
+\item $K$：虚拟刚度矩阵
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 机器人表现得像一个质量-弹簧-阻尼器系统
+\item 当有外力$f_{\text{ext}}$时，机器人会产生位移$x$
+\item 位移的大小由阻抗参数$M, B, K$决定
+\end{itemize}
+
+\subsection{柔顺性的实现}
+
+\textbf{低刚度$K$的效果}：
+\begin{itemize}
+\item 如果$K$很小，即使有小的外力$f_{\text{ext}}$，也会产生较大的位移$x$
+\item 机器人表现得"软"，容易变形
+\item 可以自动适应位置误差
+\end{itemize}
+
+\textbf{高阻尼$B$的效果}：
+\begin{itemize}
+\item 如果$B$很大，速度$\dot{x}$会很快衰减
+\item 减少振荡和振动
+\item 使插入过程更平稳
+\end{itemize}
+
+\section{轴孔装配的阻抗控制策略}
+
+\subsection{方向分解}
+
+\textbf{关键思想}：在不同方向上设置不同的阻抗参数。
+
+\textbf{插入方向（$z$轴）}：
+\begin{itemize}
+\item 需要主动插入，因此需要较高的刚度$K_z$
+\item 但也不能太高，以避免产生过大的接触力
+\item 阻尼$B_z$应该适中，以提供平滑的插入
+\end{itemize}
+
+\textbf{横向方向（$x, y$轴）}：
+\begin{itemize}
+\item 需要柔顺性，以自动适应位置误差
+\item 因此需要较低的刚度$K_x, K_y$
+\item 阻尼$B_x, B_y$应该较大，以减少横向振动
+\end{itemize}
+
+\textbf{旋转方向（$\theta_x, \theta_y$）}：
+\begin{itemize}
+\item 需要柔顺性，以自动适应角度误差
+\item 因此需要较低的刚度$K_{\theta_x}, K_{\theta_y}$
+\item 阻尼$B_{\theta_x}, B_{\theta_y}$应该较大，以减少旋转振动
+\end{itemize}
+
+\subsection{阻抗矩阵的设计}
+
+\textbf{对角阻抗矩阵}（解耦情况）：
+\begin{equation}
+M = \begin{bmatrix}
+m_x & 0 & 0 & 0 & 0 & 0 \\
+0 & m_y & 0 & 0 & 0 & 0 \\
+0 & 0 & m_z & 0 & 0 & 0 \\
+0 & 0 & 0 & I_{\theta_x} & 0 & 0 \\
+0 & 0 & 0 & 0 & I_{\theta_y} & 0 \\
+0 & 0 & 0 & 0 & 0 & I_{\theta_z}
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+B = \begin{bmatrix}
+b_x & 0 & 0 & 0 & 0 & 0 \\
+0 & b_y & 0 & 0 & 0 & 0 \\
+0 & 0 & b_z & 0 & 0 & 0 \\
+0 & 0 & 0 & b_{\theta_x} & 0 & 0 \\
+0 & 0 & 0 & 0 & b_{\theta_y} & 0 \\
+0 & 0 & 0 & 0 & 0 & b_{\theta_z}
+\end{bmatrix}
+\end{equation}
+
+\begin{equation}
+K = \begin{bmatrix}
+k_x & 0 & 0 & 0 & 0 & 0 \\
+0 & k_y & 0 & 0 & 0 & 0 \\
+0 & 0 & k_z & 0 & 0 & 0 \\
+0 & 0 & 0 & k_{\theta_x} & 0 & 0 \\
+0 & 0 & 0 & 0 & k_{\theta_y} & 0 \\
+0 & 0 & 0 & 0 & 0 & k_{\theta_z}
+\end{bmatrix}
+\end{equation}
+
+\textbf{参数选择}：
+\begin{itemize}
+\item $k_x, k_y$：较小（例如，$100-500$ N/m），提供横向柔顺性
+\item $k_z$：中等（例如，$1000-5000$ N/m），提供插入力，但不产生过大的接触力
+\item $k_{\theta_x}, k_{\theta_y}$：较小（例如，$10-50$ N·m/rad），提供旋转柔顺性
+\item $b_x, b_y, b_{\theta_x}, b_{\theta_y}$：较大（例如，$50-200$ N·s/m），减少横向和旋转振动
+\item $b_z$：中等（例如，$20-100$ N·s/m），提供平滑的插入
+\end{itemize}
+
+\section{轴孔装配的控制流程}
+
+\subsection{阶段1：接近阶段}
+
+\textbf{目标}：将轴移动到孔的上方
+
+\textbf{控制策略}：
+\begin{itemize}
+\item 使用位置控制或轨迹跟踪
+\item 阻抗控制参数可以设置为标准值
+\item 在自由空间中移动，没有接触力
+\end{itemize}
+
+\textbf{期望位置}：
+\begin{equation}
+x_d = \begin{bmatrix} x_{\text{hole}} \\ y_{\text{hole}} \\ z_{\text{above}} \end{bmatrix}
+\end{equation}
+
+其中$z_{\text{above}}$是孔上方的一个安全高度。
+
+\subsection{阶段2：接触阶段}
+
+\textbf{目标}：检测接触并开始插入
+
+\textbf{接触检测}：
+\begin{itemize}
+\item 使用力传感器检测接触力$f_{\text{ext}}$
+\item 当$|f_{\text{ext}}| > f_{\text{threshold}}$时，认为发生接触
+\item 或者使用位置误差：当位置变化很小时，认为发生接触
+\end{itemize}
+
+\textbf{控制策略}：
+\begin{itemize}
+\item 切换到阻抗控制模式
+\item 在插入方向（$z$轴）上施加向下的力
+\item 在横向方向（$x, y$轴）上保持柔顺性
+\end{itemize}
+
+\textbf{期望力}（在插入方向上）：
+\begin{equation}
+f_{z,d} = f_{\text{insert}}
+\end{equation}
+
+其中$f_{\text{insert}}$是期望的插入力（例如，$10-50$ N）。
+
+\textbf{阻抗控制}：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+在插入方向上，可以添加一个期望力项：
+\begin{equation}
+M_z\ddot{z} + B_z\dot{z} + K_z z = f_{\text{ext},z} - f_{\text{insert}}
+\end{equation}
+
+\subsection{阶段3：插入阶段}
+
+\textbf{目标}：将轴完全插入孔中
+
+\textbf{控制策略}：
+\begin{itemize}
+\item 继续使用阻抗控制
+\item 在插入方向上继续施加向下的力
+\item 在横向方向上保持柔顺性，自动适应位置误差
+\end{itemize}
+
+\textbf{位置反馈}：
+\begin{itemize}
+\item 监测插入深度$z$
+\item 当$z$达到目标深度时，插入完成
+\end{itemize}
+
+\textbf{力反馈}：
+\begin{itemize}
+\item 监测接触力$f_{\text{ext}}$
+\item 如果$f_{\text{ext}}$突然增大，可能发生卡住
+\item 可以调整插入策略（例如，旋转轴或改变插入速度）
+\end{itemize}
+
+\section{具体实现方法}
+
+\subsection{方法1：基于位置的阻抗控制}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right) \tag{11.65}
+\end{equation}
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item 测量当前位置$x$和速度$\dot{x}$
+\item 计算位置误差$x_e = x - x_d$（相对于期望位置）
+\item 计算虚拟阻抗力：$f_{\text{impedance}} = -(M\ddot{x} + B\dot{x} + Kx_e)$
+\item 计算控制力矩：$\tau = J^T(\theta)(\text{补偿项} + f_{\text{impedance}})$
+\end{enumerate}
+
+\textbf{优点}：
+\begin{itemize}
+\item 不需要力传感器
+\item 实现简单
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 不能直接控制接触力
+\item 需要精确的动力学模型
+\end{itemize}
+
+\subsection{方法2：基于力的阻抗控制}
+
+\textbf{控制律}（添加力反馈）：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx) + K_f(f_{\text{desired}} - f_{\text{ext}})\right)
+\end{equation}
+
+其中$K_f$是力反馈增益。
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item 测量当前位置$x$、速度$\dot{x}$和接触力$f_{\text{ext}}$
+\item 计算位置误差$x_e = x - x_d$
+\item 计算虚拟阻抗力：$f_{\text{impedance}} = -(M\ddot{x} + B\dot{x} + Kx_e)$
+\item 计算力误差：$f_e = f_{\text{desired}} - f_{\text{ext}}$
+\item 计算控制力矩：$\tau = J^T(\theta)(\text{补偿项} + f_{\text{impedance}} + K_f f_e)$
+\end{enumerate}
+
+\textbf{优点}：
+\begin{itemize}
+\item 可以精确控制接触力
+\item 对动力学模型误差不敏感
+\end{itemize}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 需要力传感器
+\item 实现较复杂
+\end{itemize}
+
+\subsection{方法3：混合控制}
+
+\textbf{思想}：在不同方向上使用不同的控制策略。
+
+\textbf{插入方向（$z$轴）}：
+\begin{itemize}
+\item 使用力控制：$f_z = f_{\text{insert}}$
+\item 或者使用导纳控制：$M_z\ddot{z}_d + B_z\dot{z} + K_z z = f_{\text{ext},z}$
+\end{itemize}
+
+\textbf{横向方向（$x, y$轴）}：
+\begin{itemize}
+\item 使用阻抗控制：$M_{x,y}\ddot{x}_{x,y} + B_{x,y}\dot{x}_{x,y} + K_{x,y}x_{x,y} = f_{\text{ext},x,y}$
+\item 低刚度$K_{x,y}$，提供柔顺性
+\end{itemize}
+
+\textbf{旋转方向}：
+\begin{itemize}
+\item 使用阻抗控制：$I_{\theta}\ddot{\theta} + B_{\theta}\dot{\theta} + K_{\theta}\theta = \tau_{\text{ext}}$
+\item 低刚度$K_{\theta}$，提供旋转柔顺性
+\end{itemize}
+
+\section{参数调优}
+
+\subsection{刚度参数$K$的调优}
+
+\textbf{横向刚度$K_x, K_y$}：
+\begin{itemize}
+\item \textbf{太小}：机器人太软，可能无法抵抗横向力，导致插入失败
+\item \textbf{太大}：机器人太硬，不能适应位置误差，可能产生过大的接触力
+\item \textbf{推荐值}：$100-500$ N/m（取决于轴和孔的尺寸和材料）
+\end{itemize}
+
+\textbf{插入刚度$K_z$}：
+\begin{itemize}
+\item \textbf{太小}：插入力不足，可能无法插入
+\item \textbf{太大}：可能产生过大的接触力，导致卡住或损坏
+\item \textbf{推荐值}：$1000-5000$ N/m
+\end{itemize}
+
+\textbf{旋转刚度$K_{\theta_x}, K_{\theta_y}$}：
+\begin{itemize}
+\item \textbf{太小}：轴可能过度倾斜，导致插入失败
+\item \textbf{太大}：不能适应角度误差，可能产生过大的接触力矩
+\item \textbf{推荐值}：$10-50$ N·m/rad
+\end{itemize}
+
+\subsection{阻尼参数$B$的调优}
+
+\textbf{横向阻尼$B_x, B_y$}：
+\begin{itemize}
+\item \textbf{太小}：可能产生横向振动，影响插入
+\item \textbf{太大}：响应太慢，可能无法及时适应位置误差
+\item \textbf{推荐值}：$50-200$ N·s/m
+\end{itemize}
+
+\textbf{插入阻尼$B_z$}：
+\begin{itemize}
+\item \textbf{太小}：插入过程可能不平稳，产生振动
+\item \textbf{太大}：插入速度太慢
+\item \textbf{推荐值}：$20-100$ N·s/m
+\end{itemize}
+
+\subsection{质量参数$M$的调优}
+
+\textbf{通常设置}：
+\begin{itemize}
+\item $M$可以设置得较小，以提供快速响应
+\item 或者设置为$M = 0$，以简化控制律
+\item 推荐值：$0.1-1$ kg（对于平移）或$0.01-0.1$ kg·m²（对于旋转）
+\end{itemize}
+
+\section{实际例子}
+
+\subsection{例子：小轴孔装配}
+
+\textbf{参数}：
+\begin{itemize}
+\item 轴直径：$d_{\text{peg}} = 10$ mm
+\item 孔直径：$d_{\text{hole}} = 10.1$ mm
+\item 间隙：$0.1$ mm（很小）
+\item 插入深度：$20$ mm
+\end{itemize}
+
+\textbf{阻抗参数}：
+\begin{align}
+K_x = K_y &= 200 \text{ N/m} \quad \text{（低刚度，提供横向柔顺性）} \\
+K_z &= 2000 \text{ N/m} \quad \text{（中等刚度，提供插入力）} \\
+K_{\theta_x} = K_{\theta_y} &= 20 \text{ N·m/rad} \quad \text{（低刚度，提供旋转柔顺性）} \\
+B_x = B_y &= 100 \text{ N·s/m} \quad \text{（高阻尼，减少横向振动）} \\
+B_z &= 50 \text{ N·s/m} \quad \text{（中等阻尼，提供平滑插入）} \\
+B_{\theta_x} = B_{\theta_y} &= 5 \text{ N·m·s/rad} \quad \text{（高阻尼，减少旋转振动）}
+\end{align}
+
+\textbf{控制流程}：
+\begin{enumerate}
+\item \textbf{接近}：移动到孔上方$z = 5$ mm处
+\item \textbf{接触检测}：当$|f_{\text{ext}}| > 1$ N时，认为发生接触
+\item \textbf{插入}：在$z$方向上施加$f_{\text{insert}} = 20$ N的力
+\item \textbf{完成}：当$z$达到$-20$ mm时，插入完成
+\end{enumerate}
+
+\subsection{例子：大轴孔装配}
+
+\textbf{参数}：
+\begin{itemize}
+\item 轴直径：$d_{\text{peg}} = 50$ mm
+\item 孔直径：$d_{\text{hole}} = 50.5$ mm
+\item 间隙：$0.5$ mm（较大）
+\item 插入深度：$100$ mm
+\end{itemize}
+
+\textbf{阻抗参数}：
+\begin{align}
+K_x = K_y &= 500 \text{ N/m} \quad \text{（稍高，因为间隙较大）} \\
+K_z &= 5000 \text{ N/m} \quad \text{（较高，因为需要更大的插入力）} \\
+K_{\theta_x} = K_{\theta_y} &= 50 \text{ N·m/rad} \\
+B_x = B_y &= 200 \text{ N·s/m} \\
+B_z &= 100 \text{ N·s/m} \\
+B_{\theta_x} = B_{\theta_y} &= 10 \text{ N·m·s/rad}
+\end{align}
+
+\section{常见问题和解决方案}
+
+\subsection{问题1：卡住（Jamming）}
+
+\textbf{原因}：
+\begin{itemize}
+\item 横向位置误差太大，轴与孔壁接触
+\item 接触力太大，导致摩擦力过大
+\item 插入角度不正确
+\end{itemize}
+
+\textbf{解决方案}：
+\begin{enumerate}
+\item 减小横向刚度$K_x, K_y$，增加柔顺性
+\item 减小插入力$f_{\text{insert}}$
+\item 添加旋转运动，帮助轴找到正确的角度
+\item 使用力反馈，监测接触力，如果过大则停止插入
+\end{enumerate}
+
+\subsection{问题2：插入失败}
+
+\textbf{原因}：
+\begin{itemize}
+\item 位置误差太大，轴无法进入孔
+\item 插入力不足
+\item 角度误差太大
+\end{itemize}
+
+\textbf{解决方案}：
+\begin{enumerate}
+\item 提高位置精度（使用视觉或其他传感器）
+\item 增加插入力$f_{\text{insert}}$
+\item 减小旋转刚度$K_{\theta_x}, K_{\theta_y}$，增加旋转柔顺性
+\item 使用搜索策略（例如，螺旋搜索）
+\end{enumerate}
+
+\subsection{问题3：振荡}
+
+\textbf{原因}：
+\begin{itemize}
+\item 阻尼$B$太小
+\item 刚度$K$太大
+\item 控制延迟
+\end{itemize}
+
+\textbf{解决方案}：
+\begin{enumerate}
+\item 增加阻尼$B$
+\item 减小刚度$K$
+\item 使用低通滤波器过滤力信号
+\item 减小控制增益
+\end{enumerate}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{阻抗控制的优势}：
+\begin{itemize}
+\item 提供柔顺性，自动适应位置和角度误差
+\item 避免产生过大的接触力
+\item 适合不确定环境下的装配任务
+\end{itemize}
+
+\item \textbf{参数设计原则}：
+\begin{itemize}
+\item 横向和旋转方向：低刚度$K$，高阻尼$B$（提供柔顺性，减少振动）
+\item 插入方向：中等刚度$K$，中等阻尼$B$（提供插入力，但不产生过大的接触力）
+\end{itemize}
+
+\item \textbf{控制流程}：
+\begin{itemize}
+\item 接近阶段：位置控制
+\item 接触阶段：检测接触，切换到阻抗控制
+\item 插入阶段：继续阻抗控制，监测插入深度和接触力
+\end{itemize}
+
+\item \textbf{实现方法}：
+\begin{itemize}
+\item 基于位置的阻抗控制：不需要力传感器，但需要精确的动力学模型
+\item 基于力的阻抗控制：需要力传感器，但可以精确控制接触力
+\item 混合控制：在不同方向上使用不同的控制策略
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{阻抗控制公式}：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}}
+\end{equation}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = J^T(\theta)\left(\tilde{\Lambda}(\theta)\ddot{x} + \tilde{\eta}(\theta, \dot{x}) - (M\ddot{x} + B\dot{x} + Kx)\right)
+\end{equation}
+
+\textbf{参数选择}：
+\begin{itemize}
+\item $K_x, K_y$：$100-500$ N/m（低，提供横向柔顺性）
+\item $K_z$：$1000-5000$ N/m（中等，提供插入力）
+\item $K_{\theta_x}, K_{\theta_y}$：$10-50$ N·m/rad（低，提供旋转柔顺性）
+\item $B_x, B_y$：$50-200$ N·s/m（高，减少横向振动）
+\item $B_z$：$20-100$ N·s/m（中等，提供平滑插入）
+\end{itemize}
+
+\end{document}
+

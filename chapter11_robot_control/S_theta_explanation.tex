@@ -1,0 +1,500 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{阻抗控制中的$S\theta$详解}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+在阻抗控制公式中：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}} \tag{*}
+\end{equation}
+
+其中每一项都是6×1的向量：
+\begin{itemize}
+\item $M\dot{V}$：6×1（加速度项）
+\item $BV$：6×1（速度项）
+\item $K(S\theta)$：6×1（位置项）
+\item $F_{\text{ext}}$：6×1（外力项）
+\end{itemize}
+
+\textbf{问题}：如何理解$S\theta$？
+
+\section{$S\theta$的定义}
+
+\subsection{基本概念}
+
+\textbf{$S\theta$是SE(3)群上的指数坐标（Exponential Coordinates）}：
+
+\begin{equation}
+S\theta = \begin{bmatrix} \omega \\ v \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $S \in \mathbb{R}^6$：\textbf{螺旋轴（Screw Axis）}，6×1向量
+\item $\theta \in \mathbb{R}$：\textbf{标量参数}，表示沿螺旋轴的位移
+\item $S\theta$：\textbf{Twist向量}，6×1向量
+\end{itemize}
+
+\subsection{螺旋轴$S$的结构}
+
+\textbf{螺旋轴$S$的分解}：
+\begin{equation}
+S = \begin{bmatrix} \omega_s \\ v_s \end{bmatrix} = \begin{bmatrix} \omega_s \\ h\omega_s + v_0 \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_s \in \mathbb{R}^3$：旋转轴方向（单位向量）
+\item $v_s \in \mathbb{R}^3$：平移方向
+\item $h$：螺距（pitch），表示旋转和平移的比例
+\item $v_0$：垂直于旋转轴的分量
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 螺旋轴描述了"如何运动"（旋转轴和平移方向）
+\item 参数$\theta$描述了"运动多少"（角度和距离）
+\end{itemize}
+
+\section{SE(3)群和指数坐标}
+
+\subsection{SE(3)群}
+
+\textbf{SE(3)群}：特殊欧几里得群，表示刚体的位姿（位置+姿态）
+
+\textbf{元素}：
+\begin{equation}
+X = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix} \in \text{SE(3)}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $R \in \text{SO(3)}$：旋转矩阵（3×3）
+\item $p \in \mathbb{R}^3$：位置向量（3×1）
+\end{itemize}
+
+\subsection{指数映射}
+
+\textbf{指数映射}：将twist映射到位姿
+\begin{equation}
+X = \exp([S\theta]) = \exp([\xi])
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\xi = S\theta \in \mathbb{R}^6$：twist向量
+\item $[\xi]$：twist的矩阵表示（4×4）
+\item $\exp$：SE(3)的指数映射
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 给定一个twist $\xi = S\theta$，可以通过指数映射得到对应的位姿变换$X$
+\item 这表示"沿螺旋轴$S$运动$\theta$距离"得到的位姿
+\end{itemize}
+
+\subsection{对数映射}
+
+\textbf{对数映射}：将位姿映射到twist
+\begin{equation}
+[S\theta] = \log(X) = \log(X^{-1} X_d)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 给定一个位姿变换$X$，可以通过对数映射得到对应的twist $\xi = S\theta$
+\item 这表示"从单位变换到$X$"所需的螺旋运动
+\end{itemize}
+
+\section{在阻抗控制中的使用}
+
+\subsection{阻抗控制公式}
+
+\textbf{完整公式}：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}} \tag{11.64-twist}
+\end{equation}
+
+\textbf{各项的含义}：
+
+\textbf{1. $M\dot{V}$（6×1）}：
+\begin{itemize}
+\item $M$：6×6虚拟质量矩阵
+\item $\dot{V}$：6×1加速度twist（$\dot{V} = [\dot{\omega}, \dot{v}]^T$）
+\item $M\dot{V}$：惯性力（6×1）
+\end{itemize}
+
+\textbf{2. $BV$（6×1）}：
+\begin{itemize}
+\item $B$：6×6虚拟阻尼矩阵
+\item $V$：6×1速度twist（$V = [\omega, v]^T$）
+\item $BV$：阻尼力（6×1）
+\end{itemize}
+
+\textbf{3. $K(S\theta)$（6×1）}：
+\begin{itemize}
+\item $K$：6×6虚拟刚度矩阵
+\item $S\theta$：6×1位置twist（指数坐标）
+\item $K(S\theta)$：弹性恢复力（6×1）
+\end{itemize}
+
+\textbf{4. $F_{\text{ext}}$（6×1）}：
+\begin{itemize}
+\item 外部wrench（力和力矩）
+\item $F_{\text{ext}} = [\tau_{\text{ext}}, f_{\text{ext}}]^T$
+\end{itemize}
+
+\subsection{$S\theta$的具体含义}
+
+\textbf{在阻抗控制中，$S\theta$表示什么？}
+
+\textbf{选项1：相对于平衡位置的误差}
+
+假设平衡位置为$X_0$，当前位姿为$X$，则：
+\begin{equation}
+S\theta = \log(X_0^{-1} X)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $X_0^{-1} X$：从平衡位置到当前位置的相对变换
+\item $\log(X_0^{-1} X)$：将这个相对变换表示为twist
+\item $S\theta$：位置误差的twist表示
+\end{itemize}
+
+\textbf{选项2：相对于期望位置的误差}
+
+假设期望位姿为$X_d$，当前位姿为$X$，则：
+\begin{equation}
+S\theta = \log(X^{-1} X_d)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $X^{-1} X_d$：从当前位置到期望位置的相对变换
+\item $\log(X^{-1} X_d)$：将这个相对变换表示为twist
+\item $S\theta$：位置误差的twist表示
+\end{itemize}
+
+\textbf{选项3：相对于初始位置的位移}
+
+假设初始位姿为$X_{\text{init}}$，当前位姿为$X$，则：
+\begin{equation}
+S\theta = \log(X_{\text{init}}^{-1} X)
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $X_{\text{init}}^{-1} X$：从初始位置到当前位置的相对变换
+\item $\log(X_{\text{init}}^{-1} X)$：将这个相对变换表示为twist
+\item $S\theta$：位移的twist表示
+\end{itemize}
+
+\textbf{通常情况}：在阻抗控制中，$S\theta$通常表示相对于平衡位置或期望位置的误差。
+
+\section{$S\theta$的6维结构}
+
+\subsection{分解}
+
+\textbf{$S\theta$的6维向量}：
+\begin{equation}
+S\theta = \begin{bmatrix} \omega\theta \\ v\theta \end{bmatrix} = \begin{bmatrix} \omega_e \\ v_e \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_e \in \mathbb{R}^3$：\textbf{旋转误差}（角度误差的轴-角表示）
+\item $v_e \in \mathbb{R}^3$：\textbf{平移误差}
+\end{itemize}
+
+\subsection{旋转部分$\omega_e$}
+
+\textbf{$\omega_e$的物理意义}：
+\begin{itemize}
+\item 方向：旋转轴的方向
+\item 大小：旋转角度（以弧度为单位）
+\item 表示：$\omega_e = \omega_s \theta$，其中$\omega_s$是单位旋转轴，$\theta$是角度
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 如果$\omega_e = [0, 0, 0.1]^T$，表示绕$z$轴旋转0.1弧度
+\item 如果$\omega_e = [0.2, 0, 0]^T$，表示绕$x$轴旋转0.2弧度
+\end{itemize}
+
+\subsection{平移部分$v_e$}
+
+\textbf{$v_e$的物理意义}：
+\begin{itemize}
+\item 方向：平移方向
+\item 大小：平移距离
+\item 表示：$v_e = v_s \theta$，其中$v_s$是平移方向，$\theta$是距离
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 如果$v_e = [0.01, 0, 0]^T$，表示沿$x$轴平移0.01米
+\item 如果$v_e = [0, 0.02, 0]^T$，表示沿$y$轴平移0.02米
+\end{itemize}
+
+\section{与最小坐标的对比}
+
+\subsection{最小坐标表示}
+
+\textbf{在原始阻抗控制中}（使用最小坐标）：
+\begin{equation}
+M\ddot{x} + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64-minimal}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $x \in \mathbb{R}^n$：最小坐标（例如，$n=3$表示位置，$n=6$表示位置+欧拉角）
+\item $x$：位置误差
+\end{itemize}
+
+\subsection{Twist表示}
+
+\textbf{使用twist表示}：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}} \tag{11.64-twist}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $S\theta \in \mathbb{R}^6$：指数坐标（twist）
+\item $S\theta$：位置误差的twist表示
+\end{itemize}
+
+\subsection{对比}
+
+\textbf{最小坐标$x$}：
+\begin{itemize}
+\item 优点：直观，易于理解
+\item 缺点：存在奇异性（例如，欧拉角的万向锁）
+\item 维度：$n$维（通常$n=3$或$n=6$）
+\end{itemize}
+
+\textbf{指数坐标$S\theta$}：
+\begin{itemize}
+\item 优点：无奇异性，全局表示
+\item 缺点：计算复杂（需要指数/对数映射）
+\item 维度：6维（固定）
+\end{itemize}
+
+\section{刚度项$K(S\theta)$的物理意义}
+
+\subsection{虚拟弹簧}
+
+\textbf{刚度项$K(S\theta)$表示虚拟弹簧的恢复力}：
+
+\begin{equation}
+F_{\text{spring}} = K(S\theta) = K \begin{bmatrix} \omega_e \\ v_e \end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果机器人偏离平衡位置（$S\theta \neq 0$），虚拟弹簧产生恢复力
+\item 恢复力的大小和方向由刚度矩阵$K$和误差$S\theta$决定
+\end{itemize}
+
+\subsection{刚度矩阵$K$的结构}
+
+\textbf{$K$是6×6矩阵}：
+\begin{equation}
+K = \begin{bmatrix} K_{\text{rot}} & K_{\text{coupling}} \\ K_{\text{coupling}}^T & K_{\text{trans}} \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $K_{\text{rot}}$：3×3旋转刚度矩阵
+\item $K_{\text{trans}}$：3×3平移刚度矩阵
+\item $K_{\text{coupling}}$：3×3耦合项（旋转和平移的耦合）
+\end{itemize}
+
+\textbf{对角化情况}（解耦）：
+\begin{equation}
+K = \begin{bmatrix} K_{\text{rot}} & 0 \\ 0 & K_{\text{trans}} \end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item $K_{\text{rot}}$：旋转刚度（抵抗旋转误差）
+\item $K_{\text{trans}}$：平移刚度（抵抗平移误差）
+\item $K_{\text{coupling}}$：旋转和平移的耦合（例如，旋转时产生平移力）
+\end{itemize}
+
+\subsection{恢复力的计算}
+
+\textbf{完整计算}：
+\begin{equation}
+F_{\text{spring}} = K(S\theta) = \begin{bmatrix} K_{\text{rot}} & K_{\text{coupling}} \\ K_{\text{coupling}}^T & K_{\text{trans}} \end{bmatrix} \begin{bmatrix} \omega_e \\ v_e \end{bmatrix}
+\end{equation}
+
+\textbf{分解}：
+\begin{align}
+F_{\text{spring,rot}} &= K_{\text{rot}} \omega_e + K_{\text{coupling}} v_e \\
+F_{\text{spring,trans}} &= K_{\text{coupling}}^T \omega_e + K_{\text{trans}} v_e
+\end{align}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 旋转误差$\omega_e$产生旋转恢复力矩和平移恢复力（如果存在耦合）
+\item 平移误差$v_e$产生平移恢复力和旋转恢复力矩（如果存在耦合）
+\end{itemize}
+
+\section{实际计算示例}
+
+\subsection{计算$S\theta$}
+
+\textbf{步骤1：确定参考位姿和当前位姿}
+
+假设：
+\begin{itemize}
+\item 参考位姿（平衡位置）：$X_0 = \begin{bmatrix} I & 0 \\ 0 & 1 \end{bmatrix}$（单位变换）
+\item 当前位姿：$X = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}$
+\end{itemize}
+
+\textbf{步骤2：计算相对变换}
+
+\begin{equation}
+X_{\text{rel}} = X_0^{-1} X = X = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+\textbf{步骤3：计算对数映射}
+
+\begin{equation}
+[S\theta] = \log(X_{\text{rel}}) = \log(X)
+\end{equation}
+
+\textbf{步骤4：提取twist向量}
+
+从$[S\theta]$提取6维向量：
+\begin{equation}
+S\theta = \begin{bmatrix} \omega_e \\ v_e \end{bmatrix}
+\end{equation}
+
+\subsection{计算刚度项}
+
+\textbf{假设刚度矩阵}：
+\begin{equation}
+K = \begin{bmatrix} k_{\text{rot}} I_3 & 0 \\ 0 & k_{\text{trans}} I_3 \end{bmatrix}
+\end{equation}
+
+其中$k_{\text{rot}} = 100$ N·m/rad，$k_{\text{trans}} = 1000$ N/m。
+
+\textbf{假设误差}：
+\begin{equation}
+S\theta = \begin{bmatrix} 0 \\ 0 \\ 0.1 \\ 0.01 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+表示绕$z$轴旋转0.1弧度，沿$x$轴平移0.01米。
+
+\textbf{计算恢复力}：
+\begin{equation}
+F_{\text{spring}} = K(S\theta) = \begin{bmatrix} 100 I_3 & 0 \\ 0 & 1000 I_3 \end{bmatrix} \begin{bmatrix} 0 \\ 0 \\ 0.1 \\ 0.01 \\ 0 \\ 0 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 10 \\ 10 \\ 0 \\ 0 \end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 旋转恢复力矩：$10$ N·m（绕$z$轴）
+\item 平移恢复力：$10$ N（沿$x$轴）
+\end{itemize}
+
+\section{小角度近似}
+
+\subsection{近似公式}
+
+\textbf{当误差很小时}（$S\theta$很小），可以使用线性近似：
+
+\textbf{旋转部分}：
+\begin{equation}
+\omega_e \approx \text{axis-angle}(R)
+\end{equation}
+
+其中$\text{axis-angle}(R)$是旋转矩阵$R$的轴-角表示。
+
+\textbf{平移部分}：
+\begin{equation}
+v_e \approx p
+\end{equation}
+
+\textbf{完整近似}：
+\begin{equation}
+S\theta \approx \begin{bmatrix} \text{axis-angle}(R) \\ p \end{bmatrix}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 当误差很小时，指数坐标$S\theta$近似等于位置和姿态误差的直接表示
+\item 这简化了计算，但只适用于小误差
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{$S\theta$的定义}：
+\begin{itemize}
+\item $S\theta$是SE(3)群上的指数坐标（twist）
+\item $S$是螺旋轴（6×1），$\theta$是标量参数
+\item $S\theta$是6×1向量：$S\theta = [\omega_e, v_e]^T$
+\end{itemize}
+
+\item \textbf{在阻抗控制中的含义}：
+\begin{itemize}
+\item $S\theta$表示位置误差（相对于参考位姿）
+\item 通常：$S\theta = \log(X_0^{-1} X)$或$S\theta = \log(X^{-1} X_d)$
+\item 旋转部分$\omega_e$：旋转误差（轴-角表示）
+\item 平移部分$v_e$：平移误差
+\end{itemize}
+
+\item \textbf{刚度项$K(S\theta)$}：
+\begin{itemize}
+\item 虚拟弹簧的恢复力（6×1）
+\item $K$是6×6刚度矩阵
+\item 如果存在耦合，旋转误差可能产生平移力，反之亦然
+\end{itemize}
+
+\item \textbf{与最小坐标的对比}：
+\begin{itemize}
+\item 最小坐标$x$：直观，但有奇异性
+\item 指数坐标$S\theta$：无奇异性，但计算复杂
+\item 两者都表示位置误差，但表示方式不同
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{阻抗控制公式（使用twist）}：
+\begin{equation}
+M\dot{V} + BV + K(S\theta) = F_{\text{ext}}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M\dot{V}$：6×1惯性力
+\item $BV$：6×1阻尼力
+\item $K(S\theta)$：6×1弹性恢复力
+\item $F_{\text{ext}}$：6×1外部wrench
+\end{itemize}
+
+\textbf{$S\theta$的计算}：
+\begin{equation}
+S\theta = \log(X_0^{-1} X) \quad \text{或} \quad S\theta = \log(X^{-1} X_d)
+\end{equation}
+
+\end{document}
+

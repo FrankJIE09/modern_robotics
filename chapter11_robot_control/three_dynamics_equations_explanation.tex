@@ -1,0 +1,528 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{三个动力学方程的理解}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+本文档解释三个相关的动力学方程：
+\begin{enumerate}
+\item $\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})$ \quad (8.82)
+\item $F = \Lambda(\theta)\dot{V} + \eta(\theta, V)$ \quad (8.89)
+\item $M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}$ \quad (1)
+\end{enumerate}
+
+\section{公式1：关节空间动力学（无外部力）}
+
+\subsection{公式}
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \tag{8.82}
+\end{equation}
+
+\subsection{各项含义}
+
+\begin{itemize}
+\item $\tau \in \mathbb{R}^n$：\textbf{关节力矩向量}（由执行器提供）
+\item $M(\theta) \in \mathbb{R}^{n \times n}$：\textbf{关节空间质量矩阵}（对称正定）
+\item $\ddot{\theta} \in \mathbb{R}^n$：\textbf{关节加速度向量}
+\item $h(\theta, \dot{\theta}) \in \mathbb{R}^n$：\textbf{科里奥利、向心力和重力项}
+\end{itemize}
+
+\subsection{物理意义}
+
+\textbf{这个方程描述}：
+\begin{itemize}
+\item 要产生关节加速度$\ddot{\theta}$，需要施加关节力矩$\tau$
+\item $\tau$包括两部分：
+\begin{enumerate}
+\item 惯性力：$M(\theta)\ddot{\theta}$（产生加速度所需的力）
+\item 科里奥利、向心力和重力：$h(\theta, \dot{\theta})$（由于速度和位置产生的力）
+\end{enumerate}
+\end{itemize}
+
+\subsection{假设条件}
+
+\begin{itemize}
+\item \textbf{无外部力}：假设末端执行器上没有外部力作用
+\item \textbf{理想情况}：忽略摩擦、间隙等非理想因素
+\end{itemize}
+
+\subsection{例子：单关节机器人}
+
+\textbf{单关节动力学}：
+\begin{equation}
+\tau = M\ddot{\theta} + mgr\cos\theta \tag{11.19}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M$：连杆关于旋转轴的标量惯性
+\item $m$：连杆质量
+\item $r$：从轴到质心的距离
+\item $g$：重力加速度
+\end{itemize}
+
+\textbf{分解}：
+\begin{itemize}
+\item $M\ddot{\theta}$：惯性力（产生加速度所需的力矩）
+\item $mgr\cos\theta$：重力项（依赖于角度$\theta$）
+\end{itemize}
+
+\section{公式3：关节空间动力学（含外部力）}
+
+\subsection{公式}
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}} \tag{1}
+\end{equation}
+
+\subsection{与公式1的对比}
+
+\textbf{公式1}（无外部力）：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{公式3}（含外部力）：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+\textbf{区别}：
+\begin{itemize}
+\item 公式3多了一项：$-J^T(\theta)F_{\text{ext}}$
+\item 这一项表示外部力$F_{\text{ext}}$对关节力矩的影响
+\end{itemize}
+
+\subsection{各项含义}
+
+\begin{itemize}
+\item $\tau$：关节力矩（由执行器提供）
+\item $M(\theta)\ddot{\theta}$：惯性力
+\item $h(\theta, \dot{\theta})$：科里奥利、向心力和重力
+\item $F_{\text{ext}} \in \mathbb{R}^6$：\textbf{作用在末端执行器上的外部wrench}（6×1向量，包含力和力矩）
+\item $J^T(\theta)$：\textbf{雅可比矩阵的转置}（将任务空间wrench转换为关节空间力矩）
+\item $-J^T(\theta)F_{\text{ext}}$：\textbf{外部力在关节空间中的等效力矩}
+\end{itemize}
+
+\subsection{物理意义}
+
+\textbf{这个方程描述}：
+\begin{itemize}
+\item 要产生关节加速度$\ddot{\theta}$，需要施加关节力矩$\tau$
+\item 但外部力$F_{\text{ext}}$会"帮助"或"阻碍"运动
+\item 如果$F_{\text{ext}}$与运动方向相同，$J^T(\theta)F_{\text{ext}}$为正，需要的$\tau$减小
+\item 如果$F_{\text{ext}}$与运动方向相反，$J^T(\theta)F_{\text{ext}}$为负，需要的$\tau$增大
+\end{itemize}
+
+\textbf{重新整理}：
+\begin{equation}
+\tau + J^T(\theta)F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 总力矩（执行器力矩 + 外部力等效力矩）= 惯性力 + 其他力
+\end{itemize}
+
+\subsection{虚功原理}
+
+\textbf{为什么是$J^T(\theta)$？}
+
+\textbf{虚功原理}告诉我们，关节空间和任务空间之间的功率是守恒的：
+\begin{equation}
+\tau^T\dot{\theta} = F^T V
+\end{equation}
+
+其中$V = J(\theta)\dot{\theta}$是末端执行器的twist。
+
+\textbf{推导}：
+\begin{align}
+\tau^T\dot{\theta} &= F^T V \\
+&= F^T J(\theta)\dot{\theta} \\
+&= (J^T(\theta)F)^T\dot{\theta}
+\end{align}
+
+因此：
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 任务空间wrench $F$在关节空间中的等效力矩是$J^T(\theta)F$
+\item 如果$F$是外部力，那么$-J^T(\theta)F$表示外部力对关节力矩的"贡献"
+\end{itemize}
+
+\section{公式2：任务空间动力学}
+
+\subsection{公式}
+
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\subsection{各项含义}
+
+\begin{itemize}
+\item $F \in \mathbb{R}^6$：\textbf{任务空间wrench}（6×1向量，包含力和力矩）
+\item $\Lambda(\theta) \in \mathbb{R}^{6 \times 6}$：\textbf{任务空间质量矩阵}（对称正定）
+\item $\dot{V} \in \mathbb{R}^6$：\textbf{末端执行器加速度}（twist的导数）
+\item $\eta(\theta, V) \in \mathbb{R}^6$：\textbf{任务空间的科里奥利、向心力和重力项}
+\end{itemize}
+
+\subsection{物理意义}
+
+\textbf{这个方程描述}：
+\begin{itemize}
+\item 要产生末端执行器加速度$\dot{V}$，需要施加wrench $F$
+\item $F$包括两部分：
+\begin{enumerate}
+\item 惯性力：$\Lambda(\theta)\dot{V}$（产生加速度所需的力）
+\item 科里奥利、向心力和重力：$\eta(\theta, V)$（由于速度和位置产生的力）
+\end{enumerate}
+\end{itemize}
+
+\subsection{与公式1和公式3的关系}
+
+\textbf{公式2是从公式1或公式3转换而来的}：
+
+\textbf{从公式1转换}（假设$\tau = J^T(\theta)F$，无外部力）：
+\begin{equation}
+J^T(\theta)F = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+左乘$J^{-T}(\theta)$并转换，得到：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{从公式3转换}（含外部力）：
+\begin{equation}
+J^T(\theta)\tau + F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+转换后：
+\begin{equation}
+F_{\text{total}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+其中$F_{\text{total}} = J^T(\theta)\tau + F_{\text{ext}}$是总wrench。
+
+\subsection{转换关系}
+
+\textbf{质量矩阵}：
+\begin{equation}
+\Lambda(\theta) = J^{-T}(\theta)M(\theta)J^{-1}(\theta) \tag{8.90}
+\end{equation}
+
+\textbf{科里奥利等项}：
+\begin{equation}
+\eta(\theta, V) = J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V \tag{8.91}
+\end{equation}
+
+\textbf{速度关系}：
+\begin{align}
+V &= J(\theta)\dot{\theta} \tag{8.83} \\
+\dot{V} &= \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta} \tag{8.84}
+\end{align}
+
+\section{三个公式的对比总结}
+
+\subsection{公式对比表}
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{公式} & \textbf{坐标系} & \textbf{变量} & \textbf{是否含外部力} \\
+\hline
+(8.82) & 关节空间 & $\tau, \theta, \dot{\theta}, \ddot{\theta}$ & 否 \\
+\hline
+(1) & 关节空间 & $\tau, \theta, \dot{\theta}, \ddot{\theta}, F_{\text{ext}}$ & 是 \\
+\hline
+(8.89) & 任务空间 & $F, V, \dot{V}$ & 取决于$F$的含义 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{公式1：$\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})$}
+
+\textbf{特点}：
+\begin{itemize}
+\item 关节空间表示
+\item 无外部力
+\item 适用于自由空间运动
+\end{itemize}
+
+\textbf{应用}：
+\begin{itemize}
+\item 自由空间轨迹跟踪
+\item 无接触任务
+\end{itemize}
+
+\subsection{公式3：$\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}$}
+
+\textbf{特点}：
+\begin{itemize}
+\item 关节空间表示
+\item 含外部力
+\item 适用于接触任务
+\end{itemize}
+
+\textbf{应用}：
+\begin{itemize}
+\item 力控制
+\item 接触任务（装配、打磨等）
+\item 阻抗控制
+\end{itemize}
+
+\subsection{公式2：$F = \Lambda(\theta)\dot{V} + \eta(\theta, V)$}
+
+\textbf{特点}：
+\begin{itemize}
+\item 任务空间表示
+\item 直接描述末端执行器动力学
+\item 适用于任务空间控制
+\end{itemize}
+
+\textbf{应用}：
+\begin{itemize}
+\item 任务空间轨迹跟踪
+\item 任务空间力控制
+\item 任务空间阻抗控制
+\end{itemize}
+
+\section{实际应用场景}
+
+\subsection{场景1：自由空间运动}
+
+\textbf{使用公式1}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\textbf{控制律}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta}_d + h(\theta, \dot{\theta}) + K_p(\theta_d - \theta) + K_d(\dot{\theta}_d - \dot{\theta})
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 无外部力
+\item 直接控制关节
+\end{itemize}
+
+\subsection{场景2：接触任务}
+
+\textbf{使用公式3}：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+\textbf{控制律}（力控制）：
+\begin{equation}
+\tau = M(\theta)\ddot{\theta}_d + h(\theta, \dot{\theta}) - J^T(\theta)(F_d + K_f(F_d - F_{\text{ext}}))
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 考虑外部力
+\item 可以控制接触力
+\end{itemize}
+
+\subsection{场景3：任务空间控制}
+
+\textbf{使用公式2}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{控制律}：
+\begin{equation}
+F = \Lambda(\theta)\dot{V}_d + \eta(\theta, V) + K_p X_e + K_d V_e
+\end{equation}
+
+\textbf{转换到关节空间}：
+\begin{equation}
+\tau = J^T(\theta)F
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 任务空间表示
+\item 直接控制末端执行器
+\end{itemize}
+
+\section{数学推导：从公式1到公式2}
+
+\subsection{步骤1：从公式1开始}
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) \tag{8.82}
+\end{equation}
+
+\subsection{步骤2：假设$\tau = J^T(\theta)F$}
+
+这表示关节力矩$\tau$是由任务空间wrench $F$产生的。
+
+\begin{equation}
+J^T(\theta)F = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\subsection{步骤3：左乘$J^{-T}(\theta)$}
+
+\begin{equation}
+F = J^{-T}(\theta)M(\theta)\ddot{\theta} + J^{-T}(\theta)h(\theta, \dot{\theta})
+\end{equation}
+
+\subsection{步骤4：代入速度关系}
+
+从$V = J(\theta)\dot{\theta}$，得到：
+\begin{equation}
+\dot{\theta} = J^{-1}(\theta)V
+\end{equation}
+
+从$\dot{V} = \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}$，得到：
+\begin{equation}
+\ddot{\theta} = J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V)
+\end{equation}
+
+\subsection{步骤5：代入并整理}
+
+\begin{align}
+F &= J^{-T}(\theta)M(\theta)J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V) + J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) \\
+&= J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{V} \\
+&\quad - J^{-T}(\theta)M(\theta)J^{-1}(\theta)\dot{J}(\theta)J^{-1}(\theta)V \\
+&\quad + J^{-T}(\theta)h(\theta, J^{-1}(\theta)V)
+\end{align}
+
+\subsection{步骤6：定义$\Lambda(\theta)$和$\eta(\theta, V)$}
+
+\begin{align}
+\Lambda(\theta) &= J^{-T}(\theta)M(\theta)J^{-1}(\theta) \tag{8.90} \\
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V \tag{8.91}
+\end{align}
+
+\subsection{步骤7：得到最终方程}
+
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V) \tag{8.89}
+\end{equation}
+
+\section{数学推导：从公式3到公式2}
+
+\subsection{步骤1：从公式3开始}
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}} \tag{1}
+\end{equation}
+
+\subsection{步骤2：重新整理}
+
+\begin{equation}
+\tau + J^T(\theta)F_{\text{ext}} = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\subsection{步骤3：假设$\tau = J^T(\theta)F_{\text{actuator}}$}
+
+这表示关节力矩$\tau$是由执行器产生的任务空间wrench $F_{\text{actuator}}$产生的。
+
+\begin{equation}
+J^T(\theta)(F_{\text{actuator}} + F_{\text{ext}}) = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\subsection{步骤4：定义总wrench}
+
+\begin{equation}
+F_{\text{total}} = F_{\text{actuator}} + F_{\text{ext}}
+\end{equation}
+
+\subsection{步骤5：转换到任务空间}
+
+按照从公式1到公式2的步骤，得到：
+\begin{equation}
+F_{\text{total}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+\textbf{如果$F_{\text{ext}} = 0$}（无外部力），则：
+\begin{equation}
+F_{\text{actuator}} = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+
+这就是公式2（其中$F = F_{\text{actuator}}$）。
+
+\section{总结}
+
+\subsection{三个公式的关系}
+
+\begin{enumerate}
+\item \textbf{公式1}：关节空间动力学（无外部力）
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta})
+\end{equation}
+
+\item \textbf{公式3}：关节空间动力学（含外部力）
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + h(\theta, \dot{\theta}) - J^T(\theta)F_{\text{ext}}
+\end{equation}
+
+\item \textbf{公式2}：任务空间动力学（从公式1或公式3转换而来）
+\begin{equation}
+F = \Lambda(\theta)\dot{V} + \eta(\theta, V)
+\end{equation}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{公式1和公式3的区别}：
+\begin{itemize}
+\item 公式3多了一项$-J^T(\theta)F_{\text{ext}}$，表示外部力的影响
+\item 公式1是公式3在$F_{\text{ext}} = 0$时的特殊情况
+\end{itemize}
+
+\item \textbf{公式2与公式1、公式3的关系}：
+\begin{itemize}
+\item 公式2是从公式1或公式3通过坐标变换得到的
+\item 从关节空间转换到任务空间
+\item 使用雅可比矩阵$J(\theta)$进行转换
+\end{itemize}
+
+\item \textbf{应用场景}：
+\begin{itemize}
+\item 公式1：自由空间运动
+\item 公式3：接触任务
+\item 公式2：任务空间控制
+\end{itemize}
+\end{enumerate}
+
+\subsection{转换关系总结}
+
+\textbf{从关节空间到任务空间}：
+\begin{align}
+\Lambda(\theta) &= J^{-T}(\theta)M(\theta)J^{-1}(\theta) \\
+\eta(\theta, V) &= J^{-T}(\theta)h(\theta, J^{-1}(\theta)V) - \Lambda(\theta)\dot{J}(\theta)J^{-1}(\theta)V \\
+V &= J(\theta)\dot{\theta} \\
+\dot{V} &= \dot{J}(\theta)\dot{\theta} + J(\theta)\ddot{\theta}
+\end{align}
+
+\textbf{从任务空间到关节空间}：
+\begin{align}
+\tau &= J^T(\theta)F \\
+\dot{\theta} &= J^{-1}(\theta)V \\
+\ddot{\theta} &= J^{-1}(\theta)(\dot{V} - \dot{J}(\theta)J^{-1}(\theta)V)
+\end{align}
+
+\end{document}
+

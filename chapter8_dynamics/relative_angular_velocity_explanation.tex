@@ -1,0 +1,362 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{相对角速度$\omega_{\text{rel}}$的含义和表示}
+\author{第8章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：如何理解"$\omega_{\text{rel}} \in \mathbb{R}^3$：坐标系$\{i\}$相对于$\{i-1\}$的相对角速度（在$\{i\}$中表示）"？
+
+\section{基本概念}
+
+\subsection{相对角速度的定义}
+
+\textbf{定义}：$\omega_{\text{rel}}$是坐标系$\{i\}$相对于坐标系$\{i-1\}$的角速度，也可以理解为坐标系$\{i\}$自身的角速度。
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 如果坐标系$\{i-1\}$固定不动，$\omega_{\text{rel}}$描述了坐标系$\{i\}$自身的旋转运动
+\item 这是坐标系$\{i\}$自身的角速度，由关节$i$的运动产生
+\item 这是两个坐标系之间的相对旋转运动
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item $\omega_{\text{rel}}$是坐标系$\{i\}$\textbf{自身}的角速度
+\item 它描述了坐标系$\{i\}$相对于$\{i-1\}$的旋转
+\item 由关节$i$的运动直接产生：$\omega_{\text{rel}} = \dot{\theta}_i z_i$
+\end{itemize}
+
+\subsection{表示坐标系的选择}
+
+\textbf{关键问题}：$\omega_{\text{rel}}$应该在哪个坐标系中表示？
+
+\textbf{答案}：在坐标系$\{i\}$中表示。
+
+\textbf{原因}：
+\begin{enumerate}
+\item 关节轴$z_i$通常在坐标系$\{i\}$中定义
+\item 因此，相对角速度$\omega_{\text{rel}} = \dot{\theta}_i z_i$自然在$\{i\}$中表示
+\item 这样便于在递归算法中使用
+\end{enumerate}
+
+\section{数学表达}
+
+\subsection{一般形式}
+
+\textbf{相对角速度的表达式}：
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $\dot{\theta}_i$：关节$i$的角速度（标量）
+\item $z_i$：关节$i$的旋转轴（在坐标系$\{i\}$中表示的单位向量）
+\item $\omega_{\text{rel}}$：相对角速度（在坐标系$\{i\}$中表示的3维向量）
+\end{itemize}
+
+\subsection{坐标表示}
+
+\textbf{在坐标系$\{i\}$中的表示}：
+
+如果$z_i$在坐标系$\{i\}$中的表示为：
+\begin{equation}
+z_i = \begin{bmatrix} z_{i,x} \\ z_{i,y} \\ z_{i,z} \end{bmatrix}_{\{i\}}
+\end{equation}
+
+那么$\omega_{\text{rel}}$在坐标系$\{i\}$中的表示为：
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i \begin{bmatrix} z_{i,x} \\ z_{i,y} \\ z_{i,z} \end{bmatrix}_{\{i\}} = \begin{bmatrix} \dot{\theta}_i z_{i,x} \\ \dot{\theta}_i z_{i,y} \\ \dot{\theta}_i z_{i,z} \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{注意}：下标$\{i\}$表示这个向量在坐标系$\{i\}$中的坐标表示。
+
+\section{具体例子}
+
+\subsection{例子1：绕$z$轴旋转}
+
+\textbf{场景}：
+
+考虑一个旋转关节，关节轴$z_i$与坐标系$\{i\}$的$z$轴对齐：
+\begin{equation}
+z_i = \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+关节以角速度$\dot{\theta}_i = 2$ rad/s旋转。
+
+\textbf{自身角速度}：
+
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i = 2 \times \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}_{\{i\}} = \begin{bmatrix} 0 \\ 0 \\ 2 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 坐标系$\{i\}$自身的角速度为$[0, 0, 2]^T$ rad/s（在$\{i\}$中表示）
+\item 坐标系$\{i\}$绕自身的$z$轴旋转
+\item 角速度大小为$2$ rad/s
+\item 方向沿$z$轴正方向（在$\{i\}$中）
+\end{itemize}
+
+\textbf{验证}：
+
+在坐标系$\{i\}$中，这个向量表示：
+\begin{itemize}
+\item $x$方向分量：$0$ rad/s
+\item $y$方向分量：$0$ rad/s
+\item $z$方向分量：$2$ rad/s
+\end{itemize}
+
+这符合绕$z$轴旋转的物理意义。
+
+\subsection{例子2：绕任意轴旋转}
+
+\textbf{场景}：
+
+考虑一个旋转关节，关节轴$z_i$在坐标系$\{i\}$中的表示为：
+\begin{equation}
+z_i = \frac{1}{\sqrt{3}} \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+这是一个单位向量，指向$(1,1,1)$方向。
+
+关节以角速度$\dot{\theta}_i = \pi$ rad/s旋转。
+
+\textbf{自身角速度}：
+
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i = \pi \times \frac{1}{\sqrt{3}} \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}_{\{i\}} = \frac{\pi}{\sqrt{3}} \begin{bmatrix} 1 \\ 1 \\ 1 \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 坐标系$\{i\}$自身的角速度为$\frac{\pi}{\sqrt{3}}[1, 1, 1]^T$ rad/s（在$\{i\}$中表示）
+\item 坐标系$\{i\}$绕自身的轴$(1,1,1)$旋转
+\item 角速度大小为$\pi$ rad/s
+\item 方向沿$(1,1,1)$方向（在$\{i\}$中）
+\end{itemize}
+
+\textbf{验证}：
+
+在坐标系$\{i\}$中，这个向量表示：
+\begin{itemize}
+\item $x$方向分量：$\frac{\pi}{\sqrt{3}}$ rad/s
+\item $y$方向分量：$\frac{\pi}{\sqrt{3}}$ rad/s
+\item $z$方向分量：$\frac{\pi}{\sqrt{3}}$ rad/s
+\end{itemize}
+
+所有分量相等，符合绕$(1,1,1)$方向旋转的物理意义。
+
+\subsection{例子3：在机器人手臂中的应用}
+
+\textbf{场景}：
+
+考虑一个6自由度机器人手臂的第3个关节：
+\begin{itemize}
+\item 关节类型：旋转关节
+\item 关节轴$z_3$在坐标系$\{3\}$中的表示：$z_3 = [0, 0, 1]^T$（沿$z$轴）
+\item 关节角速度：$\dot{\theta}_3 = 1.5$ rad/s
+\end{itemize}
+
+\textbf{自身角速度}：
+
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_3 z_3 = 1.5 \times \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}_{\{3\}} = \begin{bmatrix} 0 \\ 0 \\ 1.5 \end{bmatrix}_{\{3\}}
+\end{equation}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 坐标系$\{3\}$自身的角速度为$[0, 0, 1.5]^T$ rad/s（在$\{3\}$中表示）
+\item 坐标系$\{3\}$绕自身的$z$轴旋转
+\item 角速度大小为$1.5$ rad/s
+\item 这个角速度由关节3的运动产生
+\end{itemize}
+
+\textbf{在速度合成中的应用}：
+
+如果坐标系$\{2\}$的角速度为$\omega_2 = [0.5, 0, 0]^T$（在$\{2\}$中表示），那么坐标系$\{3\}$的绝对角速度为：
+
+\begin{align}
+\omega_3 &= R_3^T \omega_2 + \omega_{\text{rel}} \\
+&= R_3^T \begin{bmatrix} 0.5 \\ 0 \\ 0 \end{bmatrix}_{\{2\}} + \begin{bmatrix} 0 \\ 0 \\ 1.5 \end{bmatrix}_{\{3\}}
+\end{align}
+
+\textbf{注意}：
+\begin{itemize}
+\item $R_3^T \omega_2$将$\omega_2$从$\{2\}$转换到$\{3\}$
+\item $\omega_{\text{rel}}$已经在$\{3\}$中，可以直接相加
+\item 所有项都在$\{3\}$中表示，可以相加
+\end{itemize}
+
+\section{为什么在$\{i\}$中表示？}
+
+\subsection{原因1：与关节轴定义一致}
+
+\textbf{关节轴的定义}：
+
+在机器人学中，关节轴$z_i$通常在坐标系$\{i\}$中定义：
+\begin{equation}
+z_i = \begin{bmatrix} z_{i,x} \\ z_{i,y} \\ z_{i,z} \end{bmatrix}_{\{i\}}
+\end{equation}
+
+\textbf{自身角速度的定义}：
+
+坐标系$\{i\}$自身的角速度是沿关节轴方向的：
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i
+\end{equation}
+
+\textbf{结论}：
+
+由于$z_i$在$\{i\}$中定义，$\omega_{\text{rel}} = \dot{\theta}_i z_i$自然也在$\{i\}$中表示。这反映了坐标系$\{i\}$自身的旋转运动。
+
+\subsection{原因2：便于递归计算}
+
+\textbf{递归算法的特点}：
+
+在递归牛顿-欧拉算法中，所有量都在当前坐标系$\{i\}$中表示：
+\begin{itemize}
+\item $\omega_i$：在$\{i\}$中表示
+\item $v_i$：在$\{i\}$中表示
+\item $\omega_{\text{rel}}$：在$\{i\}$中表示
+\item $v_{\text{rel}}$：在$\{i\}$中表示
+\end{itemize}
+
+\textbf{速度合成公式}：
+
+\begin{align}
+\omega_i &= R_i^T \omega_{i-1} + \omega_{\text{rel}} \\
+v_i &= R_i^T (v_{i-1} + \omega_{i-1} \times p_i) + v_{\text{rel}}
+\end{align}
+
+\textbf{关键点}：
+
+\begin{itemize}
+\item $R_i^T \omega_{i-1}$将$\omega_{i-1}$从$\{i-1\}$转换到$\{i\}$
+\item $\omega_{\text{rel}}$已经在$\{i\}$中
+\item 两者都在$\{i\}$中，可以直接相加
+\end{itemize}
+
+\subsection{原因3：物理直观性}
+
+\textbf{物理意义}：
+
+$\omega_{\text{rel}}$是坐标系$\{i\}$自身的角速度，描述了坐标系$\{i\}$自身的旋转运动。
+
+\textbf{在$\{i\}$中表示的优势}：
+
+\begin{itemize}
+\item 直接反映了坐标系$\{i\}$自身的旋转运动
+\item 与坐标系$\{i\}$的基向量对齐，物理意义清晰
+\item 便于理解坐标系$\{i\}$自身的运动状态
+\item 如果坐标系$\{i-1\}$固定，$\omega_{\text{rel}}$就是坐标系$\{i\}$的绝对角速度
+\end{itemize}
+
+\section{与其他表示方法的对比}
+
+\subsection{方法1：在$\{i\}$中表示（标准方法）}
+
+\textbf{表达式}：
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i \quad \text{（在$\{i\}$中表示）}
+\end{equation}
+
+\textbf{优点}：
+\begin{itemize}
+\item 与关节轴定义一致
+\item 便于递归计算
+\item 物理意义直观
+\end{itemize}
+
+\textbf{速度合成}：
+\begin{equation}
+\omega_i = R_i^T \omega_{i-1} + \omega_{\text{rel}}
+\end{equation}
+
+\subsection{方法2：在$\{i-1\}$中表示（理论可能）}
+
+\textbf{表达式}：
+\begin{equation}
+\omega_{\text{rel},\{i-1\}} = R_i \omega_{\text{rel},\{i\}} = R_i (\dot{\theta}_i z_i)
+\end{equation}
+
+\textbf{缺点}：
+\begin{itemize}
+\item 需要额外的坐标变换
+\item 与关节轴定义不一致
+\item 在递归算法中不常用
+\end{itemize}
+
+\textbf{速度合成}（如果使用这种方法）：
+\begin{equation}
+\omega_i = R_i^T (\omega_{i-1} + \omega_{\text{rel},\{i-1\}})
+\end{equation}
+
+\textbf{注意}：这种方法在理论上可行，但在实际应用中不常用。
+
+\section{总结}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{定义}：
+\begin{itemize}
+\item $\omega_{\text{rel}}$是坐标系$\{i\}$自身的角速度
+\item 它描述了坐标系$\{i\}$相对于$\{i-1\}$的旋转
+\item 表达式：$\omega_{\text{rel}} = \dot{\theta}_i z_i$
+\end{itemize}
+
+\item \textbf{表示}：
+\begin{itemize}
+\item $\omega_{\text{rel}}$在坐标系$\{i\}$中表示
+\item 原因：与关节轴$z_i$的定义一致，反映坐标系$\{i\}$自身的旋转
+\end{itemize}
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 这是坐标系$\{i\}$自身的角速度，由关节$i$的运动产生
+\item 如果坐标系$\{i-1\}$固定，$\omega_{\text{rel}}$就是坐标系$\{i\}$的绝对角速度
+\item 方向沿关节轴$z_i$，大小等于$\dot{\theta}_i$
+\end{itemize}
+
+\item \textbf{应用}：
+\begin{itemize}
+\item 在速度合成公式中使用：$\omega_i = R_i^T \omega_{i-1} + \omega_{\text{rel}}$
+\item 所有项都在$\{i\}$中表示，可以直接相加
+\end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{自身角速度}：
+\begin{equation}
+\omega_{\text{rel}} = \dot{\theta}_i z_i \quad \text{（在$\{i\}$中表示）}
+\end{equation}
+
+\textbf{其中}：
+\begin{itemize}
+\item $\dot{\theta}_i$：关节$i$的角速度（标量）
+\item $z_i$：关节$i$的旋转轴（在$\{i\}$中表示的单位向量）
+\item $\omega_{\text{rel}} \in \mathbb{R}^3$：坐标系$\{i\}$自身的角速度（在$\{i\}$中表示的3维向量）
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item $\omega_{\text{rel}}$是坐标系$\{i\}$自身的角速度
+\item 它由关节$i$的运动直接产生
+\item 在坐标系$\{i\}$中表示，反映了坐标系$\{i\}$自身的旋转状态
+\end{itemize}
+
+\end{document}
+

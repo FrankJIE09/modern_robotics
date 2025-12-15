@@ -1,0 +1,510 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{低定位精度情况下的导纳控制策略}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+\textbf{问题}：在装配任务中，如果夹爪对于物体抓取位置的重复定位精度不高（误差2-3cm），应该使用何种导纳控制？
+
+\textbf{关键挑战}：
+\begin{itemize}
+\item 位置误差大（2-3cm）
+\item 需要柔顺性来适应位置误差
+\item 避免产生过大的接触力
+\item 需要自动调整位置
+\end{itemize}
+
+\section{问题分析}
+
+\subsection{定位精度不高的原因}
+
+\textbf{可能的来源}：
+\begin{enumerate}
+\item \textbf{视觉定位误差}：
+\begin{itemize}
+\item 相机标定误差
+\item 图像处理误差
+\item 光照条件变化
+\end{itemize}
+
+\item \textbf{机器人定位误差}：
+\begin{itemize}
+\item 关节编码器误差
+\item 机器人标定误差
+\item 机械间隙
+\end{itemize}
+
+\item \textbf{物体位置变化}：
+\begin{itemize}
+\item 物体放置位置不固定
+\item 传送带上的位置变化
+\item 夹具定位误差
+\end{itemize}
+
+\item \textbf{环境因素}：
+\begin{itemize}
+\item 温度变化
+\item 振动
+\item 磨损
+\end{itemize}
+\end{enumerate}
+
+\subsection{对装配任务的影响}
+
+\textbf{问题}：
+\begin{itemize}
+\item 如果使用位置控制，夹爪可能无法正确抓取物体
+\item 如果位置误差太大，可能产生碰撞
+\item 如果接触力太大，可能损坏物体或机器人
+\end{itemize}
+
+\textbf{需求}：
+\begin{itemize}
+\item 需要柔顺性来适应位置误差
+\item 需要自动调整位置
+\item 需要控制接触力
+\end{itemize}
+
+\section{导纳控制方案选择}
+
+\subsection{方案1：标准导纳控制（不推荐）}
+
+\textbf{公式}：
+\begin{equation}
+M\ddot{x}_d + B\dot{x} + Kx = f_{\text{ext}} \tag{11.64}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 使用当前状态$x, \dot{x}$
+\item 没有期望轨迹$x_d$
+\item 只响应外力
+\item 位置可能漂移
+\end{itemize}
+
+\textbf{问题}：
+\begin{itemize}
+\item 没有期望位置，无法引导夹爪到目标位置
+\item 位置可能漂移，不适合装配任务
+\item 不能利用已知的（虽然不精确的）目标位置信息
+\end{itemize}
+
+\textbf{结论}：\textbf{不推荐}用于定位精度不高的装配任务。
+
+\subsection{方案2：结合轨迹跟踪的导纳控制（推荐）}
+
+\textbf{公式}：
+\begin{equation}
+M\ddot{x}_d + B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \tag{*}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 有期望轨迹$x_d$（虽然不精确）
+\item 使用误差项$x_e = x_d - x, \dot{x}_e = \dot{x}_d - \dot{x}$
+\item 既跟踪轨迹，又响应外力
+\item 位置不会漂移
+\end{itemize}
+
+\textbf{优势}：
+\begin{itemize}
+\item \textbf{有期望位置}：即使$x_d$不精确，仍然可以引导夹爪到大致位置
+\item \textbf{柔顺性}：通过低刚度$K$，允许偏离期望位置
+\item \textbf{自动调整}：当接触力$f_{\text{ext}}$出现时，自动调整位置
+\item \textbf{不会漂移}：有期望位置作为参考
+\end{itemize}
+
+\textbf{参数选择}：
+\begin{itemize}
+\item \textbf{低刚度$K$}：允许2-3cm的位置误差
+\item \textbf{中等阻尼$B$}：提供平滑响应
+\item \textbf{小质量$M$或$M = 0$}：快速响应
+\end{itemize}
+
+\textbf{结论}：\textbf{推荐}用于定位精度不高的装配任务。
+
+\subsection{方案3：忽略$M$的导纳控制（推荐）}
+
+\textbf{公式}：
+\begin{equation}
+B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}} \tag{**}
+\end{equation}
+
+\textbf{特点}：
+\begin{itemize}
+\item 忽略虚拟质量$M = 0$
+\item 直接计算期望速度$\dot{x}_d$
+\item 实现更简单
+\end{itemize}
+
+\textbf{求解期望速度}：
+\begin{equation}
+\dot{x}_d = \dot{x} + B^{-1}[f_{\text{ext}} - K(x_d - x)]
+\end{equation}
+
+\textbf{优势}：
+\begin{itemize}
+\item \textbf{计算简单}：不需要计算加速度
+\item \textbf{快速响应}：没有质量延迟
+\item \textbf{适合速度控制}：直接输出速度命令
+\end{itemize}
+
+\textbf{参数选择}：
+\begin{itemize}
+\item \textbf{低刚度$K$}：例如，$K = 100-500$ N/m（允许2-3cm误差）
+\item \textbf{中等阻尼$B$}：例如，$B = 20-100$ N·s/m
+\end{itemize}
+
+\textbf{结论}：\textbf{推荐}用于定位精度不高的装配任务，特别是速度控制执行器。
+
+\section{参数设计策略}
+
+\subsection{刚度$K$的选择}
+
+\textbf{原则}：刚度$K$应该足够小，以允许位置误差。
+
+\textbf{计算}：
+
+假设位置误差$\Delta x = 2-3$ cm = 0.02-0.03 m，期望接触力$f_{\text{contact}} = 10-50$ N。
+
+根据导纳控制公式：
+\begin{equation}
+K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+如果位置误差$\Delta x = x_d - x = 0.025$ m，接触力$f_{\text{ext}} = 20$ N：
+\begin{equation}
+K = \frac{f_{\text{ext}}}{\Delta x} = \frac{20}{0.025} = 800 \text{ N/m}
+\end{equation}
+
+\textbf{但为了安全裕度}，应该选择更小的$K$：
+\begin{equation}
+K = 100-500 \text{ N/m}
+\end{equation}
+
+\textbf{理由}：
+\begin{itemize}
+\item 如果$K = 200$ N/m，位置误差0.025 m产生5 N的力（安全）
+\item 如果$K = 1000$ N/m，位置误差0.025 m产生25 N的力（可能过大）
+\end{itemize}
+
+\subsection{阻尼$B$的选择}
+
+\textbf{原则}：阻尼$B$应该足够大，以提供平滑响应，但不能太大，以免响应太慢。
+
+\textbf{经验值}：
+\begin{equation}
+B = 20-100 \text{ N·s/m}
+\end{equation}
+
+\textbf{设计考虑}：
+\begin{itemize}
+\item 如果$B$太小：可能产生振荡
+\item 如果$B$太大：响应太慢，可能无法及时调整位置
+\end{itemize}
+
+\textbf{临界阻尼}：
+
+对于一阶系统（$M = 0$），没有临界阻尼的概念。但对于二阶系统（$M \neq 0$），临界阻尼为：
+\begin{equation}
+B_{\text{critical}} = 2\sqrt{MK}
+\end{equation}
+
+如果$M = 0.1$ kg，$K = 200$ N/m：
+\begin{equation}
+B_{\text{critical}} = 2\sqrt{0.1 \times 200} = 8.9 \text{ N·s/m}
+\end{equation}
+
+\textbf{推荐}：$B = 2-5$倍临界阻尼，即$B = 20-50$ N·s/m。
+
+\subsection{质量$M$的选择}
+
+\textbf{选项1}：忽略$M$（$M = 0$）
+
+\textbf{优势}：
+\begin{itemize}
+\item 计算简单
+\item 快速响应
+\item 适合速度控制
+\end{itemize}
+
+\textbf{劣势}：
+\begin{itemize}
+\item 不能模拟质量
+\item 响应可能过快
+\end{itemize}
+
+\textbf{选项2}：使用小$M$
+
+\textbf{推荐值}：
+\begin{equation}
+M = 0.1-1 \text{ kg}
+\end{equation}
+
+\textbf{优势}：
+\begin{itemize}
+\item 提供平滑响应
+\item 有惯性阻尼
+\end{itemize}
+
+\textbf{劣势}：
+\begin{itemize}
+\item 需要计算加速度
+\item 计算更复杂
+\end{itemize}
+
+\section{具体实现方案}
+
+\subsection{方案A：低刚度导纳控制（推荐）}
+
+\textbf{控制律}：
+\begin{equation}
+B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+\textbf{参数}：
+\begin{align}
+K &= 200 \text{ N/m} \quad \text{（低刚度，允许2-3cm误差）} \\
+B &= 50 \text{ N·s/m} \quad \text{（中等阻尼）} \\
+M &= 0 \quad \text{（忽略质量）}
+\end{align}
+
+\textbf{实现步骤}：
+\begin{enumerate}
+\item \textbf{获取期望位置}：$x_d$（虽然不精确，但有大致位置）
+\item \textbf{测量当前位置}：$x$（由编码器测量）
+\item \textbf{测量接触力}：$f_{\text{ext}}$（由力传感器测量）
+\item \textbf{计算期望速度}：
+\begin{equation}
+\dot{x}_d = \dot{x} + B^{-1}[f_{\text{ext}} - K(x_d - x)]
+\end{equation}
+\item \textbf{转换为关节速度}：
+\begin{equation}
+\dot{\theta}_d = J^{\dagger}(\theta)\dot{x}_d
+\end{equation}
+\item \textbf{控制关节速度}：$\dot{\theta} = \dot{x}_d$
+\end{enumerate}
+
+\subsection{方案B：自适应刚度导纳控制}
+
+\textbf{思想}：根据接触力动态调整刚度$K$。
+
+\textbf{策略}：
+\begin{itemize}
+\item \textbf{初始阶段}（无接触）：使用低刚度$K_{\text{low}} = 100$ N/m
+\item \textbf{接触阶段}（有接触力）：逐渐增加刚度$K_{\text{high}} = 500$ N/m
+\item \textbf{装配阶段}：使用中等刚度$K_{\text{medium}} = 300$ N/m
+\end{itemize}
+
+\textbf{切换条件}：
+\begin{equation}
+K = \begin{cases}
+K_{\text{low}} & \text{如果 } |f_{\text{ext}}| < f_{\text{threshold}} \\
+K_{\text{medium}} & \text{如果 } f_{\text{threshold}} \leq |f_{\text{ext}}| < 2f_{\text{threshold}} \\
+K_{\text{high}} & \text{如果 } |f_{\text{ext}}| \geq 2f_{\text{threshold}}
+\end{cases}
+\end{equation}
+
+\textbf{优势}：
+\begin{itemize}
+\item 初始阶段柔顺，允许位置误差
+\item 接触后增加刚度，提高精度
+\item 自适应调整
+\end{itemize}
+
+\subsection{方案C：方向分解导纳控制}
+
+\textbf{思想}：在不同方向上使用不同的刚度。
+
+\textbf{对于装配任务}：
+\begin{itemize}
+\item \textbf{插入方向}（$z$轴）：中等刚度$K_z = 500$ N/m（需要一定的插入力）
+\item \textbf{横向方向}（$x, y$轴）：低刚度$K_x = K_y = 100$ N/m（允许位置误差）
+\item \textbf{旋转方向}：低刚度$K_{\theta} = 10$ N·m/rad（允许角度误差）
+\end{itemize}
+
+\textbf{控制律}：
+\begin{equation}
+\begin{bmatrix}
+B_x & 0 & 0 \\
+0 & B_y & 0 \\
+0 & 0 & B_z
+\end{bmatrix}
+\begin{bmatrix}
+\dot{x}_{d,x} - \dot{x}_x \\
+\dot{x}_{d,y} - \dot{x}_y \\
+\dot{x}_{d,z} - \dot{x}_z
+\end{bmatrix}
++
+\begin{bmatrix}
+K_x & 0 & 0 \\
+0 & K_y & 0 \\
+0 & 0 & K_z
+\end{bmatrix}
+\begin{bmatrix}
+x_{d,x} - x_x \\
+x_{d,y} - x_y \\
+x_{d,z} - x_z
+\end{bmatrix}
+=
+\begin{bmatrix}
+f_{\text{ext},x} \\
+f_{\text{ext},y} \\
+f_{\text{ext},z}
+\end{bmatrix}
+\end{equation}
+
+\textbf{优势}：
+\begin{itemize}
+\item 在横向方向柔顺，允许位置误差
+\item 在插入方向有足够的刚度，提供插入力
+\item 更灵活
+\end{itemize}
+
+\section{实际应用示例}
+
+\subsection{示例：轴孔装配（定位精度2-3cm）}
+
+\textbf{场景}：
+\begin{itemize}
+\item 轴直径：$d_{\text{peg}} = 10$ mm
+\item 孔直径：$d_{\text{hole}} = 10.1$ mm
+\item 间隙：$0.1$ mm（很小）
+\item 定位精度：$\pm 2-3$ cm（很大）
+\end{itemize}
+
+\textbf{挑战}：
+\begin{itemize}
+\item 位置误差（2-3cm）远大于装配间隙（0.1mm）
+\item 需要柔顺性来适应位置误差
+\item 需要自动调整位置
+\end{itemize}
+
+\textbf{解决方案}：使用方向分解导纳控制
+
+\textbf{参数选择}：
+\begin{align}
+K_x = K_y &= 100 \text{ N/m} \quad \text{（低刚度，允许横向位置误差）} \\
+K_z &= 2000 \text{ N/m} \quad \text{（中等刚度，提供插入力）} \\
+K_{\theta_x} = K_{\theta_y} &= 10 \text{ N·m/rad} \quad \text{（低刚度，允许角度误差）} \\
+B_x = B_y &= 50 \text{ N·s/m} \quad \text{（中等阻尼）} \\
+B_z &= 100 \text{ N·s/m} \quad \text{（中等阻尼）} \\
+B_{\theta_x} = B_{\theta_y} &= 5 \text{ N·m·s/rad} \quad \text{（中等阻尼）} \\
+M &= 0 \quad \text{（忽略质量）}
+\end{align}
+
+\textbf{控制流程}：
+\begin{enumerate}
+\item \textbf{接近阶段}：
+\begin{itemize}
+\item 移动到大致位置$x_d$（可能有2-3cm误差）
+\item 使用低刚度$K_x, K_y = 100$ N/m
+\item 允许位置误差
+\end{itemize}
+
+\item \textbf{接触阶段}：
+\begin{itemize}
+\item 检测接触力$f_{\text{ext}}$
+\item 自动调整位置（响应接触力）
+\item 横向方向柔顺，允许调整
+\end{itemize}
+
+\item \textbf{插入阶段}：
+\begin{itemize}
+\item 在$z$方向施加插入力
+\item 横向方向继续柔顺，自动适应位置误差
+\item 完成装配
+\end{itemize}
+\end{enumerate}
+
+\section{总结和建议}
+
+\subsection{推荐方案}
+
+\textbf{对于定位精度不高（2-3cm误差）的装配任务}，推荐使用：
+
+\begin{enumerate}
+\item \textbf{结合轨迹跟踪的导纳控制}：
+\begin{equation}
+B(\dot{x}_d - \dot{x}) + K(x_d - x) = f_{\text{ext}}
+\end{equation}
+
+\item \textbf{忽略虚拟质量}（$M = 0$）：
+\begin{itemize}
+\item 计算简单
+\item 快速响应
+\item 适合速度控制执行器
+\end{itemize}
+
+\item \textbf{低刚度参数}：
+\begin{itemize}
+\item $K = 100-500$ N/m（允许2-3cm位置误差）
+\item $B = 20-100$ N·s/m（提供平滑响应）
+\end{itemize}
+
+\item \textbf{方向分解}（可选）：
+\begin{itemize}
+\item 横向方向：低刚度（允许位置误差）
+\item 插入方向：中等刚度（提供插入力）
+\end{itemize}
+\end{enumerate}
+
+\subsection{关键要点}
+
+\begin{enumerate}
+\item \textbf{必须有期望位置$x_d$}：
+\begin{itemize}
+\item 即使不精确，仍然可以引导夹爪
+\item 避免位置漂移
+\end{itemize}
+
+\item \textbf{低刚度是关键}：
+\begin{itemize}
+\item 允许位置误差
+\item 避免产生过大的接触力
+\end{itemize}
+
+\item \textbf{柔顺性}：
+\begin{itemize}
+\item 通过低刚度实现
+\item 自动适应位置误差
+\end{itemize}
+
+\item \textbf{快速响应}：
+\begin{itemize}
+\item 忽略质量$M = 0$
+\item 直接计算速度
+\end{itemize}
+\end{enumerate}
+
+\subsection{参数选择总结}
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{参数} & \textbf{推荐值} & \textbf{理由} \\
+\hline
+$K$（横向） & $100-500$ N/m & 允许2-3cm位置误差 \\
+\hline
+$K$（插入） & $1000-5000$ N/m & 提供插入力 \\
+\hline
+$B$ & $20-100$ N·s/m & 提供平滑响应 \\
+\hline
+$M$ & $0$ & 快速响应，简化计算 \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}
+

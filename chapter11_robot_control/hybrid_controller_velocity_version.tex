@@ -1,0 +1,356 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\title{混合运动-力控制器的速度控制版本}
+\author{第11章补充说明}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题提出}
+
+原始混合运动-力控制器公式(11.61)：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\left(\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e\right) + (I - P(\theta))\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(t)dt\right) + \tilde{\eta}(\theta, V_b)\Bigg] \tag{11.61}
+\end{equation}
+
+\textbf{问题}：如果控制的是末端速度而不是加速度，公式应该怎么写？
+
+\section{加速度控制 vs 速度控制}
+
+\subsection{加速度控制（原始公式）}
+
+\textbf{特点}：
+\begin{itemize}
+\item 控制器输出期望加速度$\dot{V}_d$
+\item 需要计算$\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d)$
+\item 使用质量矩阵$\tilde{\Lambda}(\theta)$将加速度转换为力
+\item 适用于可以控制加速度的系统
+\end{itemize}
+
+\textbf{运动控制部分}：
+\begin{equation}
+F_{\text{motion}} = \tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e
+\end{equation}
+
+\subsection{速度控制}
+
+\textbf{特点}：
+\begin{itemize}
+\item 控制器直接输出期望速度$V_d$
+\item 不需要计算加速度
+\item 不需要质量矩阵（或使用简化的质量矩阵）
+\item 适用于只能控制速度的系统
+\end{itemize}
+
+\textbf{运动控制部分}：
+\begin{equation}
+F_{\text{motion}} = K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e
+\end{equation}
+
+\section{速度控制版本的推导}
+
+\subsection{基本思路}
+
+\textbf{目标}：设计速度控制器，使得末端执行器速度$V_b$跟踪期望速度$V_d$。
+
+\textbf{方法}：
+\begin{enumerate}
+\item 定义速度误差：$V_e = V_d - V_b$
+\item 使用PID控制器产生控制力
+\item 投影到运动控制子空间
+\item 与力控制器组合
+\end{enumerate}
+
+\subsection{速度控制器的设计}
+
+\textbf{速度误差}：
+\begin{equation}
+V_e = V_d - V_b
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $V_d$：期望的末端执行器速度（在体坐标系$\{b\}$中）
+\item $V_b$：实际的末端执行器速度（在体坐标系$\{b\}$中）
+\end{itemize}
+
+\textbf{位置误差}：
+\begin{equation}
+X_e = \log(X^{-1}X_d)
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $X$：实际的末端执行器位姿
+\item $X_d$：期望的末端执行器位姿
+\item $X_e$：位置误差（在SE(3)中）
+\end{itemize}
+
+\textbf{速度控制器}：
+\begin{equation}
+F_{\text{motion}} = K_p X_e + K_i\int_0^t X_e(\tau)d\tau + K_d V_e
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $K_p$：位置比例增益矩阵
+\item $K_i$：位置积分增益矩阵
+\item $K_d$：速度微分增益矩阵
+\end{itemize}
+
+\subsection{完整的速度控制公式}
+
+\textbf{混合运动-力控制器（速度控制版本）}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\left(K_p X_e + K_i\int_0^t X_e(\tau)d\tau + K_d V_e\right) + (I - P(\theta))\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(\tau)d\tau\right) + \tilde{\eta}(\theta, V_b)\Bigg] \tag{11.61-velocity}
+\end{equation}
+
+\textbf{与原始公式的对比}：
+
+\textbf{原始公式（加速度控制）}：
+\begin{equation}
+F_{\text{motion}} = \tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d) + K_p X_e + K_i\int_0^t X_e(t)dt + K_d V_e
+\end{equation}
+
+\textbf{速度控制版本}：
+\begin{equation}
+F_{\text{motion}} = K_p X_e + K_i\int_0^t X_e(\tau)d\tau + K_d V_e
+\end{equation}
+
+\textbf{主要区别}：
+\begin{itemize}
+\item \textbf{移除了加速度项}：$\tilde{\Lambda}(\theta)\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d)$
+\item \textbf{保留了PID项}：$K_p X_e + K_i\int X_e dt + K_d V_e$
+\item \textbf{力控制部分不变}：$(I-P)(F_d + K_{fp}F_e + K_{fi}\int F_e dt)$
+\item \textbf{补偿项不变}：$\tilde{\eta}(\theta, V_b)$
+\end{itemize}
+
+\section{详细解释}
+
+\subsection{各项的物理意义}
+
+\textbf{运动控制部分}：$P(\theta)(K_p X_e + K_i\int X_e dt + K_d V_e)$
+
+\begin{itemize}
+\item \textbf{$K_p X_e$}：位置误差的比例项
+\begin{itemize}
+\item 产生与位置误差成比例的力
+\item 使系统向期望位置移动
+\end{itemize}
+
+\item \textbf{$K_i\int X_e dt$}：位置误差的积分项
+\begin{itemize}
+\item 消除稳态误差
+\item 累积位置误差，产生持续的控制力
+\end{itemize}
+
+\item \textbf{$K_d V_e$}：速度误差的微分项
+\begin{itemize}
+\item 产生与速度误差成比例的阻尼力
+\item 稳定系统，减少振荡
+\end{itemize}
+
+\item \textbf{$P(\theta)$}：投影到运动控制子空间
+\begin{itemize}
+\item 确保控制力只影响自由运动方向
+\item 不影响约束方向
+\end{itemize}
+\end{itemize}
+
+\textbf{力控制部分}：$(I-P(\theta))(F_d + K_{fp}F_e + K_{fi}\int F_e dt)$
+
+\begin{itemize}
+\item \textbf{$F_d$}：期望的力
+\item \textbf{$K_{fp}F_e$}：力误差的比例项
+\item \textbf{$K_{fi}\int F_e dt$}：力误差的积分项
+\item \textbf{$(I-P(\theta))$}：投影到力控制子空间
+\end{itemize}
+
+\textbf{补偿项}：$\tilde{\eta}(\theta, V_b)$
+
+\begin{itemize}
+\item 科里奥利力、向心力和重力补偿
+\item 消除这些干扰项的影响
+\end{itemize}
+
+\subsection{速度误差的定义}
+
+\textbf{关键问题}：如何定义$V_e$？
+
+\textbf{方法1：直接差值}
+\begin{equation}
+V_e = V_d - V_b
+\end{equation}
+
+其中$V_d$和$V_b$都在体坐标系$\{b\}$中表示。
+
+\textbf{方法2：考虑位姿变换}
+\begin{equation}
+V_e = [Ad_{X^{-1}X_d}]V_d - V_b
+\end{equation}
+
+这考虑了期望位姿$X_d$和实际位姿$X$之间的变换。
+
+\textbf{推荐}：使用方法2，因为它考虑了位姿误差的影响。
+
+\section{速度控制 vs 加速度控制}
+
+\subsection{适用场景}
+
+\textbf{加速度控制}：
+\begin{itemize}
+\item 适用于可以控制加速度的系统
+\item 需要精确的动力学模型
+\item 响应更快，性能更好
+\item 但实现更复杂
+\end{itemize}
+
+\textbf{速度控制}：
+\begin{itemize}
+\item 适用于只能控制速度的系统
+\item 不需要精确的加速度模型
+\item 实现更简单
+\item 但响应可能较慢
+\end{itemize}
+
+\subsection{性能对比}
+
+\textbf{加速度控制}：
+\begin{itemize}
+\item \textbf{优点}：
+\begin{itemize}
+\item 可以精确控制加速度
+\item 响应快
+\item 性能好
+\end{itemize}
+\item \textbf{缺点}：
+\begin{itemize}
+\item 需要计算$\frac{d}{dt}([Ad_{X^{-1}X_d}]V_d)$
+\item 需要质量矩阵$\tilde{\Lambda}(\theta)$
+\item 对模型误差敏感
+\end{itemize}
+\end{itemize}
+
+\textbf{速度控制}：
+\begin{itemize}
+\item \textbf{优点}：
+\begin{itemize}
+\item 实现简单
+\item 不需要加速度计算
+\item 对模型误差不敏感
+\end{itemize}
+\item \textbf{缺点}：
+\begin{itemize}
+\item 响应可能较慢
+\item 性能可能不如加速度控制
+\item 需要较大的增益来补偿
+\end{itemize}
+\end{itemize}
+
+\section{实际实现}
+
+\subsection{离散时间实现}
+
+\textbf{速度控制器的离散时间形式}：
+
+\textbf{位置误差}：
+\begin{equation}
+X_e(k) = \log(X^{-1}(k)X_d(k))
+\end{equation}
+
+\textbf{速度误差}：
+\begin{equation}
+V_e(k) = [Ad_{X^{-1}(k)X_d(k)}]V_d(k) - V_b(k)
+\end{equation}
+
+\textbf{积分项}：
+\begin{equation}
+I(k+1) = I(k) + X_e(k)\Delta t
+\end{equation}
+
+\textbf{控制力}：
+\begin{equation}
+F_{\text{motion}}(k) = K_p X_e(k) + K_i I(k+1) + K_d V_e(k)
+\end{equation}
+
+\textbf{完整控制器}：
+\begin{equation}
+\tau(k) = J_b^T(\theta(k))\Bigg[P(\theta(k))F_{\text{motion}}(k) + (I - P(\theta(k)))F_{\text{force}}(k) + \tilde{\eta}(\theta(k), V_b(k))\Bigg]
+\end{equation}
+
+\subsection{参数选择}
+
+\textbf{增益矩阵的选择}：
+
+\begin{itemize}
+\item \textbf{$K_p$}：位置比例增益
+\begin{itemize}
+\item 较大的$K_p$：响应快，但可能不稳定
+\item 较小的$K_p$：响应慢，但更稳定
+\end{itemize}
+
+\item \textbf{$K_i$}：位置积分增益
+\begin{itemize}
+\item 消除稳态误差
+\item 但可能导致超调和振荡
+\item 需要添加积分器抗饱和
+\end{itemize}
+
+\item \textbf{$K_d$}：速度微分增益
+\begin{itemize}
+\item 提供阻尼，稳定系统
+\item 减少超调和振荡
+\end{itemize}
+\end{itemize}
+
+\section{总结}
+
+\subsection{速度控制版本的公式}
+
+\textbf{混合运动-力控制器（速度控制版本）}：
+\begin{equation}
+\tau = J_b^T(\theta)\Bigg[P(\theta)\left(K_p X_e + K_i\int_0^t X_e(\tau)d\tau + K_d V_e\right) + (I - P(\theta))\left(F_d + K_{fp}F_e + K_{fi}\int_0^t F_e(\tau)d\tau\right) + \tilde{\eta}(\theta, V_b)\Bigg]
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $X_e = \log(X^{-1}X_d)$：位置误差
+\item $V_e = [Ad_{X^{-1}X_d}]V_d - V_b$：速度误差（推荐）
+\item 或$V_e = V_d - V_b$：速度误差（简化）
+\item $P(\theta)$：投影到运动控制子空间
+\item $I - P(\theta)$：投影到力控制子空间
+\end{itemize}
+
+\subsection{与原始公式的对比}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{原始公式（加速度控制）} & \textbf{速度控制版本} \\
+\hline
+包含加速度项$\tilde{\Lambda}\frac{d}{dt}([Ad]V_d)$ & 不包含加速度项 \\
+需要质量矩阵$\tilde{\Lambda}$ & 不需要质量矩阵 \\
+需要计算加速度 & 只需要速度 \\
+响应快，性能好 & 响应较慢，但实现简单 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{选择建议}
+
+\begin{itemize}
+\item \textbf{如果可以控制加速度}：使用原始公式(11.61)
+\item \textbf{如果只能控制速度}：使用速度控制版本
+\item \textbf{如果系统响应要求高}：优先考虑加速度控制
+\item \textbf{如果实现简单性优先}：使用速度控制
+\end{itemize}
+
+\end{document}
+
