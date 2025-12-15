@@ -1,0 +1,471 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{$\dot{T} = [V]T$的详细证明}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+在机器人学中，齐次变换矩阵$T(t) \in SE(3)$的时间导数与其twist $V$之间存在重要关系：
+
+\begin{equation}
+\dot{T} = [V] T
+\label{eq:main_theorem}
+\end{equation}
+
+其中$[V]$是twist $V$的反对称矩阵表示（$4 \times 4$矩阵）。这个关系是理解刚体运动学和动力学的基础。本文将提供这个重要结果的详细证明。
+
+\section{预备知识}
+
+\subsection{齐次变换矩阵}
+
+齐次变换矩阵$T \in SE(3)$的形式为：
+
+\begin{equation}
+T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $R \in SO(3)$：旋转矩阵（$3 \times 3$）
+\item $p \in \mathbb{R}^3$：平移向量
+\item $SE(3)$：特殊欧氏群（Special Euclidean Group）
+\end{itemize}
+
+\subsection{Twist的定义}
+
+\textbf{Twist} $V \in \mathbb{R}^6$定义为：
+
+\begin{equation}
+V = \begin{bmatrix} \omega \\ v \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega \in \mathbb{R}^3$：角速度向量
+\item $v \in \mathbb{R}^3$：线速度向量
+\end{itemize}
+
+\subsection{Twist的反对称矩阵表示}
+
+对于twist $V = (\omega, v)$，其反对称矩阵表示为$4 \times 4$矩阵：
+
+\begin{equation}
+[V] = \begin{bmatrix}
+[\omega] & v \\
+0 & 0
+\end{bmatrix} = \begin{bmatrix}
+0 & -\omega_z & \omega_y & v_x \\
+\omega_z & 0 & -\omega_x & v_y \\
+-\omega_y & \omega_x & 0 & v_z \\
+0 & 0 & 0 & 0
+\end{bmatrix}
+\label{eq:V_bracket}
+\end{equation}
+
+其中$[\omega]$是角速度$\omega$的$3 \times 3$反对称矩阵：
+
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\subsection{旋转矩阵的导数}
+
+对于旋转矩阵$R(t) \in SO(3)$，其导数满足：
+
+\begin{equation}
+\dot{R} = [\omega_s] R = R [\omega_b]
+\label{eq:R_dot}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_s$：空间角速度（在固定坐标系中表示）
+\item $\omega_b$：体角速度（在旋转坐标系中表示）
+\end{itemize}
+
+\section{证明方法1：从点的运动出发}
+
+\subsection{基本思路}
+
+考虑固定在刚体上的点。如果刚体以twist $V$运动，则点的速度可以通过$\dot{T} = [V]T$来描述。
+
+\subsection{详细证明}
+
+\textbf{步骤1}：考虑固定在刚体上的点
+
+设$q_0$是固定在刚体上的一个点（在刚体坐标系中的坐标）。在固定坐标系中，该点的位置为：
+
+\begin{equation}
+q(t) = T(t) q_0 = R(t) q_0 + p(t)
+\end{equation}
+
+\textbf{步骤2}：计算点的速度
+
+对时间求导：
+
+\begin{align}
+\dot{q}(t) &= \dot{R}(t) q_0 + \dot{p}(t) \\
+&= [\omega_s] R(t) q_0 + v_s
+\end{align}
+
+其中：
+\begin{itemize}
+\item $\omega_s$是空间角速度（在固定坐标系中表示）
+\item $v_s$是空间线速度（在固定坐标系中表示）
+\end{itemize}
+
+\textbf{步骤3}：使用twist表示
+
+定义空间twist $V_s = \begin{bmatrix} \omega_s \\ v_s \end{bmatrix}$，则：
+
+\begin{align}
+\dot{q}(t) &= [\omega_s] R(t) q_0 + v_s \\
+&= \begin{bmatrix} [\omega_s] & v_s \\ 0 & 0 \end{bmatrix} \begin{bmatrix} R(t) q_0 \\ 1 \end{bmatrix} \\
+&= [V_s] \begin{bmatrix} R(t) q_0 \\ 1 \end{bmatrix}
+\end{align}
+
+\textbf{步骤4}：扩展到齐次坐标
+
+在齐次坐标中，$q_0 = \begin{bmatrix} q_{0,xyz} \\ 1 \end{bmatrix}$，$q = \begin{bmatrix} q_{xyz} \\ 1 \end{bmatrix} = T q_0$。
+
+因此：
+\begin{equation}
+\dot{q} = [V_s] q = [V_s] T q_0
+\end{equation}
+
+\textbf{步骤5}：直接计算$\dot{q}$
+
+另一方面，直接对$q = T q_0$求导：
+
+\begin{equation}
+\dot{q} = \dot{T} q_0
+\end{equation}
+
+\textbf{步骤6}：比较两种表达式}
+
+由于$q_0$是任意的，我们得到：
+
+\begin{equation}
+\dot{T} q_0 = [V_s] T q_0
+\end{equation}
+
+对所有$q_0$成立，因此：
+
+\begin{equation}
+\dot{T} = [V_s] T
+\label{eq:proof1_result}
+\end{equation}
+
+\textbf{证毕！}
+
+\section{证明方法2：直接计算矩阵元素}
+
+\subsection{基本思路}
+
+直接计算$\dot{T}$和$[V]T$的每个元素，证明它们相等。
+
+\subsection{详细证明}
+
+\textbf{步骤1}：计算$\dot{T}$
+
+对于$T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}$：
+
+\begin{equation}
+\dot{T} = \begin{bmatrix} \dot{R} & \dot{p} \\ 0 & 0 \end{bmatrix}
+\label{eq:T_dot_calc}
+\end{equation}
+
+\textbf{步骤2}：计算$[V]T$
+
+设$V = \begin{bmatrix} \omega \\ v \end{bmatrix}$，则：
+
+\begin{align}
+[V]T &= \begin{bmatrix} [\omega] & v \\ 0 & 0 \end{bmatrix} \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} [\omega]R & [\omega]p + v \\ 0 & 0 \end{bmatrix}
+\label{eq:V_bracket_T}
+\end{align}
+
+\textbf{步骤3}：使用旋转矩阵的导数关系}
+
+从方程(\ref{eq:R_dot})，我们知道：
+
+\begin{equation}
+\dot{R} = [\omega_s] R
+\end{equation}
+
+其中$\omega_s$是空间角速度。
+
+\textbf{步骤4}：确定线速度}
+
+对于平移部分，我们需要确定$v$。
+
+考虑刚体原点的运动。如果刚体原点在固定坐标系中的位置是$p(t)$，则其速度为$\dot{p}(t)$。
+
+但是，由于刚体在旋转，原点的速度不仅包括平移速度，还包括由于旋转产生的速度。
+
+\textbf{更精确的分析}：
+
+对于固定在刚体上的点，其速度由两部分组成：
+\begin{enumerate}
+\item 由于刚体平移产生的速度：$v_s$
+\item 由于刚体旋转产生的速度：$\omega_s \times (q - p_0)$，其中$p_0$是旋转中心
+\end{enumerate}
+
+对于刚体原点本身（$q = p$），如果旋转中心在原点，则：
+
+\begin{equation}
+\dot{p} = v_s + \omega_s \times p
+\end{equation}
+
+使用反对称矩阵：
+\begin{equation}
+\dot{p} = v_s + [\omega_s] p
+\end{equation}
+
+因此：
+\begin{equation}
+v_s = \dot{p} - [\omega_s] p
+\end{equation}
+
+\textbf{步骤5}：验证等式}
+
+现在验证$\dot{T} = [V_s]T$：
+
+\begin{align}
+[V_s]T &= \begin{bmatrix} [\omega_s]R & [\omega_s]p + v_s \\ 0 & 0 \end{bmatrix} \\
+&= \begin{bmatrix} [\omega_s]R & [\omega_s]p + (\dot{p} - [\omega_s]p) \\ 0 & 0 \end{bmatrix} \\
+&= \begin{bmatrix} [\omega_s]R & \dot{p} \\ 0 & 0 \end{bmatrix} \\
+&= \begin{bmatrix} \dot{R} & \dot{p} \\ 0 & 0 \end{bmatrix} \quad \text{（因为$\dot{R} = [\omega_s]R$）} \\
+&= \dot{T}
+\end{align}
+
+\textbf{因此}：$\dot{T} = [V_s]T$，其中$V_s = \begin{bmatrix} \omega_s \\ \dot{p} - [\omega_s]p \end{bmatrix}$是空间twist。
+
+\textbf{证毕！}
+
+\section{证明方法3：使用指数映射}
+
+\subsection{基本思路}
+
+利用$SE(3)$的指数映射性质来证明。
+
+\subsection{详细证明}
+
+\textbf{步骤1}：指数映射
+
+任意$T \in SE(3)$可以表示为：
+
+\begin{equation}
+T(t) = \exp([S]\theta(t))
+\end{equation}
+
+其中$S$是螺旋轴，$\theta$是运动参数。
+
+\textbf{步骤2}：对时间求导}
+
+\begin{align}
+\dot{T}(t) &= \frac{d}{dt}[\exp([S]\theta(t))] \\
+&= [S]\dot{\theta}(t) \exp([S]\theta(t)) \\
+&= [S]\dot{\theta}(t) T(t)
+\end{align}
+
+\textbf{步骤3}：识别twist}
+
+定义twist $V = S\dot{\theta}$，则：
+
+\begin{equation}
+\dot{T} = [V] T
+\end{equation}
+
+\textbf{证毕！}
+
+\section{空间Twist与Body Twist}
+
+\subsection{两种表示}
+
+\textbf{空间Twist} $V_s$：
+\begin{itemize}
+\item 在固定坐标系中表示
+\item 满足：$\dot{T} = [V_s] T$
+\end{itemize}
+
+\textbf{Body Twist} $V_b$：
+\begin{itemize}
+\item 在运动坐标系中表示
+\item 满足：$T^{-1} \dot{T} = [V_b]$
+\end{itemize}
+
+\subsection{关系推导}
+
+从$\dot{T} = [V_s] T$，左乘$T^{-1}$：
+
+\begin{equation}
+T^{-1} \dot{T} = T^{-1} [V_s] T
+\end{equation}
+
+\textbf{关键恒等式}：对于反对称矩阵和齐次变换矩阵，有：
+
+\begin{equation}
+T^{-1} [V_s] T = [\text{Ad}_{T^{-1}}(V_s)]
+\end{equation}
+
+其中$\text{Ad}_{T^{-1}}$是伴随变换。
+
+更直接地，可以证明：
+
+\begin{equation}
+T^{-1} [V_s] T = [V_b]
+\end{equation}
+
+其中$V_b$是Body Twist。
+
+\textbf{因此}：
+\begin{equation}
+T^{-1} \dot{T} = [V_b]
+\end{equation}
+
+\section{具体例子}
+
+\subsection{例子1：纯平移}
+
+考虑纯平移运动，$R = I$（单位矩阵），$p(t) = v_0 t$。
+
+\textbf{计算$\dot{T}$}：
+\begin{equation}
+\dot{T} = \begin{bmatrix} 0 & v_0 \\ 0 & 0 \end{bmatrix}
+\end{equation}
+
+\textbf{计算$[V]T$}：
+
+空间twist为$V_s = \begin{bmatrix} 0 \\ v_0 \end{bmatrix}$（无旋转，只有平移）。
+
+\begin{align}
+[V_s]T &= \begin{bmatrix} 0 & v_0 \\ 0 & 0 \end{bmatrix} \begin{bmatrix} I & p \\ 0 & 1 \end{bmatrix} \\
+&= \begin{bmatrix} 0 & v_0 \\ 0 & 0 \end{bmatrix} = \dot{T} \quad \checkmark
+\end{align}
+
+\subsection{例子2：绕固定轴旋转}
+
+考虑绕$z$轴旋转，旋转角度为$\theta(t)$，无平移。
+
+\textbf{旋转矩阵}：
+\begin{equation}
+R(t) = \begin{bmatrix}
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+\sin\theta(t) & \cos\theta(t) & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{计算$\dot{R}$}：
+\begin{equation}
+\dot{R}(t) = \dot{\theta}(t) \begin{bmatrix}
+-\sin\theta(t) & -\cos\theta(t) & 0 \\
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{空间角速度}：
+\begin{equation}
+\omega_s = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta}(t) \end{bmatrix}
+\end{equation}
+
+\textbf{计算$[\omega_s]R$}：
+\begin{align}
+[\omega_s]R &= \begin{bmatrix}
+0 & -\dot{\theta}(t) & 0 \\
+\dot{\theta}(t) & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix} \begin{bmatrix}
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+\sin\theta(t) & \cos\theta(t) & 0 \\
+0 & 0 & 1
+\end{bmatrix} \\
+&= \dot{\theta}(t) \begin{bmatrix}
+-\sin\theta(t) & -\cos\theta(t) & 0 \\
+\cos\theta(t) & -\sin\theta(t) & 0 \\
+0 & 0 & 0
+\end{bmatrix} = \dot{R}(t) \quad \checkmark
+\end{align}
+
+\textbf{因此}：$\dot{T} = [V_s]T$，其中$V_s = \begin{bmatrix} \omega_s \\ 0 \end{bmatrix}$。
+
+\section{应用}
+
+\subsection{在速度递推中的应用}
+
+在机器人动力学中，$\dot{T} = [V]T$用于速度递推：
+
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+这个递推关系的基础就是$\dot{T} = [V]T$。
+
+\subsection{在Body雅可比计算中的应用}
+
+从$T_{0i}^{-1}\dot{T}_{0i} = [V_i^b]$可以提取Body雅可比：
+
+\begin{equation}
+V_i^b = J_i^b(\theta) \dot{\theta}
+\end{equation}
+
+\section{总结}
+
+\subsection{主要结论}
+
+\begin{enumerate}
+\item \textbf{基本关系}：$\dot{T} = [V_s]T$，其中$V_s$是空间twist
+
+\item \textbf{Body形式}：$T^{-1}\dot{T} = [V_b]$，其中$V_b$是Body twist
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 空间twist $V_s$：从固定坐标系观察到的速度
+\item Body twist $V_b$：从运动坐标系自身观察到的速度
+\end{itemize}
+
+\item \textbf{关系}：$V_s = \text{Ad}_T(V_b)$
+\end{enumerate}
+
+\subsection{证明方法总结}
+
+\begin{itemize}
+\item \textbf{方法1}：从点的运动出发，通过速度分析
+\item \textbf{方法2}：直接计算矩阵元素，验证等式
+\item \textbf{方法3}：使用指数映射的性质
+\end{itemize}
+
+所有方法都证明了相同的结果：$\dot{T} = [V]T$。
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control
+\item 第3章：刚体运动（Twist和Screw理论）
+\item 第8章：开链动力学
+\end{itemize}
+
+\end{document}
+

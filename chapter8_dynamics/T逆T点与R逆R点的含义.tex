@@ -1,0 +1,426 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{$T^{-1}\dot{T}$与$R^{-1}\dot{R}$的含义：Body Twist与Body角速度}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+在机器人动力学中，我们经常遇到表达式$T^{-1}\dot{T}$和$R^{-1}\dot{R}$。这些表达式看似简单，但蕴含着深刻的物理和数学意义：
+
+\begin{itemize}
+\item $R^{-1}\dot{R}$表示\textbf{体角速度（body angular velocity）}的反对称矩阵
+\item $T^{-1}\dot{T}$表示\textbf{Body Twist}的反对称矩阵表示
+\item 从$T_{0i}^{-1}\dot{T}_{0i}$可以提取Body雅可比矩阵$J_i^b(\theta)$
+\end{itemize}
+
+本文将详细解释这些表达式的含义、推导过程及其在机器人学中的应用。
+
+\section{旋转矩阵的情况：$R^{-1}\dot{R}$}
+
+\subsection{基本关系}
+
+对于旋转矩阵$R(t) \in SO(3)$，其导数满足：
+\begin{equation}
+\dot{R} = [\omega_s] R = R [\omega_b]
+\label{eq:R_dot}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_s \in \mathbb{R}^3$：\textbf{空间角速度}（spatial angular velocity），在固定坐标系中表示
+\item $\omega_b \in \mathbb{R}^3$：\textbf{体角速度}（body angular velocity），在旋转坐标系中表示
+\item $[\omega]$：角速度向量的反对称矩阵
+\end{itemize}
+
+\subsection{$R^{-1}\dot{R}$的推导}
+
+从方程(\ref{eq:R_dot})，我们有：
+\begin{equation}
+R [\omega_b] = \dot{R}
+\end{equation}
+
+左乘$R^{-1} = R^T$（因为$R$是正交矩阵）：
+\begin{equation}
+R^{-1} \dot{R} = R^T \dot{R} = [\omega_b]
+\label{eq:R_inv_R_dot}
+\end{equation}
+
+\textbf{因此}：$R^{-1}\dot{R}$等于体角速度$\omega_b$的反对称矩阵$[\omega_b]$。
+
+\subsection{为什么$R^T \dot{R}$是反对称矩阵？}
+
+\textbf{证明}：对$R^T R = I$求时间导数：
+\begin{align}
+\frac{d}{dt}(R^T R) &= \dot{R}^T R + R^T \dot{R} = 0 \\
+R^T \dot{R} &= -(\dot{R}^T R) = -(R^T \dot{R})^T
+\end{align}
+
+因此：
+\begin{equation}
+(R^T \dot{R})^T = -R^T \dot{R}
+\end{equation}
+
+这说明$R^T \dot{R}$是反对称矩阵，因此可以表示为某个角速度向量的反对称矩阵。
+
+\subsection{物理意义}
+
+\textbf{空间角速度} $\omega_s$：
+\begin{itemize}
+\item 在固定坐标系（空间坐标系）中表示
+\item 满足：$[\omega_s] R = \dot{R}$
+\item 表示从固定坐标系观察到的角速度
+\end{itemize}
+
+\textbf{体角速度} $\omega_b$：
+\begin{itemize}
+\item 在旋转坐标系（体坐标系）中表示
+\item 满足：$R [\omega_b] = \dot{R}$，即$[\omega_b] = R^{-1} \dot{R}$
+\item 表示从旋转坐标系自身观察到的角速度
+\end{itemize}
+
+\textbf{关系}：
+\begin{equation}
+\omega_s = R \omega_b
+\label{eq:omega_relation}
+\end{equation}
+
+\textbf{证明}：
+\begin{align}
+[\omega_s] R &= \dot{R} = R [\omega_b] \\
+[\omega_s] &= R [\omega_b] R^T = [R \omega_b]
+\end{align}
+
+因此$\omega_s = R \omega_b$。
+
+\section{齐次变换矩阵的情况：$T^{-1}\dot{T}$}
+
+\subsection{基本关系}
+
+对于齐次变换矩阵$T(t) \in SE(3)$：
+\begin{equation}
+T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+其中$R \in SO(3)$是旋转矩阵，$p \in \mathbb{R}^3$是平移向量。
+
+\textbf{Twist的定义}：对于变换矩阵$T(t)$，存在twist $V$使得：
+\begin{equation}
+\dot{T} = [V] T
+\label{eq:T_dot}
+\end{equation}
+
+其中$[V]$是twist $V$的反对称矩阵表示（$4 \times 4$矩阵）。
+
+\subsection{$T^{-1}\dot{T}$的推导}
+
+从方程(\ref{eq:T_dot})：
+\begin{equation}
+\dot{T} = [V] T
+\end{equation}
+
+左乘$T^{-1}$：
+\begin{equation}
+T^{-1} \dot{T} = T^{-1} [V] T
+\end{equation}
+
+\textbf{关键观察}：$T^{-1} \dot{T}$给出了在体坐标系中表示的twist。
+
+\textbf{详细推导}：
+
+设$T = \begin{bmatrix} R & p \\ 0 & 1 \end{bmatrix}$，则：
+\begin{equation}
+T^{-1} = \begin{bmatrix} R^T & -R^T p \\ 0 & 1 \end{bmatrix}
+\end{equation}
+
+计算$\dot{T}$：
+\begin{equation}
+\dot{T} = \begin{bmatrix} \dot{R} & \dot{p} \\ 0 & 0 \end{bmatrix}
+\end{equation}
+
+因此：
+\begin{align}
+T^{-1} \dot{T} &= \begin{bmatrix} R^T & -R^T p \\ 0 & 1 \end{bmatrix} \begin{bmatrix} \dot{R} & \dot{p} \\ 0 & 0 \end{bmatrix} \\
+&= \begin{bmatrix} R^T \dot{R} & R^T \dot{p} \\ 0 & 0 \end{bmatrix}
+\end{align}
+
+\textbf{分析各部分}：
+
+\begin{enumerate}
+\item \textbf{左上角}：$R^T \dot{R} = [\omega_b]$（体角速度的反对称矩阵）
+
+\item \textbf{右上角}：$R^T \dot{p}$表示什么？
+
+考虑坐标系$\{B\}$相对于坐标系$\{A\}$的运动。设$p$是坐标系$\{B\}$原点在坐标系$\{A\}$中的位置。
+
+在坐标系$\{B\}$中观察到的线速度（体线速度）为：
+\begin{equation}
+v_b = R^T (\dot{p} - \omega_s \times p) = R^T \dot{p} - \omega_b \times (R^T p)
+\end{equation}
+
+更精确地，如果$p$是坐标系$\{B\}$原点在$\{A\}$中的位置，则：
+\begin{equation}
+v_b = R^T \dot{p}
+\end{equation}
+
+这是坐标系$\{B\}$原点在体坐标系中的线速度。
+\end{enumerate}
+
+\textbf{因此}：
+\begin{equation}
+T^{-1} \dot{T} = \begin{bmatrix} [\omega_b] & v_b \\ 0 & 0 \end{bmatrix} = [V_b]
+\label{eq:T_inv_T_dot}
+\end{equation}
+
+其中$V_b = \begin{bmatrix} \omega_b \\ v_b \end{bmatrix}$是\textbf{Body Twist}（在体坐标系中表示的twist）。
+
+\subsection{Body Twist与Spatial Twist}
+
+\textbf{Body Twist} $V_b$：
+\begin{itemize}
+\item 在运动坐标系（体坐标系）中表示
+\item 满足：$T^{-1} \dot{T} = [V_b]$
+\item 表示从运动坐标系自身观察到的速度
+\end{itemize}
+
+\textbf{Spatial Twist} $V_s$：
+\begin{itemize}
+\item 在固定坐标系（空间坐标系）中表示
+\item 满足：$\dot{T} = [V_s] T$
+\item 表示从固定坐标系观察到的速度
+\end{itemize}
+
+\textbf{关系}：通过伴随变换（adjoint transformation）：
+\begin{equation}
+V_s = \text{Ad}_T(V_b) = \begin{bmatrix} R & 0 \\ [p]R & R \end{bmatrix} V_b
+\end{equation}
+
+其中$\text{Ad}_T$是伴随变换矩阵。
+
+\section{从$T_{0i}^{-1}\dot{T}_{0i}$提取Body雅可比}
+
+\subsection{问题设置}
+
+设$T_{0i}(\theta_1, \ldots, \theta_i)$表示从基座坐标系$\{0\}$到连杆坐标系$\{i\}$的正向运动学变换。
+
+\textbf{目标}：找到Body雅可比$J_i^b(\theta)$，使得：
+\begin{equation}
+V_i^b = J_i^b(\theta) \dot{\theta}
+\label{eq:body_jacobian}
+\end{equation}
+
+其中$V_i^b$是连杆$i$在坐标系$\{i\}$中表示的Body Twist。
+
+\subsection{关键观察}
+
+\textbf{从$T_{0i}^{-1}\dot{T}_{0i}$提取Body Twist}：
+
+根据前面的推导：
+\begin{equation}
+T_{0i}^{-1} \dot{T}_{0i} = [V_i^b]
+\end{equation}
+
+这给出了连杆$i$的Body Twist的反对称矩阵表示。
+
+\subsection{Body雅可比的构造}
+
+\textbf{方法1：直接求导}
+
+对$T_{0i}(\theta)$关于$\theta_j$求偏导（$j = 1, \ldots, i$）：
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\end{equation}
+
+其中$A_j^b$是关节$j$的螺旋轴，在坐标系$\{i\}$中表示。
+
+因此：
+\begin{equation}
+T_{0i}^{-1} \frac{\partial T_{0i}}{\partial \theta_j} = [A_j^b]
+\end{equation}
+
+\textbf{Body雅可比的第$j$列}就是$A_j^b$（如果$j \leq i$），否则为零。
+
+\textbf{方法2：从$T_{0i}^{-1}\dot{T}_{0i}$提取}
+
+由于：
+\begin{equation}
+\dot{T}_{0i} = \sum_{j=1}^{i} \frac{\partial T_{0i}}{\partial \theta_j} \dot{\theta}_j = \sum_{j=1}^{i} T_{0i} [A_j^b] \dot{\theta}_j
+\end{equation}
+
+因此：
+\begin{align}
+T_{0i}^{-1} \dot{T}_{0i} &= \sum_{j=1}^{i} [A_j^b] \dot{\theta}_j \\
+&= \left[ \sum_{j=1}^{i} A_j^b \dot{\theta}_j \right] \\
+&= [V_i^b]
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+V_i^b = \sum_{j=1}^{i} A_j^b \dot{\theta}_j = J_i^b(\theta) \dot{\theta}
+\end{equation}
+
+其中Body雅可比$J_i^b(\theta)$的第$j$列是$A_j^b$（$j = 1, \ldots, i$），其余列为零。
+
+\subsection{完整Body雅可比的构造}
+
+由于$J_i^b$需要是$6 \times n$矩阵（$n$是总关节数），而$T_{0i}$只依赖于前$i$个关节，我们：
+
+\begin{enumerate}
+\item 计算前$i$列：从$T_{0i}^{-1}\dot{T}_{0i}$提取，每列对应一个关节的螺旋轴
+\item 填充后$n-i$列：全部为零（因为后$n-i$个关节不影响连杆$i$的运动）
+\end{enumerate}
+
+\textbf{因此}：
+\begin{equation}
+J_i^b(\theta) = \begin{bmatrix} A_1^b & A_2^b & \cdots & A_i^b & 0 & \cdots & 0 \end{bmatrix}
+\end{equation}
+
+\section{具体例子}
+
+\subsection{例子1：单关节旋转}
+
+考虑绕$z$轴旋转的单个关节，旋转角度为$\theta$。
+
+\textbf{旋转矩阵}：
+\begin{equation}
+R(\theta) = \begin{bmatrix}
+\cos\theta & -\sin\theta & 0 \\
+\sin\theta & \cos\theta & 0 \\
+0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{计算$R^{-1}\dot{R}$}：
+\begin{align}
+\dot{R}(\theta) &= \dot{\theta} \begin{bmatrix}
+-\sin\theta & -\cos\theta & 0 \\
+\cos\theta & -\sin\theta & 0 \\
+0 & 0 & 0
+\end{bmatrix} \\
+R^{-1} \dot{R} &= R^T \dot{R} = \dot{\theta} \begin{bmatrix}
+0 & -1 & 0 \\
+1 & 0 & 0 \\
+0 & 0 & 0
+\end{bmatrix} = [\omega_b]
+\end{align}
+
+其中$\omega_b = \begin{bmatrix} 0 \\ 0 \\ \dot{\theta} \end{bmatrix}$是体角速度。
+
+\textbf{验证}：这确实是绕$z$轴的角速度，在体坐标系中表示。
+
+\subsection{例子2：2R平面机器人}
+
+考虑2R平面机器人，两个关节都在$xy$平面内旋转。
+
+\textbf{正向运动学}：
+\begin{equation}
+T_{02}(\theta_1, \theta_2) = T_{01}(\theta_1) T_{12}(\theta_2)
+\end{equation}
+
+\textbf{计算$T_{02}^{-1}\dot{T}_{02}$}：
+
+这给出了末端执行器（连杆2）的Body Twist：
+\begin{equation}
+V_2^b = J_2^b(\theta) \begin{bmatrix} \dot{\theta}_1 \\ \dot{\theta}_2 \end{bmatrix}
+\end{equation}
+
+其中$J_2^b$的列是各个关节的螺旋轴在坐标系$\{2\}$中的表示。
+
+\section{在机器人动力学中的应用}
+
+\subsection{动能表达式}
+
+机器人的总动能可以表示为：
+\begin{equation}
+K = \frac{1}{2}\sum_{i=1}^{n} (V_i^b)^T G_i V_i^b
+\end{equation}
+
+其中$G_i$是连杆$i$的空间惯性矩阵（在坐标系$\{i\}$中表示）。
+
+使用$V_i^b = J_i^b(\theta) \dot{\theta}$：
+\begin{equation}
+K = \frac{1}{2}\dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta} = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}
+\end{equation}
+
+其中质量矩阵为：
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\end{equation}
+
+\subsection{Body雅可比的计算}
+
+在实际计算中，Body雅可比可以通过以下方式获得：
+
+\begin{enumerate}
+\item 计算正向运动学$T_{0i}(\theta)$
+\item 对每个关节角度$\theta_j$（$j = 1, \ldots, i$）求偏导
+\item 计算$T_{0i}^{-1} \frac{\partial T_{0i}}{\partial \theta_j}$，提取螺旋轴$A_j^b$
+\item 构造$J_i^b$的第$j$列为$A_j^b$
+\end{enumerate}
+
+\section{总结}
+
+\subsection{关键结论}
+
+\begin{enumerate}
+\item \textbf{$R^{-1}\dot{R} = [\omega_b]$}：
+\begin{itemize}
+\item 表示体角速度的反对称矩阵
+\item 在旋转坐标系中观察到的角速度
+\end{itemize}
+
+\item \textbf{$T^{-1}\dot{T} = [V_b]$}：
+\begin{itemize}
+\item 表示Body Twist的反对称矩阵
+\item 在运动坐标系中观察到的twist（包含角速度和线速度）
+\end{itemize}
+
+\item \textbf{从$T_{0i}^{-1}\dot{T}_{0i}$提取Body雅可比}：
+\begin{itemize}
+\item $T_{0i}^{-1}\dot{T}_{0i}$给出了连杆$i$的Body Twist
+\item Body雅可比$J_i^b$的列是各个关节的螺旋轴在坐标系$\{i\}$中的表示
+\item $V_i^b = J_i^b(\theta) \dot{\theta}$建立了关节速度与Body Twist的关系
+\end{itemize}
+\end{enumerate}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item \textbf{Body表示}：在运动坐标系自身中观察到的速度
+\item \textbf{Spatial表示}：在固定坐标系中观察到的速度
+\item \textbf{转换}：通过伴随变换$\text{Ad}_T$在两者之间转换
+\end{itemize}
+
+\subsection{在动力学中的重要性}
+
+\begin{itemize}
+\item Body雅可比用于构造质量矩阵$M(\theta)$
+\item 动能表达式：$K = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}$
+\item 在牛顿-欧拉算法中用于计算各连杆的速度和加速度
+\end{itemize}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control
+\item 第8章：开链动力学
+\item 第3章：刚体运动（Twist和Screw理论）
+\end{itemize}
+
+\end{document}
+

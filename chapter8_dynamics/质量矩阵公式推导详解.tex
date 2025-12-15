@@ -1,0 +1,332 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{质量矩阵公式$M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)$的详细推导}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+在机器人动力学中，质量矩阵$M(\theta)$是一个关键概念，它将关节加速度$\ddot{\theta}$与关节力矩$\tau$联系起来。质量矩阵的一个重要表达式是：
+
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\label{eq:mass_matrix}
+\end{equation}
+
+本文将详细解释为什么质量矩阵可以这样表示，以及这个公式的物理和数学意义。
+
+\section{推导的起点：动能表达式}
+
+\subsection{总动能为各连杆动能之和}
+
+机器人的总动能$K$等于所有连杆的动能之和：
+
+\begin{equation}
+K = \sum_{i=1}^{n} K_i
+\label{eq:total_kinetic_energy}
+\end{equation}
+
+其中$K_i$是连杆$i$的动能。
+
+\subsection{单个连杆的动能}
+
+对于连杆$i$，其动能可以表示为：
+
+\begin{equation}
+K_i = \frac{1}{2} V_i^T G_i V_i
+\label{eq:link_kinetic_energy}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $V_i \in \mathbb{R}^6$：连杆$i$的twist（在坐标系$\{i\}$中表示）
+\item $G_i \in \mathbb{R}^{6 \times 6}$：连杆$i$的空间惯性矩阵（在坐标系$\{i\}$中表示）
+\end{itemize}
+
+\textbf{为什么是这种形式？}
+
+空间惯性矩阵$G_i$的定义使得：
+\begin{equation}
+G_i = \begin{bmatrix} I_i & 0 \\ 0 & m_i I \end{bmatrix}
+\end{equation}
+
+其中$I_i$是连杆$i$的惯性张量，$m_i$是质量。因此：
+\begin{align}
+V_i^T G_i V_i &= \begin{bmatrix} \omega_i^T & v_i^T \end{bmatrix} \begin{bmatrix} I_i & 0 \\ 0 & m_i I \end{bmatrix} \begin{bmatrix} \omega_i \\ v_i \end{bmatrix} \\
+&= \omega_i^T I_i \omega_i + m_i v_i^T v_i
+\end{align}
+
+这正是旋转动能$\frac{1}{2}\omega_i^T I_i \omega_i$和平移动能$\frac{1}{2}m_i v_i^T v_i$之和。
+
+\textbf{因此}：
+\begin{equation}
+K = \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i
+\label{eq:kinetic_energy_sum}
+\end{equation}
+
+\section{关键步骤：将Twist表示为关节速度的函数}
+
+\subsection{Body雅可比的定义}
+
+设$T_{0i}(\theta_1, \ldots, \theta_i)$表示从基座坐标系$\{0\}$到连杆坐标系$\{i\}$的正向运动学变换。
+
+\textbf{Body雅可比}$J_i^b(\theta)$定义为：从$T_{0i}^{-1}\dot{T}_{0i}$提取的雅可比矩阵，它将关节速度$\dot{\theta}$映射到连杆$i$的Body Twist：
+
+\begin{equation}
+V_i = J_i^b(\theta) \dot{\theta}
+\label{eq:body_jacobian}
+\end{equation}
+
+\textbf{注意}：
+\begin{itemize}
+\item $J_i^b(\theta)$是一个$6 \times n$矩阵（$n$是总关节数）
+\item 前$i$列对应影响连杆$i$的关节
+\item 后$n-i$列全为零（因为后$n-i$个关节不影响连杆$i$）
+\end{itemize}
+
+\subsection{为什么可以这样表示？}
+
+\textbf{物理意义}：连杆$i$的速度$V_i$是由前$i$个关节的运动产生的。每个关节$j$（$j = 1, \ldots, i$）对连杆$i$速度的贡献是$A_j^b \dot{\theta}_j$，其中$A_j^b$是关节$j$的螺旋轴在坐标系$\{i\}$中的表示。
+
+因此：
+\begin{equation}
+V_i = \sum_{j=1}^{i} A_j^b \dot{\theta}_j = J_i^b(\theta) \dot{\theta}
+\end{equation}
+
+其中$J_i^b(\theta)$的第$j$列是$A_j^b$（$j \leq i$），否则为零。
+
+\section{推导质量矩阵公式}
+
+\subsection{步骤1：代入Body雅可比}
+
+将方程(\ref{eq:body_jacobian})代入方程(\ref{eq:kinetic_energy_sum})：
+
+\begin{align}
+K &= \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i \\
+&= \frac{1}{2}\sum_{i=1}^{n} (J_i^b(\theta) \dot{\theta})^T G_i (J_i^b(\theta) \dot{\theta}) \\
+&= \frac{1}{2}\sum_{i=1}^{n} \dot{\theta}^T J_i^b(\theta)^T G_i J_i^b(\theta) \dot{\theta}
+\label{eq:kinetic_energy_jacobian}
+\end{align}
+
+\textbf{矩阵转置的性质}：$(AB)^T = B^T A^T$，因此$(J_i^b \dot{\theta})^T = \dot{\theta}^T (J_i^b)^T$。
+
+\subsection{步骤2：提取$\dot{\theta}$}
+
+由于$\dot{\theta}$是公共因子，可以提取出来：
+
+\begin{align}
+K &= \frac{1}{2}\sum_{i=1}^{n} \dot{\theta}^T J_i^b(\theta)^T G_i J_i^b(\theta) \dot{\theta} \\
+&= \frac{1}{2}\dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta}
+\label{eq:kinetic_energy_extracted}
+\end{align}
+
+\textbf{关键观察}：括号内的项$\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)$是一个$n \times n$矩阵。
+
+\subsection{步骤3：动能的一般形式}
+
+在拉格朗日动力学中，动能$K$必须是关于广义速度$\dot{\theta}$的\textbf{二次型}：
+
+\begin{equation}
+K = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}
+\label{eq:kinetic_energy_general}
+\end{equation}
+
+其中$M(\theta)$是\textbf{质量矩阵}（也称为广义质量矩阵或惯性矩阵）。
+
+\textbf{为什么必须是二次型？}
+
+\begin{enumerate}
+\item \textbf{物理原因}：动能是速度的平方的函数（$K = \frac{1}{2}mv^2$），因此必须是速度的二次型。
+
+\item \textbf{数学原因}：在拉格朗日方程中，动能对广义速度的偏导数是：
+\begin{equation}
+\frac{\partial K}{\partial \dot{\theta}} = M(\theta) \dot{\theta}
+\end{equation}
+
+这要求$K$是$\dot{\theta}$的二次型。
+
+\item \textbf{能量守恒}：动能必须是正定的二次型，这保证了系统的能量是正的。
+\end{enumerate}
+
+\subsection{步骤4：识别质量矩阵}
+
+比较方程(\ref{eq:kinetic_energy_extracted})和(\ref{eq:kinetic_energy_general})：
+
+\begin{align}
+K &= \frac{1}{2}\dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta} \\
+&= \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}
+\end{align}
+
+\textbf{因此}，质量矩阵必须是：
+
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\label{eq:mass_matrix_final}
+\end{equation}
+
+\textbf{证毕！}
+
+\section{公式的物理意义}
+
+\subsection{每一项的贡献}
+
+质量矩阵$M(\theta)$的每一项$J_i^b(\theta)^T G_i J_i^b(\theta)$表示：
+
+\begin{itemize}
+\item \textbf{连杆$i$对总惯性的贡献}
+\item 通过Body雅可比$J_i^b$将连杆$i$的惯性$G_i$从twist空间映射到关节空间
+\item 所有连杆的贡献相加得到总的质量矩阵
+\end{itemize}
+
+\subsection{矩阵乘法的意义}
+
+\textbf{$J_i^b(\theta)^T G_i J_i^b(\theta)$的含义}：
+
+\begin{enumerate}
+\item \textbf{$J_i^b(\theta) \dot{\theta}$}：将关节速度映射到连杆$i$的twist
+\item \textbf{$G_i (J_i^b(\theta) \dot{\theta})$}：计算连杆$i$的动量（twist乘以惯性矩阵）
+\item \textbf{$(J_i^b(\theta) \dot{\theta})^T G_i (J_i^b(\theta) \dot{\theta})$}：计算连杆$i$的动能（twist的转置乘以动量）
+\item \textbf{提取$\dot{\theta}$}：得到关于$\dot{\theta}$的二次型，系数矩阵就是$J_i^b(\theta)^T G_i J_i^b(\theta)$
+\end{enumerate}
+
+\subsection{质量矩阵的性质}
+
+\begin{enumerate}
+\item \textbf{对称性}：$M(\theta) = M(\theta)^T$
+
+\textbf{证明}：
+\begin{align}
+M(\theta)^T &= \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right)^T \\
+&= \sum_{i=1}^{n} (J_i^b(\theta)^T G_i J_i^b(\theta))^T \\
+&= \sum_{i=1}^{n} J_i^b(\theta)^T G_i^T (J_i^b(\theta)^T)^T \\
+&= \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta) \quad \text{（因为$G_i$对称）} \\
+&= M(\theta)
+\end{align}
+
+\item \textbf{正定性}：$M(\theta)$是正定矩阵
+
+\textbf{证明}：对于任意非零$\dot{\theta}$：
+\begin{align}
+\dot{\theta}^T M(\theta) \dot{\theta} &= \dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta} \\
+&= \sum_{i=1}^{n} (J_i^b(\theta) \dot{\theta})^T G_i (J_i^b(\theta) \dot{\theta}) \\
+&= 2\sum_{i=1}^{n} K_i > 0
+\end{align}
+
+因为每个连杆的动能$K_i > 0$（除非所有速度为零），所以$M(\theta)$是正定的。
+
+\item \textbf{配置依赖性}：$M(\theta)$依赖于关节配置$\theta$，因为Body雅可比$J_i^b(\theta)$依赖于$\theta$。
+\end{enumerate}
+
+\section{具体例子}
+
+\subsection{例子1：单连杆机器人}
+
+对于单连杆机器人（$n = 1$）：
+
+\begin{equation}
+M(\theta) = J_1^b(\theta)^T G_1 J_1^b(\theta)
+\end{equation}
+
+如果关节是旋转关节，$J_1^b$是$6 \times 1$矩阵，$M(\theta)$是标量（$1 \times 1$矩阵），即等效转动惯量。
+
+\subsection{例子2：2R平面机器人}
+
+对于2R平面机器人（$n = 2$）：
+
+\begin{align}
+M(\theta) &= J_1^b(\theta)^T G_1 J_1^b(\theta) + J_2^b(\theta)^T G_2 J_2^b(\theta) \\
+&= \begin{bmatrix} M_{11} & M_{12} \\ M_{21} & M_{22} \end{bmatrix}
+\end{align}
+
+其中：
+\begin{itemize}
+\item $M_{11}$：关节1的等效惯量（包括连杆1和连杆2的影响）
+\item $M_{22}$：关节2的等效惯量（主要是连杆2的影响）
+\item $M_{12} = M_{21}$：关节1和关节2之间的耦合惯量
+\end{itemize}
+
+\section{与拉格朗日方程的关系}
+
+\subsection{拉格朗日方程}
+
+在拉格朗日动力学中，运动方程为：
+
+\begin{equation}
+\tau = \frac{d}{dt}\frac{\partial K}{\partial \dot{\theta}} - \frac{\partial K}{\partial \theta}
+\end{equation}
+
+\subsection{计算$\frac{\partial K}{\partial \dot{\theta}}$}
+
+使用$K = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}$：
+
+\begin{align}
+\frac{\partial K}{\partial \dot{\theta}} &= \frac{\partial}{\partial \dot{\theta}} \left(\frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}\right) \\
+&= M(\theta) \dot{\theta}
+\end{align}
+
+\textbf{因此}：
+\begin{equation}
+\frac{d}{dt}\frac{\partial K}{\partial \dot{\theta}} = M(\theta) \ddot{\theta} + \dot{M}(\theta) \dot{\theta}
+\end{equation}
+
+这给出了动力学方程中的$M(\theta)\ddot{\theta}$项和$\dot{M}(\theta)\dot{\theta}$项（后者是科里奥利力的一部分）。
+
+\section{总结}
+
+\subsection{推导的关键步骤}
+
+\begin{enumerate}
+\item \textbf{总动能}：$K = \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i$
+
+\item \textbf{Body雅可比}：$V_i = J_i^b(\theta) \dot{\theta}$
+
+\item \textbf{代入}：$K = \frac{1}{2}\dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta}$
+
+\item \textbf{识别质量矩阵}：由于$K = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}$，所以：
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\end{equation}
+\end{enumerate}
+
+\subsection{为什么这个公式是正确的？}
+
+\begin{itemize}
+\item \textbf{数学上}：动能必须是关于$\dot{\theta}$的二次型，系数矩阵就是质量矩阵
+\item \textbf{物理上}：质量矩阵将关节空间的加速度与力矩联系起来，而每个连杆通过其Body雅可比贡献惯性
+\item \textbf{几何上}：Body雅可比将关节速度映射到twist空间，惯性矩阵在twist空间中作用，然后通过转置的雅可比映射回关节空间
+\end{itemize}
+
+\subsection{公式的重要性}
+
+\begin{itemize}
+\item 提供了质量矩阵的\textbf{解析表达式}
+\item 揭示了质量矩阵的\textbf{结构}：各连杆贡献的叠加
+\item 便于\textbf{数值计算}：可以递归计算每个连杆的贡献
+\item 揭示了\textbf{耦合项}的来源：不同连杆的雅可比之间的相互作用
+\end{itemize}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control
+\item 第8章：开链动力学
+\item 拉格朗日动力学理论
+\end{itemize}
+
+\end{document}
+

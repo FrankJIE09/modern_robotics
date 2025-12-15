@@ -1,0 +1,555 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{封闭形式动力学方程的详细推导}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+本节详细推导如何将递归的牛顿-欧拉逆向动力学算法组织成封闭形式的动力学方程：
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta)
+\label{eq:closed_form}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M(\theta)$：质量矩阵（惯性矩阵）
+\item $c(\theta, \dot{\theta})$：科里奥利力和向心力项
+\item $g(\theta)$：重力项
+\end{itemize}
+
+\section{第一部分：动能与质量矩阵}
+
+\subsection{总动能的表达式}
+
+机器人的总动能$K$等于所有连杆的动能之和：
+
+\begin{equation}
+K = \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i
+\label{eq:kinetic_energy_sum}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $V_i \in \mathbb{R}^6$：连杆$i$的twist（在坐标系$\{i\}$中表示）
+\item $G_i \in \mathbb{R}^{6 \times 6}$：连杆$i$的空间惯性矩阵（在坐标系$\{i\}$中表示）
+\end{itemize}
+
+\subsection{Body雅可比}
+
+设$T_{0i}(\theta_1, \ldots, \theta_i)$表示从基座坐标系$\{0\}$到连杆坐标系$\{i\}$的正向运动学。
+
+\textbf{Body雅可比}$J_i^b(\theta)$定义为：从$T_{0i}^{-1}\dot{T}_{0i}$提取的雅可比矩阵，它将关节速度$\dot{\theta}$映射到连杆$i$的Body Twist：
+
+\begin{equation}
+V_i = J_i^b(\theta) \dot{\theta}, \quad i = 1, \ldots, n
+\label{eq:body_jacobian}
+\end{equation}
+
+\textbf{注意}：$J_i^b(\theta)$是一个$6 \times n$矩阵，前$i$列对应影响连杆$i$的关节，后$n-i$列全为零。
+
+\subsection{质量矩阵的推导}
+
+将方程(\ref{eq:body_jacobian})代入方程(\ref{eq:kinetic_energy_sum})：
+
+\begin{align}
+K &= \frac{1}{2}\sum_{i=1}^{n} (J_i^b(\theta) \dot{\theta})^T G_i (J_i^b(\theta) \dot{\theta}) \\
+&= \frac{1}{2}\sum_{i=1}^{n} \dot{\theta}^T J_i^b(\theta)^T G_i J_i^b(\theta) \dot{\theta} \\
+&= \frac{1}{2}\dot{\theta}^T \left(\sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)\right) \dot{\theta}
+\end{align}
+
+由于动能的一般形式是$K = \frac{1}{2}\dot{\theta}^T M(\theta) \dot{\theta}$，因此：
+
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\label{eq:mass_matrix}
+\end{equation}
+
+\section{第二部分：堆叠向量和矩阵的定义}
+
+\subsection{堆叠向量}
+
+为了将递归算法组织成矩阵形式，我们定义以下堆叠向量：
+
+\textbf{堆叠的Twist向量}：
+\begin{equation}
+V = \begin{bmatrix} V_1 \\ V_2 \\ \vdots \\ V_n \end{bmatrix} \in \mathbb{R}^{6n}
+\label{eq:stacked_V}
+\end{equation}
+
+\textbf{堆叠的Wrench向量}：
+\begin{equation}
+F = \begin{bmatrix} F_1 \\ F_2 \\ \vdots \\ F_n \end{bmatrix} \in \mathbb{R}^{6n}
+\label{eq:stacked_F}
+\end{equation}
+
+\textbf{基座速度向量}：
+\begin{equation}
+V_{\text{base}} = \begin{bmatrix} \text{Ad}_{T_{10}}(V_0) \\ 0 \\ \vdots \\ 0 \end{bmatrix} \in \mathbb{R}^{6n}
+\label{eq:V_base}
+\end{equation}
+
+\textbf{基座加速度向量}：
+\begin{equation}
+\dot{V}_{\text{base}} = \begin{bmatrix} \text{Ad}_{T_{10}}(\dot{V}_0) \\ 0 \\ \vdots \\ 0 \end{bmatrix} \in \mathbb{R}^{6n}
+\label{eq:V_dot_base}
+\end{equation}
+
+\textbf{末端执行器力向量}：
+\begin{equation}
+F_{\text{tip}} = \begin{bmatrix} 0 \\ \vdots \\ 0 \\ \text{Ad}_{T_{n+1,n}}^T(F_{n+1}) \end{bmatrix} \in \mathbb{R}^{6n}
+\label{eq:F_tip}
+\end{equation}
+
+\subsection{块对角矩阵}
+
+\textbf{螺旋轴矩阵}：
+\begin{equation}
+A = \begin{bmatrix}
+A_1 & 0 & \cdots & 0 \\
+0 & A_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & A_n
+\end{bmatrix} \in \mathbb{R}^{6n \times n}
+\label{eq:matrix_A}
+\end{equation}
+
+其中$A_i \in \mathbb{R}^6$是关节$i$的螺旋轴（在坐标系$\{i\}$中表示）。
+
+\textbf{空间惯性矩阵}：
+\begin{equation}
+G = \begin{bmatrix}
+G_1 & 0 & \cdots & 0 \\
+0 & G_2 & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & G_n
+\end{bmatrix} \in \mathbb{R}^{6n \times 6n}
+\label{eq:matrix_G}
+\end{equation}
+
+\textbf{Ad算子矩阵}：
+\begin{equation}
+[\text{ad}_V] = \begin{bmatrix}
+[\text{ad}_{V_1}] & 0 & \cdots & 0 \\
+0 & [\text{ad}_{V_2}] & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & [\text{ad}_{V_n}]
+\end{bmatrix} \in \mathbb{R}^{6n \times 6n}
+\label{eq:matrix_ad_V}
+\end{equation}
+
+\textbf{Ad算子矩阵（关节速度）}：
+\begin{equation}
+[\text{ad}_{A\dot{\theta}}] = \begin{bmatrix}
+[\text{ad}_{A_1\dot{\theta}_1}] & 0 & \cdots & 0 \\
+0 & [\text{ad}_{A_2\dot{\theta}_2}] & \cdots & 0 \\
+\vdots & \vdots & \ddots & \vdots \\
+0 & 0 & \cdots & [\text{ad}_{A_n\dot{\theta}_n}]
+\end{bmatrix} \in \mathbb{R}^{6n \times 6n}
+\label{eq:matrix_ad_A_theta_dot}
+\end{equation}
+
+\subsection{传递矩阵$W(\theta)$}
+
+\textbf{定义}：传递矩阵$W(\theta)$定义为：
+
+\begin{equation}
+W(\theta) = \begin{bmatrix}
+0 & 0 & \cdots & 0 & 0 \\
+[\text{Ad}_{T_{21}}] & 0 & \cdots & 0 & 0 \\
+0 & [\text{Ad}_{T_{32}}] & \cdots & 0 & 0 \\
+\vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & \cdots & [\text{Ad}_{T_{n,n-1}}] & 0
+\end{bmatrix} \in \mathbb{R}^{6n \times 6n}
+\label{eq:matrix_W}
+\end{equation}
+
+\textbf{物理意义}：$W(\theta)$表示速度从前一个连杆传递到下一个连杆的变换。
+
+\textbf{重要性质}：$W(\theta)$是\textbf{幂零矩阵}（nilpotent），即：
+\begin{equation}
+W^n(\theta) = 0
+\label{eq:W_nilpotent}
+\end{equation}
+
+这意味着$W(\theta)$的$n$次幂为零矩阵。
+
+\section{第三部分：递归算法的矩阵形式}
+
+\subsection{速度递推的矩阵形式}
+
+从递归算法中的速度递推公式：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i
+\end{equation}
+
+可以写成矩阵形式：
+\begin{equation}
+V = W(\theta)V + A\dot{\theta} + V_{\text{base}}
+\label{eq:matrix_V}
+\end{equation}
+
+\textbf{推导}：
+
+对于$i = 1$：
+\begin{equation}
+V_1 = \text{Ad}_{T_{10}}(V_0) + A_1 \dot{\theta}_1 = [W(\theta)V]_1 + [A\dot{\theta}]_1 + [V_{\text{base}}]_1
+\end{equation}
+
+对于$i > 1$：
+\begin{equation}
+V_i = \text{Ad}_{T_{i,i-1}}(V_{i-1}) + A_i \dot{\theta}_i = [W(\theta)V]_i + [A\dot{\theta}]_i
+\end{equation}
+
+因此方程(\ref{eq:matrix_V})成立。
+
+\subsection{加速度递推的矩阵形式}
+
+从递归算法中的加速度递推公式：
+\begin{equation}
+\dot{V}_i = \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i
+\end{equation}
+
+可以写成矩阵形式：
+\begin{equation}
+\dot{V} = W(\theta)\dot{V} + A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}}
+\label{eq:matrix_V_dot}
+\end{equation}
+
+\textbf{详细推导}：
+
+对于$i = 1$：
+\begin{align}
+\dot{V}_1 &= \text{Ad}_{T_{10}}(\dot{V}_0) + \text{ad}_{V_1}(A_1)\dot{\theta}_1 + A_1 \ddot{\theta}_1 \\
+&= [W(\theta)\dot{V}]_1 + [A\ddot{\theta}]_1 - [\text{ad}_{A_1\dot{\theta}_1}]V_1 + [\dot{V}_{\text{base}}]_1
+\end{align}
+
+对于$i > 1$：
+\begin{align}
+\dot{V}_i &= \text{Ad}_{T_{i,i-1}}(\dot{V}_{i-1}) + \text{ad}_{V_i}(A_i)\dot{\theta}_i + A_i \ddot{\theta}_i \\
+&= [W(\theta)\dot{V}]_i + [A\ddot{\theta}]_i - [\text{ad}_{A_i\dot{\theta}_i}]V_i
+\end{align}
+
+注意到$V = W(\theta)V + A\dot{\theta} + V_{\text{base}}$，因此：
+\begin{equation}
+[\text{ad}_{A\dot{\theta}}]V = [\text{ad}_{A\dot{\theta}}](W(\theta)V + A\dot{\theta} + V_{\text{base}})
+\end{equation}
+
+由于$[\text{ad}_{A\dot{\theta}}](A\dot{\theta}) = 0$（反对称性），我们得到方程(\ref{eq:matrix_V_dot})。
+
+\subsection{力递推的矩阵形式}
+
+从递归算法中的力递推公式：
+\begin{equation}
+F_i = \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - \text{ad}_{V_i}^T(G_i V_i)
+\end{equation}
+
+可以写成矩阵形式：
+\begin{equation}
+F = W^T(\theta)F + G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}
+\label{eq:matrix_F}
+\end{equation}
+
+\textbf{推导}：
+
+对于$i = n$：
+\begin{equation}
+F_n = G_n \dot{V}_n - \text{ad}_{V_n}^T(G_n V_n) + \text{Ad}_{T_{n+1,n}}^T(F_{n+1})
+\end{equation}
+
+对于$i < n$：
+\begin{equation}
+F_i = \text{Ad}_{T_{i+1,i}}^T(F_{i+1}) + G_i \dot{V}_i - \text{ad}_{V_i}^T(G_i V_i)
+\end{equation}
+
+写成矩阵形式即为方程(\ref{eq:matrix_F})。
+
+\subsection{关节力矩}
+
+关节力矩为：
+\begin{equation}
+\tau = A^T F
+\label{eq:matrix_tau}
+\end{equation}
+
+\textbf{推导}：对于每个关节$i$，$\tau_i = A_i^T F_i$，因此：
+\begin{equation}
+\tau = \begin{bmatrix} A_1^T F_1 \\ A_2^T F_2 \\ \vdots \\ A_n^T F_n \end{bmatrix} = A^T F
+\end{equation}
+
+\section{第四部分：求解矩阵方程}
+
+\subsection{求解速度方程}
+
+从方程(\ref{eq:matrix_V})：
+\begin{equation}
+V = W(\theta)V + A\dot{\theta} + V_{\text{base}}
+\end{equation}
+
+移项：
+\begin{equation}
+(I - W(\theta))V = A\dot{\theta} + V_{\text{base}}
+\end{equation}
+
+\textbf{关键}：由于$W(\theta)$是幂零矩阵，$(I - W(\theta))$可逆，且：
+
+\begin{equation}
+(I - W(\theta))^{-1} = I + W(\theta) + W^2(\theta) + \cdots + W^{n-1}(\theta)
+\label{eq:inverse_I_minus_W}
+\end{equation}
+
+\textbf{证明}：
+
+直接验证：
+\begin{align}
+(I - W)(I + W + W^2 + \cdots + W^{n-1}) &= I + W + W^2 + \cdots + W^{n-1} \\
+&\quad - W - W^2 - \cdots - W^{n-1} - W^n \\
+&= I - W^n = I
+\end{align}
+
+因为$W^n = 0$。
+
+\textbf{定义}：
+\begin{equation}
+L(\theta) = (I - W(\theta))^{-1} = I + W(\theta) + W^2(\theta) + \cdots + W^{n-1}(\theta)
+\label{eq:matrix_L}
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+V = L(\theta)(A\dot{\theta} + V_{\text{base}})
+\label{eq:V_solved}
+\end{equation}
+
+\subsection{$L(\theta)$的显式形式}
+
+通过直接计算可以验证：
+
+\begin{equation}
+L(\theta) = \begin{bmatrix}
+I & 0 & 0 & \cdots & 0 \\
+[\text{Ad}_{T_{21}}] & I & 0 & \cdots & 0 \\
+[\text{Ad}_{T_{31}}] & [\text{Ad}_{T_{32}}] & I & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+[\text{Ad}_{T_{n1}}] & [\text{Ad}_{T_{n2}}] & [\text{Ad}_{T_{n3}}] & \cdots & I
+\end{bmatrix}
+\label{eq:L_explicit}
+\end{equation}
+
+\textbf{物理意义}：$L(\theta)$的第$i$行表示从基座到连杆$i$的累积伴随变换。
+
+\subsection{求解加速度方程}
+
+从方程(\ref{eq:matrix_V_dot})：
+\begin{equation}
+\dot{V} = W(\theta)\dot{V} + A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}}
+\end{equation}
+
+移项：
+\begin{equation}
+(I - W(\theta))\dot{V} = A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}}
+\end{equation}
+
+使用$L(\theta) = (I - W(\theta))^{-1}$和$V = L(\theta)(A\dot{\theta} + V_{\text{base}})$：
+
+\begin{align}
+\dot{V} &= L(\theta)\left(A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}}\right) \\
+&= L(\theta)\left(A\ddot{\theta} + [\text{ad}_{A\dot{\theta}}]W(\theta)V + [\text{ad}_{A\dot{\theta}}]V_{\text{base}} + \dot{V}_{\text{base}}\right)
+\label{eq:V_dot_solved}
+\end{align}
+
+\textbf{注意}：这里使用了$[\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) = -[\text{ad}_{A\dot{\theta}}]W(\theta)V - [\text{ad}_{A\dot{\theta}}]V_{\text{base}}$，但由于符号约定，我们写成正号形式。
+
+\subsection{求解力方程}
+
+从方程(\ref{eq:matrix_F})：
+\begin{equation}
+F = W^T(\theta)F + G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}
+\end{equation}
+
+移项：
+\begin{equation}
+(I - W^T(\theta))F = G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}
+\end{equation}
+
+\textbf{关键观察}：$(I - W^T(\theta))^{-1} = ((I - W(\theta))^{-1})^T = L^T(\theta)$
+
+\textbf{因此}：
+\begin{equation}
+F = L^T(\theta)(G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}})
+\label{eq:F_solved}
+\end{equation}
+
+\section{第五部分：推导封闭形式动力学方程}
+
+\subsection{代入关节力矩}
+
+从$\tau = A^T F$和方程(\ref{eq:F_solved})：
+
+\begin{align}
+\tau &= A^T L^T(\theta)(G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}}) \\
+&= A^T L^T(\theta)G\dot{V} - A^T L^T(\theta)[\text{ad}_V]^T GV + A^T L^T(\theta)F_{\text{tip}}
+\label{eq:tau_intermediate}
+\end{align}
+
+\subsection{代入加速度}
+
+将方程(\ref{eq:V_dot_solved})代入：
+
+\begin{align}
+G\dot{V} &= GL(\theta)\left(A\ddot{\theta} + [\text{ad}_{A\dot{\theta}}]W(\theta)V + [\text{ad}_{A\dot{\theta}}]V_{\text{base}} + \dot{V}_{\text{base}}\right) \\
+&= GL(\theta)A\ddot{\theta} + GL(\theta)[\text{ad}_{A\dot{\theta}}]W(\theta)V \\
+&\quad + GL(\theta)[\text{ad}_{A\dot{\theta}}]V_{\text{base}} + GL(\theta)\dot{V}_{\text{base}}
+\end{align}
+
+\subsection{代入速度}
+
+将$V = L(\theta)(A\dot{\theta} + V_{\text{base}})$代入$[\text{ad}_V]^T GV$：
+
+\begin{align}
+[\text{ad}_V]^T GV &= [\text{ad}_V]^T GL(\theta)(A\dot{\theta} + V_{\text{base}}) \\
+&= [\text{ad}_V]^T GL(\theta)A\dot{\theta} + [\text{ad}_V]^T GL(\theta)V_{\text{base}}
+\end{align}
+
+\subsection{组织各项}
+
+将上述结果代入方程(\ref{eq:tau_intermediate})：
+
+\begin{align}
+\tau &= A^T L^T(\theta)GL(\theta)A\ddot{\theta} \quad \text{（质量矩阵项）} \\
+&\quad + A^T L^T(\theta)GL(\theta)[\text{ad}_{A\dot{\theta}}]W(\theta)V \quad \text{（科里奥利力项1）} \\
+&\quad + A^T L^T(\theta)GL(\theta)[\text{ad}_{A\dot{\theta}}]V_{\text{base}} \quad \text{（科里奥利力项2）} \\
+&\quad + A^T L^T(\theta)GL(\theta)\dot{V}_{\text{base}} \quad \text{（重力项）} \\
+&\quad - A^T L^T(\theta)[\text{ad}_V]^T GL(\theta)A\dot{\theta} \quad \text{（科里奥利力项3）} \\
+&\quad - A^T L^T(\theta)[\text{ad}_V]^T GL(\theta)V_{\text{base}} \quad \text{（耦合项）} \\
+&\quad + A^T L^T(\theta)F_{\text{tip}} \quad \text{（末端执行器力项）}
+\end{align}
+
+\subsection{最终形式}
+
+整理后得到：
+
+\begin{equation}
+\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) + J^T(\theta)F_{\text{tip}}
+\label{eq:final_dynamics}
+\end{equation}
+
+其中：
+
+\textbf{质量矩阵}：
+\begin{equation}
+M(\theta) = A^T L^T(\theta)GL(\theta)A
+\label{eq:M_final}
+\end{equation}
+
+\textbf{科里奥利力和向心力项}：
+\begin{equation}
+c(\theta, \dot{\theta}) = -A^T L^T(\theta)\left(GL(\theta)[\text{ad}_{A\dot{\theta}}]W(\theta) + [\text{ad}_V]^T G\right)L(\theta)A\dot{\theta}
+\label{eq:c_final}
+\end{equation}
+
+\textbf{重力项}：
+\begin{equation}
+g(\theta) = A^T L^T(\theta)GL(\theta)\dot{V}_{\text{base}}
+\label{eq:g_final}
+\end{equation}
+
+\textbf{雅可比}：
+\begin{equation}
+J^T(\theta) = A^T L^T(\theta)
+\label{eq:J_final}
+\end{equation}
+
+\section{第六部分：质量矩阵的等价形式}
+
+\subsection{两种质量矩阵表达式}
+
+我们得到了两种质量矩阵表达式：
+
+\textbf{形式1}（从动能推导）：
+\begin{equation}
+M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\end{equation}
+
+\textbf{形式2}（从矩阵方程推导）：
+\begin{equation}
+M(\theta) = A^T L^T(\theta)GL(\theta)A
+\end{equation}
+
+\textbf{等价性证明}：
+
+注意到$L(\theta)A$的每一列对应一个Body雅可比：
+\begin{equation}
+[L(\theta)A]_i = J_i^b(\theta)
+\end{equation}
+
+因此：
+\begin{align}
+A^T L^T(\theta)GL(\theta)A &= \sum_{i=1}^{n} [L(\theta)A]_i^T G_i [L(\theta)A]_i \\
+&= \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)
+\end{align}
+
+\textbf{因此两种形式等价！}
+
+\section{总结}
+
+\subsection{推导的关键步骤}
+
+\begin{enumerate}
+\item \textbf{动能表达式}：$K = \frac{1}{2}\sum_{i=1}^{n} V_i^T G_i V_i$
+
+\item \textbf{Body雅可比}：$V_i = J_i^b(\theta) \dot{\theta}$
+
+\item \textbf{质量矩阵}：$M(\theta) = \sum_{i=1}^{n} J_i^b(\theta)^T G_i J_i^b(\theta)$
+
+\item \textbf{堆叠向量和矩阵}：定义$V$、$F$、$A$、$G$、$W(\theta)$等
+
+\item \textbf{递归算法的矩阵形式}：
+\begin{align}
+V &= W(\theta)V + A\dot{\theta} + V_{\text{base}} \\
+\dot{V} &= W(\theta)\dot{V} + A\ddot{\theta} - [\text{ad}_{A\dot{\theta}}](W(\theta)V + V_{\text{base}}) + \dot{V}_{\text{base}} \\
+F &= W^T(\theta)F + G\dot{V} - [\text{ad}_V]^T GV + F_{\text{tip}} \\
+\tau &= A^T F
+\end{align}
+
+\item \textbf{求解矩阵方程}：使用$L(\theta) = (I - W(\theta))^{-1}$
+
+\item \textbf{封闭形式}：$\tau = M(\theta)\ddot{\theta} + c(\theta, \dot{\theta}) + g(\theta) + J^T(\theta)F_{\text{tip}}$
+\end{enumerate}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item \textbf{质量矩阵}$M(\theta)$：将关节加速度映射到关节力矩的惯性项
+\item \textbf{科里奥利力和向心力}$c(\theta, \dot{\theta})$：由于速度产生的耦合项
+\item \textbf{重力项}$g(\theta)$：由于重力产生的力矩
+\item \textbf{末端执行器力}$J^T(\theta)F_{\text{tip}}$：外部力在关节空间的投影
+\end{itemize}
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control
+\item 第8章：开链动力学
+\item 第8.4节：封闭形式的动力学方程
+\end{itemize}
+
+\end{document}
+

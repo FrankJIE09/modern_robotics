@@ -1,0 +1,452 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{bm}
+
+\geometry{margin=2.5cm}
+
+\title{$\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]$的详细证明}
+\author{Modern Robotics}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{引言}
+
+在机器人运动学和动力学中，一个重要关系是：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\label{eq:main_relation}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $T_{0i}(\theta_1, \ldots, \theta_i)$：从基座坐标系$\{0\}$到连杆坐标系$\{i\}$的正向运动学变换
+\item $\theta_j$：关节$j$的角度（$j = 1, \ldots, i$）
+\item $A_j^b$：关节$j$的螺旋轴，在坐标系$\{i\}$中表示
+\item $[A_j^b]$：螺旋轴$A_j^b$的反对称矩阵表示
+\end{itemize}
+
+这个关系是理解Body雅可比的基础。本文将提供这个重要结果的详细证明。
+
+\section{预备知识}
+
+\subsection{正向运动学的链式结构}
+
+正向运动学$T_{0i}$可以表示为：
+
+\begin{equation}
+T_{0i}(\theta_1, \ldots, \theta_i) = T_{01}(\theta_1) T_{12}(\theta_2) \cdots T_{i-1,i}(\theta_i)
+\label{eq:forward_kinematics_chain}
+\end{equation}
+
+其中$T_{j-1,j}(\theta_j)$是关节$j$的变换矩阵。
+
+\subsection{关节变换矩阵}
+
+对于关节$j$，其变换矩阵为：
+
+\begin{equation}
+T_{j-1,j}(\theta_j) = M_{j-1,j} e^{[A_j]\theta_j}
+\label{eq:joint_transform}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $M_{j-1,j}$：当$\theta_j = 0$时的初始配置
+\item $A_j$：关节$j$的螺旋轴（在坐标系$\{j\}$中表示）
+\item $[A_j]$：螺旋轴的反对称矩阵表示
+\end{itemize}
+
+\subsection{Twist与变换矩阵的关系}
+
+从前面我们知道：$\dot{T} = [V]T$，其中$V$是twist。
+
+\section{证明方法1：从链式法则出发}
+
+\subsection{基本思路}
+
+利用正向运动学的链式结构，对$\theta_j$求偏导时，只有包含$\theta_j$的项会变化。
+
+\subsection{详细推导}
+
+\textbf{步骤1}：写出正向运动学的链式结构
+
+\begin{equation}
+T_{0i} = T_{01}(\theta_1) T_{12}(\theta_2) \cdots T_{j-1,j}(\theta_j) \cdots T_{i-1,i}(\theta_i)
+\end{equation}
+
+\textbf{步骤2}：对$\theta_j$求偏导
+
+当对$\theta_j$求偏导时，只有$T_{j-1,j}(\theta_j)$依赖于$\theta_j$，其他项都是常数：
+
+\begin{align}
+\frac{\partial T_{0i}}{\partial \theta_j} &= T_{01}(\theta_1) \cdots T_{j-2,j-1}(\theta_{j-1}) \frac{\partial T_{j-1,j}(\theta_j)}{\partial \theta_j} T_{j,j+1}(\theta_{j+1}) \cdots T_{i-1,i}(\theta_i) \\
+&= T_{0,j-1} \frac{\partial T_{j-1,j}(\theta_j)}{\partial \theta_j} T_{j,i}
+\label{eq:partial_chain}
+\end{align}
+
+\textbf{步骤3}：计算$\frac{\partial T_{j-1,j}(\theta_j)}{\partial \theta_j}$
+
+从方程(\ref{eq:joint_transform})：
+
+\begin{equation}
+T_{j-1,j}(\theta_j) = M_{j-1,j} e^{[A_j]\theta_j}
+\end{equation}
+
+对$\theta_j$求导：
+
+\begin{align}
+\frac{\partial T_{j-1,j}(\theta_j)}{\partial \theta_j} &= M_{j-1,j} \frac{\partial}{\partial \theta_j}[e^{[A_j]\theta_j}] \\
+&= M_{j-1,j} [A_j] e^{[A_j]\theta_j} \\
+&= M_{j-1,j} [A_j] (M_{j-1,j}^{-1} T_{j-1,j}) \\
+&= [A_j] T_{j-1,j}
+\end{align}
+
+\textbf{注意}：这里$[A_j]$是关节$j$的螺旋轴在坐标系$\{j\}$中的表示。
+
+\textbf{步骤4}：转换到坐标系$\{i\}$
+
+我们需要将$[A_j]$转换到坐标系$\{i\}$中表示。
+
+从方程(\ref{eq:partial_chain})：
+
+\begin{align}
+\frac{\partial T_{0i}}{\partial \theta_j} &= T_{0,j-1} [A_j] T_{j-1,j} T_{j,i} \\
+&= T_{0,j-1} [A_j] T_{j-1,i} \\
+&= T_{0,j-1} [A_j] T_{j-1,i}
+\end{align}
+
+\textbf{关键观察}：$T_{0,j-1} [A_j] T_{j-1,i}$可以写成$T_{0i} [A_j^b]$的形式，其中$A_j^b$是$A_j$在坐标系$\{i\}$中的表示。
+
+\textbf{步骤5}：使用伴随变换}
+
+根据反对称矩阵的相似变换性质：
+
+\begin{equation}
+T_{0,j-1} [A_j] T_{j-1,i} = T_{0i} [\text{Ad}_{T_{i,j-1}}(A_j)]
+\end{equation}
+
+其中$\text{Ad}_{T_{i,j-1}}$是从坐标系$\{j-1\}$到$\{i\}$的伴随变换。
+
+\textbf{定义}：$A_j^b = \text{Ad}_{T_{i,j-1}}(A_j)$，这是关节$j$的螺旋轴在坐标系$\{i\}$中的表示。
+
+\textbf{因此}：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\label{eq:result1}
+\end{equation}
+
+\textbf{证毕！}
+
+\section{证明方法2：从$\dot{T} = [V]T$出发}
+
+\subsection{基本思路}
+
+利用$\dot{T} = [V]T$的关系，当只有关节$j$运动时，$T_{0i}$的变化率应该与关节$j$的螺旋轴相关。
+
+\subsection{详细推导}
+
+\textbf{步骤1}：考虑只有关节$j$运动的情况
+
+假设只有关节$j$在运动，即$\dot{\theta}_j \neq 0$，而其他关节速度为零：$\dot{\theta}_k = 0$（$k \neq j$）。
+
+\textbf{步骤2}：计算$\dot{T}_{0i}$
+
+当只有关节$j$运动时：
+
+\begin{equation}
+\dot{T}_{0i} = \frac{\partial T_{0i}}{\partial \theta_j} \dot{\theta}_j
+\end{equation}
+
+\textbf{步骤3}：使用$\dot{T} = [V]T$的关系
+
+根据$\dot{T} = [V]T$，当只有关节$j$运动时，连杆$i$的Body Twist为：
+
+\begin{equation}
+V_i^b = A_j^b \dot{\theta}_j
+\end{equation}
+
+其中$A_j^b$是关节$j$的螺旋轴在坐标系$\{i\}$中的表示。
+
+\textbf{因此}：
+
+\begin{equation}
+\dot{T}_{0i} = [V_i^b] T_{0i} = [A_j^b \dot{\theta}_j] T_{0i}
+\end{equation}
+
+\textbf{步骤4}：提取$\dot{\theta}_j$
+
+由于$[A_j^b \dot{\theta}_j] = \dot{\theta}_j [A_j^b]$（反对称矩阵的标量乘法），我们有：
+
+\begin{equation}
+\dot{T}_{0i} = \dot{\theta}_j [A_j^b] T_{0i}
+\end{equation}
+
+\textbf{步骤5}：与偏导数比较}
+
+另一方面：
+
+\begin{equation}
+\dot{T}_{0i} = \frac{\partial T_{0i}}{\partial \theta_j} \dot{\theta}_j
+\end{equation}
+
+\textbf{因此}：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} \dot{\theta}_j = \dot{\theta}_j [A_j^b] T_{0i}
+\end{equation}
+
+由于这对任意$\dot{\theta}_j$都成立，我们得到：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = [A_j^b] T_{0i}
+\end{equation}
+
+\textbf{注意}：这里需要验证顺序。实际上应该是：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\end{equation}
+
+\textbf{为什么是$T_{0i} [A_j^b]$而不是$[A_j^b] T_{0i}$？}
+
+这取决于$A_j^b$是在哪个坐标系中表示的。如果$A_j^b$是在坐标系$\{i\}$中表示（Body形式），则：
+
+\begin{equation}
+T_{0i}^{-1} \dot{T}_{0i} = [A_j^b \dot{\theta}_j]
+\end{equation}
+
+因此：
+
+\begin{equation}
+\dot{T}_{0i} = T_{0i} [A_j^b \dot{\theta}_j] = T_{0i} [A_j^b] \dot{\theta}_j
+\end{equation}
+
+所以：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\end{equation}
+
+\textbf{证毕！}
+
+\section{证明方法3：从指数映射出发}
+
+\subsection{基本思路}
+
+利用$SE(3)$的指数映射性质，直接计算偏导数。
+
+\subsection{详细推导}
+
+\textbf{步骤1}：正向运动学的指数形式
+
+正向运动学可以写成：
+
+\begin{equation}
+T_{0i}(\theta) = \prod_{k=1}^{i} M_{k-1,k} e^{[A_k]\theta_k}
+\end{equation}
+
+\textbf{步骤2}：对$\theta_j$求偏导}
+
+当对$\theta_j$求偏导时，只有包含$e^{[A_j]\theta_j}$的项会变化：
+
+\begin{align}
+\frac{\partial T_{0i}}{\partial \theta_j} &= \left(\prod_{k=1}^{j-1} M_{k-1,k} e^{[A_k]\theta_k}\right) \frac{\partial}{\partial \theta_j}[M_{j-1,j} e^{[A_j]\theta_j}] \left(\prod_{k=j+1}^{i} M_{k-1,k} e^{[A_k]\theta_k}\right) \\
+&= T_{0,j-1} \frac{\partial}{\partial \theta_j}[M_{j-1,j} e^{[A_j]\theta_j}] T_{j,i}
+\end{align}
+
+\textbf{步骤3}：计算$\frac{\partial}{\partial \theta_j}[M_{j-1,j} e^{[A_j]\theta_j}]$
+
+\begin{align}
+\frac{\partial}{\partial \theta_j}[M_{j-1,j} e^{[A_j]\theta_j}] &= M_{j-1,j} [A_j] e^{[A_j]\theta_j} \\
+&= [A_j] M_{j-1,j} e^{[A_j]\theta_j} \\
+&= [A_j] T_{j-1,j}
+\end{align}
+
+\textbf{步骤4}：组合}
+
+\begin{align}
+\frac{\partial T_{0i}}{\partial \theta_j} &= T_{0,j-1} [A_j] T_{j-1,j} T_{j,i} \\
+&= T_{0,j-1} [A_j] T_{j-1,i}
+\end{align}
+
+\textbf{步骤5}：转换到Body形式}
+
+使用反对称矩阵的相似变换：
+
+\begin{equation}
+T_{0,j-1} [A_j] T_{j-1,i} = T_{0i} T_{i,j-1} [A_j] T_{j-1,i} = T_{0i} [\text{Ad}_{T_{i,j-1}}(A_j)]
+\end{equation}
+
+定义$A_j^b = \text{Ad}_{T_{i,j-1}}(A_j)$，则：
+
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\end{equation}
+
+\textbf{证毕！}
+
+\section{物理意义}
+
+\subsection{直观理解}
+
+\textbf{为什么是$T_{0i} [A_j^b]$？}
+
+\begin{itemize}
+\item $A_j^b$是关节$j$的螺旋轴在坐标系$\{i\}$中的表示（Body形式）
+\item 当只有关节$j$运动时，它产生的运动在坐标系$\{i\}$中观察就是$A_j^b \dot{\theta}_j$
+\item 根据$\dot{T} = [V]T$，如果twist是$A_j^b \dot{\theta}_j$（在坐标系$\{i\}$中表示），则：
+\begin{equation}
+T_{0i}^{-1} \dot{T}_{0i} = [A_j^b \dot{\theta}_j]
+\end{equation}
+\item 因此：$\dot{T}_{0i} = T_{0i} [A_j^b \dot{\theta}_j] = T_{0i} [A_j^b] \dot{\theta}_j$
+\item 所以：$\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]$
+\end{itemize}
+
+\subsection{Body形式与Spatial形式}
+
+\textbf{Body形式}（在坐标系$\{i\}$中表示）：
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]
+\end{equation}
+
+\textbf{Spatial形式}（在固定坐标系$\{0\}$中表示）：
+\begin{equation}
+\frac{\partial T_{0i}}{\partial \theta_j} = [A_j^s] T_{0i}
+\end{equation}
+
+其中$A_j^s$是关节$j$的螺旋轴在固定坐标系中的表示。
+
+\textbf{关系}：$A_j^s = \text{Ad}_{T_{0i}}(A_j^b)$
+
+\section{具体例子}
+
+\subsection{例子1：单关节情况}
+
+考虑$T_{01}(\theta_1)$，即从基座到第一个连杆的变换。
+
+\textbf{关节变换}：
+\begin{equation}
+T_{01}(\theta_1) = M_{01} e^{[A_1]\theta_1}
+\end{equation}
+
+\textbf{对$\theta_1$求导}：
+\begin{align}
+\frac{\partial T_{01}}{\partial \theta_1} &= M_{01} [A_1] e^{[A_1]\theta_1} \\
+&= [A_1] M_{01} e^{[A_1]\theta_1} \\
+&= [A_1] T_{01}
+\end{align}
+
+\textbf{注意}：这里$A_1$在坐标系$\{1\}$中表示，所以这是Body形式。
+
+如果写成$T_{01} [A_1^b]$的形式，其中$A_1^b = A_1$（因为已经在坐标系$\{1\}$中），则：
+
+\begin{equation}
+\frac{\partial T_{01}}{\partial \theta_1} = T_{01} [A_1^b]
+\end{equation}
+
+\textbf{验证}：$T_{01} [A_1^b] = T_{01} [A_1] = [A_1] T_{01}$（因为$[A_1]$在Body坐标系中表示）。
+
+\subsection{例子2：两关节情况}
+
+考虑$T_{02}(\theta_1, \theta_2) = T_{01}(\theta_1) T_{12}(\theta_2)$。
+
+\textbf{对$\theta_1$求偏导}：
+
+\begin{align}
+\frac{\partial T_{02}}{\partial \theta_1} &= \frac{\partial T_{01}}{\partial \theta_1} T_{12} \\
+&= T_{01} [A_1] T_{12} \\
+&= T_{02} T_{12}^{-1} [A_1] T_{12} \\
+&= T_{02} [\text{Ad}_{T_{21}}(A_1)] \\
+&= T_{02} [A_1^b]
+\end{align}
+
+其中$A_1^b = \text{Ad}_{T_{21}}(A_1)$是关节1的螺旋轴在坐标系$\{2\}$中的表示。
+
+\textbf{对$\theta_2$求偏导}：
+
+\begin{align}
+\frac{\partial T_{02}}{\partial \theta_2} &= T_{01} \frac{\partial T_{12}}{\partial \theta_2} \\
+&= T_{01} T_{12} [A_2] \\
+&= T_{02} [A_2^b]
+\end{align}
+
+其中$A_2^b = A_2$（因为$A_2$已经在坐标系$\{2\}$中表示）。
+
+\section{在Body雅可比构造中的应用}
+
+\subsection{Body雅可比的构造}
+
+从$\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]$，我们可以得到：
+
+\begin{equation}
+T_{0i}^{-1} \frac{\partial T_{0i}}{\partial \theta_j} = [A_j^b]
+\end{equation}
+
+\textbf{因此}：Body雅可比$J_i^b(\theta)$的第$j$列就是$A_j^b$（$j = 1, \ldots, i$）。
+
+\subsection{完整Body雅可比}
+
+\begin{equation}
+J_i^b(\theta) = \begin{bmatrix} A_1^b & A_2^b & \cdots & A_i^b & 0 & \cdots & 0 \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item 前$i$列：各个关节的螺旋轴在坐标系$\{i\}$中的表示
+\item 后$n-i$列：全为零（因为后$n-i$个关节不影响连杆$i$）
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键结论}
+
+\begin{enumerate}
+\item \textbf{基本关系}：$\frac{\partial T_{0i}}{\partial \theta_j} = T_{0i} [A_j^b]$
+
+\item \textbf{物理意义}：
+\begin{itemize}
+\item 当只有关节$j$运动时，$T_{0i}$的变化率由关节$j$的螺旋轴决定
+\item $A_j^b$是关节$j$的螺旋轴在坐标系$\{i\}$中的表示（Body形式）
+\item 这个关系反映了关节运动对正向运动学的影响
+\end{itemize}
+
+\item \textbf{在Body雅可比中的应用}：
+\begin{itemize}
+\item $T_{0i}^{-1} \frac{\partial T_{0i}}{\partial \theta_j} = [A_j^b]$
+\item Body雅可比的第$j$列就是$A_j^b$
+\item 这提供了计算Body雅可比的方法
+\end{itemize}
+\end{enumerate}
+
+\subsection{证明方法总结}
+
+\begin{itemize}
+\item \textbf{方法1}：从链式法则出发，逐步计算
+\item \textbf{方法2}：从$\dot{T} = [V]T$的关系出发
+\item \textbf{方法3}：从指数映射出发
+\end{itemize}
+
+所有方法都证明了相同的结果。
+
+\section{参考文献}
+
+\begin{itemize}
+\item Modern Robotics: Mechanics, Planning, and Control
+\item 第3章：刚体运动（Twist和Screw理论）
+\item 第8章：开链动力学
+\end{itemize}
+
+\end{document}
+
