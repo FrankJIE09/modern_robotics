@@ -1,0 +1,317 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{Wrench在复合锥内的例子详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题设置}
+
+在例12.9中，我们看到wrench $(0, 0, mg)$不在复合锥中，导致静态抓取不可行。
+
+现在我们要问：\textbf{如果wrench在复合锥内，会发生什么？}
+
+\section{例12.9回顾}
+
+\subsection{接触配置}
+
+\begin{itemize}
+    \item 下手指在$(x, y) = (-3, -1)$处接触块
+    \item 上手指在$(1, 1)$处接触块
+    \item 一个接触有摩擦（$\mu = 1$），另一个无摩擦
+\end{itemize}
+
+\subsection{基接触Wrench}
+
+\begin{align}
+F_1 &= \frac{1}{\sqrt{2}}(-4, -1, 1) \\
+F_2 &= \frac{1}{\sqrt{2}}(-2, 1, 1) \\
+F_3 &= (1, -1, 0)
+\end{align}
+
+\subsection{复合Wrench锥}
+
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2, F_3\}) = \{k_1 F_1 + k_2 F_2 + k_3 F_3 \mid k_1, k_2, k_3 \geq 0\}
+\end{equation}
+
+\section{例子1：Wrench在锥内（动态抓取）}
+
+\subsection{所需的Wrench}
+
+在例12.9的动态抓取中，手指向左以$2g$加速，所需的wrench为：
+\begin{equation}
+F_{\text{required}} = (0, -2mg, mg)
+\end{equation}
+
+即：
+\begin{itemize}
+    \item 力矩：$m_z = 0$
+    \item x方向力：$f_x = -2mg$（向左）
+    \item y方向力：$f_y = mg$（向上）
+\end{itemize}
+
+\subsection{检查是否在锥中}
+
+需要检查是否存在$k_1, k_2, k_3 \geq 0$，使得：
+\begin{equation}
+k_1 F_1 + k_2 F_2 + k_3 F_3 = (0, -2mg, mg)
+\end{equation}
+
+展开：
+\begin{align}
+k_1 \frac{1}{\sqrt{2}}(-4, -1, 1) + k_2 \frac{1}{\sqrt{2}}(-2, 1, 1) + k_3 (1, -1, 0) &= (0, -2mg, mg)
+\end{align}
+
+按分量：
+\begin{align}
+-\frac{4k_1}{\sqrt{2}} - \frac{2k_2}{\sqrt{2}} + k_3 &= 0 \quad \text{（力矩）} \label{eq:moment} \\
+-\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} - k_3 &= -2mg \quad \text{（x方向力）} \label{eq:fx} \\
+\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} &= mg \quad \text{（y方向力）} \label{eq:fy}
+\end{align}
+
+\subsection{求解}
+
+从方程(\ref{eq:fy})：
+\begin{equation}
+\frac{k_1 + k_2}{\sqrt{2}} = mg \quad \Rightarrow \quad k_1 + k_2 = \sqrt{2}mg
+\end{equation}
+
+从方程(\ref{eq:moment})：
+\begin{equation}
+k_3 = \frac{4k_1 + 2k_2}{\sqrt{2}} = \frac{2(2k_1 + k_2)}{\sqrt{2}}
+\end{equation}
+
+从方程(\ref{eq:fx})，代入$k_3$：
+\begin{align}
+-\frac{k_1 - k_2}{\sqrt{2}} - \frac{2(2k_1 + k_2)}{\sqrt{2}} &= -2mg \\
+-\frac{k_1 - k_2 + 4k_1 + 2k_2}{\sqrt{2}} &= -2mg \\
+-\frac{5k_1 + k_2}{\sqrt{2}} &= -2mg \\
+\frac{5k_1 + k_2}{\sqrt{2}} &= 2mg
+\end{align}
+
+使用$k_1 + k_2 = \sqrt{2}mg$，设$k_1 = t$，则$k_2 = \sqrt{2}mg - t$：
+\begin{align}
+\frac{5t + \sqrt{2}mg - t}{\sqrt{2}} &= 2mg \\
+\frac{4t + \sqrt{2}mg}{\sqrt{2}} &= 2mg \\
+4t + \sqrt{2}mg &= 2\sqrt{2}mg \\
+4t &= \sqrt{2}mg \\
+t = k_1 &= \frac{\sqrt{2}mg}{4}
+\end{align}
+
+因此：
+\begin{align}
+k_1 &= \frac{\sqrt{2}mg}{4} \\
+k_2 &= \sqrt{2}mg - \frac{\sqrt{2}mg}{4} = \frac{3\sqrt{2}mg}{4} \\
+k_3 &= \frac{2(2k_1 + k_2)}{\sqrt{2}} = \frac{2(2 \cdot \frac{\sqrt{2}mg}{4} + \frac{3\sqrt{2}mg}{4})}{\sqrt{2}} \\
+&= \frac{2 \cdot \frac{5\sqrt{2}mg}{4}}{\sqrt{2}} = \frac{5mg}{2}
+\end{align}
+
+\subsection{验证非负性}
+
+检查$k_1, k_2, k_3 \geq 0$：
+\begin{align}
+k_1 &= \frac{\sqrt{2}mg}{4} > 0 \quad \checkmark \\
+k_2 &= \frac{3\sqrt{2}mg}{4} > 0 \quad \checkmark \\
+k_3 &= \frac{5mg}{2} > 0 \quad \checkmark
+\end{align}
+
+所有系数都非负！
+
+\subsection{验证解}
+
+代入验证：
+\begin{align}
+k_1 F_1 + k_2 F_2 + k_3 F_3 &= \frac{\sqrt{2}mg}{4} \cdot \frac{1}{\sqrt{2}}(-4, -1, 1) \\
+&\quad + \frac{3\sqrt{2}mg}{4} \cdot \frac{1}{\sqrt{2}}(-2, 1, 1) \\
+&\quad + \frac{5mg}{2} \cdot (1, -1, 0) \\
+&= \frac{mg}{4}(-4, -1, 1) + \frac{3mg}{4}(-2, 1, 1) + \frac{5mg}{2}(1, -1, 0) \\
+&= \left(-\frac{4mg}{4} - \frac{6mg}{4} + \frac{5mg}{2}, -\frac{mg}{4} + \frac{3mg}{4} - \frac{5mg}{2}, \frac{mg}{4} + \frac{3mg}{4}\right) \\
+&= \left(-mg - \frac{3mg}{2} + \frac{5mg}{2}, \frac{2mg}{4} - \frac{10mg}{4}, mg\right) \\
+&= \left(0, -2mg, mg\right) \quad \checkmark
+\end{align}
+
+\textbf{结论}：wrench $(0, -2mg, mg)$在复合锥中，动态抓取可行！
+
+\section{例子2：构造一个在锥内的Wrench}
+
+\subsection{方法：使用正线性组合}
+
+要构造一个在锥内的wrench，我们可以直接使用正线性组合。
+
+\subsubsection{选择系数}
+
+选择$k_1 = 1$，$k_2 = 2$，$k_3 = 1$（都是正数）：
+\begin{align}
+F &= k_1 F_1 + k_2 F_2 + k_3 F_3 \\
+&= 1 \cdot \frac{1}{\sqrt{2}}(-4, -1, 1) + 2 \cdot \frac{1}{\sqrt{2}}(-2, 1, 1) + 1 \cdot (1, -1, 0) \\
+&= \frac{1}{\sqrt{2}}(-4, -1, 1) + \frac{1}{\sqrt{2}}(-4, 2, 2) + (1, -1, 0) \\
+&= \frac{1}{\sqrt{2}}(-8, 1, 3) + (1, -1, 0) \\
+&= \left(-\frac{8}{\sqrt{2}} + 1, \frac{1}{\sqrt{2}} - 1, \frac{3}{\sqrt{2}}\right) \\
+&= \left(1 - \frac{8}{\sqrt{2}}, \frac{1 - \sqrt{2}}{\sqrt{2}}, \frac{3}{\sqrt{2}}\right)
+\end{align}
+
+这个wrench肯定在锥中，因为它是基wrench的正线性组合。
+
+\subsection{物理解释}
+
+这个wrench表示：
+\begin{itemize}
+    \item 通过接触1施加力（系数$k_1 = 1$）
+    \item 通过接触2施加力（系数$k_2 = 2$，更大）
+    \item 通过接触3施加力（系数$k_3 = 1$）
+    \item 总wrench是这些接触wrench的加权和
+\end{itemize}
+
+\section{例子3：在锥内的Wrench的特征}
+
+\subsection{几何特征}
+
+在wrench空间中，复合锥$\mathcal{WC}$是一个凸锥（以原点为根部）。
+
+\subsubsection{锥的边界}
+
+锥的边界由基wrench的某些组合形成。wrench在锥内意味着：
+\begin{itemize}
+    \item 它可以表示为基wrench的非负线性组合
+    \item 它在锥的边界或内部
+    \item 它不在锥的外部
+\end{itemize}
+
+\subsubsection{力矩标记的视角}
+
+如果wrench在锥内，其箭头表示应该：
+\begin{itemize}
+    \item 在标记区域内（$'+'$、$'-'$或$\pm$）
+    \item 或者箭头指向空白区域，但wrench本身仍然在锥中（因为三个分量都满足）
+\end{itemize}
+
+\section{对比：在锥内 vs 不在锥内}
+
+\subsection{不在锥内：$(0, 0, mg)$}
+
+\begin{itemize}
+    \item \textbf{需要}：$m_z = 0$，$f_x = 0$，$f_y = mg$
+    \item \textbf{问题}：三个约束无法同时满足
+    \item \textbf{原因}：从方程推导出$k_1 = k_2 = 0$，但$f_y = mg$要求$k_1 + k_2 > 0$
+    \item \textbf{结果}：无解，不在锥中
+\end{itemize}
+
+\subsection{在锥内：$(0, -2mg, mg)$}
+
+\begin{itemize}
+    \item \textbf{需要}：$m_z = 0$，$f_x = -2mg$，$f_y = mg$
+    \item \textbf{解}：$k_1 = \frac{\sqrt{2}mg}{4}$，$k_2 = \frac{3\sqrt{2}mg}{4}$，$k_3 = \frac{5mg}{2}$
+    \item \textbf{验证}：所有系数非负，满足所有约束
+    \item \textbf{结果}：有解，在锥中
+\end{itemize}
+
+\subsection{关键区别}
+
+\begin{itemize}
+    \item \textbf{不在锥内}：三个分量的约束相互矛盾，无法同时满足
+    \item \textbf{在锥内}：三个分量的约束可以同时满足，存在非负系数解
+\end{itemize}
+
+\section{判断Wrench是否在锥中的方法}
+
+\subsection{方法1：直接求解}
+
+\begin{enumerate}
+    \item 设$F = \sum_{i=1}^n k_i F_i$，其中$k_i \geq 0$
+    \item 展开为三个方程（平面）或六个方程（三维）
+    \item 求解$k_i$
+    \item 检查是否所有$k_i \geq 0$
+\end{enumerate}
+
+\subsection{方法2：线性规划}
+
+将问题表述为线性规划：
+\begin{align}
+\text{最小化} \quad & \mathbf{1}^T \mathbf{k} \\
+\text{使得} \quad & \sum_{i=1}^n k_i F_i = F \\
+& k_i \geq 0, \quad i = 1, \ldots, n
+\end{align}
+
+如果存在可行解，则$F$在锥中。
+
+\subsection{方法3：几何判断}
+
+\begin{itemize}
+    \item 在wrench空间中，检查$F$是否在锥的边界或内部
+    \item 使用力矩标记（提供部分信息）
+    \item 检查$F$是否在锥的支撑超平面的一侧
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{抓取规划}
+
+在抓取规划中：
+\begin{itemize}
+    \item 需要判断所需的wrench是否在复合锥中
+    \item 如果在锥中，抓取可行
+    \item 如果不在锥中，需要调整接触配置或使用动态抓取
+\end{itemize}
+
+\subsection{操作任务}
+
+在操作任务中：
+\begin{itemize}
+    \item 需要判断操作所需的wrench是否可行
+    \item 如果在锥中，可以执行操作
+    \item 如果不在锥中，需要调整策略
+\end{itemize}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{在锥内的条件}：存在$k_i \geq 0$使得$F = \sum_i k_i F_i$
+    
+    \item \textbf{例子1}：$(0, -2mg, mg)$在锥中，动态抓取可行
+    
+    \item \textbf{例子2}：任何基wrench的正线性组合都在锥中
+    
+    \item \textbf{判断方法}：直接求解、线性规划、几何判断
+    
+    \item \textbf{关键区别}：在锥内意味着三个分量可以同时满足，不在锥内意味着约束矛盾
+    
+    \item \textbf{实际应用}：用于判断抓取和操作的可行性
+\end{enumerate}
+
+\section{进一步思考}
+
+\subsection{为什么动态抓取可行？}
+
+\begin{itemize}
+    \item 动态抓取需要wrench $(0, -2mg, mg)$
+    \item 这个wrench在复合锥中
+    \item 因此可以通过接触产生
+    \item 静态抓取需要wrench $(0, 0, mg)$
+    \item 这个wrench不在复合锥中
+    \item 因此无法通过接触产生
+\end{itemize}
+
+\subsection{如何设计可行的抓取？}
+
+\begin{itemize}
+    \item 确保所需的wrench在复合锥中
+    \item 调整接触位置和方向
+    \item 增加接触数量
+    \item 使用适当的摩擦系数
+    \item 考虑动态抓取
+\end{itemize}
+
+\end{document}
+

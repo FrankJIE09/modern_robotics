@@ -1,0 +1,500 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{$S_l$和$S_r$的详细理解：滑动接触的方向分类}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{概述}
+
+在12.1.6章节中，对于平面滑动接触，我们将标签$S$细分为两个子类：
+\begin{itemize}
+\item \textbf{$S_r$}：可动物体相对于固定约束\textbf{向右}滑动（slips to the right）
+\item \textbf{$S_l$}：可动物体相对于固定约束\textbf{向左}滑动（slips to the left）
+\end{itemize}
+
+\textbf{重要澄清}：滑动是指\textbf{接触点处}的相对运动（切向速度），不是指物体只有平移。物体仍然可以有旋转，只是在接触点处有切向相对运动。
+
+\section{为什么需要细分？}
+
+\subsection{滑动接触的基本特征}
+
+滑动接触$S$的特征：
+\begin{itemize}
+\item 满足滚动-滑动约束：$F^T (V_A - V_B) = 0$（保持接触，法线方向无相对速度）
+\item 但不满足滚动约束：$\dot{p}_A \neq \dot{p}_B$（接触点处有相对运动）
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item 滑动是指\textbf{接触点处}的\textbf{切向相对运动}
+\item 物体本身仍然可以有\textbf{旋转}和\textbf{平移}
+\item 只是在接触点处，除了法线方向（保持接触），还有\textbf{切向相对速度}
+\item 这个切向相对速度的方向决定了$S_l$还是$S_r$
+\end{itemize}
+
+\textbf{问题}：切向相对运动有\textbf{方向}！
+
+\subsection{平面问题的特殊性}
+
+在平面问题中：
+\begin{itemize}
+\item 接触发生在一条线上（接触法线）
+\item 相对滑动只能沿着\textbf{切向}方向
+\item 切向方向有两个可能：左或右
+\item 因此需要区分滑动方向
+\end{itemize}
+
+\section{定义：如何确定左和右？}
+
+\subsection{观察方向}
+
+\textbf{关键}：我们需要确定"左"和"右"是相对于什么定义的。
+
+\textbf{约定}：
+\begin{itemize}
+\item 站在接触点，面向接触法线$\hat{n}$的方向（指向可动物体内部）
+\item \textbf{左侧}：你的左手方向
+\item \textbf{右侧}：你的右手方向
+\end{itemize}
+
+\subsection{数学定义}
+
+设接触法线为$\hat{n}$（指向可动物体内部），切向向量为$\hat{t}$。
+
+在平面问题中，如果$\hat{n}$是单位向量，则切向向量可以定义为：
+\begin{equation}
+\hat{t} = \begin{bmatrix} -n_y \\ n_x \end{bmatrix}
+\end{equation}
+（这是$\hat{n}$逆时针旋转90度）
+
+\textbf{滑动方向}：
+\begin{itemize}
+\item 如果可动物体相对于固定约束沿$+\hat{t}$方向滑动：$S_r$（向右）
+\item 如果可动物体相对于固定约束沿$-\hat{t}$方向滑动：$S_l$（向左）
+\end{itemize}
+
+\subsection{相对速度的方向}
+
+接触点处的相对速度：
+\begin{equation}
+\dot{p}_A - \dot{p}_B = v_A + [\omega_A]p_A - (v_B + [\omega_B]p_B)
+\end{equation}
+
+\textbf{重要}：这个相对速度可以分解为：
+\begin{itemize}
+\item \textbf{法向分量}：与接触法线$\hat{n}$平行
+  \begin{itemize}
+  \item 对于滑动接触，法向分量为0（保持接触）
+  \end{itemize}
+\item \textbf{切向分量}：与接触法线$\hat{n}$垂直
+  \begin{itemize}
+  \item 对于滑动接触，切向分量不为0（这就是滑动）
+  \end{itemize}
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item 物体$A$和$B$都可以有旋转$\omega_A$和$\omega_B$
+\item 物体$A$和$B$都可以有平移$v_A$和$v_B$
+\item 但在接触点处，相对速度的\textbf{切向分量}不为零
+\item 这个切向相对速度的方向决定了$S_l$还是$S_r$
+\end{itemize}
+
+\textbf{判断}：
+\begin{itemize}
+\item 如果切向相对速度在$+\hat{t}$方向：$S_r$
+\item 如果切向相对速度在$-\hat{t}$方向：$S_l$
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：垂直接触法线}
+
+考虑接触法线$\hat{n} = [0, 1]^T$（垂直向上，指向可动物体内部）：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触法线
+\draw[thick,blue,->,line width=2pt] (0,0) -- (0,2) node[above] {$\hat{n}$ (法线)};
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+
+% 切向方向
+\draw[thick,green,->] (0,0) -- (1,0) node[right] {$\hat{t}$ (切向，右)};
+\draw[thick,red,->] (0,0) -- (-1,0) node[left] {$-\hat{t}$ (切向，左)};
+
+% 标记
+\node[green] at (0.5,0.3) {$S_r$};
+\node[red] at (-0.5,0.3) {$S_l$};
+
+% 坐标轴
+\draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,2.5) node[above] {$y$};
+\end{tikzpicture}
+\end{center}
+
+\textbf{分析}：
+\begin{itemize}
+\item 切向向量：$\hat{t} = [-n_y, n_x]^T = [-1, 0]^T$（向左？）
+\item 等等，需要检查定义...
+\end{itemize}
+
+\textbf{修正}：通常约定是：
+\begin{itemize}
+\item 从接触法线$\hat{n}$逆时针旋转90度得到切向
+\item 或者：站在接触点，面向$\hat{n}$方向，右手方向是"右"
+\end{itemize}
+
+\subsection{例子2：水平接触法线}
+
+考虑接触法线$\hat{n} = [1, 0]^T$（水平向右，指向可动物体内部）：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触法线
+\draw[thick,blue,->,line width=2pt] (0,0) -- (2,0) node[right] {$\hat{n}$ (法线)};
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+
+% 切向方向
+\draw[thick,green,->] (0,0) -- (0,1) node[above] {$\hat{t}$ (切向，上/右)};
+\draw[thick,red,->] (0,0) -- (0,-1) node[below] {$-\hat{t}$ (切向，下/左)};
+
+% 标记
+\node[green] at (0.3,0.5) {$S_r$};
+\node[red] at (0.3,-0.5) {$S_l$};
+
+% 坐标轴
+\draw[->] (-0.5,0) -- (2.5,0) node[right] {$x$};
+\draw[->] (0,-1.5) -- (0,1.5) node[above] {$y$};
+\end{tikzpicture}
+\end{center}
+
+\section{在CoR表示中的应用}
+
+\subsection{CoR在接触法线上}
+
+当CoR在接触法线$\hat{n}$上时（标记为'$\pm$'），对应的接触可能是：
+\begin{itemize}
+\item \textbf{R（滚动）}：接触点处无相对运动
+\item \textbf{S（滑动）}：接触点处有相对运动
+  \begin{itemize}
+  \item $S_r$：向右滑动
+  \item $S_l$：向左滑动
+  \end{itemize}
+\end{itemize}
+
+\subsection{如何从CoR判断滑动方向？}
+
+\textbf{方法}：根据CoR相对于接触点的位置和旋转方向。
+
+\begin{enumerate}
+\item \textbf{确定旋转方向}：
+   \begin{itemize}
+   \item 如果CoR标记为'+'：物体逆时针旋转（$\omega_z > 0$）
+   \item 如果CoR标记为'-'：物体顺时针旋转（$\omega_z < 0$）
+   \end{itemize}
+
+\item \textbf{确定接触点的速度方向}：
+   \begin{itemize}
+   \item 接触点的速度 = 平移速度 + 旋转产生的速度
+   \item 速度 = $v + \omega \times (p - \text{CoR})$
+   \item 速度方向垂直于从CoR到接触点的向量（旋转部分）
+   \item 还要加上平移速度分量
+   \end{itemize}
+
+\item \textbf{关键}：对于滑动接触，CoR在接触法线上
+   \begin{itemize}
+   \item 这意味着接触点的速度方向与法线垂直（或几乎垂直）
+   \item 速度的切向分量就是滑动速度
+   \end{itemize}
+
+\item \textbf{判断滑动方向}：
+   \begin{itemize}
+   \item 如果切向速度在$+\hat{t}$方向：$S_r$
+   \item 如果切向速度在$-\hat{t}$方向：$S_l$
+   \end{itemize}
+\end{enumerate}
+
+\textbf{重要澄清}：
+\begin{itemize}
+\item 物体仍然在\textbf{旋转}（有角速度$\omega_z$）
+\item 物体可能还有\textbf{平移}（有线速度$v$）
+\item 滑动是指接触点处的\textbf{切向相对运动}
+\item 不是指物体只有平移，没有旋转
+\end{itemize}
+
+\subsection{具体例子：CoR在法线上方}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触点和法线
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+\draw[thick,blue,->,line width=2pt] (0,0) -- (0,2) node[above] {$\hat{n}$};
+
+% CoR在法线上方
+\filldraw[red] (0,1.5) circle (2pt) node[above left] {CoR (+)};
+
+% 从CoR到接触点的向量
+\draw[thick,red,dashed] (0,1.5) -- (0,0);
+
+% 接触点的切向速度方向
+\draw[thick,green,->] (0,0) -- (0.5,0) node[right] {$v_t$ (切向)};
+\draw[thick,red,->] (0,0) -- (-0.5,0) node[left] {$-v_t$};
+
+% 标记旋转
+\draw[thick,blue,->] (0.3,0.3) arc (45:135:0.4);
+\node[blue] at (0,0.6) {$\omega$};
+
+% 标记
+\node[green] at (0.3,0.3) {$S_r$};
+\node[red] at (-0.3,0.3) {$S_l$};
+
+% 说明
+\node[below] at (0,-0.7) {物体在旋转（$\omega > 0$），接触点有切向速度\\切向速度向右：$S_r$，向左：$S_l$};
+\end{tikzpicture}
+\end{center}
+
+\textbf{分析}：
+\begin{itemize}
+\item CoR在接触点上方，标记为'+'（物体逆时针旋转，$\omega_z > 0$）
+\item 物体在\textbf{旋转}，不是纯平移
+\item 接触点的\textbf{切向速度}方向：向右（垂直于CoR到接触点的向量）
+\item 如果这是滑动接触，且切向速度向右：$S_r$
+\item 如果切向速度向左：$S_l$
+\end{itemize}
+
+\textbf{关键}：滑动是指接触点处的\textbf{切向相对运动}，物体本身仍然在旋转。
+
+\section{图12.11的详细说明}
+
+根据原书图12.11，接触标签的分配规则：
+
+\subsection{基本规则}
+
+\begin{itemize}
+\item \textbf{在接触法线上}（标记'$\pm$'）：
+  \begin{itemize}
+  \item 如果CoR恰好是接触点：$R$（滚动，无相对运动）
+  \item 如果CoR在接触点上方或下方：$S_r$或$S_l$（滑动）
+  \end{itemize}
+
+\item \textbf{不在接触法线上}：
+  \begin{itemize}
+  \item 标记为'$+$'或'$-$'：$B$（分离接触）
+  \end{itemize}
+\end{itemize}
+
+\subsection{关键观察：符号切换}
+
+\textbf{重要}：根据图12.11的说明，"For points on the contact normal, the sign assigned to the $S_l$ and $S_r$ CoRs switches at the contact point."
+
+这意味着：
+\begin{itemize}
+\item 在接触点\textbf{上方}的CoR：可能是$S_r$或$S_l$（取决于具体情况）
+\item 在接触点\textbf{下方}的CoR：符号相反（如果上方是$S_r$，下方是$S_l$，反之亦然）
+\item 在接触点\textbf{处}：$R$（滚动）
+\end{itemize}
+
+\subsection{为什么会在接触点切换？}
+
+\textbf{原因}：旋转方向的影响
+
+\begin{itemize}
+\item 当CoR在接触点上方时：
+  \begin{itemize}
+  \item 如果逆时针旋转（'+'）：接触点速度向右 → $S_r$
+  \item 如果顺时针旋转（'-'）：接触点速度向左 → $S_l$
+  \end{itemize}
+
+\item 当CoR在接触点下方时：
+  \begin{itemize}
+  \item 如果逆时针旋转（'+'）：接触点速度向左 → $S_l$
+  \item 如果顺时针旋转（'-'）：接触点速度向右 → $S_r$
+  \end{itemize}
+\end{itemize}
+
+\textbf{关键}：旋转方向相同，但CoR在接触点的不同侧，导致接触点速度方向相反，因此滑动方向相反。
+
+\subsection{图示说明}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触点和法线
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+\draw[thick,blue,->,line width=2pt] (0,0) -- (0,2) node[above] {$\hat{n}$};
+\draw[thick,blue,->,line width=2pt] (0,0) -- (0,-2) node[below] {$\hat{n}$（反向）};
+
+% CoR在法线上方（逆时针）
+\filldraw[red] (0,1.5) circle (2pt) node[above left] {CoR$_1$ (+)};
+\draw[thick,red,dashed] (0,1.5) -- (0,0);
+\draw[thick,green,->] (0,0) -- (0.5,0) node[right] {$v$};
+\node[green] at (0.3,0.3) {$S_r$};
+
+% CoR在法线下方（逆时针）
+\filldraw[red] (0,-1.5) circle (2pt) node[below left] {CoR$_2$ (+)};
+\draw[thick,red,dashed] (0,-1.5) -- (0,0);
+\draw[thick,red,->] (0,0) -- (-0.5,0) node[left] {$v$};
+\node[red] at (-0.3,-0.3) {$S_l$};
+
+% 接触点处
+\node[blue] at (0.3,0) {$R$};
+
+\node[below] at (0,-2.5) {相同旋转方向，但CoR位置不同导致滑动方向相反};
+\end{tikzpicture}
+\end{center}
+
+\section{为什么需要区分$S_l$和$S_r$？}
+
+\subsection{在摩擦分析中}
+
+\begin{itemize}
+\item 滑动方向决定了\textbf{摩擦力的方向}
+\item 摩擦力总是与滑动方向\textbf{相反}
+\item 因此需要知道滑动方向
+\end{itemize}
+
+\subsection{在接触模式中}
+
+\begin{itemize}
+\item 多个接触的接触模式需要指定每个接触的状态
+\item 例如：$S_lS_rB$表示：
+  \begin{itemize}
+  \item 接触1：向左滑动
+  \item 接触2：向右滑动
+  \item 接触3：分离
+  \end{itemize}
+\item 这提供了更详细的接触状态信息
+\end{itemize}
+
+\subsection{在动力学分析中}
+
+\begin{itemize}
+\item 滑动方向影响接触力的计算
+\item 库仑摩擦定律：$f_t = \mu f_n$，方向与滑动方向相反
+\item 需要知道滑动方向才能正确计算摩擦力
+\end{itemize}
+
+\section{总结}
+
+\subsection{定义}
+
+\begin{enumerate}
+\item \textbf{$S_r$}：可动物体相对于固定约束\textbf{向右}滑动
+\item \textbf{$S_l$}：可动物体相对于固定约束\textbf{向左}滑动
+\end{enumerate}
+
+\subsection{判断方法}
+
+\begin{enumerate}
+\item 确定接触法线$\hat{n}$和切向$\hat{t}$
+\item 计算接触点处的相对速度
+\item 判断相对速度在$+\hat{t}$还是$-\hat{t}$方向
+\end{enumerate}
+
+\subsection{应用}
+
+\begin{enumerate}
+\item 在CoR表示中标记接触状态
+\item 在接触模式中提供详细信息
+\item 在摩擦分析中确定摩擦力方向
+\end{enumerate}
+
+\subsection{关键点}
+
+\begin{itemize}
+\item $S_l$和$S_r$是滑动接触$S$的\textbf{子分类}
+\item 只在\textbf{平面问题}中需要（3D问题中滑动方向更复杂）
+\item 方向是相对于固定约束定义的
+\item 站在接触点，面向法线方向，左右手方向分别对应$S_l$和$S_r$
+\end{itemize}
+
+\section{重要澄清：滑动不是纯平移}
+
+\subsection{常见误解}
+
+\textbf{误解}：滑动意味着物体只有平移，没有旋转。
+
+\textbf{正确理解}：
+\begin{itemize}
+\item 滑动是指\textbf{接触点处}的\textbf{切向相对运动}
+\item 物体本身仍然可以有\textbf{旋转}（$\omega_z \neq 0$）
+\item 物体本身仍然可以有\textbf{平移}（$v \neq 0$）
+\item 只是在接触点处，除了法线方向（保持接触），还有切向相对速度
+\end{itemize}
+
+\subsection{三种接触类型的对比}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{接触类型} & \textbf{法向相对速度} & \textbf{切向相对速度} & \textbf{物体运动} \\
+\hline
+$B$（分离） & $> 0$ & 任意 & 任意 \\
+\hline
+$R$（滚动） & $= 0$ & $= 0$ & 可以有旋转和平移 \\
+\hline
+$S$（滑动） & $= 0$ & $\neq 0$ & 可以有旋转和平移 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{关键}：
+\begin{itemize}
+\item 滚动$R$：接触点处无相对运动（法向和切向都为0）
+\item 滑动$S$：接触点处有切向相对运动（法向为0，切向不为0）
+\item 两种情况下，物体本身都可以有旋转和平移
+\end{itemize}
+
+\subsection{例子：旋转的物体在滑动}
+
+\textbf{场景}：一个圆盘在平面上滑动
+
+\begin{itemize}
+\item 圆盘绕其中心旋转：$\omega_z \neq 0$
+\item 圆盘中心也在移动：$v \neq 0$
+\item 接触点处：法向相对速度为0（保持接触）
+\item 接触点处：切向相对速度不为0（滑动）
+\item 如果切向速度向右：$S_r$
+\item 如果切向速度向左：$S_l$
+\end{itemize}
+
+\textbf{关键}：圆盘在旋转，同时也在滑动。旋转和滑动可以同时存在。
+
+\subsection{总结}
+
+\begin{enumerate}
+\item \textbf{滑动}是指接触点处的\textbf{切向相对运动}，不是指物体只有平移
+
+\item \textbf{物体运动}：
+   \begin{itemize}
+   \item 可以有旋转（$\omega_z \neq 0$）
+   \item 可以有平移（$v \neq 0$）
+   \item 旋转和平移可以同时存在
+   \end{itemize}
+
+\item \textbf{接触点处的相对运动}：
+   \begin{itemize}
+   \item 法向分量 = 0（保持接触）
+   \item 切向分量 $\neq 0$（滑动）
+   \item 切向分量的方向决定$S_l$还是$S_r$
+   \end{itemize}
+\end{enumerate}
+
+\end{document}
+

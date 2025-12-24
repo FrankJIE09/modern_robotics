@@ -1,0 +1,830 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.markings}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{图12.21灰色区域详解：力矩标记和正张成}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+\subsection{问题}
+
+图12.21展示了使用\textbf{力矩标记}（moment labels）来表示wrench锥的方法。图中的\textbf{灰色区域}有特殊的含义。
+
+\textbf{核心问题}：灰色区域代表什么？
+
+\subsection{答案概述}
+
+\textbf{灰色区域}表示：
+\begin{itemize}
+\item \textbf{正力矩区域}：所有力对该区域内的点都产生\textbf{正力矩}
+\item \textbf{正张成区域}：wrench锥的正线性组合可以产生的力线围绕该区域
+\item \textbf{一致标记区域}：所有力线对该区域内的点都有一致的力矩符号
+\end{itemize}
+
+\section{力矩标记的基本原理}
+
+\subsection{单个Wrench的力矩标记}
+
+\textbf{规则}：对于基wrench $F$（用箭头表示）：
+\begin{enumerate}
+\item \textbf{箭头线左侧}的点：标记为$'+'$
+   \begin{itemize}
+   \item 表示$F$的任何正缩放（$kF, k \geq 0$）对这些点产生\textbf{正力矩}$m_z > 0$
+   \end{itemize}
+
+\item \textbf{箭头线右侧}的点：标记为$'-'$
+   \begin{itemize}
+   \item 表示$F$的任何正缩放对这些点产生\textbf{负力矩}$m_z < 0$
+   \end{itemize}
+
+\item \textbf{箭头线上}的点：标记为$\pm$
+   \begin{itemize}
+   \item 表示力矩为零$m_z = 0$
+   \end{itemize}
+\end{enumerate}
+
+\subsection{物理解释}
+
+\textbf{力矩的符号}：
+\begin{itemize}
+\item 从原点看，如果力使物体\textbf{逆时针}旋转，力矩为正
+\item 从原点看，如果力使物体\textbf{顺时针}旋转，力矩为负
+\end{itemize}
+
+\textbf{从箭头判断}：
+\begin{itemize}
+\item 如果原点在箭头\textbf{左侧}（从箭头方向看），力矩为正
+\item 如果原点在箭头\textbf{右侧}，力矩为负
+\end{itemize}
+
+\section{图12.21(a)：单个力线}
+
+\subsection{图示内容}
+
+\begin{itemize}
+\item 一条垂直的虚线，表示力$\mathcal{F}_1$的作用线
+\item 垂直向上的箭头，表示力的方向
+\item 左侧灰色区域，标记$'+'$
+\item 右侧白色区域，标记$'-'$
+\item 线上标记$\pm$
+\end{itemize}
+
+\subsection{灰色区域的含义}
+
+\textbf{灰色区域}（左侧）：
+\begin{itemize}
+\item 所有点都标记为$'+'$
+\item 表示$\mathcal{F}_1$对这些点产生\textbf{正力矩}
+\item 这是$\mathcal{F}_1$的\textbf{正力矩半空间}
+\end{itemize}
+
+\textbf{白色区域}（右侧）：
+\begin{itemize}
+\item 所有点都标记为$'-'$
+\item 表示$\mathcal{F}_1$对这些点产生\textbf{负力矩}
+\item 这是$\mathcal{F}_1$的\textbf{负力矩半空间}
+\end{itemize}
+
+\subsection{数学表达}
+
+对于wrench $F_1 = (m_{1z}, f_{1x}, f_{1y})$，作用在点$p = (x, y)$的力矩为：
+\begin{equation}
+m_z = x f_y - y f_x
+\end{equation}
+
+\textbf{正力矩区域}：满足$m_z > 0$的所有点$(x, y)$
+
+\textbf{负力矩区域}：满足$m_z < 0$的所有点$(x, y)$
+
+\section{图12.21(b)：两个力线的正张成}
+
+\subsection{图示内容}
+
+\begin{itemize}
+\item 两条相交的虚线：$\mathcal{F}_1$（垂直）和$\mathcal{F}_2$（斜向左上）
+\item 两条线在中心黑点相交
+\item 四个区域被两条线分割
+\item 只有一个区域是灰色的，标记$'+'$
+\end{itemize}
+
+\subsection{灰色区域的含义}
+
+\textbf{灰色区域}（左下角）：
+\begin{itemize}
+\item 同时标记为$'+'$（对$\mathcal{F}_1$和$\mathcal{F}_2$都是正力矩）
+\item 表示\textbf{两个力都}对该区域内的点产生正力矩
+\item 这是两个力线的\textbf{正张成区域}
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item 只有\textbf{一致标记}的点保留标签
+\item 不一致标记的点失去标签（空白）
+\item 灰色区域是\textbf{唯一一致标记}的区域
+\end{itemize}
+
+\section{为什么只有一致标记的点保留标签？}
+
+\subsection{问题的提出}
+
+\textbf{关键问题}：为什么不一致标记的点要失去标签（变为空白）？
+
+\textbf{具体场景}：
+\begin{itemize}
+\item 对于点$p$，$\mathcal{F}_1$对其产生正力矩（标记$'+'$）
+\item 但$\mathcal{F}_2$对其产生负力矩（标记$'-'$）
+\item 这个点应该标记为什么？
+\end{itemize}
+
+\subsection{答案：正张成的定义}
+
+\textbf{核心原理}：力矩标记表示的是\textbf{wrench锥的正张成}，即：
+\begin{equation}
+\text{pos}(\{F_1, F_2\}) = \{k_1 F_1 + k_2 F_2 \mid k_1, k_2 \geq 0\}
+\end{equation}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 正线性组合要求\textbf{所有系数非负}（$k_1, k_2 \geq 0$）
+\item 这意味着我们只能使用\textbf{正缩放}的wrench
+\item 不能使用负缩放（不能"反向"使用力）
+\end{itemize}
+
+\subsection{不一致标记点的含义}
+
+\textbf{设点$p$对两个力产生不一致的力矩}：
+\begin{itemize}
+\item $F_1$对$p$产生正力矩：$m_{1z}(p) > 0$
+\item $F_2$对$p$产生负力矩：$m_{2z}(p) < 0$
+\end{itemize}
+
+\textbf{问题}：能否用正线性组合$k_1 F_1 + k_2 F_2$（$k_1, k_2 \geq 0$）对$p$产生零力矩或负力矩？
+
+\textbf{分析}：
+\begin{align}
+m_z(p) &= k_1 m_{1z}(p) + k_2 m_{2z}(p) \\
+&= k_1 \cdot (\text{正数}) + k_2 \cdot (\text{负数})
+\end{align}
+
+由于$k_1, k_2 \geq 0$：
+\begin{itemize}
+\item 如果$k_1$很大，$k_2$很小：$m_z(p) > 0$（正力矩）
+\item 如果$k_1$很小，$k_2$很大：$m_z(p) < 0$（负力矩）
+\item 可以调整$k_1$和$k_2$的比例，使$m_z(p) = 0$或任意值
+\end{itemize}
+
+\textbf{结论}：对于不一致标记的点，正线性组合可以产生\textbf{任意符号}的力矩！
+
+\subsection{一致标记点的含义}
+
+\textbf{设点$p$对两个力都产生正力矩}：
+\begin{itemize}
+\item $F_1$对$p$产生正力矩：$m_{1z}(p) > 0$
+\item $F_2$对$p$产生正力矩：$m_{2z}(p) > 0$
+\end{itemize}
+
+\textbf{分析}：
+\begin{align}
+m_z(p) &= k_1 m_{1z}(p) + k_2 m_{2z}(p) \\
+&= k_1 \cdot (\text{正数}) + k_2 \cdot (\text{正数})
+\end{align}
+
+由于$k_1, k_2 \geq 0$且两个力矩都为正：
+\begin{itemize}
+\item $m_z(p) > 0$（总是正力矩）
+\item 无论$k_1, k_2$如何选择，都不能产生负力矩
+\item 这是\textbf{一致的}行为
+\end{itemize}
+
+\subsection{为什么失去标签？}
+
+\textbf{标签的含义}：
+\begin{itemize}
+\item 标记$'+'$：表示\textbf{所有}正线性组合都产生正力矩
+\item 标记$'-'$：表示\textbf{所有}正线性组合都产生负力矩
+\item 标记$\pm$：表示\textbf{所有}正线性组合都产生零力矩
+\end{itemize}
+
+\textbf{不一致标记的点}：
+\begin{itemize}
+\item 某些正线性组合产生正力矩
+\item 某些正线性组合产生负力矩
+\item 某些正线性组合产生零力矩
+\item \textbf{没有一致的符号}！
+\end{itemize}
+
+\textbf{因此}：
+\begin{itemize}
+\item 不能标记为$'+'$（因为可以产生负力矩）
+\item 不能标记为$'-'$（因为可以产生正力矩）
+\item 不能标记为$\pm$（因为可以产生非零力矩）
+\item 只能标记为\textbf{空白}（表示"不一致"）
+\end{itemize}
+
+\subsection{几何解释}
+
+\textbf{在wrench空间中}：
+
+对于点$p$，考虑所有正线性组合产生的力矩：
+\begin{equation}
+\{m_z(p) = k_1 m_{1z}(p) + k_2 m_{2z}(p) \mid k_1, k_2 \geq 0\}
+\end{equation}
+
+\textbf{情况1}：一致标记（都为正）
+\begin{itemize}
+\item $m_{1z}(p) > 0$，$m_{2z}(p) > 0$
+\item 力矩集合：$\{m_z(p) > 0\}$（所有值都为正）
+\item 可以标记为$'+'$
+\end{itemize}
+
+\textbf{情况2}：不一致标记（一正一负）
+\begin{itemize}
+\item $m_{1z}(p) > 0$，$m_{2z}(p) < 0$
+\item 力矩集合：$\{m_z(p) \in \mathbb{R}\}$（可以取任意值）
+\item 不能标记为任何单一符号
+\end{itemize}
+
+\textbf{情况3}：一致标记（都为负）
+\begin{itemize}
+\item $m_{1z}(p) < 0$，$m_{2z}(p) < 0$
+\item 力矩集合：$\{m_z(p) < 0\}$（所有值都为负）
+\item 可以标记为$'-'$
+\end{itemize}
+
+\subsection{与正张成的关系}
+
+\textbf{正张成的目标}：
+\begin{itemize}
+\item 表示wrench锥$\text{pos}(\{F_1, F_2\})$可以产生哪些wrench
+\item 特别是：可以产生哪些\textbf{方向}的wrench
+\end{itemize}
+
+\textbf{一致标记区域}：
+\begin{itemize}
+\item 表示wrench锥可以产生\textbf{围绕该区域}的力线
+\item 但不能产生其他方向的力线
+\item 这是wrench锥的\textbf{限制}
+\end{itemize}
+
+\textbf{不一致标记区域}：
+\begin{itemize}
+\item 表示wrench锥可以产生\textbf{任意方向}的力线
+\item 没有限制
+\item 这是wrench锥的\textbf{灵活性}
+\end{itemize}
+
+\subsection{实际例子}
+
+\textbf{例子}：两个接触力
+
+\textbf{接触1}：位置$(1, 0)$，法向量$(-1, 0)$（向左推）
+\textbf{接触2}：位置$(-1, 0)$，法向量$(1, 0)$（向右推）
+
+\textbf{点$p_1 = (2, 0)$}（右侧）：
+\begin{itemize}
+\item $F_1$对$p_1$的力矩：$m_{1z} = 2 \cdot 0 - 0 \cdot (-1) = 0$（在力线上）
+\item $F_2$对$p_1$的力矩：$m_{2z} = 2 \cdot 0 - 0 \cdot 1 = 0$（也在力线上）
+\item 标记：$\pm$（两个力矩都为零）
+\end{itemize}
+
+\textbf{点$p_2 = (0, 1)$}（上方）：
+\begin{itemize}
+\item $F_1$对$p_2$的力矩：$m_{1z} = 0 \cdot 0 - 1 \cdot (-1) = 1 > 0$（正）
+\item $F_2$对$p_2$的力矩：$m_{2z} = 0 \cdot 0 - 1 \cdot 1 = -1 < 0$（负）
+\item 标记：\textbf{空白}（不一致）
+\item 原因：可以通过调整$k_1$和$k_2$使总力矩为任意值
+\end{itemize}
+
+\textbf{点$p_3 = (-2, 0)$}（左侧）：
+\begin{itemize}
+\item $F_1$对$p_3$的力矩：$m_{1z} = -2 \cdot 0 - 0 \cdot (-1) = 0$
+\item $F_2$对$p_3$的力矩：$m_{2z} = -2 \cdot 0 - 0 \cdot 1 = 0$
+\item 标记：$\pm$（两个力矩都为零）
+\end{itemize}
+
+\textbf{点$p_4 = (0, -1)$}（下方）：
+\begin{itemize}
+\item $F_1$对$p_4$的力矩：$m_{1z} = 0 \cdot 0 - (-1) \cdot (-1) = -1 < 0$（负）
+\item $F_2$对$p_4$的力矩：$m_{2z} = 0 \cdot 0 - (-1) \cdot 1 = 1 > 0$（正）
+\item 标记：\textbf{空白}（不一致）
+\end{itemize}
+
+\subsection{总结}
+
+\textbf{为什么只有一致标记的点保留标签？}
+
+\begin{enumerate}
+\item \textbf{标签的含义}：表示\textbf{所有}正线性组合都产生相同符号的力矩
+\item \textbf{不一致标记的点}：正线性组合可以产生\textbf{任意符号}的力矩
+\item \textbf{因此}：不能给不一致标记的点分配单一标签
+\item \textbf{空白表示}：该点的力矩符号取决于正线性组合的系数选择
+\end{enumerate}
+
+\textbf{关键洞察}：
+\begin{itemize}
+\item 一致标记区域：wrench锥的\textbf{限制}（只能产生某些方向的wrench）
+\item 不一致标记区域：wrench锥的\textbf{灵活性}（可以产生任意方向的wrench）
+\item 力闭合要求：\textbf{没有}一致标记区域（即没有限制）
+\end{itemize}
+
+\section{不一致标记点的后果：可以产生任意符号的力矩}
+
+\subsection{问题的提出}
+
+\textbf{关键观察}：对于不一致标记的点，正线性组合可以产生\textbf{任意符号}的力矩。
+
+\textbf{问题}：这会导致什么？
+
+\subsection{物理后果1：可以控制力矩方向}
+
+\textbf{含义}：
+\begin{itemize}
+\item 对于不一致标记的点$p$，我们可以通过调整$k_1$和$k_2$的比例
+\item 使总力矩$m_z(p)$为\textbf{任意值}（正、负或零）
+\item 这意味着可以\textbf{控制}物体绕该点的旋转方向
+\end{itemize}
+
+\textbf{具体例子}：
+
+设点$p$对两个力产生不一致的力矩：
+\begin{itemize}
+\item $m_{1z}(p) = 2 > 0$（$F_1$产生正力矩）
+\item $m_{2z}(p) = -1 < 0$（$F_2$产生负力矩）
+\end{itemize}
+
+\textbf{总力矩}：
+\begin{equation}
+m_z(p) = k_1 \cdot 2 + k_2 \cdot (-1) = 2k_1 - k_2
+\end{equation}
+
+\textbf{可以产生的力矩}：
+\begin{itemize}
+\item 如果$k_1 = 1, k_2 = 0$：$m_z(p) = 2 > 0$（正力矩，逆时针旋转）
+\item 如果$k_1 = 0, k_2 = 1$：$m_z(p) = -1 < 0$（负力矩，顺时针旋转）
+\item 如果$k_1 = 0.5, k_2 = 1$：$m_z(p) = 0$（零力矩，不旋转）
+\item 可以产生\textbf{任意值}的力矩
+\end{itemize}
+
+\subsection{物理后果2：可以平衡任意外部力矩}
+
+\textbf{含义}：
+\begin{itemize}
+\item 如果外部干扰对点$p$产生力矩$m_{\text{ext}}(p)$
+\item 我们可以通过调整$k_1$和$k_2$，使总力矩$m_z(p) = -m_{\text{ext}}(p)$
+\item 从而\textbf{平衡}外部力矩
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 外部力矩：$m_{\text{ext}}(p) = 3$（逆时针）
+\item 需要总力矩：$m_z(p) = -3$（顺时针，平衡）
+\item 选择：$k_1 = 0, k_2 = 3$，则$m_z(p) = -3$，可以平衡
+\end{itemize}
+
+\textbf{关键}：对于不一致标记的点，\textbf{总是可以}找到正线性组合来平衡任意外部力矩。
+
+\subsection{物理后果3：wrench锥的灵活性}
+
+\textbf{含义}：
+\begin{itemize}
+\item 不一致标记的区域表示wrench锥在这些区域\textbf{没有限制}
+\item 可以产生\textbf{任意方向}的wrench来抵抗干扰
+\item 这是\textbf{好的}（对于力闭合）
+\end{itemize}
+
+\textbf{对比}：
+\begin{itemize}
+\item \textbf{一致标记区域}（灰色）：wrench锥有\textbf{限制}，只能产生某些方向的wrench
+\item \textbf{不一致标记区域}（空白）：wrench锥\textbf{灵活}，可以产生任意方向的wrench
+\end{itemize}
+
+\subsection{对力闭合的影响}
+
+\textbf{力闭合的条件}：
+\begin{itemize}
+\item Wrench锥必须\textbf{正张成}整个wrench空间$\mathbb{R}^3$
+\item 这意味着：可以产生\textbf{任意方向}的wrench来平衡外部干扰
+\end{itemize}
+
+\textbf{不一致标记区域的作用}：
+\begin{itemize}
+\item 对于不一致标记的点，可以产生任意符号的力矩
+\item 这意味着：可以产生\textbf{围绕这些点}的任意方向的力线
+\item 这有助于\textbf{扩展}wrench锥的能力
+\end{itemize}
+
+\textbf{一致标记区域的问题}：
+\begin{itemize}
+\item 对于一致标记的点，只能产生\textbf{固定符号}的力矩
+\item 这意味着：只能产生\textbf{围绕这些点}的某些方向的力线
+\item 这\textbf{限制}了wrench锥的能力
+\end{itemize}
+
+\subsection{实际例子：两个接触的抓取}
+
+\textbf{场景}：两个接触，每个接触有摩擦
+
+\textbf{接触1}：位置$(1, 0)$，摩擦锥的两条边
+\textbf{接触2}：位置$(-1, 0)$，摩擦锥的两条边
+
+\textbf{力矩标记分析}：
+
+\textbf{点$p_1 = (0, 1)$}（上方）：
+\begin{itemize}
+\item 对某些wrench产生正力矩
+\item 对某些wrench产生负力矩
+\item 标记：\textbf{空白}（不一致）
+\item 含义：可以产生围绕该点的\textbf{任意方向}的力线
+\end{itemize}
+
+\textbf{点$p_2 = (-2, 0)$}（左侧）：
+\begin{itemize}
+\item 对所有wrench都产生正力矩
+\item 标记：$'+'$（一致）
+\item 含义：只能产生围绕该点的\textbf{某些方向}的力线（逆时针方向）
+\end{itemize}
+
+\textbf{结论}：
+\begin{itemize}
+\item 如果\textbf{只有}一致标记区域（灰色），则wrench锥有\textbf{限制}
+\item 如果\textbf{有}不一致标记区域（空白），则wrench锥在这些区域\textbf{灵活}
+\item 力闭合要求：\textbf{没有}一致标记区域，即所有区域都是不一致的（或至少没有大的灰色区域）
+\end{itemize}
+
+\subsection{几何可视化}
+
+\textbf{在wrench空间中}：
+
+对于不一致标记的点$p$，所有正线性组合产生的力矩集合：
+\begin{equation}
+\{m_z(p) = k_1 m_{1z}(p) + k_2 m_{2z}(p) \mid k_1, k_2 \geq 0\}
+\end{equation}
+
+\textbf{如果$m_{1z}(p) > 0$且$m_{2z}(p) < 0$}：
+\begin{itemize}
+\item 力矩集合：$\{m_z(p) \in (-\infty, +\infty)\}$（可以取任意值）
+\item 这意味着：可以产生\textbf{任意大小和方向}的力矩
+\item 在wrench空间中，这对应一个\textbf{完整的子空间}
+\end{itemize}
+
+\textbf{如果$m_{1z}(p) > 0$且$m_{2z}(p) > 0$}（一致标记）：
+\begin{itemize}
+\item 力矩集合：$\{m_z(p) > 0\}$（只能取正值）
+\item 这意味着：只能产生\textbf{正力矩}
+\item 在wrench空间中，这对应一个\textbf{半空间}（限制）
+\end{itemize}
+
+\subsection{对抓取稳定性的影响}
+
+\textbf{不一致标记区域}（空白）：
+\begin{itemize}
+\item \textbf{优点}：可以抵抗\textbf{任意方向}的干扰
+\item \textbf{含义}：物体绕这些点的旋转可以被\textbf{控制}
+\item \textbf{结果}：抓取在这些区域\textbf{稳定}
+\end{itemize}
+
+\textbf{一致标记区域}（灰色）：
+\begin{itemize}
+\item \textbf{缺点}：只能抵抗\textbf{某些方向}的干扰
+\item \textbf{含义}：物体绕这些点的旋转\textbf{不能被完全控制}
+\item \textbf{结果}：抓取在这些区域\textbf{不稳定}
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item 如果灰色区域很大，说明有很多点绕其旋转时，接触力都产生相同符号的力矩
+\item 这意味着：物体可以\textbf{自由旋转}（在某些方向上）
+\item 抓取\textbf{不稳定}，不是力闭合
+\end{itemize}
+
+\subsection{总结：不一致标记点的后果}
+
+\textbf{可以产生任意符号的力矩导致}：
+
+\begin{enumerate}
+\item \textbf{控制能力}：
+   \begin{itemize}
+   \item 可以通过调整接触力比例，控制物体绕该点的旋转方向
+   \item 可以产生任意大小和方向的力矩
+   \end{itemize}
+
+\item \textbf{平衡能力}：
+   \begin{itemize}
+   \item 可以平衡任意外部力矩
+   \item 可以抵抗任意方向的干扰
+   \end{itemize}
+
+\item \textbf{Wrench锥的灵活性}：
+   \begin{itemize}
+   \item Wrench锥在这些区域没有限制
+   \item 可以产生任意方向的wrench
+   \end{itemize}
+
+\item \textbf{对力闭合的贡献}：
+   \begin{itemize}
+   \item 有助于扩展wrench锥的能力
+   \item 使wrench锥更接近正张成整个空间
+   \end{itemize}
+
+\item \textbf{抓取稳定性}：
+   \begin{itemize}
+   \item 在这些区域，抓取是稳定的
+   \item 可以抵抗任意方向的干扰
+   \end{itemize}
+\end{enumerate}
+
+\textbf{关键对比}：
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{特性} & \textbf{一致标记区域}（灰色） & \textbf{不一致标记区域}（空白） \\
+\hline
+力矩符号 & 固定（都为正或都为负） & 可变（可以为任意值） \\
+\hline
+控制能力 & 有限（只能产生某些方向的力矩） & 完全（可以产生任意方向的力矩） \\
+\hline
+平衡能力 & 有限（只能平衡某些方向的干扰） & 完全（可以平衡任意方向的干扰） \\
+\hline
+Wrench锥 & 有限制 & 灵活 \\
+\hline
+抓取稳定性 & 不稳定 & 稳定 \\
+\hline
+力闭合 & 阻碍（有灰色区域则非力闭合） & 促进（空白区域有助于力闭合） \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{最终结论}：
+
+\begin{itemize}
+\item 不一致标记的点可以产生任意符号的力矩，这是\textbf{好的}
+\item 它使wrench锥更灵活，有助于实现力闭合
+\item 一致标记的点只能产生固定符号的力矩，这是\textbf{限制}
+\item 力闭合要求：\textbf{没有}大的灰色区域（一致标记区域）
+\end{itemize}
+
+\subsection{正张成的几何意义}
+
+\textbf{正张成}：$\text{pos}(\{F_1, F_2\}) = \{k_1 F_1 + k_2 F_2 \mid k_1, k_2 \geq 0\}$
+
+\textbf{灰色区域的意义}：
+\begin{itemize}
+\item 灰色区域内的点：两个力的\textbf{任何正线性组合}都对这些点产生正力矩
+\item 这意味着：可以产生围绕该区域的力线
+\item 但不能产生其他方向的力线
+\end{itemize}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 如果物体上某点在灰色区域内
+\item 那么两个接触力的任何组合都会对该点产生正力矩
+\item 物体可以绕该点逆时针旋转
+\end{itemize}
+
+\section{图12.21(c)：三个力线的正张成}
+
+\subsection{图示内容}
+
+\begin{itemize}
+\item 三条虚线形成三角形：$\mathcal{F}_1$（垂直）、$\mathcal{F}_2$（斜向左上）、$\mathcal{F}_3$（斜向左下）
+\item 三条线围成一个三角形区域
+\item 三角形区域是灰色的，标记$'+'$
+\item 其他区域是空白的
+\end{itemize}
+
+\subsection{灰色区域的含义}
+
+\textbf{灰色三角形区域}：
+\begin{itemize}
+\item 所有三个力都对该区域内的点产生\textbf{正力矩}
+\item 这是三个力线的\textbf{正张成区域}
+\item 三个力的任何正线性组合可以产生\textbf{围绕该区域}的力线
+\end{itemize}
+
+\textbf{关键性质}：
+\begin{itemize}
+\item 三个基wrench的非负线性组合可以在平面中创建任何力线
+\item 这些力线以\textbf{逆时针方向围绕}灰色区域
+\item 不能创建其他wrench（即不能产生围绕其他区域的力线）
+\end{itemize}
+
+\subsection{力闭合的含义}
+
+\textbf{如果添加第四个wrench}：
+\begin{itemize}
+\item 如果第四个wrench围绕灰色区域\textbf{顺时针}方向
+\item 则平面中将\textbf{没有一致标记}的点
+\item 四个wrench的正线性张成将是整个wrench空间$\mathbb{R}^3$
+\item 这表示\textbf{力闭合}！
+\end{itemize}
+
+\textbf{力闭合的图形判断}：
+\begin{itemize}
+\item \textbf{力闭合} $\Leftrightarrow$ 没有一致的力矩标记区域（没有灰色区域）
+\item \textbf{非力闭合} $\Leftrightarrow$ 存在一致的力矩标记区域（有灰色区域）
+\end{itemize}
+
+\section{灰色区域的数学定义}
+
+\subsection{一致标记的定义}
+
+\textbf{给定}：$j$个基wrench $F_1, F_2, \ldots, F_j$（用箭头表示）
+
+\textbf{对于平面中的点$p = (x, y)$}：
+
+\begin{enumerate}
+\item 如果\textbf{每个}$F_i$对$p$产生\textbf{非负力矩}，标记为$'+'$
+   \begin{equation}
+   m_{iz}(p) = x f_{iy} - y f_{ix} \geq 0 \quad \text{对所有 } i
+   \end{equation}
+
+\item 如果\textbf{每个}$F_i$对$p$产生\textbf{非正力矩}，标记为$'-'$
+   \begin{equation}
+   m_{iz}(p) = x f_{iy} - y f_{ix} \leq 0 \quad \text{对所有 } i
+   \end{equation}
+
+\item 如果\textbf{每个}$F_i$对$p$产生\textbf{零力矩}，标记为$\pm$
+   \begin{equation}
+   m_{iz}(p) = 0 \quad \text{对所有 } i
+   \end{equation}
+
+\item 如果\textbf{至少一个}wrench产生正力矩且\textbf{至少一个}产生负力矩，标记为\textbf{空白}
+   \begin{equation}
+   \exists i: m_{iz}(p) > 0 \text{ 且 } \exists j: m_{jz}(p) < 0
+   \end{equation}
+\end{enumerate}
+
+\subsection{灰色区域的定义}
+
+\textbf{灰色区域} = 标记为$'+'$的区域
+
+\textbf{数学表达}：
+\begin{equation}
+\mathcal{R}_+ = \left\{p = (x, y) \middle| m_{iz}(p) = x f_{iy} - y f_{ix} \geq 0, \forall i = 1, \ldots, j \right\}
+\label{eq:positive_region}
+\end{equation}
+
+\subsection{正张成的关系}
+
+\textbf{关键定理}：
+
+灰色区域$\mathcal{R}_+$非空 $\Leftrightarrow$ wrench锥$\text{pos}(\{F_i\})$ \textbf{不能}正张成整个wrench空间
+
+\textbf{证明思路}：
+\begin{itemize}
+\item 如果存在灰色区域，说明所有力对某些点都产生正力矩
+\item 这意味着不能产生对这些点产生负力矩的wrench
+\item 因此不能正张成整个空间
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：单个接触（无摩擦）}
+
+\textbf{接触}：位置$(0, 0)$，法向量$(0, 1)$（向上）
+
+\textbf{Wrench}：$F_1 = (0, 0, 1)$（纯力，无力矩）
+
+\textbf{力矩标记}：
+\begin{itemize}
+\item 力线：$x = 0$（垂直通过原点）
+\item 左侧（$x < 0$）：标记$'+'$（灰色）
+\item 右侧（$x > 0$）：标记$'-'$（白色）
+\item 线上（$x = 0$）：标记$\pm$
+\end{itemize}
+
+\textbf{灰色区域}：左半平面（$x < 0$）
+
+\subsection{例子2：两个接触（无摩擦）}
+
+\textbf{接触1}：位置$(1, 0)$，法向量$(-1, 0)$（向左）
+\textbf{接触2}：位置$(-1, 0)$，法向量$(1, 0)$（向右）
+
+\textbf{Wrench}：
+\begin{itemize}
+\item $F_1 = (0, -1, 0)$
+\item $F_2 = (0, 1, 0)$
+\end{itemize}
+
+\textbf{力矩标记}：
+\begin{itemize}
+\item 两条力线：$x = 1$和$x = -1$
+\item 灰色区域：$x < -1$（两个力都产生正力矩）
+\item 白色区域：$x > 1$（两个力都产生负力矩）
+\item 中间区域：空白（不一致标记）
+\end{itemize}
+
+\textbf{灰色区域}：$x < -1$的区域
+
+\subsection{例子3：三个接触（形成力闭合）}
+
+\textbf{接触配置}：三个接触形成三角形
+
+\textbf{如果配置合适}：
+\begin{itemize}
+\item 灰色区域：三角形内部（如果存在）
+\item 或者：没有灰色区域（力闭合）
+\end{itemize}
+
+\textbf{力闭合判断}：
+\begin{itemize}
+\item 如果没有灰色区域：力闭合
+\item 如果有灰色区域：非力闭合
+\end{itemize}
+
+\section{灰色区域的物理解释}
+
+\subsection{从物体运动角度}
+
+\textbf{灰色区域内的点}：
+\begin{itemize}
+\item 如果物体绕灰色区域内的点旋转
+\item 所有接触力都产生正力矩（帮助旋转）
+\item 物体可以\textbf{自由旋转}
+\end{itemize}
+
+\textbf{灰色区域外的点}：
+\begin{itemize}
+\item 如果物体绕灰色区域外的点旋转
+\item 某些接触力产生负力矩（阻止旋转）
+\item 物体\textbf{不能自由旋转}
+\end{itemize}
+
+\subsection{从抓取稳定性角度}
+
+\textbf{有灰色区域}（非力闭合）：
+\begin{itemize}
+\item 物体可以绕灰色区域内的点旋转
+\item 抓取\textbf{不稳定}
+\item 不能抵抗所有方向的干扰
+\end{itemize}
+
+\textbf{无灰色区域}（力闭合）：
+\begin{itemize}
+\item 物体不能绕任何点自由旋转
+\item 抓取\textbf{稳定}
+\item 可以抵抗所有方向的干扰
+\end{itemize}
+
+\section{与Wrench锥的关系}
+
+\subsection{Wrench锥的定义}
+
+\textbf{Wrench锥}：$\mathcal{WC} = \text{pos}(\{F_1, \ldots, F_j\})$
+
+\textbf{正张成条件}：$\mathcal{WC} = \mathbb{R}^3$（对于平面问题）
+
+\subsection{灰色区域与Wrench锥}
+
+\textbf{关键关系}：
+\begin{itemize}
+\item \textbf{有灰色区域} $\Leftrightarrow$ $\mathcal{WC} \neq \mathbb{R}^3$（不能正张成整个空间）
+\item \textbf{无灰色区域} $\Leftrightarrow$ $\mathcal{WC} = \mathbb{R}^3$（可以正张成整个空间）
+\end{itemize}
+
+\textbf{证明}：
+\begin{itemize}
+\item 如果存在灰色区域，说明所有wrench对某些点都产生正力矩
+\item 这意味着不能产生对这些点产生负力矩的wrench
+\item 因此不能正张成整个空间
+\end{itemize}
+
+\section{总结}
+
+\subsection{灰色区域的核心含义}
+
+\begin{enumerate}
+\item \textbf{正力矩区域}：所有力对该区域内的点都产生正力矩
+\item \textbf{一致标记区域}：所有力线对该区域内的点都有一致的力矩符号
+\item \textbf{正张成区域}：wrench锥的正线性组合可以产生的力线围绕该区域
+\end{enumerate}
+
+\subsection{力闭合的判断}
+
+\begin{itemize}
+\item \textbf{有灰色区域}：非力闭合（不能抵抗所有方向的干扰）
+\item \textbf{无灰色区域}：力闭合（可以抵抗所有方向的干扰）
+\end{itemize}
+
+\subsection{实际应用}
+
+\begin{itemize}
+\item 用于图形化分析抓取稳定性
+\item 判断力闭合的直观方法
+\item 理解wrench锥的几何结构
+\end{itemize}
+
+\end{document}
+

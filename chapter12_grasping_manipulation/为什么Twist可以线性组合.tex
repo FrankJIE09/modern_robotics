@@ -1,0 +1,778 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{为什么Twist可以线性组合？}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+在12.1.6章节中，我们经常看到这样的表达式：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2 = (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y})
+\end{equation}
+
+\textbf{问题}：为什么twist可以这样线性组合？这有什么物理意义？
+
+\section{答案：Twist空间是向量空间}
+
+\subsection{向量空间的定义}
+
+\textbf{关键事实}：Twist空间是一个\textbf{向量空间}（vector space），因此可以进行线性组合。
+
+向量空间需要满足以下性质：
+\begin{enumerate}
+\item \textbf{加法封闭性}：如果$V_1$和$V_2$是twist，那么$V_1 + V_2$也是twist
+\item \textbf{数乘封闭性}：如果$V$是twist，$k$是标量，那么$kV$也是twist
+\item 满足向量空间的8条公理（结合律、交换律、分配律等）
+\end{enumerate}
+
+\subsection{为什么Twist空间是向量空间？}
+
+\textbf{原因1}：Twist是速度的表示
+
+\begin{itemize}
+\item Twist表示刚体的\textbf{瞬时运动}
+\item 包括角速度$\omega$和线速度$v$
+\item 速度本身是向量，可以进行线性组合
+\end{itemize}
+
+\textbf{原因2}：速度的叠加原理
+
+在物理学中，速度满足\textbf{叠加原理}：
+\begin{itemize}
+\item 如果物体同时有两个运动，总速度是两个速度的\textbf{向量和}
+\item 这是经典力学的基本原理
+\end{itemize}
+
+\textbf{原因3}：数学结构
+
+Twist $V = (\omega_z, v_x, v_y)$是$\mathbb{R}^3$中的向量：
+\begin{itemize}
+\item 每个分量都是实数
+\item 可以进行标准的向量运算
+\item 满足向量空间的所有性质
+\end{itemize}
+
+\section{线性组合的物理意义}
+
+\subsection{基本理解}
+
+\textbf{线性组合} $V = k_1 V_1 + k_2 V_2$的物理意义：
+
+\begin{itemize}
+\item $V_1$和$V_2$是两个可能的运动
+\item $k_1$和$k_2$是"权重"系数
+\item 组合后的运动$V$是这两个运动的"加权平均"
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1}：$k_1 = 1, k_2 = 0$
+
+\begin{itemize}
+\item $V = 1 \cdot V_1 + 0 \cdot V_2 = V_1$
+\item 就是运动$V_1$本身
+\end{itemize}
+
+\textbf{例子2}：$k_1 = 2, k_2 = 0$
+
+\begin{itemize}
+\item $V = 2 \cdot V_1$
+\item 运动方向与$V_1$相同，但速度是$V_1$的2倍
+\item 角速度：$\omega_z = 2 \omega_{1z}$
+\item 线速度：$v = 2 v_1$
+\end{itemize}
+
+\textbf{例子3}：$k_1 = 0.5, k_2 = 0.5$
+
+\begin{itemize}
+\item $V = 0.5 V_1 + 0.5 V_2$
+\item 这是两个运动的"平均"
+\item 角速度：$\omega_z = 0.5 \omega_{1z} + 0.5 \omega_{2z}$
+\item 线速度：$v = 0.5 v_1 + 0.5 v_2$
+\end{itemize}
+
+\section{为什么在接触约束中需要线性组合？}
+
+\subsection{可行Twist集合是凸锥}
+
+在接触约束中，可行twist集合通常是一个\textbf{凸锥}（convex cone）。
+
+\textbf{凸锥的性质}：
+\begin{itemize}
+\item 如果$V_1$和$V_2$是可行twist
+\item 那么它们的\textbf{非负线性组合} $k_1 V_1 + k_2 V_2$（$k_1, k_2 \geq 0$）也是可行twist
+\item 这是凸锥的定义
+\end{itemize}
+
+\subsection{为什么是凸锥？}
+
+\textbf{原因}：接触约束是\textbf{线性不等式}：
+\begin{equation}
+F^T V \geq 0
+\end{equation}
+
+如果$V_1$和$V_2$都满足约束：
+\begin{align}
+F^T V_1 &\geq 0 \\
+F^T V_2 &\geq 0
+\end{align}
+
+那么对于$k_1, k_2 \geq 0$：
+\begin{align}
+F^T (k_1 V_1 + k_2 V_2) &= k_1 F^T V_1 + k_2 F^T V_2 \\
+&\geq k_1 \cdot 0 + k_2 \cdot 0 = 0
+\end{align}
+
+所以$k_1 V_1 + k_2 V_2$也满足约束！
+
+\section{详细数学推导}
+
+\subsection{Twist的表示}
+
+平面twist：
+\begin{equation}
+V = \begin{bmatrix} \omega_z \\ v_x \\ v_y \end{bmatrix} \in \mathbb{R}^3
+\end{equation}
+
+这是$\mathbb{R}^3$中的标准向量。
+
+\subsection{线性组合的定义}
+
+对于两个twist：
+\begin{align}
+V_1 &= \begin{bmatrix} \omega_{1z} \\ v_{1x} \\ v_{1y} \end{bmatrix} \\
+V_2 &= \begin{bmatrix} \omega_{2z} \\ v_{2x} \\ v_{2y} \end{bmatrix}
+\end{align}
+
+它们的线性组合：
+\begin{align}
+V &= k_1 V_1 + k_2 V_2 \\
+&= k_1 \begin{bmatrix} \omega_{1z} \\ v_{1x} \\ v_{1y} \end{bmatrix} + k_2 \begin{bmatrix} \omega_{2z} \\ v_{2x} \\ v_{2y} \end{bmatrix} \\
+&= \begin{bmatrix} k_1 \omega_{1z} + k_2 \omega_{2z} \\ k_1 v_{1x} + k_2 v_{2x} \\ k_1 v_{1y} + k_2 v_{2y} \end{bmatrix}
+\end{align}
+
+这是标准的向量运算，完全合法！
+
+\subsection{为什么这样组合有意义？}
+
+\textbf{物理原因}：速度的叠加
+
+\begin{itemize}
+\item 如果物体可以以速度$V_1$运动
+\item 也可以以速度$V_2$运动
+\item 那么它也可以以"混合"速度$k_1 V_1 + k_2 V_2$运动
+\item 这是速度叠加原理的直接应用
+\end{itemize}
+
+\textbf{数学原因}：向量空间结构
+
+\begin{itemize}
+\item $\mathbb{R}^3$是向量空间
+\item 任何向量空间中的元素都可以线性组合
+\item Twist是$\mathbb{R}^3$中的向量
+\item 因此可以线性组合
+\end{itemize}
+
+\section{正线性组合的特殊意义}
+
+\subsection{为什么需要$k_1, k_2 \geq 0$？}
+
+在接触约束中，我们通常考虑\textbf{正线性组合}（非负线性组合）：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2, \quad k_1, k_2 \geq 0
+\end{equation}
+
+\textbf{原因1}：可行集合是凸锥
+
+\begin{itemize}
+\item 可行twist集合是凸锥
+\item 凸锥由非负线性组合生成
+\item 所以只需要考虑$k_1, k_2 \geq 0$
+\end{itemize}
+
+\textbf{原因2}：物理意义
+
+\begin{itemize}
+\item $k_1, k_2 \geq 0$意味着"正向"组合
+\item 不会"抵消"运动
+\item 保持运动的"方向性"
+\end{itemize}
+
+\textbf{原因3}：约束的保持
+
+\begin{itemize}
+\item 如果$V_1$和$V_2$都满足约束$F^T V \geq 0$
+\item 那么$k_1 V_1 + k_2 V_2$（$k_1, k_2 \geq 0$）也满足约束
+\item 这是凸锥的性质
+\end{itemize}
+
+\section{具体应用：CoR的线性组合}
+
+\subsection{问题回顾}
+
+给定两个twist $V_1$和$V_2$，它们的线性组合$V = k_1 V_1 + k_2 V_2$对应的CoR在哪里？
+
+\subsection{推导过程}
+
+\textbf{步骤1}：计算组合后的twist
+
+\begin{equation}
+V = (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y})
+\end{equation}
+
+\textbf{步骤2}：计算CoR位置
+
+如果$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} \neq 0$：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right) \\
+&= \left(-\frac{k_1 v_{1y} + k_2 v_{2y}}{k_1 \omega_{1z} + k_2 \omega_{2z}}, \frac{k_1 v_{1x} + k_2 v_{2x}}{k_1 \omega_{1z} + k_2 \omega_{2z}}\right)
+\end{align}
+
+\textbf{关键观察}：这个CoR位置依赖于$k_1$和$k_2$的比值，而不是绝对值。
+
+\subsection{为什么CoR在直线上？}
+
+\textbf{数学证明}：
+
+设$t = \frac{k_1}{k_1 + k_2}$（当$k_1 + k_2 \neq 0$时）
+
+则：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{t v_{1y} + (1-t) v_{2y}}{t \omega_{1z} + (1-t) \omega_{2z}}, \frac{t v_{1x} + (1-t) v_{2x}}{t \omega_{1z} + (1-t) \omega_{2z}}\right)
+\end{align}
+
+当$t$从0变化到1时，CoR在通过$\text{CoR}(V_1)$和$\text{CoR}(V_2)$的直线上移动。
+
+\section{常见疑问解答}
+
+\subsection{疑问1：线性组合的物理实现}
+
+\textbf{问题}：物体真的可以同时进行两个运动吗？
+
+\textbf{回答}：
+\begin{itemize}
+\item 不是"同时"进行两个运动
+\item 而是"可以选择"进行组合后的运动
+\item 线性组合表示的是\textbf{可能的运动集合}
+\item 物体在某个时刻只能有一个运动，但可以选择组合后的运动
+\end{itemize}
+
+\subsection{疑问2：为什么可以"混合"角速度和线速度？}
+
+\textbf{问题}：角速度和线速度是不同的物理量，为什么可以混合？
+
+\textbf{回答}：
+\begin{itemize}
+\item 虽然物理意义不同，但数学上都是实数
+\item Twist $(\omega_z, v_x, v_y)$是$\mathbb{R}^3$中的向量
+\item 向量空间的元素可以线性组合
+\item 组合后的结果仍然是有效的twist
+\end{itemize}
+
+\subsection{疑问3：线性组合是否总是有物理意义？}
+
+\textbf{问题}：任何线性组合都对应实际可能的运动吗？
+
+\textbf{回答}：
+\begin{itemize}
+\item \textbf{数学上}：任何线性组合都是有效的twist
+\item \textbf{物理上}：需要满足约束条件
+\item 在接触约束中，只有满足$F^T V \geq 0$的twist是可行的
+\item 线性组合帮助我们找到所有可行的twist
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键点}
+
+\begin{enumerate}
+\item \textbf{Twist空间是向量空间}：可以进行线性组合
+
+\item \textbf{线性组合的物理意义}：
+  \begin{itemize}
+  \item 速度的叠加
+  \item 可能的运动集合
+  \item 凸锥的生成
+  \end{itemize}
+
+\item \textbf{在接触约束中的应用}：
+  \begin{itemize}
+  \item 可行twist集合是凸锥
+  \item 由可行twist的非负线性组合生成
+  \item 用于分析CoR的位置
+  \end{itemize}
+
+\item \textbf{数学基础}：
+  \begin{itemize}
+  \item 向量空间理论
+  \item 凸分析
+  \item 线性代数
+  \end{itemize}
+\end{enumerate}
+
+\subsection{公式总结}
+
+\textbf{线性组合}：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2 = (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y})
+\end{equation}
+
+\textbf{正线性组合}（$k_1, k_2 \geq 0$）：
+\begin{equation}
+V = \text{pos}(\{V_1, V_2\}) = \{k_1 V_1 + k_2 V_2 | k_1, k_2 \geq 0\}
+\end{equation}
+
+\textbf{CoR位置}（当$\omega_z \neq 0$时）：
+\begin{equation}
+\text{CoR}(V) = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)
+\end{equation}
+
+\section{重要补充：坐标系必须相同}
+
+\subsection{你的观察}
+
+\textbf{关键问题}：如果要进行线性组合 $V = k_1 V_1 + k_2 V_2$，$V_1$和$V_2$必须在\textbf{同一个坐标系}中表示！
+
+\subsection{为什么必须相同？}
+
+\textbf{原因1}：向量运算的前提
+
+\begin{itemize}
+\item 线性组合是\textbf{分量对应相加}
+\item 如果坐标系不同，分量没有对应关系
+\item 例如：$V_1$的$x$分量和$V_2$的$x$分量可能指向不同方向
+\item 直接相加没有意义
+\end{itemize}
+
+\textbf{原因2}：物理意义的一致性
+
+\begin{itemize}
+\item 如果$V_1$和$V_2$在不同坐标系中
+\item 它们的"方向"含义不同
+\item 组合后的结果无法解释
+\end{itemize}
+
+\textbf{原因3}：数学运算的合法性
+
+\begin{itemize}
+\item 向量空间的线性组合要求元素在\textbf{同一个空间}中
+\item 不同坐标系中的twist属于不同的向量空间
+\item 必须先转换到同一坐标系
+\end{itemize}
+
+\subsection{在接触约束中的应用}
+
+在12.1.3和12.1.4章节中：
+
+\begin{itemize}
+\item 所有twist都在\textbf{空间坐标系}（space frame）$\{s\}$中表示
+\item 这是第12章的标准约定
+\item 因此可以安全地进行线性组合
+\end{itemize}
+
+\textbf{注意}：在第12章中，所有twist和wrench都在空间坐标系中表示（见12.1.2节的脚注）。
+
+\subsection{如果坐标系不同怎么办？}
+
+如果$V_1$在坐标系$\{a\}$中，$V_2$在坐标系$\{b\}$中：
+
+\begin{enumerate}
+\item \textbf{步骤1}：将$V_1$转换到$\{b\}$，或
+\item \textbf{步骤2}：将$V_2$转换到$\{a\}$，或
+\item \textbf{步骤3}：将两者都转换到第三个坐标系$\{c\}$
+\end{enumerate}
+
+然后才能进行线性组合。
+
+\textbf{转换公式}（回顾第3章）：
+
+如果$T_{ab}$是从$\{a\}$到$\{b\}$的变换，则：
+\begin{equation}
+V_b = [\text{Ad}_{T_{ab}}] V_a
+\end{equation}
+
+其中$[\text{Ad}_{T_{ab}}]$是伴随变换矩阵。
+
+\subsection{具体例子}
+
+\textbf{例子}：两个twist在不同坐标系中
+
+\begin{itemize}
+\item $V_1$在坐标系$\{1\}$中：$V_1 = (1, 2, 0)$
+\item $V_2$在坐标系$\{2\}$中：$V_2 = (1, 0, 2)$
+\item \textbf{错误}：直接计算 $V = V_1 + V_2$（没有意义！）
+\item \textbf{正确}：先将$V_1$转换到$\{2\}$，然后相加
+\end{itemize}
+
+\subsection{在CoR计算中的意义}
+
+当我们计算两个twist的线性组合对应的CoR时：
+
+\begin{itemize}
+\item 两个twist必须在\textbf{同一个坐标系}中
+\item CoR的位置也在\textbf{同一个坐标系}中
+\item 这样才能正确理解CoR的几何位置
+\end{itemize}
+
+\subsection{总结}
+
+\begin{enumerate}
+\item \textbf{线性组合要求}：所有twist必须在同一坐标系中
+
+\item \textbf{第12章的约定}：所有twist在空间坐标系$\{s\}$中表示
+
+\item \textbf{如果坐标系不同}：必须先进行坐标变换
+
+\item \textbf{物理意义}：只有在同一坐标系中，线性组合才有明确的物理意义
+\end{enumerate}
+
+\textbf{你的观察非常正确！}这是理解twist线性组合的重要前提。
+
+\section{补充：CoR位置的凸组合表示（即使符号不同）}
+
+\subsection{你的问题}
+
+即使角速度符号不同（$\omega_{1z}$和$\omega_{2z}$符号相反），CoR位置是否也能写成：
+\begin{equation}
+\text{CoR}(V) = \frac{k_1}{k_1 + k_2} \text{CoR}_1 + \frac{k_2}{k_1 + k_2} \text{CoR}_2
+\label{eq:cor_convex}
+\end{equation}
+
+\subsection{答案：可以，但需要小心}
+
+\textbf{简短答案}：数学上可以写成这种形式，但需要理解其几何意义。
+
+\subsection{数学推导}
+
+\textbf{步骤1}：CoR的基本公式
+
+对于twist $V = (\omega_z, v_x, v_y)$，如果$\omega_z \neq 0$：
+\begin{equation}
+\text{CoR}(V) = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)
+\end{equation}
+
+\textbf{步骤2}：线性组合的CoR
+
+对于$V = k_1 V_1 + k_2 V_2$：
+\begin{align}
+V &= (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y}) \\
+\omega_z &= k_1 \omega_{1z} + k_2 \omega_{2z}
+\end{align}
+
+如果$\omega_z \neq 0$：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{k_1 v_{1y} + k_2 v_{2y}}{k_1 \omega_{1z} + k_2 \omega_{2z}}, \frac{k_1 v_{1x} + k_2 v_{2x}}{k_1 \omega_{1z} + k_2 \omega_{2z}}\right)
+\end{align}
+
+\textbf{步骤3}：引入参数$t$
+
+设$t = \frac{k_1}{k_1 + k_2}$（当$k_1 + k_2 \neq 0$时）
+
+则：
+\begin{align}
+k_1 &= t(k_1 + k_2) \\
+k_2 &= (1-t)(k_1 + k_2)
+\end{align}
+
+\textbf{步骤4}：重写CoR公式
+
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{t(k_1+k_2) v_{1y} + (1-t)(k_1+k_2) v_{2y}}{t(k_1+k_2) \omega_{1z} + (1-t)(k_1+k_2) \omega_{2z}}, \frac{t(k_1+k_2) v_{1x} + (1-t)(k_1+k_2) v_{2x}}{t(k_1+k_2) \omega_{1z} + (1-t)(k_1+k_2) \omega_{2z}}\right) \\
+&= \left(-\frac{t v_{1y} + (1-t) v_{2y}}{t \omega_{1z} + (1-t) \omega_{2z}}, \frac{t v_{1x} + (1-t) v_{2x}}{t \omega_{1z} + (1-t) \omega_{2z}}\right)
+\end{align}
+
+\textbf{关键观察}：这个公式\textbf{不能}直接写成$\text{CoR}_1$和$\text{CoR}_2$的凸组合，因为分母是$\omega_z$，不是$\omega_{1z}$或$\omega_{2z}$。
+
+\subsection{特殊情况：当$\omega_{1z}$和$\omega_{2z}$同号时}
+
+如果$\omega_{1z}$和$\omega_{2z}$同号（都为正或都为负），且$k_1, k_2 \geq 0$：
+
+\begin{itemize}
+\item $\omega_z = t \omega_{1z} + (1-t) \omega_{2z}$与$\omega_{1z}$和$\omega_{2z}$同号
+\item 可以证明（需要一些代数运算）：
+  \begin{equation}
+  \text{CoR}(V) = \frac{t \omega_{1z}}{t \omega_{1z} + (1-t) \omega_{2z}} \text{CoR}_1 + \frac{(1-t) \omega_{2z}}{t \omega_{1z} + (1-t) \omega_{2z}} \text{CoR}_2
+  \end{equation}
+\item 这是\textbf{加权平均}，权重与角速度成正比
+\item 当$\omega_{1z} = \omega_{2z}$时，简化为标准的凸组合
+\end{itemize}
+
+\subsection{一般情况：符号不同时}
+
+当$\omega_{1z}$和$\omega_{2z}$符号不同时：
+
+\textbf{问题}：$\omega_z = t \omega_{1z} + (1-t) \omega_{2z}$的符号会改变！
+
+\begin{itemize}
+\item 当$t$接近1时：$\omega_z \approx \omega_{1z}$（与$\omega_{1z}$同号）
+\item 当$t$接近0时：$\omega_z \approx \omega_{2z}$（与$\omega_{2z}$同号）
+\item 当$t = t_0 = \frac{-\omega_{2z}}{\omega_{1z} - \omega_{2z}}$时：$\omega_z = 0$（纯平移）
+\end{itemize}
+
+\textbf{CoR位置的变化}：
+
+\begin{itemize}
+\item 当$t > t_0$时：$\omega_z$与$\omega_{1z}$同号，CoR在从CoR$_1$出发的射线上
+\item 当$t < t_0$时：$\omega_z$与$\omega_{2z}$同号，CoR在从CoR$_2$出发的射线上
+\item 当$t = t_0$时：$\omega_z = 0$，CoR在无穷远处（平移）
+\end{itemize}
+
+\textbf{几何解释}：
+
+虽然不能写成简单的凸组合，但CoR仍然在通过CoR$_1$和CoR$_2$的\textbf{整条直线}上，只是：
+\begin{itemize}
+\item 中间有一个"跳跃"（对应$\omega_z = 0$的点）
+\item 这个点将直线分成两部分
+\item 每部分对应不同的旋转方向（'+'或'-'）
+\end{itemize}
+
+\subsection{你提到的公式的适用条件}
+
+你提到的公式：
+\begin{equation}
+\text{CoR}(V) = \frac{k_1}{k_1 + k_2} \text{CoR}_1 + \frac{k_2}{k_1 + k_2} \text{CoR}_2
+\end{equation}
+
+\textbf{适用条件}：
+\begin{enumerate}
+\item $\omega_{1z}$和$\omega_{2z}$同号（都为正或都为负）
+\item 或者，更一般地，当$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z}$与$\omega_{1z}$和$\omega_{2z}$同号时
+\item 这是\textbf{加权平均}，权重是$\frac{k_1}{k_1 + k_2}$和$\frac{k_2}{k_1 + k_2}$
+\end{enumerate}
+
+\textbf{不适用的情况}：
+\begin{itemize}
+\item 当$\omega_{1z}$和$\omega_{2z}$符号不同，且$\omega_z$的符号会改变时
+\item 此时CoR不在两个CoR之间的线段上，而是在两条射线上
+\end{itemize}
+
+\subsection{总结}
+
+\begin{enumerate}
+\item \textbf{数学上}：CoR位置可以写成某种形式的组合，但不总是简单的凸组合
+
+\item \textbf{相同符号}：可以写成加权平均（权重与角速度成正比）
+
+\item \textbf{不同符号}：CoR在整条直线上，但被$\omega_z = 0$的点分成两部分
+
+\item \textbf{几何意义}：CoR总是在通过CoR$_1$和CoR$_2$的直线上，这是线性组合的直接结果
+\end{enumerate}
+
+\textbf{你的公式在特定条件下是正确的！}特别是当角速度同号时。
+
+\section{什么是凸组合（Convex Combination）？}
+
+\subsection{定义}
+
+\begin{definition}[凸组合]
+给定$n$个向量（或点）$x_1, x_2, \ldots, x_n$，它们的\textbf{凸组合}定义为：
+\begin{equation}
+x = \sum_{i=1}^n \lambda_i x_i
+\end{equation}
+其中系数$\lambda_i$满足：
+\begin{enumerate}
+\item \textbf{非负性}：$\lambda_i \geq 0$ 对所有$i$
+\item \textbf{归一性}：$\sum_{i=1}^n \lambda_i = 1$
+\end{enumerate}
+\end{definition}
+
+\subsection{关键特征}
+
+凸组合的两个关键条件：
+
+\begin{enumerate}
+\item \textbf{系数非负}：$\lambda_i \geq 0$
+  \begin{itemize}
+  \item 不能有负系数
+  \item 这确保组合结果在"内部"，不会"超出"原始点的范围
+  \end{itemize}
+
+\item \textbf{系数和为1}：$\sum \lambda_i = 1$
+  \begin{itemize}
+  \item 这是"加权平均"
+  \item 确保组合结果是原始点的"混合"，而不是缩放
+  \end{itemize}
+\end{enumerate}
+
+\subsection{最简单的例子：两个点的凸组合}
+
+对于两个点$x_1$和$x_2$，凸组合为：
+\begin{equation}
+x = \lambda x_1 + (1-\lambda) x_2, \quad 0 \leq \lambda \leq 1
+\end{equation}
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 当$\lambda = 0$时：$x = x_2$
+\item 当$\lambda = 1$时：$x = x_1$
+\item 当$\lambda = 0.5$时：$x = 0.5 x_1 + 0.5 x_2$（中点）
+\item 当$\lambda$从0变化到1时：$x$在从$x_2$到$x_1$的\textbf{线段}上移动
+\end{itemize}
+
+\textbf{图示}：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 两个点
+\filldraw[red] (0,0) circle (2pt) node[below left] {$x_1$};
+\filldraw[blue] (3,1) circle (2pt) node[below right] {$x_2$};
+
+% 连接线段
+\draw[thick,green] (0,0) -- (3,1);
+
+% 标记几个凸组合的点
+\filldraw[purple] (0.75,0.25) circle (1.5pt) node[above] {$\lambda=0.25$};
+\filldraw[purple] (1.5,0.5) circle (1.5pt) node[above] {$\lambda=0.5$};
+\filldraw[purple] (2.25,0.75) circle (1.5pt) node[above] {$\lambda=0.75$};
+
+\node[below] at (1.5,-0.3) {凸组合：连接两个点的线段};
+\end{tikzpicture}
+\end{center}
+
+\subsection{三个点的凸组合}
+
+对于三个点$x_1, x_2, x_3$，凸组合为：
+\begin{equation}
+x = \lambda_1 x_1 + \lambda_2 x_2 + \lambda_3 x_3
+\end{equation}
+其中：$\lambda_1, \lambda_2, \lambda_3 \geq 0$且$\lambda_1 + \lambda_2 + \lambda_3 = 1$
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 凸组合的结果在三个点形成的\textbf{三角形内部}（包括边界）
+\item 这是三个点的\textbf{凸包}（convex hull）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 三个点
+\filldraw[red] (0,0) circle (2pt) node[below left] {$x_1$};
+\filldraw[blue] (3,0) circle (2pt) node[below right] {$x_2$};
+\filldraw[green] (1.5,2) circle (2pt) node[above] {$x_3$};
+
+% 三角形
+\fill[purple!20] (0,0) -- (3,0) -- (1.5,2) -- cycle;
+\draw[thick,green] (0,0) -- (3,0) -- (1.5,2) -- cycle;
+
+\node[purple] at (1.5,0.7) {凸组合区域\\（三角形）};
+\end{tikzpicture}
+\end{center}
+
+\subsection{凸组合 vs 线性组合 vs 正线性组合}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{类型} & \textbf{系数条件} & \textbf{几何意义} & \textbf{例子} \\
+\hline
+线性组合 & $k_i \in \mathbb{R}$ & 整个空间 & 任何方向 \\
+\hline
+正线性组合 & $k_i \geq 0$ & 凸锥 & 从原点出发的射线 \\
+\hline
+凸组合 & $k_i \geq 0$且$\sum k_i = 1$ & 凸包（有界） & 线段、三角形等 \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{关系}：
+\begin{equation}
+\text{凸组合} \subseteq \text{正线性组合} \subseteq \text{线性组合}
+\end{equation}
+
+\subsection{在CoR中的应用}
+
+\subsubsection{相同符号角速度的情况}
+
+当$\omega_{1z}$和$\omega_{2z}$同号时，CoR位置可以写成：
+\begin{equation}
+\text{CoR}(V) = \frac{k_1}{k_1 + k_2} \text{CoR}_1 + \frac{k_2}{k_1 + k_2} \text{CoR}_2
+\end{equation}
+
+\textbf{这是凸组合吗？}
+
+\begin{itemize}
+\item 系数：$\lambda_1 = \frac{k_1}{k_1 + k_2}$，$\lambda_2 = \frac{k_2}{k_1 + k_2}$
+\item 检查条件1：$\lambda_1, \lambda_2 \geq 0$？是的（因为$k_1, k_2 \geq 0$）
+\item 检查条件2：$\lambda_1 + \lambda_2 = 1$？是的
+\item \textbf{结论}：这是凸组合！
+\end{itemize}
+
+\textbf{几何意义}：
+\begin{itemize}
+\item CoR在连接CoR$_1$和CoR$_2$的\textbf{线段}上
+\item 这是凸组合的典型特征
+\end{itemize}
+
+\subsubsection{不同符号角速度的情况}
+
+当$\omega_{1z}$和$\omega_{2z}$符号不同时：
+\begin{itemize}
+\item 不能写成简单的凸组合
+\item CoR不在两个CoR之间的线段上
+\item 而是在两条射线上（分别从两个CoR出发）
+\end{itemize}
+
+\textbf{为什么不是凸组合？}
+
+\begin{itemize}
+\item 虽然可以写成某种形式，但系数不满足凸组合的条件
+\item 或者，更准确地说，CoR位置不在"线段"上，而是在"直线"上
+\item 凸组合的结果总是在有界区域内，但这里CoR可以延伸到无穷远
+\end{itemize}
+
+\subsection{凸组合的重要性}
+
+\subsubsection{在接触约束中}
+
+\begin{itemize}
+\item \textbf{可行twist集合}：通常是凸锥（正线性组合）
+\item \textbf{形状闭合}：要求接触wrench的凸包包含原点
+\item \textbf{CoR区域}：多个接触的可行CoR区域是凸的
+\end{itemize}
+
+\subsubsection{在优化中}
+
+\begin{itemize}
+\item 凸组合保持凸性
+\item 如果约束是凸的，可行区域也是凸的
+\item 这简化了优化问题的求解
+\end{itemize}
+
+\subsection{总结}
+
+\begin{enumerate}
+\item \textbf{凸组合}：系数非负且和为1的线性组合
+
+\item \textbf{几何意义}：结果在原始点的凸包内（有界区域）
+
+\item \textbf{两个点的凸组合}：连接两个点的线段
+
+\item \textbf{在CoR中}：
+  \begin{itemize}
+  \item 相同符号：CoR是凸组合，在线段上
+  \item 不同符号：CoR不是凸组合，在射线上
+  \end{itemize}
+
+\item \textbf{重要性}：凸组合是理解可行区域几何结构的关键
+\end{enumerate}
+
+\end{document}
+

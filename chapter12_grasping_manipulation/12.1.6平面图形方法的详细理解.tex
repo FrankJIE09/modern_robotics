@@ -1,0 +1,429 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{12.1.6 平面图形方法的详细理解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{章节概述}
+
+12.1.6章节"平面图形方法"（Planar Graphical Methods）介绍了一种在\textbf{平面问题}中可视化可行运动的图形方法。由于平面twist空间是3维的，我们可以用图形方法来表示和分析约束，这对于理解接触运动学非常有帮助。
+
+\textbf{核心思想}：将平面twist表示为\textbf{旋转中心}（Center of Rotation, CoR），从而在2D平面上可视化3D的twist空间。
+
+\section{为什么需要图形方法？}
+
+\subsection{维度问题}
+
+\begin{itemize}
+\item \textbf{3D问题}：twist空间是6维，难以可视化
+\item \textbf{平面问题}：twist空间是3维（$\omega_z, v_x, v_y$），可以可视化
+\item 但即使是3维，直接绘制也不容易
+\end{itemize}
+
+\subsection{图形方法的优势}
+
+\begin{itemize}
+\item 将3维twist空间映射到2维平面上的点（CoR）
+\item 可以在2D平面上直观地看到可行运动区域
+\item 特别适用于静止接触约束的情况
+\end{itemize}
+
+\section{旋转中心（CoR）的概念}
+
+\subsection{平面twist的表示}
+
+对于平面问题，twist只有3个分量：
+\begin{equation}
+V = (\omega_z, v_x, v_y)
+\label{eq:planar_twist}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\omega_z$：绕$z$轴的角速度
+\item $v_x, v_y$：在$xy$平面内的线速度
+\end{itemize}
+
+\subsection{旋转中心的定义}
+
+\textbf{旋转中心}（Center of Rotation, CoR）是平面中在运动下保持\textbf{静止}的点。
+
+\begin{definition}[旋转中心]
+对于平面twist $V = (\omega_z, v_x, v_y)$，旋转中心的位置为：
+\begin{equation}
+\text{CoR} = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)
+\label{eq:cor_position}
+\end{equation}
+\end{definition}
+
+\textbf{特殊情况}：当$\omega_z = 0$时，CoR在\textbf{无穷远处}（纯平移运动）。
+
+\subsection{旋转中心的物理意义}
+
+\begin{itemize}
+\item \textbf{旋转运动}：如果$\omega_z \neq 0$，物体绕CoR旋转
+\item \textbf{平移运动}：如果$\omega_z = 0$，物体纯平移，CoR在无穷远
+\item CoR是\textbf{螺旋轴}（screw axis）与平面的交点
+\end{itemize}
+
+\subsection{旋转方向的标记}
+
+为了简化表示，我们只关心旋转的\textbf{方向}，而不关心速度大小：
+
+\begin{itemize}
+\item \textbf{'+'}：逆时针旋转（$\omega_z > 0$）
+\item \textbf{'-'}：顺时针旋转（$\omega_z < 0$）
+\item \textbf{'0'}：纯平移（$\omega_z = 0$）
+\end{itemize}
+
+\section{从Twist到CoR的映射}
+
+\subsection{映射关系}
+
+从平面twist $V = (\omega_z, v_x, v_y)$到CoR的映射：
+
+\begin{equation}
+\text{CoR}(V) = \begin{cases}
+\left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right) & \text{如果 } \omega_z \neq 0 \\
+\text{无穷远（方向：}\frac{(v_x, v_y)}{|(v_x, v_y)|}\text{）} & \text{如果 } \omega_z = 0
+\end{cases}
+\label{eq:cor_mapping}
+\end{equation}
+
+\subsection{CoR空间的几何结构}
+
+CoR空间由三部分组成：
+
+\begin{enumerate}
+\item \textbf{'+' CoR的平面}：所有逆时针旋转的CoR
+\item \textbf{'-' CoR的平面}：所有顺时针旋转的CoR
+\item \textbf{平移方向的圆}：所有纯平移的方向（在无穷远处）
+\end{enumerate}
+
+\subsection{映射的几何解释}
+
+\begin{itemize}
+\item 包含向量$V$的射线
+\item 与$\omega_z = 1$平面相交 → '+' CoR
+\item 与$\omega_z = -1$平面相交 → '-' CoR
+\item 与$\omega_z = 0$圆相交 → 平移方向
+\end{itemize}
+
+\section{两个Twist的线性组合}
+
+\subsection{线性组合的CoR}
+
+给定两个不同的twist $V_1$和$V_2$，它们的线性组合：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2, \quad k_1, k_2 \in \mathbb{R}
+\label{eq:linear_combination}
+\end{equation}
+
+\textbf{关键性质}：线性组合的CoR位于通过$\text{CoR}(V_1)$和$\text{CoR}(V_2)$的\textbf{直线}上。
+
+\subsection{两种情况}
+
+\begin{enumerate}
+\item \textbf{如果$\omega_{1z}$或$\omega_{2z}$非零}：
+  \begin{itemize}
+  \item 这条直线上的CoR可以有'+'或'-'标记
+  \item 取决于$k_1$和$k_2$的符号
+  \end{itemize}
+
+\item \textbf{如果$\omega_{1z} = \omega_{2z} = 0$}：
+  \begin{itemize}
+  \item 两个twist都是纯平移
+  \item 线性组合对应所有平移方向的集合
+  \end{itemize}
+\end{enumerate}
+
+\section{正线性组合（Positive Linear Combination）}
+
+\subsection{定义}
+
+\textbf{正线性组合}（非负线性组合）：
+\begin{equation}
+V = \text{pos}(\{V_1, V_2\}) = \{k_1 V_1 + k_2 V_2 | k_1, k_2 \geq 0\}
+\label{eq:positive_combination}
+\end{equation}
+
+这是一个以原点为根部的\textbf{平面twist锥}，$V_1$和$V_2$定义锥的边。
+
+\subsection{情况1：相同符号的角速度}
+
+如果$\omega_{1z}$和$\omega_{2z}$具有\textbf{相同的符号}：
+
+\begin{itemize}
+\item 正线性组合的CoR都具有该符号
+\item CoR位于两个CoR之间的\textbf{线段}上
+\item 例如：两个'+' CoR的正组合 → '+' CoR的线段
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 两个'+' CoR
+\filldraw[red] (0,0) circle (2pt) node[below left] {CoR$_1$ (+)};
+\filldraw[red] (3,1) circle (2pt) node[above right] {CoR$_2$ (+)};
+
+% 连接线段
+\draw[thick,blue] (0,0) -- (3,1);
+\fill[blue!20] (0,0) -- (3,1) -- (3.5,1.2) -- (0.5,0.2) -- cycle;
+
+\node[blue] at (1.5,0.5) {正组合的CoR区域};
+\node at (1.5,-0.5) {（线段）};
+\end{tikzpicture}
+\end{center}
+
+\subsection{情况2：不同符号的角速度}
+
+如果$\text{CoR}(V_1)$标记为'+'，$\text{CoR}(V_2)$标记为'-'：
+
+\begin{itemize}
+\item 正组合的CoR由包含两个CoR的\textbf{直线}组成
+\item 但\textbf{减去}CoR之间的线段
+\item 包括：
+  \begin{itemize}
+  \item 连接到CoR$_1$的'+' CoR射线
+  \item 连接到CoR$_2$的'-' CoR射线
+  \item 无穷远处的'0'点（对应平移）
+  \end{itemize}
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% '+' CoR
+\filldraw[red] (0,0) circle (2pt) node[below left] {CoR$_1$ (+)};
+
+% '-' CoR
+\filldraw[blue] (3,1) circle (2pt) node[above right] {CoR$_2$ (-)};
+
+% 连接直线
+\draw[thick,green] (-1,-0.33) -- (4,1.33);
+
+% 标记中间不可行区域
+\draw[thick,red,dashed] (0,0) -- (3,1);
+\node[red] at (1.5,0.5) {不可行};
+
+% 标记可行区域
+\draw[thick,blue,->] (0,0) -- (-0.8,-0.27) node[left] {可行 (+)};
+\draw[thick,green,->] (3,1) -- (3.8,1.27) node[right] {可行 (-)};
+
+\node at (1.5,-0.5) {（直线，但中间段不可行）};
+\end{tikzpicture}
+\end{center}
+
+\textbf{重要}：这个元素集合应该被视为\textbf{单个线段}（虽然通过无穷远），就像第一种情况一样。
+
+\section{静止接触约束的CoR表示}
+
+\subsection{基本思想}
+
+对于\textbf{静止物体}和\textbf{可动物体}之间的接触，我们可以绘制不违反不可穿透约束的CoR。
+
+\subsection{标记规则}
+
+给定接触法线$\hat{n}$（指向可动物体内部）：
+
+\begin{enumerate}
+\item \textbf{接触法线上的点}：标记为'$\pm$'
+\item \textbf{法线左侧的点}：标记为'+'（逆时针旋转可行）
+\item \textbf{法线右侧的点}：标记为'-'（顺时针旋转可行）
+\end{enumerate}
+
+\subsection{物理解释}
+
+\begin{itemize}
+\item \textbf{'+'区域}：可以作为可动物体正角速度的CoR
+\item \textbf{'-'区域}：可以作为可动物体负角速度的CoR
+\item \textbf{'$\pm$'线}：接触法线，对应滚动或滑动接触
+\end{itemize}
+
+\subsection{接触标签的分配}
+
+对于每个CoR，我们可以分配接触标签：
+
+\begin{itemize}
+\item \textbf{B（Breaking）}：分离接触
+  \begin{itemize}
+  \item CoR不在接触法线上
+  \item 接触点正在远离
+  \end{itemize}
+
+\item \textbf{R（Rolling）}：滚动接触
+  \begin{itemize}
+  \item CoR在接触法线上（标记为'$\pm$'）
+  \item 接触点处无相对运动
+  \end{itemize}
+
+\item \textbf{S（Sliding）}：滑动接触
+  \begin{itemize}
+  \item CoR在接触法线上（标记为'$\pm$'）
+  \item 但接触点处有相对运动
+  \item 进一步细分为：
+    \begin{itemize}
+    \item \textbf{$S_r$}：可动物体相对于固定约束向右滑动
+    \item \textbf{$S_l$}：可动物体相对于固定约束向左滑动
+    \end{itemize}
+  \end{itemize}
+\end{itemize}
+
+\subsection{例子：单个静止接触}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触法线
+\draw[thick,blue,->] (0,0) -- (0,2) node[above] {接触法线 $\hat{n}$};
+\draw[thick,blue] (-0.1,0) -- (0.1,0) node[below] {接触点};
+
+% 标记区域
+\fill[red!20] (-2,0) -- (-2,2) -- (0,2) -- (0,0) -- cycle;
+\node[red] at (-1,1) {+ 区域};
+
+\fill[green!20] (0,0) -- (0,2) -- (2,2) -- (2,0) -- cycle;
+\node[green] at (1,1) {- 区域};
+
+% 法线上的标记
+\draw[thick,blue] (0,0) -- (0,2);
+\node[blue] at (0.3,1) {$\pm$};
+
+% 标记一些CoR
+\filldraw[red] (-1,0.5) circle (1.5pt) node[below] {+, B};
+\filldraw[red] (-1,1.5) circle (1.5pt) node[above] {+, B};
+\filldraw[blue] (0,1) circle (1.5pt) node[right] {$\pm$, R};
+\filldraw[green] (1,0.5) circle (1.5pt) node[below] {-, B};
+\filldraw[green] (1,1.5) circle (1.5pt) node[above] {-, B};
+\end{tikzpicture}
+\end{center}
+
+\section{多个接触的情况}
+
+\subsection{约束的并集}
+
+如果有多个接触，我们只需取各个接触的约束和接触标签的\textbf{并集}。
+
+\textbf{关键性质}：约束的这种并集意味着可行CoR区域是\textbf{凸的}，就像齐次多面体twist锥一样。
+
+\subsection{例子：两个接触}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 第一个接触法线
+\draw[thick,blue,->] (0,0) -- (0,2);
+\fill[red!10] (-2,0) -- (-2,2) -- (0,2) -- (0,0) -- cycle;
+\fill[green!10] (0,0) -- (0,2) -- (2,2) -- (2,0) -- cycle;
+
+% 第二个接触法线
+\draw[thick,red,->] (3,0) -- (4,1);
+\fill[blue!10,rotate around={45:(3.5,0.5)}] (3.5,0.5) rectangle (5,2);
+
+% 交集区域（可行区域）
+\fill[purple!30] (0,0) -- (0,1.5) -- (1,2) -- (2,1.5) -- (2,0) -- cycle;
+\node[purple] at (1,0.7) {可行CoR区域};
+
+% 标记接触点
+\filldraw[black] (0,0) circle (2pt) node[below left] {接触1};
+\filldraw[black] (3,0) circle (2pt) node[below] {接触2};
+\end{tikzpicture}
+\end{center}
+
+可行CoR区域是两个接触约束区域的\textbf{交集}。
+
+\section{应用：形状闭合的可视化}
+
+\subsection{形状闭合的CoR表示}
+
+如果物体处于\textbf{形状闭合}：
+\begin{itemize}
+\item 可行twist集合只有原点（$V = 0$）
+\item 对应的CoR：没有可行的CoR（除了特殊情况）
+\item 所有方向都被约束阻止
+\end{itemize}
+
+\subsection{例子：四个接触固定物体}
+
+\begin{itemize}
+\item 四个静止接触
+\item 每个接触贡献一个约束
+\item 如果四个接触的约束区域没有交集（除了接触点），则物体被固定
+\item 这是形状闭合的图形验证方法
+\end{itemize}
+
+\section{优势与局限性}
+
+\subsection{优势}
+
+\begin{enumerate}
+\item \textbf{直观可视化}：在2D平面上看到3D twist空间
+\item \textbf{几何直觉}：CoR的概念容易理解
+\item \textbf{适用于静止约束}：特别适合分析静止接触
+\end{enumerate}
+
+\subsection{局限性}
+
+\begin{enumerate}
+\item \textbf{只适用于平面问题}：3D问题无法使用
+\item \textbf{只适用于静止约束}：运动约束无法唯一表示
+\item \textbf{特殊情况处理}：$\omega_z = 0$需要特殊处理
+\end{enumerate}
+
+\section{关键公式总结}
+
+\subsection{CoR位置}
+
+\begin{equation}
+\text{CoR} = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right), \quad \omega_z \neq 0
+\end{equation}
+
+\subsection{正线性组合}
+
+\begin{equation}
+\text{pos}(\{V_1, V_2\}) = \{k_1 V_1 + k_2 V_2 | k_1, k_2 \geq 0\}
+\end{equation}
+
+\subsection{标记规则}
+
+\begin{itemize}
+\item 法线左侧：'+'
+\item 法线右侧：'-'
+\item 法线上：'$\pm$'
+\end{itemize}
+
+\section{总结}
+
+12.1.6章节的核心内容：
+
+\begin{enumerate}
+\item \textbf{CoR表示}：将平面twist映射到2D平面上的点
+
+\item \textbf{线性组合}：两个twist的线性组合对应CoR的直线
+
+\item \textbf{正线性组合}：形成CoR的线段或射线
+
+\item \textbf{静止约束}：可以用CoR区域表示可行运动
+
+\item \textbf{接触标签}：每个CoR可以分配接触标签（B、R、S）
+
+\item \textbf{多个接触}：约束区域的交集给出可行CoR区域
+\end{enumerate}
+
+这种方法为理解平面接触运动学提供了强大的可视化工具。
+
+\end{document}
+

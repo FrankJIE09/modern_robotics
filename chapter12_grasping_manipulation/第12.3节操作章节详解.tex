@@ -1,0 +1,258 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{第12.3节\quad 操作\quad 章节详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{章节概述}
+
+第12.3节"操作"将前面章节的理论（接触运动学、接触力模型、刚体动力学）应用于实际的操作任务。操作不仅仅是简单的抓取-携带，还包括更复杂的任务，如推动、滚动、投掷等。
+
+\section{操作的定义和范围}
+
+\subsection{什么是操作？}
+
+\textbf{操作}是指操作器施加运动或力以实现物体的运动或约束的任何情况。
+
+\subsection{操作的类型}
+
+操作包括但不限于：
+
+\begin{itemize}
+    \item \textbf{抓取}：形状闭合和力闭合抓取
+    \item \textbf{推动}：沿地板推动沙发
+    \item \textbf{滚动}：绕一只脚转动冰箱
+    \item \textbf{携带}：在托盘上携带玻璃而不倾倒
+    \item \textbf{投掷和接球}：动态操作
+    \item \textbf{传送}：在振动传送带上运输零件
+\end{itemize}
+
+\subsection{超越抓取-携带的优势}
+
+赋予机器人超越简单抓取-携带的操作能力使其能够：
+
+\begin{enumerate}
+    \item \textbf{同时操作多个零件}：不需要为每个零件单独抓取
+    \item \textbf{操作大型物体}：操作太大而无法抓取的物体
+    \item \textbf{操作重型物体}：操作太重而无法提升的物体
+    \item \textbf{扩展工作空间}：通过投掷将零件发送到末端执行器工作空间之外
+\end{enumerate}
+
+\section{操作的理论基础}
+
+\subsection{三个核心要素}
+
+解决带摩擦的刚体接触问题需要三个要素：
+
+\begin{enumerate}
+    \item \textbf{接触运动学}（第12.1节）：描述接触刚体的可行运动
+    \item \textbf{接触力模型}（第12.2节）：描述可以通过摩擦接触传递的力
+    \item \textbf{刚体动力学}（第8章）：描述物体在力和力矩作用下的运动
+\end{enumerate}
+
+\subsection{动力学方程}
+
+对于单个刚体，使用第8章的记号，物体的动力学写为：
+
+\begin{equation}
+F_{\text{ext}} + \sum_i k_i F_i = G \dot{V} - [\text{ad}_V]^T G V, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\label{eq:12.31}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $V$：物体的twist（速度/角速度）
+    \item $G$：空间惯性矩阵
+    \item $F_{\text{ext}}$：外部wrench（如重力）
+    \item $\mathcal{WC}_i$：接触$i$的wrench锥
+    \item $\sum_i k_i F_i$：接触产生的总wrench
+    \item $k_i \geq 0$：非负系数
+    \item $F_i \in \mathcal{WC}_i$：接触wrench必须在摩擦锥内
+\end{itemize}
+
+所有wrench都在物体的质心坐标系中表示。
+
+\subsection{求解物体运动的方法}
+
+给定作用在物体上的一组运动或力控制的接触，以及系统的初始状态，求解物体运动的方法如下：
+
+\subsubsection{步骤(a)：枚举接触模式}
+
+枚举考虑系统当前状态的可能的接触模式集。
+
+\begin{itemize}
+    \item 接触模式由每个接触处的接触标签$R$、$S$和$B$组成
+    \item 例如，当前粘附的接触可以转换到滑动或分离
+    \item 需要考虑所有可能的接触模式组合
+\end{itemize}
+
+\subsubsection{步骤(b)：测试一致性}
+
+对于每个接触模式，确定是否存在：
+
+\begin{enumerate}
+    \item \textbf{与接触模式一致的接触wrench} $\sum_i k_i F_i$：
+    \begin{itemize}
+        \item 满足库仑摩擦定律
+        \item 位于相应的摩擦锥内
+        \item 与接触模式一致（例如，滑动接触的wrench必须在摩擦锥边缘上）
+    \end{itemize}
+    
+    \item \textbf{与接触模式一致加速度} $\dot{V}$：
+    \begin{itemize}
+        \item 满足接触模式的运动学约束
+        \item 例如，滚动接触要求$\dot{p}_A = \dot{p}_B$
+    \end{itemize}
+    
+    \item \textbf{满足动力学方程(12.31)}
+\end{enumerate}
+
+如果存在这样的解，则这个接触模式、接触wrench和物体加速度构成刚体动力学的一致解。
+
+\section{案例分析方法的特殊性}
+
+\subsection{为什么是"案例分析"？}
+
+这种方法可能听起来不寻常，因为：
+
+\begin{itemize}
+    \item 我们不仅仅是在求解一组方程
+    \item 需要枚举所有可能的接触模式
+    \item 对于每个模式，测试是否存在一致解
+\end{itemize}
+
+\subsection{多解性和无解性}
+
+这种方法可能导致：
+
+\begin{enumerate}
+    \item \textbf{多个解}（模糊问题）：
+    \begin{itemize}
+        \item 可能存在多个接触模式都满足动力学方程
+        \item 系统可能以多种方式响应
+    \end{itemize}
+    
+    \item \textbf{无解}（不一致问题）：
+    \begin{itemize}
+        \item 可能没有任何接触模式满足动力学方程
+        \item 这在物理上似乎不合理
+    \end{itemize}
+\end{enumerate}
+
+\subsection{为什么会出现这种情况？}
+
+这种情况是我们使用以下假设所付出的代价：
+
+\begin{itemize}
+    \item \textbf{完全刚体假设}：物体不会变形
+    \item \textbf{库仑摩擦假设}：简化的摩擦模型
+\end{itemize}
+
+在现实中，物体会有微小变形，摩擦行为更复杂，因此真实系统通常有唯一解。但对于许多问题，上述方法将产生唯一的接触模式和运动。
+
+\section{准静态近似}
+
+\subsection{准静态条件}
+
+对于某些操作任务，物体的速度和加速度足够小，可以忽略惯性力。这称为\textbf{准静态近似}。
+
+\subsection{准静态动力学方程}
+
+在准静态情况下，接触wrench和外部wrench始终处于力平衡，方程(12.31)简化为：
+
+\begin{equation}
+F_{\text{ext}} + \sum_i k_i F_i = 0, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\label{eq:12.32}
+\end{equation}
+
+这是一个静力学平衡方程，不涉及加速度项。
+
+\subsection{何时使用准静态近似？}
+
+准静态近似适用于：
+
+\begin{itemize}
+    \item 缓慢运动的任务
+    \item 速度变化很小的任务
+    \item 惯性力相对于接触力和重力可以忽略的情况
+\end{itemize}
+
+\section{四个例题概述}
+
+本章节用四个例子说明操作方法：
+
+\begin{enumerate}
+    \item \textbf{例12.9}：由两个手指携带的块
+    \begin{itemize}
+        \item 演示动态抓取
+        \item 使用惯性力使块压向手指
+        \item 包含代数求解方法
+    \end{itemize}
+    
+    \item \textbf{例12.10}：米尺技巧
+    \begin{itemize}
+        \item 演示准静态分析
+        \item 解释反直觉的现象
+        \item 涉及接触模式转换
+    \end{itemize}
+    
+    \item \textbf{例12.11}：装配的稳定性
+    \begin{itemize}
+        \item 多物体系统
+        \item 使用代数方法（线性规划）
+        \item 测试装配的稳定性
+    \end{itemize}
+    
+    \item \textbf{例12.12}：销插入
+    \begin{itemize}
+        \item 力控制操作
+        \item 演示卡住和楔入现象
+        \item 使用力矩标记方法
+    \end{itemize}
+\end{enumerate}
+
+每个例题都详细展示了如何应用接触运动学、接触力模型和刚体动力学来解决实际的操作问题。
+
+\section{关键概念总结}
+
+\begin{enumerate}
+    \item \textbf{操作}不仅仅是抓取，包括推动、滚动、投掷等多种任务
+    
+    \item \textbf{动力学方程}结合了接触运动学、接触力模型和刚体动力学
+    
+    \item \textbf{案例分析方法}通过枚举接触模式并测试一致性来求解
+    
+    \item \textbf{多解性和无解性}是刚体和库仑摩擦假设的结果
+    
+    \item \textbf{准静态近似}适用于缓慢运动的任务
+    
+    \item \textbf{四个例题}展示了不同操作场景的分析方法
+\end{enumerate}
+
+\section{学习方法建议}
+
+\begin{enumerate}
+    \item 理解动力学方程(12.31)的每一项
+    \item 掌握接触模式的枚举方法
+    \item 理解如何测试接触模式的一致性
+    \item 区分动态和准静态情况
+    \item 通过四个例题学习不同场景的分析方法
+\end{enumerate}
+
+\end{document}
+

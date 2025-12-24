@@ -1,0 +1,493 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.markings,angles,quotes,3d}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{摩擦锥与力旋量的关系详解}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+\subsection{问题}
+
+在机器人抓取和操作中，我们经常遇到两个重要概念：
+\begin{itemize}
+\item \textbf{摩擦锥}（Friction Cone）：描述接触点可以施加的力的集合
+\item \textbf{力旋量}（Wrench）：描述作用在物体上的力和力矩的组合
+\end{itemize}
+
+\textbf{核心问题}：摩擦锥和力旋量之间有什么关系？
+
+\subsection{答案概述}
+
+\textbf{关键关系}：
+\begin{itemize}
+\item 摩擦锥定义的是\textbf{接触点处的力}（在接触点的局部坐标系中）
+\item 力旋量定义的是\textbf{作用在物体上的力和力矩}（在物体坐标系中）
+\item 通过接触位置，可以将摩擦锥中的力转换为力旋量
+\item 摩擦锥的边对应力旋量锥的边
+\end{itemize}
+
+\section{第一部分：摩擦锥}
+
+\subsection{摩擦锥的定义}
+
+\textbf{库仑摩擦定律}：
+\begin{equation}
+|f_t| \leq \mu f_n, \quad f_n \geq 0
+\label{eq:coulomb}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $f_n$：法向力（压力）的大小
+\item $f_t$：切向力（摩擦力）的大小
+\item $\mu$：摩擦系数
+\end{itemize}
+
+\textbf{摩擦锥}：所有满足库仑摩擦定律的力向量集合
+
+\textbf{数学表达}（对于平面问题）：
+\begin{equation}
+\mathcal{FC} = \{f \in \mathbb{R}^2 \mid |f_t| \leq \mu f_n, f_n \geq 0\}
+\end{equation}
+
+\textbf{几何形状}：
+\begin{itemize}
+\item 在接触点的切平面内
+\item 是一个以法向量为轴的\textbf{圆锥}
+\item 半角为$\alpha = \tan^{-1}(\mu)$
+\end{itemize}
+
+\subsection{摩擦锥的表示}
+
+\textbf{对于平面问题}，摩擦锥由\textbf{两条边}定义：
+
+\textbf{法向量}：$\hat{n}$（指向物体内部）
+\textbf{切向量}：$\hat{t}$（沿接触边方向）
+
+\textbf{摩擦锥的两条边}：
+\begin{itemize}
+\item \textbf{边1}：$\hat{d}_1 = \frac{\hat{n} + \mu \hat{t}}{|\hat{n} + \mu \hat{t}|}$（归一化）
+   \begin{itemize}
+   \item 法向分量：$\hat{n}$（压力）
+   \item 切向分量：$+\mu \hat{t}$（正摩擦力）
+   \end{itemize}
+
+\item \textbf{边2}：$\hat{d}_2 = \frac{\hat{n} - \mu \hat{t}}{|\hat{n} - \mu \hat{t}|}$（归一化）
+   \begin{itemize}
+   \item 法向分量：$\hat{n}$（压力，与边1相同）
+   \item 切向分量：$-\mu \hat{t}$（负摩擦力，与边1相反）
+   \end{itemize}
+\end{itemize}
+
+\textbf{摩擦锥内的任何力}：
+\begin{equation}
+f = k_1 \hat{d}_1 + k_2 \hat{d}_2, \quad k_1, k_2 \geq 0
+\end{equation}
+
+\section{第二部分：力旋量（Wrench）}
+
+\subsection{力旋量的定义}
+
+\textbf{力旋量}（Wrench）是作用在刚体上的\textbf{力和力矩}的组合。
+
+\textbf{对于平面问题}，力旋量为：
+\begin{equation}
+F = \begin{bmatrix} m_z \\ f_x \\ f_y \end{bmatrix}
+\label{eq:wrench}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m_z$：绕$z$轴的力矩
+\item $f_x, f_y$：平面内的力分量
+\end{itemize}
+
+\subsection{力旋量的物理意义}
+
+\textbf{力旋量描述}：
+\begin{itemize}
+\item 作用在物体上的\textbf{力}（$f_x, f_y$）
+\item 作用在物体上的\textbf{力矩}（$m_z$）
+\item 两者组合起来描述物体的\textbf{受力状态}
+\end{itemize}
+
+\textbf{为什么需要力旋量？}
+\begin{itemize}
+\item 单独的力不能完全描述物体的受力状态
+\item 还需要知道力的作用点（通过力矩体现）
+\item 力旋量统一描述了力和力矩
+\end{itemize}
+
+\section{第三部分：从摩擦锥到力旋量}
+
+\subsection{基本转换公式}
+
+\textbf{关键观察}：接触点处的力可以产生力矩！
+
+\textbf{设}：
+\begin{itemize}
+\item 接触位置：$p = (p_x, p_y)$（在物体坐标系中）
+\item 接触力：$f = (f_x, f_y)$（在接触点的局部坐标系中，在摩擦锥内）
+\end{itemize}
+
+\textbf{对应的力旋量}：
+\begin{equation}
+F = \begin{bmatrix} m_z \\ f_x \\ f_y \end{bmatrix} = \begin{bmatrix} (p \times f)_z \\ f_x \\ f_y \end{bmatrix} = \begin{bmatrix} p_x f_y - p_y f_x \\ f_x \\ f_y \end{bmatrix}
+\label{eq:force_to_wrench}
+\end{equation}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 力$f$作用在位置$p$处
+\item 产生的力矩：$m_z = (p \times f)_z = p_x f_y - p_y f_x$
+\item 力分量直接传递：$f_x, f_y$
+\end{itemize}
+
+\subsection{从摩擦锥边到力旋量边}
+
+\textbf{关键步骤}：
+
+对于摩擦锥的每条边$\hat{d}_i$（单位向量），对应的力旋量为：
+\begin{equation}
+F_i = \begin{bmatrix} (p \times \hat{d}_i)_z \\ \hat{d}_{ix} \\ \hat{d}_{iy} \end{bmatrix} = \begin{bmatrix} p_x \hat{d}_{iy} - p_y \hat{d}_{ix} \\ \hat{d}_{ix} \\ \hat{d}_{iy} \end{bmatrix}
+\label{eq:cone_edge_to_wrench}
+\end{equation}
+
+\textbf{为什么这样转换？}
+\begin{itemize}
+\item 摩擦锥边$\hat{d}_i$是\textbf{方向}（单位向量）
+\item 对应的力可以是任意大小：$f = k \hat{d}_i$，$k \geq 0$
+\item 对应的力旋量：$F = k F_i$，$k \geq 0$
+\item 因此，$F_i$是力旋量锥的\textbf{边}
+\end{itemize}
+
+\subsection{力旋量锥}
+
+\textbf{定义}：所有可以通过接触传递的力旋量集合
+
+\textbf{数学表达}：
+\begin{equation}
+\mathcal{WC} = \{F \mid F = \begin{bmatrix} (p \times f)_z \\ f_x \\ f_y \end{bmatrix}, f \in \mathcal{FC}\}
+\end{equation}
+
+\textbf{等价表达}：
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2\})
+\end{equation}
+
+其中$F_1, F_2$是摩擦锥两条边对应的力旋量。
+
+\section{第四部分：详细例子}
+
+\subsection{例子1：单个接触点}
+
+\textbf{设置}：
+\begin{itemize}
+\item 接触位置：$p = (1, 0)$
+\item 法向量：$\hat{n} = (0, 1)$（向上）
+\item 切向量：$\hat{t} = (1, 0)$（向右）
+\item 摩擦系数：$\mu = 0.5$
+\end{itemize}
+
+\textbf{步骤1：计算摩擦锥边}
+
+\textbf{摩擦角}：$\alpha = \tan^{-1}(0.5) \approx 26.57°$
+
+\textbf{摩擦锥边1}：
+\begin{align}
+\hat{d}_1 &= \frac{\hat{n} + \mu \hat{t}}{|\hat{n} + \mu \hat{t}|} \\
+&= \frac{(0, 1) + 0.5(1, 0)}{|(0, 1) + 0.5(1, 0)|} \\
+&= \frac{(0.5, 1)}{|(0.5, 1)|} \\
+&= \frac{(0.5, 1)}{\sqrt{0.25 + 1}} \\
+&= \frac{(0.5, 1)}{\sqrt{1.25}} \\
+&\approx (0.447, 0.894)
+\end{align}
+
+\textbf{摩擦锥边2}：
+\begin{align}
+\hat{d}_2 &= \frac{\hat{n} - \mu \hat{t}}{|\hat{n} - \mu \hat{t}|} \\
+&= \frac{(0, 1) - 0.5(1, 0)}{|(0, 1) - 0.5(1, 0)|} \\
+&= \frac{(-0.5, 1)}{\sqrt{0.25 + 1}} \\
+&\approx (-0.447, 0.894)
+\end{align}
+
+\textbf{步骤2：计算对应的力旋量}
+
+\textbf{力旋量$F_1$}（对应摩擦锥边1）：
+\begin{align}
+m_{1z} &= p_x \hat{d}_{1y} - p_y \hat{d}_{1x} \\
+&= 1 \cdot 0.894 - 0 \cdot 0.447 \\
+&= 0.894
+\end{align}
+
+\begin{equation}
+F_1 = \begin{bmatrix} 0.894 \\ 0.447 \\ 0.894 \end{bmatrix}
+\end{equation}
+
+\textbf{力旋量$F_2$}（对应摩擦锥边2）：
+\begin{align}
+m_{2z} &= p_x \hat{d}_{2y} - p_y \hat{d}_{2x} \\
+&= 1 \cdot 0.894 - 0 \cdot (-0.447) \\
+&= 0.894
+\end{align}
+
+\begin{equation}
+F_2 = \begin{bmatrix} 0.894 \\ -0.447 \\ 0.894 \end{bmatrix}
+\end{equation}
+
+\textbf{步骤3：力旋量锥}
+
+\textbf{力旋量锥}：
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2\}) = \{k_1 F_1 + k_2 F_2 \mid k_1, k_2 \geq 0\}
+\end{equation}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 摩擦锥内的任何力$f = k_1 \hat{d}_1 + k_2 \hat{d}_2$
+\item 对应的力旋量：$F = k_1 F_1 + k_2 F_2$
+\item 力旋量锥是摩擦锥的"提升"（lift）到力旋量空间
+\end{itemize}
+
+\subsection{例子2：两个接触点}
+
+\textbf{设置}：
+\begin{itemize}
+\item 接触1：位置$p_1 = (-1, 0)$，法向量$\hat{n}_1 = (1, 0)$，$\mu_1 = 0.5$
+\item 接触2：位置$p_2 = (1, 0)$，法向量$\hat{n}_2 = (-1, 0)$，$\mu_2 = 0.5$
+\end{itemize}
+
+\textbf{计算每个接触的力旋量}：
+
+\textbf{接触1}：
+\begin{itemize}
+\item 摩擦锥边1：$\hat{d}_{11} = (0.894, 0.447)$
+\item 摩擦锥边2：$\hat{d}_{12} = (0.894, -0.447)$
+\item 力旋量$F_1$：$m_z = (-1) \cdot 0.447 - 0 \cdot 0.894 = -0.447$
+\item 力旋量$F_2$：$m_z = (-1) \cdot (-0.447) - 0 \cdot 0.894 = 0.447$
+\end{itemize}
+
+\textbf{接触2}：
+\begin{itemize}
+\item 摩擦锥边1：$\hat{d}_{21} = (-0.894, 0.447)$
+\item 摩擦锥边2：$\hat{d}_{22} = (-0.894, -0.447)$
+\item 力旋量$F_3$：$m_z = 1 \cdot 0.447 - 0 \cdot (-0.894) = 0.447$
+\item 力旋量$F_4$：$m_z = 1 \cdot (-0.447) - 0 \cdot (-0.894) = -0.447$
+\end{itemize}
+
+\textbf{复合力旋量锥}：
+\begin{equation}
+\mathcal{WC}_{\text{total}} = \text{pos}(\{F_1, F_2, F_3, F_4\})
+\end{equation}
+
+\section{第五部分：关键关系总结}
+
+\subsection{对应关系}
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{摩擦锥} & \textbf{力旋量锥} \\
+\hline
+接触点处的力$f$ & 作用在物体上的力旋量$F$ \\
+\hline
+摩擦锥$\mathcal{FC}$ & 力旋量锥$\mathcal{WC}$ \\
+\hline
+摩擦锥边$\hat{d}_i$ & 力旋量锥边$F_i$ \\
+\hline
+摩擦角$\alpha = \tan^{-1}\mu$ & 影响力旋量的力矩分量 \\
+\hline
+接触位置$p$ & 通过$p \times f$产生力矩 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{转换公式}
+
+\textbf{从摩擦锥边到力旋量边}：
+\begin{equation}
+F_i = \begin{bmatrix} (p \times \hat{d}_i)_z \\ \hat{d}_{ix} \\ \hat{d}_{iy} \end{bmatrix} = \begin{bmatrix} p_x \hat{d}_{iy} - p_y \hat{d}_{ix} \\ \hat{d}_{ix} \\ \hat{d}_{iy} \end{bmatrix}
+\end{equation}
+
+\textbf{从摩擦锥到力旋量锥}：
+\begin{equation}
+\mathcal{WC} = \{F \mid F = \begin{bmatrix} (p \times f)_z \\ f_x \\ f_y \end{bmatrix}, f \in \mathcal{FC}\}
+\end{equation}
+
+\textbf{等价表达}：
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2, \ldots, F_n\})
+\end{equation}
+
+其中$F_i$是摩擦锥各条边对应的力旋量。
+
+\subsection{几何关系}
+
+\textbf{摩擦锥}：
+\begin{itemize}
+\item 在接触点的\textbf{切平面}内（2维）
+\item 是一个\textbf{圆锥}，以法向量为轴
+\item 半角为$\alpha = \tan^{-1}\mu$
+\end{itemize}
+
+\textbf{力旋量锥}：
+\begin{itemize}
+\item 在\textbf{力旋量空间}中（3维，对于平面问题）
+\item 是一个\textbf{凸锥}，以原点为顶点
+\item 由摩擦锥边对应的力旋量正张成
+\end{itemize}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 摩擦锥是\textbf{局部}的（在接触点）
+\item 力旋量锥是\textbf{全局}的（在物体坐标系中）
+\item 通过接触位置$p$，将局部力转换为全局力旋量
+\end{itemize}
+
+\section{第六部分：物理直觉}
+
+\subsection{为什么需要这个转换？}
+
+\textbf{问题}：为什么不能直接用摩擦锥？
+
+\textbf{答案}：
+\begin{itemize}
+\item 摩擦锥描述的是\textbf{接触点处的力}
+\item 但我们需要知道\textbf{作用在物体上的总效果}
+\item 同样的力，作用在不同位置，产生的力矩不同
+\item 力旋量统一描述了力和力矩
+\end{itemize}
+
+\subsection{力矩的作用}
+
+\textbf{关键理解}：接触位置影响力矩！
+
+\textbf{例子}：
+\begin{itemize}
+\item 同样的力$f = (0, 1)$（向上）
+\item 作用在$p_1 = (1, 0)$：力矩$m_z = 1 \cdot 1 - 0 \cdot 0 = 1$（逆时针）
+\item 作用在$p_2 = (-1, 0)$：力矩$m_z = (-1) \cdot 1 - 0 \cdot 0 = -1$（顺时针）
+\item 作用在$p_3 = (0, 0)$：力矩$m_z = 0$（无力矩）
+\end{itemize}
+
+\textbf{结论}：
+\begin{itemize}
+\item 接触位置\textbf{至关重要}
+\item 同样的摩擦锥，在不同位置产生不同的力旋量锥
+\item 这是为什么需要从摩擦锥转换到力旋量的原因
+\end{itemize}
+
+\section{第七部分：应用：力闭合分析}
+
+\subsection{力闭合的定义}
+
+\textbf{力闭合}：复合力旋量锥包含整个力旋量空间
+\begin{equation}
+\mathcal{WC}_{\text{total}} = \mathbb{R}^3 \quad \text{（对于平面问题）}
+\end{equation}
+
+\textbf{含义}：
+\begin{itemize}
+\item 可以产生\textbf{任意方向}的力旋量
+\item 可以平衡\textbf{任意}外部干扰
+\end{itemize}
+
+\subsection{从摩擦锥到力闭合}
+
+\textbf{步骤}：
+\begin{enumerate}
+\item 对每个接触，计算摩擦锥
+\item 将摩擦锥边转换为力旋量边
+\item 构建复合力旋量锥
+\item 检查是否正张成整个空间
+\end{enumerate}
+
+\textbf{例子}：两个摩擦接触
+\begin{itemize}
+\item 每个接触有2条摩擦锥边
+\item 总共4条摩擦锥边
+\item 对应4个力旋量
+\item 如果这4个力旋量正张成$\mathbb{R}^3$，则力闭合
+\end{itemize}
+
+\section{第八部分：数学框架}
+
+\subsection{一般转换公式}
+
+\textbf{对于三维问题}：
+
+\textbf{接触位置}：$p \in \mathbb{R}^3$
+\textbf{接触力}：$f \in \mathbb{R}^3$（在摩擦锥内）
+
+\textbf{对应的力旋量}：
+\begin{equation}
+F = \begin{bmatrix} m \\ f \end{bmatrix} = \begin{bmatrix} p \times f \\ f \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m = p \times f$：力矩向量（3维）
+\item $f$：力向量（3维）
+\end{itemize}
+
+\subsection{摩擦锥到力旋量锥的映射}
+
+\textbf{映射}：$\Phi: \mathcal{FC} \to \mathcal{WC}$
+
+\textbf{定义}：
+\begin{equation}
+\Phi(f) = \begin{bmatrix} p \times f \\ f \end{bmatrix}
+\end{equation}
+
+\textbf{性质}：
+\begin{itemize}
+\item 线性映射（除了位置依赖）
+\item 保持凸性：如果$\mathcal{FC}$是凸的，则$\mathcal{WC}$也是凸的
+\item 保持锥性：如果$\mathcal{FC}$是锥，则$\mathcal{WC}$也是锥
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心关系}
+
+\begin{enumerate}
+\item \textbf{摩擦锥}定义接触点处可以施加的力
+\item \textbf{力旋量}描述作用在物体上的力和力矩
+\item \textbf{转换}：通过接触位置，将摩擦锥中的力转换为力旋量
+\item \textbf{对应}：摩擦锥边对应力旋量锥边
+\end{enumerate}
+
+\subsection{关键公式}
+
+\textbf{从摩擦锥边到力旋量边}：
+\begin{equation}
+F_i = \begin{bmatrix} p_x \hat{d}_{iy} - p_y \hat{d}_{ix} \\ \hat{d}_{ix} \\ \hat{d}_{iy} \end{bmatrix}
+\end{equation}
+
+\textbf{从摩擦锥到力旋量锥}：
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2, \ldots, F_n\})
+\end{equation}
+
+\subsection{物理意义}
+
+\begin{itemize}
+\item 摩擦锥是\textbf{局部}的（在接触点）
+\item 力旋量锥是\textbf{全局}的（在物体坐标系中）
+\item 接触位置通过产生力矩，将局部力转换为全局力旋量
+\item 这是分析抓取稳定性的基础
+\end{itemize}
+
+\end{document}
+

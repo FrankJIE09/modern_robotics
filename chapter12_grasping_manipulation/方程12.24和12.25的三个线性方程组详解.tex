@@ -1,0 +1,229 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{方程(12.24)和(12.25)的三个线性方程组详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+在定理12.8的证明中，文本提到：
+
+\begin{quote}
+首先考虑法向$N$中的力闭合方程(12.24)和(12.25)。给定任意外部力$f_{\text{ext},N} \in N$和外部力矩$m_{\text{ext},S} \in S$，方程(12.24)和(12.25)构成三个未知数的三个线性方程组。
+\end{quote}
+
+这里有一个看似矛盾的地方：只有两个方程（(12.24)和(12.25)），为什么说是"三个线性方程组"？
+
+\section{关键理解：向量方程与标量方程}
+
+关键在于理解：虽然只有两个\textbf{向量方程}，但它们实际上等价于三个\textbf{标量方程}。
+
+\subsection{坐标系设定}
+
+根据文本，我们选择固定参考坐标系，使得：
+\begin{itemize}
+    \item $S$是$\hat{x}$--$\hat{y}$平面
+    \item $N$是$\hat{z}$轴方向
+\end{itemize}
+
+因此：
+\begin{align}
+S &= \text{span}\{\hat{x}, \hat{y}\} = \mathbb{R}^2 \text{（平面）} \\
+N &= \text{span}\{\hat{z}\} = \mathbb{R}^1 \text{（一维直线）}
+\end{align}
+
+\subsection{法向力$f_{iN}$的性质}
+
+由于$f_{iN} \in N$，且$N$是$\hat{z}$轴方向，我们有：
+\begin{equation}
+f_{iN} = f_{iN,z} \hat{z} = \begin{bmatrix} 0 \\ 0 \\ f_{iN,z} \end{bmatrix}
+\end{equation}
+
+其中$f_{iN,z} \in \mathbb{R}$是标量。因此，每个$f_{iN}$实际上只有一个未知的标量分量$f_{iN,z}$。
+
+三个接触点给出三个未知标量：
+\begin{equation}
+\text{未知数：} \quad f_{1N,z}, \quad f_{2N,z}, \quad f_{3N,z}
+\end{equation}
+
+\section{方程(12.24)的分析}
+
+方程(12.24)是：
+\begin{equation}
+f_{1N} + f_{2N} + f_{3N} = -f_{\text{ext},N} \label{eq:12.24}
+\end{equation}
+
+由于所有向量都在$\hat{z}$方向，这个向量方程实际上只给出一个标量方程。
+
+\subsection{向量形式}
+
+将每个$f_{iN}$展开：
+\begin{align}
+f_{1N} &= f_{1N,z} \hat{z} \\
+f_{2N} &= f_{2N,z} \hat{z} \\
+f_{3N} &= f_{3N,z} \hat{z} \\
+f_{\text{ext},N} &= f_{\text{ext},N,z} \hat{z}
+\end{align}
+
+代入方程(12.24)：
+\begin{equation}
+(f_{1N,z} + f_{2N,z} + f_{3N,z}) \hat{z} = -f_{\text{ext},N,z} \hat{z}
+\end{equation}
+
+\subsection{标量方程}
+
+由于$\hat{z}$是单位向量且非零，我们得到\textbf{第一个标量方程}：
+\begin{equation}
+f_{1N,z} + f_{2N,z} + f_{3N,z} = -f_{\text{ext},N,z} \label{eq:scalar1}
+\end{equation}
+
+这是关于$\hat{z}$方向的力平衡方程。
+
+\section{方程(12.25)的分析}
+
+方程(12.25)是：
+\begin{equation}
+(r_1 \times f_{1N}) + (r_2 \times f_{2N}) + (r_3 \times f_{3N}) = -m_{\text{ext},N} \label{eq:12.25}
+\end{equation}
+
+这是关于力矩的方程。关键观察是：$r_i \times f_{iN}$的结果在$\hat{x}$--$\hat{y}$平面内。
+
+\subsection{叉积的计算}
+
+设接触点$i$的位置向量为：
+\begin{equation}
+r_i = \begin{bmatrix} r_{ix} \\ r_{iy} \\ r_{iz} \end{bmatrix}
+\end{equation}
+
+法向力为：
+\begin{equation}
+f_{iN} = \begin{bmatrix} 0 \\ 0 \\ f_{iN,z} \end{bmatrix}
+\end{equation}
+
+计算叉积：
+\begin{align}
+r_i \times f_{iN} &= \begin{bmatrix} r_{ix} \\ r_{iy} \\ r_{iz} \end{bmatrix} \times \begin{bmatrix} 0 \\ 0 \\ f_{iN,z} \end{bmatrix} \\
+&= \begin{bmatrix} r_{iy} \cdot f_{iN,z} - r_{iz} \cdot 0 \\ r_{iz} \cdot 0 - r_{ix} \cdot f_{iN,z} \\ r_{ix} \cdot 0 - r_{iy} \cdot 0 \end{bmatrix} \\
+&= \begin{bmatrix} r_{iy} f_{iN,z} \\ -r_{ix} f_{iN,z} \\ 0 \end{bmatrix}
+\end{align}
+
+因此，$r_i \times f_{iN}$在$\hat{x}$--$\hat{y}$平面内，$\hat{z}$分量为零。
+
+\subsection{力矩方程的分解}
+
+将方程(12.25)展开：
+\begin{align}
+\sum_{i=1}^3 (r_i \times f_{iN}) &= -m_{\text{ext},N} \\
+\sum_{i=1}^3 \begin{bmatrix} r_{iy} f_{iN,z} \\ -r_{ix} f_{iN,z} \\ 0 \end{bmatrix} &= -m_{\text{ext},N}
+\end{align}
+
+由于$m_{\text{ext},N} \in N$（即$\hat{z}$轴方向），但根据文本，这里应该是$m_{\text{ext},S} \in S$。让我们重新检查文本。
+
+实际上，根据文本第487行：
+\begin{quote}
+给定任意外部力$f_{\text{ext},N} \in N$和外部力矩$m_{\text{ext},S} \in S$
+\end{quote}
+
+所以$m_{\text{ext},N}$在方程(12.25)中应该理解为在$\hat{x}$--$\hat{y}$平面内的力矩分量。但根据方程(12.25)的标记，$m_{\text{ext},N}$应该是在$N$方向（$\hat{z}$轴）的力矩。
+
+让我重新理解：$m_{\text{ext},N}$表示关于$\hat{z}$轴的力矩，这是一个标量。但$r_i \times f_{iN}$给出的是在$\hat{x}$--$\hat{y}$平面内的向量。
+
+实际上，更准确的理解是：$m_{\text{ext},N}$是外部力矩在$\hat{x}$--$\hat{y}$平面内的分量（即关于$\hat{z}$轴的力矩在$\hat{x}$和$\hat{y}$方向的分量）。
+
+或者，我们可以这样理解：方程(12.25)的左边$r_i \times f_{iN}$在$\hat{x}$--$\hat{y}$平面内，所以这个向量方程给出两个标量方程（$\hat{x}$和$\hat{y}$分量）。
+
+\subsection{标量方程}
+
+将方程(12.25)按分量写出：
+\begin{align}
+\sum_{i=1}^3 r_{iy} f_{iN,z} &= -m_{\text{ext},N,x} \label{eq:scalar2} \\
+-\sum_{i=1}^3 r_{ix} f_{iN,z} &= -m_{\text{ext},N,y} \label{eq:scalar3}
+\end{align}
+
+或者等价地：
+\begin{align}
+\sum_{i=1}^3 r_{iy} f_{iN,z} &= -m_{\text{ext},N,x} \\
+\sum_{i=1}^3 r_{ix} f_{iN,z} &= m_{\text{ext},N,y}
+\end{align}
+
+这是\textbf{第二个和第三个标量方程}，分别对应$\hat{x}$和$\hat{y}$方向的力矩平衡。
+
+\section{完整的三个线性方程组}
+
+综合以上分析，我们得到三个标量线性方程：
+
+\begin{align}
+f_{1N,z} + f_{2N,z} + f_{3N,z} &= -f_{\text{ext},N,z} \label{eq:system1} \\
+r_{1y} f_{1N,z} + r_{2y} f_{2N,z} + r_{3y} f_{3N,z} &= -m_{\text{ext},N,x} \label{eq:system2} \\
+r_{1x} f_{1N,z} + r_{2x} f_{2N,z} + r_{3x} f_{3N,z} &= m_{\text{ext},N,y} \label{eq:system3}
+\end{align}
+
+写成矩阵形式：
+\begin{equation}
+\begin{bmatrix}
+1 & 1 & 1 \\
+r_{1y} & r_{2y} & r_{3y} \\
+r_{1x} & r_{2x} & r_{3x}
+\end{bmatrix}
+\begin{bmatrix}
+f_{1N,z} \\
+f_{2N,z} \\
+f_{3N,z}
+\end{bmatrix}
+=
+\begin{bmatrix}
+-f_{\text{ext},N,z} \\
+-m_{\text{ext},N,x} \\
+m_{\text{ext},N,y}
+\end{bmatrix}
+\label{eq:matrix_form}
+\end{equation}
+
+\section{唯一解的条件}
+
+根据文本，如果三个接触点不共线，则这个$3 \times 3$矩阵是可逆的，从而存在唯一解。
+
+\subsection{矩阵可逆性的几何解释}
+
+系数矩阵的行列式为：
+\begin{equation}
+\det \begin{bmatrix}
+1 & 1 & 1 \\
+r_{1y} & r_{2y} & r_{3y} \\
+r_{1x} & r_{2x} & r_{3x}
+\end{bmatrix}
+= \det \begin{bmatrix}
+1 & 1 & 1 \\
+r_{1x} & r_{2x} & r_{3x} \\
+r_{1y} & r_{2y} & r_{3y}
+\end{bmatrix}
+\end{equation}
+
+这个行列式与三个接触点在$\hat{x}$--$\hat{y}$平面上的投影形成的三角形的有向面积成正比。如果三个点不共线，则三角形面积非零，行列式非零，矩阵可逆。
+
+\section{总结}
+
+\begin{enumerate}
+    \item 虽然只有两个\textbf{向量方程}（(12.24)和(12.25)），但它们等价于三个\textbf{标量方程}。
+    \item 方程(12.24)（力平衡）给出1个标量方程（$\hat{z}$方向）。
+    \item 方程(12.25)（力矩平衡）给出2个标量方程（$\hat{x}$和$\hat{y}$方向）。
+    \item 三个未知数是：$f_{1N,z}$、$f_{2N,z}$、$f_{3N,z}$（三个接触点的法向力大小）。
+    \item 如果三个接触点不共线，则存在唯一解。
+\end{enumerate}
+
+因此，"三个未知数的三个线性方程组"这一表述是正确的，尽管表面上只有两个向量方程。
+
+\end{document}
+

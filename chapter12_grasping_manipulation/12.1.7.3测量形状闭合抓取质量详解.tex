@@ -1,0 +1,1036 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{12.1.7.3 测量形状闭合抓取质量详解}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+\subsection{问题提出}
+
+考虑图12.16中显示的两个形状闭合抓取。\textbf{哪个是更好的抓取？}
+
+\begin{itemize}
+\item 两个抓取都实现了形状闭合
+\item 但它们的\textbf{质量}可能不同
+\item 需要一种\textbf{度量}来量化抓取质量
+\end{itemize}
+
+\subsection{抓取度量的定义}
+
+\textbf{抓取度量}：取接触集$\{F_i\}$，返回单个值$\text{Qual}(\{F_i\})$
+
+\begin{itemize}
+\item $\text{Qual}(\{F_i\}) < 0$：抓取\textbf{不产生}形状闭合
+\item $\text{Qual}(\{F_i\}) = 0$：抓取\textbf{刚好}产生形状闭合（临界情况）
+\item $\text{Qual}(\{F_i\}) > 0$：抓取产生形状闭合，\textbf{值越大越好}
+\end{itemize}
+
+\section{接触Wrench集合 $\mathcal{C}_F$}
+
+\subsection{物理约束}
+
+\textbf{假设}：为了避免损坏物体，接触$i$处的力大小必须满足：
+\begin{equation}
+|f_i| \leq f_{i,\max} > 0
+\label{eq:force_limit}
+\end{equation}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 每个接触有\textbf{最大力限制}
+\item 这防止物体被损坏
+\item 也防止手指施加过大的力
+\end{itemize}
+
+\subsection{接触Wrench集合的定义}
+
+\textbf{定义}：$j$个接触可以施加的接触wrench集合为：
+\begin{equation}
+\mathcal{C}_F = \left\{\sum_{i=1}^j f_i F_i \middle| f_i \in [0, f_{i,\max}] \right\}
+\label{eq:12.15}
+\end{equation}
+
+\textbf{关键点}：
+\begin{itemize}
+\item $f_i \in [0, f_{i,\max}]$：力必须\textbf{非负}（只能推，不能拉）
+\item $\sum_{i=1}^j f_i F_i$：所有接触wrench的\textbf{正线性组合}
+\item $\mathcal{C}_F$是\textbf{凸多面体}（polytope）
+\end{itemize}
+
+\subsection{几何解释}
+
+\textbf{图12.17的说明}：
+
+\begin{itemize}
+\item \textbf{二维情况}：$\mathcal{C}_F$是wrench空间中的\textbf{凸多边形}
+\item \textbf{顶点}：由某些$f_i = f_{i,\max}$或$f_i = 0$的组合产生
+\item \textbf{边}：由约束$f_i \in [0, f_{i,\max}]$的边界产生
+\end{itemize}
+
+\textbf{形状闭合的几何特征}：
+
+如果抓取产生形状闭合，则：
+\begin{itemize}
+\item $\mathcal{C}_F$在其\textbf{内部}包含wrench空间的原点
+\item 这意味着：接触可以产生\textbf{任何方向}的wrench来抵抗干扰
+\end{itemize}
+
+\section{从多面体到质量值}
+
+\subsection{问题}
+
+\textbf{挑战}：如何将凸多面体$\mathcal{C}_F$转换为单个数字$\text{Qual}(\{F_i\})$？
+
+\textbf{理想方法}：
+\begin{itemize}
+\item 考虑物体可能遇到的\textbf{干扰wrench分布}
+\item 基于实际应用场景设计度量
+\end{itemize}
+
+\textbf{简化方法}：
+\begin{itemize}
+\item 使用\textbf{最大内接球}方法
+\item 计算以原点为中心、适合$\mathcal{C}_F$内部的最大球的半径
+\end{itemize}
+
+\subsection{最大内接球方法}
+
+\textbf{定义}：
+\begin{equation}
+\text{Qual}(\{F_i\}) = \text{最大内接球的半径}
+\end{equation}
+
+\textbf{几何意义}（图12.17）：
+\begin{itemize}
+\item 以wrench空间原点为中心
+\item 完全位于$\mathcal{C}_F$内部
+\item 半径越大，抓取质量越好
+\end{itemize}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 半径$d$表示：接触可以抵抗\textbf{任何方向}、大小不超过$d$的干扰wrench
+\item 更大的半径意味着更强的\textbf{鲁棒性}
+\end{itemize}
+
+\section{两个关键问题}
+
+\subsection{问题1：单位不一致}
+
+\textbf{问题}：力矩和力具有\textbf{不同的单位}
+
+\begin{itemize}
+\item 力：牛顿（N）
+\item 力矩：牛顿·米（N·m）
+\item 如何比较它们的大小？
+\end{itemize}
+
+\textbf{解决方案}：引入\textbf{特征长度}$r$
+
+\begin{itemize}
+\item 选择被抓取物体的特征长度$r$（例如，物体尺寸）
+\item 将接触力矩$m$转换为等效力：$m/r$
+\item 这样力矩和力就有了\textbf{相同的单位}
+\end{itemize}
+
+\textbf{数学表达}：
+
+对于平面情况，wrench原本是：
+\begin{equation}
+F_i = \begin{bmatrix} m_{iz} \\ f_{ix} \\ f_{iy} \end{bmatrix}
+\end{equation}
+
+转换后：
+\begin{equation}
+\tilde{F}_i = \begin{bmatrix} m_{iz}/r \\ f_{ix} \\ f_{iy} \end{bmatrix}
+\end{equation}
+
+现在所有分量都有力的单位。
+
+\subsection{问题2：坐标系原点依赖}
+
+\textbf{问题}：接触力产生的力矩\textbf{依赖于}空间坐标系原点的位置
+
+\begin{itemize}
+\item 如果原点改变，力矩分量会改变
+\item 这会影响$\mathcal{C}_F$的形状
+\item 进而影响质量度量
+\end{itemize}
+
+\textbf{解决方案}：选择合适的原点位置
+
+\textbf{常见选择}：
+\begin{itemize}
+\item \textbf{几何中心}：物体形状的中心
+\item \textbf{质心}：物体的质量中心
+\item \textbf{抓取中心}：接触点的中心
+\end{itemize}
+
+\textbf{建议}：
+\begin{itemize}
+\item 选择在物体\textbf{几何中心附近}
+\item 或选择在物体\textbf{质心}处
+\item 这样度量更稳定、更有意义
+\end{itemize}
+
+\section{边界超平面详解}
+
+\subsection{什么是超平面？}
+
+\textbf{超平面}是$n$维空间中的$(n-1)$维子空间。
+
+\textbf{从低维到高维的理解}：
+\begin{itemize}
+\item \textbf{一维空间}（直线）：超平面是\textbf{点}（0维）
+\item \textbf{二维空间}（平面）：超平面是\textbf{直线}（1维）
+\item \textbf{三维空间}：超平面是\textbf{平面}（2维）
+\item \textbf{$n$维空间}：超平面是$(n-1)$维子空间
+\end{itemize}
+
+\textbf{超平面的方程}：
+
+在$n$维空间中，超平面可以表示为：
+\begin{equation}
+a_1 x_1 + a_2 x_2 + \cdots + a_n x_n = b
+\label{eq:hyperplane_general}
+\end{equation}
+
+或者用向量形式：
+\begin{equation}
+a^T x = b
+\label{eq:hyperplane_vector}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $a = [a_1, a_2, \ldots, a_n]^T$是超平面的\textbf{法向量}
+\item $b$是标量常数
+\item $x = [x_1, x_2, \ldots, x_n]^T$是空间中的点
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子1：二维空间中的超平面（直线）}
+
+在二维空间中，超平面是直线：
+\begin{equation}
+a_1 x_1 + a_2 x_2 = b
+\end{equation}
+
+例如：$x_1 + x_2 = 1$是一条直线。
+
+\textbf{例子2：三维空间中的超平面（平面）}
+
+在三维空间中，超平面是平面：
+\begin{equation}
+a_1 x_1 + a_2 x_2 + a_3 x_3 = b
+\end{equation}
+
+例如：$x_1 + x_2 + x_3 = 1$是一个平面。
+
+\textbf{例子3：wrench空间中的超平面}
+
+对于平面物体的wrench空间（3维），超平面是2维平面：
+\begin{equation}
+a_1 m_z + a_2 f_x + a_3 f_y = b
+\end{equation}
+
+\subsection{什么是边界超平面？}
+
+\textbf{边界超平面}是多面体（polytope）的\textbf{边界}。
+
+\textbf{多面体}：
+\begin{itemize}
+\item 由\textbf{半空间}的交集定义
+\item 半空间：$a^T x \leq b$或$a^T x \geq b$
+\item 边界：满足$a^T x = b$的点
+\end{itemize}
+
+\textbf{边界超平面的定义}：
+
+如果多面体$\mathcal{C}_F$由以下约束定义：
+\begin{equation}
+\mathcal{C}_F = \{x \in \mathbb{R}^n \mid a_i^T x \leq b_i, i = 1, \ldots, m\}
+\end{equation}
+
+那么每个约束$a_i^T x = b_i$对应一个\textbf{边界超平面}。
+
+\subsection{$\mathcal{C}_F$的边界超平面}
+
+\textbf{回顾}：接触wrench集合定义为：
+\begin{equation}
+\mathcal{C}_F = \left\{\sum_{i=1}^j f_i F_i \middle| f_i \in [0, f_{i,\max}] \right\}
+\end{equation}
+
+\textbf{约束条件}：
+\begin{itemize}
+\item $f_i \geq 0$（力不能为负）
+\item $f_i \leq f_{i,\max}$（力有上限）
+\end{itemize}
+
+\textbf{边界超平面的来源}：
+
+每个约束的\textbf{边界}对应一个超平面：
+\begin{itemize}
+\item $f_i = 0$：第$i$个接触的力为零
+\item $f_i = f_{i,\max}$：第$i$个接触的力达到最大值
+\end{itemize}
+
+\textbf{在wrench空间中的表示}：
+
+设$F = [F_1, F_2, \ldots, F_j]$，则：
+\begin{equation}
+x = \sum_{i=1}^j f_i F_i = F f
+\end{equation}
+
+其中$f = [f_1, f_2, \ldots, f_j]^T$。
+
+约束$f_i = 0$在wrench空间中对应：
+\begin{equation}
+x = \sum_{k \neq i} f_k F_k
+\end{equation}
+
+这是一个\textbf{超平面}（由其他接触wrench张成的子空间）。
+
+约束$f_i = f_{i,\max}$在wrench空间中对应：
+\begin{equation}
+x = f_{i,\max} F_i + \sum_{k \neq i} f_k F_k
+\end{equation}
+
+这也是一个\textbf{超平面}（平移后的子空间）。
+
+\subsection{二维例子：多边形}
+
+\textbf{情况}：二维wrench空间，三个接触
+
+\begin{itemize}
+\item $\mathcal{C}_F$是一个\textbf{凸多边形}
+\item 边界由\textbf{边}（1维超平面，即直线）组成
+\item 每条边对应某个约束的边界
+\end{itemize}
+
+\textbf{具体例子}：
+
+假设$f_1, f_2, f_3 \in [0, 1]$，则：
+\begin{itemize}
+\item 边1：$f_1 = 0$，$f_2, f_3 \in [0,1]$
+\item 边2：$f_1 = 1$，$f_2, f_3 \in [0,1]$
+\item 边3：$f_2 = 0$，$f_1, f_3 \in [0,1]$
+\item 边4：$f_2 = 1$，$f_1, f_3 \in [0,1]$
+\item 边5：$f_3 = 0$，$f_1, f_2 \in [0,1]$
+\item 边6：$f_3 = 1$，$f_1, f_2 \in [0,1]$
+\end{itemize}
+
+\textbf{注意}：不是所有约束边界都会出现在多边形的边上（有些可能在内部）。
+
+\subsection{超平面的法向量}
+
+\textbf{法向量}：垂直于超平面的向量
+
+对于超平面$a^T x = b$：
+\begin{itemize}
+\item 法向量：$a$（或$-a$）
+\item 如果$|a| = 1$，则$b$是原点到超平面的\textbf{有符号距离}
+\end{itemize}
+
+\textbf{符号约定}：
+\begin{itemize}
+\item 如果$b > 0$，原点在超平面的\textbf{正侧}（法向量指向原点）
+\item 如果$b < 0$，原点在超平面的\textbf{负侧}（法向量背离原点）
+\item 如果$b = 0$，原点在超平面上
+\end{itemize}
+
+\subsection{如何找到边界超平面？}
+
+\textbf{方法1：从约束条件}
+
+\begin{enumerate}
+\item 列出所有约束：$f_i \geq 0$和$f_i \leq f_{i,\max}$
+\item 对每个约束，设等号成立：$f_i = 0$或$f_i = f_{i,\max}$
+\item 在wrench空间中，这些约束对应超平面
+\end{enumerate}
+
+\textbf{方法2：从多面体表示}
+
+如果$\mathcal{C}_F = \{x \mid A x \leq b\}$，则：
+\begin{itemize}
+\item 每行$A_i$对应一个约束
+\item 边界超平面：$A_i^T x = b_i$
+\end{itemize}
+
+\textbf{方法3：从顶点表示}
+
+\begin{itemize}
+\item 找到多面体的所有顶点
+\item 找到连接顶点的边/面
+\item 这些边/面就是边界超平面
+\end{itemize}
+
+\section{质量度量的计算}
+
+\subsection{有符号距离}
+
+\textbf{给定}：
+\begin{itemize}
+\item 空间坐标系的选择（原点位置）
+\item 特征长度$r$的选择
+\item 接触wrench集合$\mathcal{C}_F$
+\end{itemize}
+
+\textbf{方法}：计算从wrench空间原点到$\mathcal{C}_F$边界上每个\textbf{超平面}的有符号距离
+
+\subsection{超平面方程}
+
+\textbf{多面体$\mathcal{C}_F$的边界}由超平面组成。
+
+每个超平面可以表示为：
+\begin{equation}
+a^T x = b
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $a$是超平面的法向量（单位向量）
+\item $b$是超平面到原点的距离
+\item $x$是wrench空间中的点
+\end{itemize}
+
+\subsection{点到超平面的距离}
+
+\textbf{有符号距离}：
+\begin{equation}
+d = \frac{b}{|a|} = b \quad \text{（如果$|a| = 1$）}
+\end{equation}
+
+\textbf{符号意义}：
+\begin{itemize}
+\item $d > 0$：原点在超平面的\textbf{正侧}（法向量指向原点）
+\item $d < 0$：原点在超平面的\textbf{负侧}（法向量背离原点）
+\item $d = 0$：原点在超平面上
+\end{itemize}
+
+\subsection{质量度量的定义}
+
+\textbf{定义}：
+\begin{equation}
+\text{Qual}(\{F_i\}) = \min\{d_1, d_2, \ldots, d_k\}
+\label{eq:quality_metric}
+\end{equation}
+
+其中$d_1, d_2, \ldots, d_k$是从原点到$\mathcal{C}_F$边界上所有超平面的有符号距离。
+
+\textbf{关键理解}：
+\begin{itemize}
+\item 取\textbf{最小值}确保球完全在$\mathcal{C}_F$内部
+\item 如果所有$d_i > 0$，则原点在$\mathcal{C}_F$内部（形状闭合）
+\item 如果某个$d_i < 0$，则原点不在$\mathcal{C}_F$内部（不是形状闭合）
+\end{itemize}
+
+\section{图12.17的详细解释}
+
+\subsection{图12.17(a)}
+
+\textbf{情况}：三个接触wrench在二维wrench空间中
+
+\begin{itemize}
+\item $\mathcal{C}_F$是一个\textbf{凸多边形}
+\item 以原点为中心的最大内接球半径为$d$
+\item $d$是到所有边的最小距离
+\end{itemize}
+
+\textbf{质量}：$\text{Qual}(\{F_i\}) = d$
+
+\subsection{图12.17(b)}
+
+\textbf{情况}：不同的三个接触wrench
+
+\begin{itemize}
+\item $\mathcal{C}_F$的形状不同
+\item 最大内接球的半径\textbf{更大}
+\item 说明这个抓取质量\textbf{更好}
+\end{itemize}
+
+\textbf{质量}：$\text{Qual}(\{F_i\}) = d' > d$
+
+\section{图12.16的例子}
+
+\subsection{两个抓取的比较}
+
+\textbf{假设}：每个手指允许施加相同的力（$f_{i,\max}$相同）
+
+\textbf{观察}：
+\begin{itemize}
+\item 左侧的抓取：接触可以抵抗关于物体中心的\textbf{更大力矩}
+\item 右侧的抓取：抵抗力矩的能力较弱
+\end{itemize}
+
+\textbf{结论}：
+\begin{itemize}
+\item 左侧抓取的$\mathcal{C}_F$更大
+\item 最大内接球半径更大
+\item 因此\textbf{质量更好}
+\end{itemize}
+
+\section{算法步骤总结}
+
+\subsection{计算抓取质量的步骤}
+
+\textbf{步骤1}：选择坐标系和特征长度
+\begin{itemize}
+\item 选择空间坐标系原点（几何中心或质心）
+\item 选择特征长度$r$（物体尺寸）
+\end{itemize}
+
+\textbf{步骤2}：构建接触wrench集合
+\begin{equation}
+\mathcal{C}_F = \left\{\sum_{i=1}^j f_i F_i \middle| f_i \in [0, f_{i,\max}] \right\}
+\end{equation}
+
+\textbf{步骤3}：单位归一化
+\begin{itemize}
+\item 将力矩分量除以$r$：$m_{iz} \to m_{iz}/r$
+\item 确保所有分量单位一致
+\end{itemize}
+
+\textbf{步骤4}：找到$\mathcal{C}_F$的边界超平面
+\begin{itemize}
+\item 确定多面体的所有面（超平面）
+\item 每个面由约束$f_i = 0$或$f_i = f_{i,\max}$定义
+\end{itemize}
+
+\textbf{步骤5}：计算有符号距离
+\begin{itemize}
+\item 对每个超平面，计算原点到它的有符号距离
+\item $d_i = \text{有符号距离到第$i$个超平面}$
+\end{itemize}
+
+\textbf{步骤6}：计算质量度量
+\begin{equation}
+\text{Qual}(\{F_i\}) = \min_i d_i
+\end{equation}
+
+\section{实际应用考虑}
+
+\subsection{度量的选择}
+
+\textbf{注意}：最大内接球方法只是\textbf{一种}选择
+
+\textbf{其他可能的度量}：
+\begin{itemize}
+\item \textbf{体积}：$\mathcal{C}_F$的体积
+\item \textbf{最小距离}：到最近边界的距离（就是我们的方法）
+\item \textbf{条件数}：基于$F$矩阵的条件数
+\item \textbf{力传递比}：基于力放大系数
+\end{itemize}
+
+\subsection{度量的优缺点}
+
+\textbf{最大内接球方法的优点}：
+\begin{itemize}
+\item \textbf{几何直观}：容易理解和可视化
+\item \textbf{方向无关}：对所有方向的干扰都公平
+\item \textbf{计算简单}：只需要计算距离
+\end{itemize}
+
+\textbf{最大内接球方法的缺点}：
+\begin{itemize}
+\item \textbf{不考虑干扰分布}：假设所有方向等概率
+\item \textbf{可能过于保守}：实际干扰可能只在某些方向
+\item \textbf{单位选择敏感}：特征长度$r$的选择影响结果
+\end{itemize}
+
+\section{数学细节补充}
+
+\subsection{多面体的表示}
+
+\textbf{$\mathcal{C}_F$的顶点表示}：
+
+$\mathcal{C}_F$的顶点由以下方式产生：
+\begin{itemize}
+\item 对每个接触$i$，选择$f_i = 0$或$f_i = f_{i,\max}$
+\item 共有$2^j$种组合（但很多可能不在边界上）
+\end{itemize}
+
+\textbf{$\mathcal{C}_F$的半空间表示}：
+
+$\mathcal{C}_F$可以表示为：
+\begin{equation}
+\mathcal{C}_F = \{x \in \mathbb{R}^n \mid A x \leq b\}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $A$是约束矩阵
+\item $b$是约束向量
+\item 每行对应一个约束（$f_i \geq 0$或$f_i \leq f_{i,\max}$）
+\end{itemize}
+
+\subsection{有符号距离的计算}
+
+\textbf{对于半空间表示}：
+
+如果$\mathcal{C}_F = \{x \mid a^T x \leq b\}$，则：
+\begin{itemize}
+\item 超平面方程：$a^T x = b$
+\item 原点到超平面的距离：$d = \frac{b}{|a|}$
+\item 如果$|a| = 1$（归一化），则$d = b$
+\end{itemize}
+
+\textbf{符号判断}：
+\begin{itemize}
+\item 如果$a^T 0 = 0 \leq b$，则原点在$\mathcal{C}_F$内，$d = b > 0$
+\item 如果$a^T 0 = 0 > b$，则原点不在$\mathcal{C}_F$内，$d = b < 0$
+\end{itemize}
+
+\section{具体计算例子：二维平面抓取}
+
+\subsection{问题设置}
+
+\textbf{场景}：在二维平面中抓取一个矩形物体
+
+\textbf{接触配置}：
+\begin{itemize}
+\item 4个接触点（满足形状闭合的最小数量）
+\item 接触位置：矩形的四个角附近
+\item 每个接触的法向力指向物体内部
+\end{itemize}
+
+\textbf{具体参数}：
+
+假设矩形物体尺寸为$2 \times 1$（单位：米），质心在原点。
+
+四个接触点的位置和法向量：
+\begin{itemize}
+\item 接触1：位置$(1, 0.5)$，法向量$\hat{n}_1 = (-1, 0)$（向右推）
+\item 接触2：位置$(-1, 0.5)$，法向量$\hat{n}_2 = (1, 0)$（向左推）
+\item 接触3：位置$(1, -0.5)$，法向量$\hat{n}_3 = (-1, 0)$（向右推）
+\item 接触4：位置$(-1, -0.5)$，法向量$\hat{n}_4 = (1, 0)$（向左推）
+\end{itemize}
+
+\textbf{注意}：这是一个简化的例子，实际抓取中接触法向量可能不完全是水平方向。
+
+\subsection{计算接触Wrench}
+
+\textbf{对于平面情况}，wrench为：
+\begin{equation}
+F_i = \begin{bmatrix} m_{iz} \\ f_{ix} \\ f_{iy} \end{bmatrix}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $m_{iz}$：关于$z$轴的力矩
+\item $f_{ix}, f_{iy}$：力的$x$和$y$分量
+\end{itemize}
+
+\textbf{接触wrench的计算}：
+
+对于点接触，wrench为：
+\begin{equation}
+F_i = \begin{bmatrix} 
+(p_i \times \hat{n}_i)_z \\
+\hat{n}_{ix} \\
+\hat{n}_{iy}
+\end{bmatrix}
+\end{equation}
+
+其中$p_i$是接触点位置。
+
+\textbf{具体计算}：
+
+\textbf{接触1}：$p_1 = (1, 0.5)$，$\hat{n}_1 = (-1, 0)$
+\begin{align}
+m_{1z} &= (p_1 \times \hat{n}_1)_z = 1 \cdot 0 - 0.5 \cdot (-1) = 0.5 \\
+F_1 &= \begin{bmatrix} 0.5 \\ -1 \\ 0 \end{bmatrix}
+\end{align}
+
+\textbf{接触2}：$p_2 = (-1, 0.5)$，$\hat{n}_2 = (1, 0)$
+\begin{align}
+m_{2z} &= (p_2 \times \hat{n}_2)_z = (-1) \cdot 0 - 0.5 \cdot 1 = -0.5 \\
+F_2 &= \begin{bmatrix} -0.5 \\ 1 \\ 0 \end{bmatrix}
+\end{align}
+
+\textbf{接触3}：$p_3 = (1, -0.5)$，$\hat{n}_3 = (-1, 0)$
+\begin{align}
+m_{3z} &= (p_3 \times \hat{n}_3)_z = 1 \cdot 0 - (-0.5) \cdot (-1) = -0.5 \\
+F_3 &= \begin{bmatrix} -0.5 \\ -1 \\ 0 \end{bmatrix}
+\end{align}
+
+\textbf{接触4}：$p_4 = (-1, -0.5)$，$\hat{n}_4 = (1, 0)$
+\begin{align}
+m_{4z} &= (p_4 \times \hat{n}_4)_z = (-1) \cdot 0 - (-0.5) \cdot 1 = 0.5 \\
+F_4 &= \begin{bmatrix} 0.5 \\ 1 \\ 0 \end{bmatrix}
+\end{align}
+
+\subsection{构建接触Wrench集合}
+
+\textbf{假设}：每个接触的最大力$f_{i,\max} = 1$（单位：N）
+
+\textbf{接触wrench集合}：
+\begin{equation}
+\mathcal{C}_F = \left\{\sum_{i=1}^4 f_i F_i \middle| f_i \in [0, 1] \right\}
+\end{equation}
+
+\textbf{wrench矩阵}：
+\begin{equation}
+F = \begin{bmatrix}
+F_1 & F_2 & F_3 & F_4
+\end{bmatrix} = \begin{bmatrix}
+0.5 & -0.5 & -0.5 & 0.5 \\
+-1 & 1 & -1 & 1 \\
+0 & 0 & 0 & 0
+\end{bmatrix}
+\end{equation}
+
+\textbf{注意}：这个例子中所有接触的$y$方向力分量为0，所以wrench空间实际上是2维的（力矩和$x$方向力）。
+
+\subsection{简化：二维Wrench空间}
+
+由于$f_{iy} = 0$对所有接触，我们可以将问题简化为2维：
+\begin{equation}
+\tilde{F}_i = \begin{bmatrix} m_{iz} \\ f_{ix} \end{bmatrix}
+\end{equation}
+
+\textbf{简化的wrench矩阵}：
+\begin{equation}
+\tilde{F} = \begin{bmatrix}
+0.5 & -0.5 & -0.5 & 0.5 \\
+-1 & 1 & -1 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{简化的接触wrench集合}：
+\begin{equation}
+\mathcal{C}_F = \left\{\sum_{i=1}^4 f_i \tilde{F}_i \middle| f_i \in [0, 1] \right\}
+\end{equation}
+
+\subsection{找到边界超平面（直线）}
+
+在2维空间中，超平面是\textbf{直线}。
+
+\textbf{方法}：找到$\mathcal{C}_F$的顶点
+
+$\mathcal{C}_F$的顶点由$f_i \in \{0, 1\}$的组合产生。
+
+\textbf{计算所有顶点}：
+
+设$f = [f_1, f_2, f_3, f_4]^T$，则$w = \tilde{F} f$。
+
+\textbf{关键顶点}（选择几个重要的）：
+\begin{itemize}
+\item $f = [1, 0, 0, 0]^T$：$w_1 = [0.5, -1]^T$
+\item $f = [0, 1, 0, 0]^T$：$w_2 = [-0.5, 1]^T$
+\item $f = [0, 0, 1, 0]^T$：$w_3 = [-0.5, -1]^T$
+\item $f = [0, 0, 0, 1]^T$：$w_4 = [0.5, 1]^T$
+\item $f = [1, 1, 0, 0]^T$：$w_5 = [0, 0]^T$（原点！）
+\item $f = [1, 0, 1, 0]^T$：$w_6 = [0, -2]^T$
+\item $f = [0, 1, 0, 1]^T$：$w_7 = [0, 2]^T$
+\item $f = [1, 0, 0, 1]^T$：$w_8 = [1, 0]^T$
+\item $f = [0, 1, 1, 0]^T$：$w_9 = [-1, 0]^T$
+\end{itemize}
+
+\textbf{观察}：$w_5 = [0, 0]^T$是原点，说明这个抓取\textbf{可以产生形状闭合}（因为原点在$\mathcal{C}_F$内部）。
+
+\subsection{确定多边形的边界}
+
+\textbf{凸包}：$\mathcal{C}_F$是这些顶点的凸包。
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 原点$[0, 0]^T$在$\mathcal{C}_F$内部
+\item 边界由连接顶点的直线段组成
+\end{itemize}
+
+\textbf{边界直线}（简化分析）：
+
+考虑约束$f_i = 0$和$f_i = 1$对应的边界：
+
+\textbf{边界1}：$f_1 = 0$，其他$f_i \in [0,1]$
+\begin{equation}
+w = f_2 \begin{bmatrix} -0.5 \\ 1 \end{bmatrix} + f_3 \begin{bmatrix} -0.5 \\ -1 \end{bmatrix} + f_4 \begin{bmatrix} 0.5 \\ 1 \end{bmatrix}
+\end{equation}
+
+这是一个\textbf{三角形区域}的边界。
+
+\textbf{更简单的方法}：直接计算原点到各约束边界的距离。
+
+\subsection{单位归一化}
+
+\textbf{特征长度}：选择$r = 1$米（物体的特征尺寸）
+
+\textbf{归一化wrench}：
+\begin{equation}
+\tilde{F}_i^{\text{norm}} = \begin{bmatrix} m_{iz}/r \\ f_{ix} \end{bmatrix} = \begin{bmatrix} m_{iz} \\ f_{ix} \end{bmatrix}
+\end{equation}
+
+（因为$r = 1$，所以不变）
+
+\subsection{计算有符号距离}
+
+\textbf{方法}：对于每个约束边界，计算原点到对应超平面的距离。
+
+\textbf{约束边界对应的超平面}：
+
+在2维wrench空间中，我们需要找到$\mathcal{C}_F$的\textbf{支撑超平面}（supporting hyperplanes）。
+
+\textbf{简化方法}：使用线性规划找到最近边界
+
+\textbf{问题}：找到最小的$d$，使得以原点为中心、半径为$d$的球完全在$\mathcal{C}_F$内部。
+
+这等价于：
+\begin{align}
+\text{最大化} \quad & d \\
+\text{使得} \quad & \|w\| \leq d \text{ 的所有 } w \in \mathcal{C}_F \text{ 都满足约束}
+\end{align}
+
+\textbf{更实用的方法}：检查原点是否在$\mathcal{C}_F$内部，并计算到最近边界的距离。
+
+\subsection{使用半空间表示}
+
+\textbf{$\mathcal{C}_F$的半空间表示}：
+
+$\mathcal{C}_F$可以表示为：
+\begin{equation}
+\mathcal{C}_F = \{w \in \mathbb{R}^2 \mid \exists f \in [0,1]^4, w = \tilde{F} f\}
+\end{equation}
+
+\textbf{对偶表示}：找到所有支撑超平面。
+
+\textbf{关键支撑超平面}：
+
+考虑从原点出发的各个方向，找到$\mathcal{C}_F$在这些方向上的\textbf{支撑点}。
+
+\textbf{方向} $\theta$对应的支撑点：
+\begin{equation}
+w^*(\theta) = \arg\max_{w \in \mathcal{C}_F} \cos(\theta) w_1 + \sin(\theta) w_2
+\end{equation}
+
+\textbf{支撑超平面}：垂直于方向$\theta$，通过$w^*(\theta)$。
+
+\textbf{原点到支撑超平面的距离}：
+\begin{equation}
+d(\theta) = \cos(\theta) w_1^*(\theta) + \sin(\theta) w_2^*(\theta)
+\end{equation}
+
+\subsection{数值计算示例}
+
+\textbf{关键方向}：
+
+\textbf{方向1}：$\theta = 0$（$x$轴正方向）
+\begin{itemize}
+\item 最大化$w_1$（力矩分量）
+\item 约束：$w = \tilde{F} f$，$f_i \in [0,1]$
+\item 解：$f = [1, 0, 0, 1]^T$，$w^* = [1, 0]^T$
+\item 距离：$d(0) = 1$
+\end{itemize}
+
+\textbf{方向2}：$\theta = \pi$（$x$轴负方向）
+\begin{itemize}
+\item 最大化$-w_1$
+\item 解：$f = [0, 1, 1, 0]^T$，$w^* = [-1, 0]^T$
+\item 距离：$d(\pi) = 1$
+\end{itemize}
+
+\textbf{方向3}：$\theta = \pi/2$（$y$轴正方向，力$x$分量正方向）
+\begin{itemize}
+\item 最大化$w_2$（力$x$分量）
+\item 解：$f = [0, 1, 0, 1]^T$，$w^* = [0, 2]^T$
+\item 距离：$d(\pi/2) = 2$
+\end{itemize}
+
+\textbf{方向4}：$\theta = -\pi/2$（$y$轴负方向，力$x$分量负方向）
+\begin{itemize}
+\item 最大化$-w_2$
+\item 解：$f = [1, 0, 1, 0]^T$，$w^* = [0, -2]^T$
+\item 距离：$d(-\pi/2) = 2$
+\end{itemize}
+
+\textbf{方向5}：$\theta = \pi/4$
+\begin{itemize}
+\item 最大化$(w_1 + w_2)/\sqrt{2}$
+\item 需要求解线性规划
+\item 近似：考虑顶点，$f = [1, 0, 0, 1]^T$给出$w = [1, 0]^T$
+\item 但可能不是最优，需要检查其他组合
+\end{itemize}
+
+\textbf{关键观察}：最小距离可能不在这些主方向上。
+
+\subsection{简化计算：使用对称性}
+
+\textbf{对称性分析}：
+
+由于抓取配置的对称性，$\mathcal{C}_F$关于原点对称（实际上，原点在内部）。
+
+\textbf{关键边界}：
+
+考虑约束$f_1 + f_2 = 1$和$f_3 + f_4 = 1$的情况（内力平衡）。
+
+\textbf{特殊情况}：$f_1 = f_2 = 0.5$，$f_3 = f_4 = 0.5$
+\begin{align}
+w &= 0.5 \begin{bmatrix} 0.5 \\ -1 \end{bmatrix} + 0.5 \begin{bmatrix} -0.5 \\ 1 \end{bmatrix} + 0.5 \begin{bmatrix} -0.5 \\ -1 \end{bmatrix} + 0.5 \begin{bmatrix} 0.5 \\ 1 \end{bmatrix} \\
+&= \begin{bmatrix} 0 \\ 0 \end{bmatrix}
+\end{align}
+
+这确认了原点在$\mathcal{C}_F$内部。
+
+\subsection{系统化计算质量度量}
+
+\textbf{方法}：使用线性规划找到最小距离
+
+\textbf{问题表述}：
+
+找到最大的$d$，使得以原点为中心、半径为$d$的球完全在$\mathcal{C}_F$内部。
+
+等价于：
+\begin{align}
+\text{最大化} \quad & d \\
+\text{使得} \quad & \text{对于所有方向 } \theta, \text{ 有 } d \leq d(\theta)
+\end{align}
+
+其中$d(\theta)$是方向$\theta$上的支撑距离。
+
+\textbf{关键方向检查}：
+
+\textbf{方向1}：$\theta = 0$（正力矩方向）
+\begin{itemize}
+\item 线性规划：$\max w_1$，约束$w = \tilde{F} f$，$f_i \in [0,1]$
+\item 解：$f = [1, 0, 0, 1]^T$
+\item $w^* = [1, 0]^T$
+\item $d(0) = 1$
+\end{itemize}
+
+\textbf{方向2}：$\theta = \pi$（负力矩方向）
+\begin{itemize}
+\item 线性规划：$\max (-w_1)$
+\item 解：$f = [0, 1, 1, 0]^T$
+\item $w^* = [-1, 0]^T$
+\item $d(\pi) = 1$
+\end{itemize}
+
+\textbf{方向3}：$\theta = \pi/2$（正力方向）
+\begin{itemize}
+\item 线性规划：$\max w_2$
+\item 解：$f = [0, 1, 0, 1]^T$
+\item $w^* = [0, 2]^T$
+\item $d(\pi/2) = 2$
+\end{itemize}
+
+\textbf{方向4}：$\theta = -\pi/2$（负力方向）
+\begin{itemize}
+\item 线性规划：$\max (-w_2)$
+\item 解：$f = [1, 0, 1, 0]^T$
+\item $w^* = [0, -2]^T$
+\item $d(-\pi/2) = 2$
+\end{itemize}
+
+\textbf{方向5}：$\theta = \pi/4$（力矩和力相等）
+\begin{itemize}
+\item 线性规划：$\max (w_1 + w_2)$
+\item 需要检查所有顶点组合
+\item 候选：$f = [1, 0, 0, 1]^T$，$w = [1, 0]^T$，值$= 1$
+\item 候选：$f = [0, 1, 0, 1]^T$，$w = [0, 2]^T$，值$= 2$
+\item 候选：$f = [1, 1, 0, 0]^T$，$w = [0, 0]^T$，值$= 0$
+\item 最优：需要求解LP，但可以估计$d(\pi/4) \geq 1/\sqrt{2} \approx 0.707$
+\end{itemize}
+
+\textbf{方向6}：$\theta = 3\pi/4$（负力矩，正力）
+\begin{itemize}
+\item 类似分析，$d(3\pi/4) \geq 1/\sqrt{2}$
+\end{itemize}
+
+\subsection{最终质量度量}
+
+\textbf{最小距离}：
+
+通过检查所有关键方向，我们发现：
+\begin{equation}
+\text{Qual}(\{F_i\}) = \min_{\theta} d(\theta) \approx 0.707
+\end{equation}
+
+\textbf{更精确的计算}：
+
+实际上，最小距离出现在$\theta = \pi/4$或$3\pi/4$方向附近。
+
+\textbf{精确值}：可以通过求解以下优化问题得到：
+\begin{align}
+\text{最大化} \quad & d \\
+\text{使得} \quad & d \leq d(\theta) \text{ 对所有 } \theta
+\end{align}
+
+\textbf{近似结果}：$\text{Qual}(\{F_i\}) \approx 0.7$
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 抓取可以抵抗任何方向、大小不超过0.7（归一化单位）的干扰wrench
+\item 在纯力矩方向（$\theta = 0, \pi$）上，距离为1
+\item 在纯力方向（$\theta = \pi/2, -\pi/2$）上，距离为2
+\item 在混合方向（$\theta = \pi/4, 3\pi/4$）上，距离最小，约为0.7
+\item 因此，质量度量由\textbf{最弱方向}决定
+\end{itemize}
+
+\subsection{改进抓取质量}
+
+\textbf{问题}：当前抓取在混合方向（力矩+力）上较弱
+
+\textbf{改进方法1}：增加接触点之间的距离
+\begin{itemize}
+\item 将接触点移到更远的位置
+\item 例如：从$(1, 0.5)$移到$(1.5, 0.75)$
+\item 这会增加力矩分量，扩展$\mathcal{C}_F$
+\end{itemize}
+
+\textbf{改进方法2}：改变接触法向量方向
+\begin{itemize}
+\item 使用更倾斜的法向量
+\item 可以同时产生力矩和力
+\item 使$\mathcal{C}_F$更"圆"，减少方向依赖性
+\end{itemize}
+
+\textbf{改进方法3}：增加接触数量
+\begin{itemize}
+\item 虽然4个接触已经足够形状闭合
+\item 但更多接触可以提供更好的力分布
+\item 提高质量度量
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心思想}
+
+\begin{enumerate}
+\item \textbf{抓取质量}需要量化，不能只判断"是否形状闭合"
+\item \textbf{接触wrench集合}$\mathcal{C}_F$表示接触可以提供的所有wrench
+\item \textbf{最大内接球半径}是一个简单有效的质量度量
+\item \textbf{单位归一化}和\textbf{坐标系选择}是关键步骤
+\end{enumerate}
+
+\subsection{关键公式}
+
+\begin{itemize}
+\item 接触wrench集合：$\mathcal{C}_F = \left\{\sum_{i=1}^j f_i F_i \middle| f_i \in [0, f_{i,\max}] \right\}$
+\item 质量度量：$\text{Qual}(\{F_i\}) = \min\{d_1, d_2, \ldots, d_k\}$
+\item 单位归一化：力矩 $\to$ 力矩/$r$（特征长度）
+\end{itemize}
+
+\subsection{实际意义}
+
+\begin{itemize}
+\item 帮助选择\textbf{更好的抓取配置}
+\item 评估抓取的\textbf{鲁棒性}
+\item 指导\textbf{抓取规划}和\textbf{优化}
+\end{itemize}
+
+\end{document}
+

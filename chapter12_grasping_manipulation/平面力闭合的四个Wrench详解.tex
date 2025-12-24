@@ -1,0 +1,402 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.markings}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{平面力闭合：四个Wrench和两个摩擦接触详解}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+\subsection{核心陈述}
+
+\textbf{原文}：
+\begin{quote}
+对于平面问题，四个接触wrench足以正张成三维wrench空间，这意味着至少两个摩擦接触（每个有两条摩擦锥边）足以实现力闭合。使用力矩标记，我们看到力闭合等价于没有一致的力矩标记。例如，如果两个接触可以通过位于两个摩擦锥内的视线"看到"彼此，则我们有力闭合（图12.22(b)）。
+\end{quote}
+
+\subsection{需要理解的关键点}
+
+\begin{enumerate}
+\item 为什么四个wrench足以正张成三维wrench空间？
+\item 为什么两个摩擦接触（每个有两条边）等于四个wrench？
+\item 为什么力闭合等价于没有一致的力矩标记？
+\item 什么是"视线"（line of sight）？为什么它能判断力闭合？
+\end{enumerate}
+
+\section{第一部分：四个Wrench足以正张成三维空间}
+
+\subsection{平面Wrench空间的维度}
+
+\textbf{平面问题}：
+\begin{itemize}
+\item 物体在2D平面中运动
+\item Wrench空间是\textbf{3维}的：$(m_z, f_x, f_y)$
+   \begin{itemize}
+   \item $m_z$：绕$z$轴的力矩（1维）
+   \item $f_x, f_y$：平面内的力（2维）
+   \end{itemize}
+\end{itemize}
+
+\subsection{正张成需要多少个向量？}
+
+\textbf{线性代数事实}：
+\begin{itemize}
+\item 要\textbf{线性张成}（linear span）$n$维空间，需要至少$n$个向量
+\item 要\textbf{正张成}（positive span）$n$维空间，需要至少$n+1$个向量
+\end{itemize}
+
+\textbf{原因}：
+\begin{itemize}
+\item 线性张成允许负系数：$\sum k_i v_i$，$k_i \in \mathbb{R}$
+\item 正张成只允许非负系数：$\sum k_i v_i$，$k_i \geq 0$
+\item 正张成更受限制，所以需要更多向量
+\end{itemize}
+
+\textbf{对于平面wrench空间}：
+\begin{itemize}
+\item 维度：$n = 3$
+\item 正张成需要：$n + 1 = 4$个向量
+\item 因此：\textbf{四个wrench足以正张成三维wrench空间}
+\end{itemize}
+
+\subsection{为什么不能更少？}
+
+\textbf{三个wrench的情况}：
+
+假设三个wrench $F_1, F_2, F_3$线性无关（可以线性张成整个空间）。
+
+\textbf{问题}：它们能正张成整个空间吗？
+
+\textbf{答案}：\textbf{不能}！
+
+\textbf{原因}：
+\begin{itemize}
+\item 对于任何三个向量，存在一个方向$c$，使得对所有$i$有$F_i^T c \leq 0$
+\item 这意味着：三个向量的正线性组合不能创建方向$c$的向量
+\item 因此不能正张成整个空间
+\end{itemize}
+
+\textbf{例子}：
+\begin{itemize}
+\item $F_1 = (1, 0, 0)$，$F_2 = (0, 1, 0)$，$F_3 = (0, 0, 1)$
+\item 正张成：第一象限（只能表示$m_z \geq 0, f_x \geq 0, f_y \geq 0$的点）
+\item 不能表示负方向的wrench
+\end{itemize}
+
+\textbf{需要第四个wrench}：
+\begin{itemize}
+\item 例如：$F_4 = (-1, -1, -1)$
+\item 现在四个wrench可以正张成整个空间
+\end{itemize}
+
+\section{第二部分：两个摩擦接触 = 四个Wrench}
+
+\subsection{摩擦锥的表示}
+
+\textbf{平面摩擦锥}：
+\begin{itemize}
+\item 对于平面问题，摩擦锥是\textbf{2维}的（在接触点的切平面内）
+\item 摩擦锥由\textbf{两条边}定义（见图12.18(b)）
+\item 每条边对应一个\textbf{方向}的摩擦力
+\end{itemize}
+
+\textbf{摩擦锥的两条边}：
+\begin{itemize}
+\item 边1：摩擦力方向与接触法线成角度$+\alpha$（$\alpha = \tan^{-1}\mu$）
+\item 边2：摩擦力方向与接触法线成角度$-\alpha$
+\item 两条边张成整个摩擦锥
+\end{itemize}
+
+\subsection{从摩擦锥边到Wrench}
+
+\textbf{每个摩擦锥边对应一个wrench}：
+\begin{itemize}
+\item 接触位置：$p_i$
+\item 摩擦锥边方向：$\hat{d}_i$（单位向量）
+\item 对应的wrench：$F_i = ([p_i] \hat{d}_i, \hat{d}_i)$
+   \begin{itemize}
+   \item 力矩：$m_{iz} = (p_i \times \hat{d}_i)_z$
+   \item 力：$f_i = \hat{d}_i$
+   \end{itemize}
+\end{itemize}
+
+\textbf{两个摩擦接触}：
+\begin{itemize}
+\item 接触1：有2条摩擦锥边 $\Rightarrow$ 2个wrench：$F_1, F_2$
+\item 接触2：有2条摩擦锥边 $\Rightarrow$ 2个wrench：$F_3, F_4$
+\item 总共：\textbf{4个wrench}
+\end{itemize}
+
+\subsection{为什么是四个Wrench？}
+
+\textbf{数学表达}：
+
+设两个接触：
+\begin{itemize}
+\item 接触1：位置$p_1$，法向量$\hat{n}_1$，摩擦系数$\mu_1$
+\item 接触2：位置$p_2$，法向量$\hat{n}_2$，摩擦系数$\mu_2$
+\end{itemize}
+
+\textbf{接触1的摩擦锥边}：
+\begin{itemize}
+\item 边1：方向$\hat{d}_{11} = \hat{n}_1 + \mu_1 \hat{t}_1$（归一化）
+\item 边2：方向$\hat{d}_{12} = \hat{n}_1 - \mu_1 \hat{t}_1$（归一化）
+\item Wrench：$F_1 = ([p_1] \hat{d}_{11}, \hat{d}_{11})$，$F_2 = ([p_1] \hat{d}_{12}, \hat{d}_{12})$
+\end{itemize}
+
+\textbf{接触2的摩擦锥边}：
+\begin{itemize}
+\item 边1：方向$\hat{d}_{21} = \hat{n}_2 + \mu_2 \hat{t}_2$（归一化）
+\item 边2：方向$\hat{d}_{22} = \hat{n}_2 - \mu_2 \hat{t}_2$（归一化）
+\item Wrench：$F_3 = ([p_2] \hat{d}_{21}, \hat{d}_{21})$，$F_4 = ([p_2] \hat{d}_{22}, \hat{d}_{22})$
+\end{itemize}
+
+\textbf{总共4个wrench}：$\{F_1, F_2, F_3, F_4\}$
+
+\section{第三部分：力闭合等价于没有一致的力矩标记}
+
+\subsection{力闭合的定义}
+
+\textbf{力闭合}：复合wrench锥包含整个wrench空间
+\begin{equation}
+\text{pos}(\{F_1, F_2, F_3, F_4\}) = \mathbb{R}^3
+\end{equation}
+
+\textbf{含义}：
+\begin{itemize}
+\item 可以产生\textbf{任意方向}的wrench
+\item 可以平衡\textbf{任意}外部干扰
+\end{itemize}
+
+\subsection{一致力矩标记的含义}
+
+\textbf{一致标记区域}（灰色区域）：
+\begin{itemize}
+\item 所有wrench对该区域内的点都产生\textbf{相同符号}的力矩
+\item 例如：所有wrench都产生正力矩
+\end{itemize}
+
+\textbf{一致标记区域的问题}：
+\begin{itemize}
+\item 如果存在一致标记区域，说明所有wrench对某些点都产生相同符号的力矩
+\item 这意味着：不能产生对这些点产生\textbf{相反符号}力矩的wrench
+\item 因此：\textbf{不能正张成整个空间}
+\end{itemize}
+
+\subsection{没有一致标记的含义}
+
+\textbf{没有一致标记区域}：
+\begin{itemize}
+\item 对于平面中的\textbf{任何点}，至少有一个wrench产生正力矩，至少有一个wrench产生负力矩
+\item 这意味着：可以通过调整正线性组合的系数，产生\textbf{任意符号}的力矩
+\item 因此：可以正张成整个空间
+\end{itemize}
+
+\subsection{等价性证明}
+
+\textbf{定理}：力闭合 $\Leftrightarrow$ 没有一致的力矩标记
+
+\textbf{证明思路}：
+
+\textbf{方向1}：如果有力闭合，则没有一致标记
+\begin{itemize}
+\item 假设存在一致标记区域（灰色区域）
+\item 则所有wrench对该区域内的点都产生相同符号的力矩
+\item 这意味着不能产生相反符号的力矩
+\item 因此不能正张成整个空间
+\item 矛盾！因此没有一致标记区域
+\end{itemize}
+
+\textbf{方向2}：如果没有一致标记，则有力闭合
+\begin{itemize}
+\item 对于任何点，至少有一个wrench产生正力矩，至少有一个产生负力矩
+\item 可以通过调整系数产生任意符号的力矩
+\item 因此可以正张成整个空间
+\item 力闭合成立
+\end{itemize}
+
+\section{第四部分："视线"（Line of Sight）的含义}
+
+\subsection{什么是"视线"？}
+
+\textbf{定义}：两个接触之间的\textbf{视线}是连接两个接触点的直线段。
+
+\textbf{关键条件}：视线必须位于\textbf{两个摩擦锥内部}
+
+\textbf{含义}：
+\begin{itemize}
+\item 从接触1到接触2的直线段
+\item 这条线段必须完全在接触1的摩擦锥内
+\item 这条线段必须完全在接触2的摩擦锥内
+\end{itemize}
+
+\subsection{为什么视线能判断力闭合？}
+
+\textbf{几何解释}：
+
+如果两个接触可以通过视线"看到"彼此：
+\begin{itemize}
+\item 说明两个摩擦锥\textbf{重叠}
+\item 这意味着：可以产生从接触1指向接触2的力（在摩擦锥内）
+\item 也可以产生从接触2指向接触1的力（在摩擦锥内）
+\item 这两个力可以产生\textbf{任意方向}的合力
+\end{itemize}
+
+\textbf{力矩标记解释}：
+
+如果视线在两个摩擦锥内：
+\begin{itemize}
+\item 接触1的摩擦锥边可以产生围绕接触2的力线
+\item 接触2的摩擦锥边可以产生围绕接触1的力线
+\item 四个wrench的力线可以\textbf{相互抵消}，产生任意方向的wrench
+\item 因此：\textbf{没有一致标记区域}
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{场景}：两个接触抓取三角形物体
+
+\textbf{接触1}：位置$p_1$，法向量$\hat{n}_1$，摩擦系数$\mu_1$
+\textbf{接触2}：位置$p_2$，法向量$\hat{n}_2$，摩擦系数$\mu_2$
+
+\textbf{检查视线}：
+\begin{itemize}
+\item 连接$p_1$和$p_2$的直线段
+\item 检查：这条线段是否在接触1的摩擦锥内？
+\item 检查：这条线段是否在接触2的摩擦锥内？
+\end{itemize}
+
+\textbf{如果视线在两个摩擦锥内}：
+\begin{itemize}
+\item 四个wrench（两个接触，每个2条边）可以正张成整个空间
+\item 没有一致标记区域
+\item \textbf{力闭合成立}
+\end{itemize}
+
+\textbf{如果视线不在摩擦锥内}：
+\begin{itemize}
+\item 可能存在一致标记区域
+\item 不能正张成整个空间
+\item \textbf{力闭合不成立}
+\end{itemize}
+
+\section{完整的理解链条}
+
+\subsection{从接触配置到力闭合}
+
+\textbf{步骤1}：两个摩擦接触
+\begin{itemize}
+\item 每个接触有摩擦锥
+\item 每个摩擦锥有2条边
+\item 总共：4个wrench
+\end{itemize}
+
+\textbf{步骤2}：四个wrench
+\begin{itemize}
+\item 平面wrench空间是3维的
+\item 正张成需要$n+1 = 4$个向量
+\item 四个wrench\textbf{足以}正张成三维空间
+\end{itemize}
+
+\textbf{步骤3}：力矩标记
+\begin{itemize}
+\item 绘制四个wrench的力矩标记
+\item 检查是否有一致标记区域（灰色区域）
+\end{itemize}
+
+\textbf{步骤4}：力闭合判断
+\begin{itemize}
+\item 如果没有一致标记区域：力闭合
+\item 如果有一致标记区域：非力闭合
+\end{itemize}
+
+\textbf{步骤5}：视线检查
+\begin{itemize}
+\item 如果两个接触可以通过视线"看到"彼此
+\item 则没有一致标记区域
+\item 因此力闭合成立
+\end{itemize}
+
+\section{图12.22(b)的解释}
+
+\subsection{图示内容}
+
+\textbf{图12.22(b)}显示：
+\begin{itemize}
+\item 两个接触（手指）抓取三角形物体
+\item 两个摩擦锥（每个接触一个）
+\item 连接两个接触的视线
+\item 视线位于两个摩擦锥内部
+\end{itemize}
+
+\subsection{为什么这是力闭合？}
+
+\textbf{分析}：
+\begin{enumerate}
+\item \textbf{四个wrench}：两个接触，每个有2条摩擦锥边
+\item \textbf{视线在摩擦锥内}：说明两个摩擦锥重叠
+\item \textbf{力矩标记}：四个wrench的力线可以相互抵消
+\item \textbf{没有一致标记区域}：可以产生任意方向的wrench
+\item \textbf{力闭合成立}
+\end{enumerate}
+
+\section{总结}
+
+\subsection{关键理解}
+
+\begin{enumerate}
+\item \textbf{四个wrench足以正张成三维空间}
+   \begin{itemize}
+   \item 平面wrench空间是3维的
+   \item 正张成需要$n+1 = 4$个向量
+   \end{itemize}
+
+\item \textbf{两个摩擦接触 = 四个wrench}
+   \begin{itemize}
+   \item 每个摩擦接触有2条摩擦锥边
+   \item 每条边对应一个wrench
+   \item 两个接触 = 4个wrench
+   \end{itemize}
+
+\item \textbf{力闭合 $\Leftrightarrow$ 没有一致标记}
+   \begin{itemize}
+   \item 一致标记区域表示wrench锥的限制
+   \item 没有一致标记表示可以产生任意方向的wrench
+   \end{itemize}
+
+\item \textbf{视线判断力闭合}
+   \begin{itemize}
+   \item 如果两个接触可以通过视线"看到"彼此
+   \item 则没有一致标记区域
+   \item 因此力闭合成立
+   \end{itemize}
+\end{enumerate}
+
+\subsection{实际应用}
+
+\textbf{设计抓取时}：
+\begin{itemize}
+\item 确保两个接触的摩擦锥足够大
+\item 确保连接两个接触的视线在摩擦锥内
+\item 这样就能实现力闭合
+\end{itemize}
+
+\textbf{检查力闭合时}：
+\begin{itemize}
+\item 绘制力矩标记图
+\item 检查是否有灰色区域（一致标记区域）
+\item 或者检查视线是否在摩擦锥内
+\end{itemize}
+
+\end{document}
+

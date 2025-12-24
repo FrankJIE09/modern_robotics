@@ -1,0 +1,238 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{不可穿透约束公式(12.4)的证明：$\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0$}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+\newtheorem{proof}{证明}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+在第12章中，我们遇到了不可穿透约束：
+\begin{equation}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0,
+\label{eq:12.4}
+\end{equation}
+其中：
+\begin{itemize}
+\item $\hat{n} \in \mathbb{R}^3$是单位接触法线向量，指向物体$A$
+\item $p_A \in \mathbb{R}^3$是物体$A$上接触点在世界坐标系中的位置
+\item $p_B \in \mathbb{R}^3$是物体$B$上接触点在世界坐标系中的位置
+\item $\dot{p}_A$和$\dot{p}_B$分别是$p_A$和$p_B$的时间导数
+\end{itemize}
+
+本文档将详细证明这个约束公式的正确性。
+
+\section{预备知识}
+
+\subsection{距离函数}
+
+考虑两个刚体$A$和$B$，其配置分别由局部坐标列向量$q_1$和$q_2$给出。将复合配置写为$q = (q_1, q_2)$，我们定义物体之间的距离函数$d(q)$：
+\begin{itemize}
+\item $d(q) > 0$：物体分离
+\item $d(q) = 0$：物体接触
+\item $d(q) < 0$：物体穿透（不可行）
+\end{itemize}
+
+\subsection{接触法线}
+
+当两个物体在点$p$处接触时（$d(q) = 0$），接触法线$\hat{n}$定义为距离函数$d(q)$在接触点处的梯度方向：
+\begin{equation}
+\hat{n} = \frac{\nabla_q d}{\|\nabla_q d\|} \quad \text{（归一化）}
+\end{equation}
+
+根据定义，$\hat{n}$指向物体$A$，即指向$d(q)$增加的方向。
+
+\subsection{不可穿透条件}
+
+不可穿透的基本条件是：两个物体不能相互穿透。这意味着：
+\begin{equation}
+d(q(t)) \geq 0 \quad \text{对所有时间$t$}
+\end{equation}
+
+如果物体在$t=0$时接触（$d(0) = 0$），则为了保持不穿透，我们需要：
+\begin{equation}
+\dot{d}(0) \geq 0
+\end{equation}
+
+\section{主要证明}
+
+\subsection{步骤1：距离函数的时间导数}
+
+距离函数$d(q)$的时间导数为：
+\begin{equation}
+\dot{d} = \frac{\partial d}{\partial q} \dot{q} = \nabla_q d \cdot \dot{q}
+\label{eq:dot_d}
+\end{equation}
+
+在接触点处，$\nabla_q d$的方向就是接触法线$\hat{n}$的方向。
+
+\subsection{步骤2：接触点速度}
+
+接触点$p_A$和$p_B$的速度可以通过物体的twist计算。设物体$A$和$B$的twist分别为：
+\begin{align}
+V_A &= (\omega_A, v_A), \\
+V_B &= (\omega_B, v_B)
+\end{align}
+
+则接触点的速度为：
+\begin{align}
+\dot{p}_A &= v_A + \omega_A \times p_A = v_A + [\omega_A] p_A, \\
+\dot{p}_B &= v_B + \omega_B \times p_B = v_B + [\omega_B] p_B
+\label{eq:contact_velocities}
+\end{align}
+
+\subsection{步骤3：距离变化率与接触点相对速度的关系}
+
+当两个物体在点$p$处接触时，距离函数$d(q)$的变化率$\dot{d}$与接触点相对速度在法线方向上的投影直接相关。
+
+\textbf{关键观察}：如果两个接触点$p_A$和$p_B$在法线方向上的相对速度使得它们相互靠近，则$\dot{d} < 0$（穿透）；如果它们相互远离，则$\dot{d} > 0$（分离）；如果相对速度在法线方向上为零，则$\dot{d} = 0$（保持接触）。
+
+具体地，距离变化率可以表示为：
+\begin{equation}
+\dot{d} = \hat{n}^T (\dot{p}_A - \dot{p}_B) + \text{高阶项}
+\label{eq:distance_rate}
+\end{equation}
+
+在一阶分析中，我们忽略高阶项，因此：
+\begin{equation}
+\dot{d} \approx \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\end{equation}
+
+\subsection{步骤4：不可穿透约束的推导}
+
+由于不可穿透要求$\dot{d} \geq 0$（当$d = 0$时），结合方程(\ref{eq:distance_rate})，我们得到：
+\begin{equation}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0
+\end{equation}
+
+这就是公式(12.4)。
+
+\section{严格证明}
+
+\subsection{几何解释}
+
+让我们从几何角度更严格地证明这个公式。
+
+\textbf{引理1}：在接触点处，距离函数$d(q)$的梯度$\nabla_q d$在配置空间中的方向对应于接触法线$\hat{n}$在物理空间中的方向。
+
+\textbf{证明}：在接触点$p$处，两个物体的表面相切。距离函数$d(q)$测量从物体$B$的表面到物体$A$的表面的最短距离。梯度$\nabla_q d$指向$d$增加最快的方向，即从物体$B$指向物体$A$的方向，这正是接触法线$\hat{n}$的方向。$\square$
+
+\textbf{引理2}：距离函数的时间导数$\dot{d}$等于接触点相对速度在接触法线方向上的投影。
+
+\textbf{证明}：考虑接触点$p_A$和$p_B$。在接触瞬间，$p_A = p_B = p$。距离函数$d(q)$可以理解为从$p_B$到物体$A$表面的最短距离。
+
+当物体运动时，$p_A$和$p_B$的速度可能不同。距离的变化率主要取决于：
+\begin{enumerate}
+\item $p_A$和$p_B$在法线方向上的相对速度
+\item 物体表面的曲率（二阶效应）
+\end{enumerate}
+
+在一阶分析中，我们只考虑第一项。如果$\dot{p}_A - \dot{p}_B$在$\hat{n}$方向上的分量为正，则两个接触点相互远离，$d$增加；如果为负，则相互靠近，$d$减少。
+
+因此，在一阶近似下：
+\begin{equation}
+\dot{d} = \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\end{equation}
+$\square$
+
+\textbf{定理}：不可穿透约束等价于$\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0$。
+
+\textbf{证明}：
+\begin{enumerate}
+\item \textbf{必要性}：如果$\hat{n}^T (\dot{p}_A - \dot{p}_B) < 0$，则根据引理2，$\dot{d} < 0$。这意味着在下一时刻，$d$将变为负值，即发生穿透。因此，为了保持不穿透，必须有$\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0$。
+
+\item \textbf{充分性}：如果$\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0$，则根据引理2，$\dot{d} \geq 0$。这意味着距离不会减少，因此不会发生穿透（在一阶分析中）。
+\end{enumerate}
+$\square$
+
+\section{特殊情况：静止约束}
+
+当物体$B$是静止的（$V_B = 0$）时，我们有$\dot{p}_B = 0$，因此约束(12.4)简化为：
+\begin{equation}
+\hat{n}^T \dot{p}_A \geq 0
+\label{eq:12.7}
+\end{equation}
+
+这等价于：
+\begin{equation}
+F^T V_A \geq 0
+\end{equation}
+其中$F = ([p_A]\hat{n}, \hat{n})$是接触wrench。
+
+\section{物理意义}
+
+公式(12.4)的物理意义是：
+
+\begin{itemize}
+\item \textbf{$\hat{n}^T (\dot{p}_A - \dot{p}_B) > 0$}：两个接触点在法线方向上相互远离，物体正在分离。
+
+\item \textbf{$\hat{n}^T (\dot{p}_A - \dot{p}_B) = 0$}：两个接触点在法线方向上的相对速度为零，接触得以保持（可能是滚动或滑动）。
+
+\item \textbf{$\hat{n}^T (\dot{p}_A - \dot{p}_B) < 0$}：两个接触点在法线方向上相互靠近，这将导致穿透（不可行）。
+\end{itemize}
+
+\section{与Twist表示的关系}
+
+使用twist表示，接触点速度可以写为：
+\begin{align}
+\dot{p}_A &= v_A + [\omega_A] p_A, \\
+\dot{p}_B &= v_B + [\omega_B] p_B
+\end{align}
+
+因此：
+\begin{align}
+\dot{p}_A - \dot{p}_B &= (v_A + [\omega_A] p_A) - (v_B + [\omega_B] p_B) \\
+&= (v_A - v_B) + [\omega_A] p_A - [\omega_B] p_B
+\end{align}
+
+接触wrench定义为：
+\begin{equation}
+F = (p_A \times \hat{n}, \hat{n}) = ([p_A]\hat{n}, \hat{n})
+\end{equation}
+
+可以证明（见练习12.1）：
+\begin{equation}
+F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\end{equation}
+
+因此，不可穿透约束也可以写为：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\label{eq:12.5}
+\end{equation}
+
+\section{总结}
+
+我们证明了：
+
+\begin{theorem}
+对于两个在点$p$处接触的刚体$A$和$B$，接触法线$\hat{n}$指向物体$A$，不可穿透约束在一阶分析下等价于：
+\begin{equation}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0
+\end{equation}
+或等价地：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\end{equation}
+其中$F = ([p_A]\hat{n}, \hat{n})$是接触wrench。
+\end{theorem}
+
+这个约束确保了在接触点处，两个物体不会相互穿透，是接触运动学分析的基础。
+
+\end{document}
+
+

@@ -1,0 +1,308 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{例题12.5的详细理解：多个接触的CoR表示}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{问题1：灰色图是CoR点的合集吗？}
+
+\textbf{答案}：是的！灰色区域表示\textbf{可行CoR的集合}。
+
+\begin{itemize}
+\item 灰色区域内的每个点都对应一个可行的CoR
+\item 每个CoR对应一个可行的twist（运动）
+\item 灰色区域是\textbf{凸的}（convex）
+\item 这是多个接触约束的交集
+\end{itemize}
+
+\section{例题12.5的设置}
+
+\begin{example}[例题12.5]
+图12.12(a)显示一个平面物体站在桌子上，同时被一个静止的机器人手指接触。手指定义了一个不等式约束，桌子定义了两个约束。不违反不可穿透约束的twist锥由对每个接触一致标记的CoR表示（图12.12(b)）。每个可行CoR都标记有一个接触模式，该模式是各个接触标签的连接（图12.12(c)）。
+\end{example}
+
+\subsection{接触设置}
+
+\begin{itemize}
+\item \textbf{接触1}：桌子提供的接触约束1
+\item \textbf{接触2}：桌子提供的接触约束2
+\item \textbf{接触3}：静止机器人手指提供的接触约束
+\item 总共：\textbf{3个接触约束}
+\end{itemize}
+
+\subsection{约束类型}
+
+所有接触都是\textbf{静止的}（stationary），因此：
+\begin{itemize}
+\item 约束是\textbf{齐次的}
+\item 可行twist集合是\textbf{以原点为根部的凸锥}
+\item 可以用CoR表示
+\end{itemize}
+
+\section{图12.12(b)：可行CoR区域（灰色区域）}
+
+\subsection{灰色区域的含义}
+
+\textbf{灰色区域}表示所有\textbf{可行CoR的集合}：
+
+\begin{itemize}
+\item 区域内的每个点都对应一个可行的CoR
+\item 每个CoR对应一个可行的twist（运动）
+\item 这些twist满足所有3个接触的不可穿透约束
+\end{itemize}
+
+\subsection{为什么是凸的？}
+
+\begin{itemize}
+\item 每个接触贡献一个约束区域（半空间）
+\item 可行CoR区域是所有约束区域的\textbf{交集}
+\item 半空间的交集是\textbf{凸集}
+\item 因此灰色区域是凸的
+\end{itemize}
+
+\subsection{边界和无穷远}
+
+\textbf{重要观察}：根据图12.12的说明，延伸到左侧和底部的线在无穷远处"环绕"，从右侧和顶部回来。
+
+这意味着：
+\begin{itemize}
+\item 在射影几何中，这是一个\textbf{单连通的凸区域}
+\item 包括无穷远点（对应平移）
+\item 在有限平面上，我们看到的是延伸到边界的区域
+\end{itemize}
+
+\section{图12.12(c)：接触模式标记}
+
+\subsection{接触模式的含义}
+
+每个可行CoR都标记有一个\textbf{接触模式}，该模式是各个接触标签的连接。
+
+\textbf{例子}：
+\begin{itemize}
+\item \textbf{RRR}：所有三个接触都是滚动的（物体完全静止）
+\item \textbf{BSrB}：接触1分离，接触2向右滑动，接触3分离
+\item \textbf{SrBSr}：接触1向右滑动，接触2分离，接触3向右滑动
+\end{itemize}
+
+\subsection{接触模式的分布}
+
+\begin{itemize}
+\item \textbf{内部区域}：所有接触都分离（BBB）
+\item \textbf{边界线}：一个接触约束主动（如BSrB、BSlB等）
+\item \textbf{顶点/交点}：两个或更多接触约束主动（如RRR、SrSrSr等）
+\end{itemize}
+
+\section{关键观察：一阶分析的局限性}
+
+\subsection{问题：$S_rBS_r$接触模式}
+
+图12.12(c)中标记了$S_rBS_r$接触模式，但原书指出：
+
+\textbf{这个运动实际上是不可能的！}
+
+\textbf{原因}：
+\begin{itemize}
+\item 物体会立即穿透静止的手指
+\item 一阶分析忽略了局部接触曲率
+\item 二阶分析会显示这个运动是不可能的
+\end{itemize}
+
+\subsection{一阶 vs 二阶分析}
+
+\textbf{一阶分析}：
+\begin{itemize}
+\item 只考虑接触法线方向
+\item 忽略接触曲率
+\item 可能错误地认为某些运动是可行的
+\end{itemize}
+
+\textbf{二阶分析}：
+\begin{itemize}
+\item 考虑接触曲率$\partial^2 d/\partial q^2$
+\item 更准确地判断运动的可行性
+\item 可能将一阶的滚动-滑动运动重新分类为分离或穿透
+\end{itemize}
+
+\subsection{特殊情况}
+
+\textbf{注意}：如果物体在接触处的曲率半径足够小，那么$S_rBS_r$运动可能是可行的。
+
+\section{详细分析：三个接触的约束}
+
+\subsection{接触1：桌子约束1}
+
+\begin{itemize}
+\item 接触法线：$\hat{n}_1$（指向物体内部）
+\item 约束：$F_1^T V \geq 0$
+\item CoR标记规则：
+  \begin{itemize}
+  \item 法线左侧：'+'
+  \item 法线右侧：'-'
+  \item 法线上：'$\pm$'
+  \end{itemize}
+\end{itemize}
+
+\subsection{接触2：桌子约束2}
+
+\begin{itemize}
+\item 接触法线：$\hat{n}_2$（指向物体内部）
+\item 约束：$F_2^T V \geq 0$
+\item CoR标记规则：同上
+\end{itemize}
+
+\subsection{接触3：手指约束}
+
+\begin{itemize}
+\item 接触法线：$\hat{n}_3$（指向物体内部）
+\item 约束：$F_3^T V \geq 0$
+\item CoR标记规则：同上
+\end{itemize}
+
+\subsection{可行CoR区域}
+
+可行CoR区域是三个约束区域的\textbf{交集}：
+
+\begin{equation}
+\text{可行CoR} = \{\text{CoR} | \text{CoR满足所有三个接触的约束}\}
+\end{equation}
+
+\textbf{关键}：
+\begin{itemize}
+\item 每个接触贡献一个约束区域
+\item 可行区域是这些区域的交集
+\item 交集是凸的
+\end{itemize}
+
+\section{接触模式的确定}
+
+\subsection{对于每个可行CoR}
+
+对于可行CoR区域内的每个点，我们需要确定：
+
+\begin{enumerate}
+\item \textbf{每个接触的状态}：
+   \begin{itemize}
+   \item CoR在接触法线左侧：'+'标记 → 接触分离（B）
+   \item CoR在接触法线右侧：'-'标记 → 接触分离（B）
+   \item CoR在接触法线上：'$\pm$'标记 → 接触可能是滚动（R）或滑动（S）
+   \end{itemize}
+
+\item \textbf{如果是滑动}：
+   \begin{itemize}
+   \item 需要进一步判断是$S_l$还是$S_r$
+   \item 这取决于旋转方向和CoR位置
+   \end{itemize}
+
+\item \textbf{接触模式}：
+   \begin{itemize}
+   \item 连接三个接触的标签
+   \item 例如：$S_rBS_r$、$RRR$、$BBB$等
+   \end{itemize}
+\end{enumerate}
+
+\section{具体例子分析}
+
+\subsection{例子1：CoR在内部（BBB）}
+
+\begin{itemize}
+\item CoR不在任何接触法线上
+\item 所有接触都分离
+\item 接触模式：\textbf{BBB}
+\end{itemize}
+
+\subsection{例子2：CoR在一条边界上（BSrB）}
+
+\begin{itemize}
+\item CoR在接触2的法线上
+\item 接触1和3分离（B）
+\item 接触2滑动（$S_r$）
+\item 接触模式：\textbf{BSrB}
+\end{itemize}
+
+\subsection{例子3：CoR在顶点（RRR）}
+
+\begin{itemize}
+\item CoR在所有三条接触法线的交点上
+\item 所有接触都滚动
+\item 接触模式：\textbf{RRR}
+\item 这对应零速度（物体完全静止）
+\end{itemize}
+
+\section{一阶分析的局限性总结}
+
+\subsection{一阶分析的正确性}
+
+\begin{itemize}
+\item \textbf{总是正确}：分离（B）和穿透（不可行）
+\item 一阶分析总是能正确识别这些运动
+\end{itemize}
+
+\subsection{一阶分析的不确定性}
+
+\begin{itemize}
+\item \textbf{可能错误}：滚动-滑动运动（R或S）
+\item 一阶分析认为可行的运动，二阶分析可能显示为分离或穿透
+\item 例如：$S_rBS_r$在一阶分析中可行，但二阶分析显示不可行
+\end{itemize}
+
+\subsection{形状闭合的保证}
+
+\begin{itemize}
+\item 如果一阶分析显示形状闭合，则\textbf{任何分析}都显示形状闭合
+\item 如果只有滚动-滑动运动在一阶分析中可行，则：
+  \begin{itemize}
+  \item 可能通过高阶分析实现形状闭合
+  \item 或者，在任何分析中都不处于形状闭合
+  \end{itemize}
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键点}
+
+\begin{enumerate}
+\item \textbf{灰色区域}：表示可行CoR的集合（凸集）
+
+\item \textbf{接触模式}：每个CoR对应一个接触模式（三个接触标签的连接）
+
+\item \textbf{一阶分析的局限性}：
+   \begin{itemize}
+   \item 可能错误地认为某些运动可行
+   \item 需要二阶或更高阶分析来验证
+   \end{itemize}
+
+\item \textbf{形状闭合}：
+   \begin{itemize}
+   \item 如果一阶分析显示形状闭合，则保证形状闭合
+   \item 否则需要更高阶分析
+   \end{itemize}
+\end{enumerate}
+
+\subsection{应用}
+
+这个例题展示了：
+\begin{itemize}
+\item 如何用CoR表示多个接触的约束
+\item 如何确定接触模式
+\item 一阶分析的优点和局限性
+\end{itemize}
+
+\end{document}
+

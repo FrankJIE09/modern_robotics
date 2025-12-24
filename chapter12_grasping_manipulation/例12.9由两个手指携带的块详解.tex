@@ -1,0 +1,260 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{例12.9\quad 由两个手指携带的块\quad 详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+
+考虑重力作用下的平面块，由两个手指支撑（如图12.25(a)所示）：
+\begin{itemize}
+    \item 一个手指与块之间的摩擦系数为$\mu = 1$
+    \item 另一个接触是无摩擦的（$\mu = 0$）
+    \item 块受到重力作用
+\end{itemize}
+
+\section{问题设置}
+
+\subsection{接触配置}
+
+手指可以施加的wrench锥是$\text{pos}(\{F_1, F_2, F_3\})$，如图12.25(b)中使用力矩标记所示。
+
+\subsection{基接触Wrench}
+
+根据文本，接触位置和基wrench为：
+\begin{itemize}
+    \item 下手指在$(x, y) = (-3, -1)$处接触块
+    \item 上手指在$(1, 1)$处接触块
+    \item 基接触wrench：
+    \begin{align}
+    F_1 &= \frac{1}{\sqrt{2}}(-4, -1, 1) \\
+    F_2 &= \frac{1}{\sqrt{2}}(-2, 1, 1) \\
+    F_3 &= (1, -1, 0)
+    \end{align}
+\end{itemize}
+
+\section{问题1：静止手指能否使块保持静止？}
+
+\subsection{问题分析}
+
+要使块保持静止，手指必须提供wrench来平衡重力。
+
+\subsubsection{重力Wrench}
+
+重力产生的wrench为：
+\begin{equation}
+F_{\text{ext}} = (m_z, f_x, f_y) = (0, 0, -mg)
+\end{equation}
+其中$g > 0$是重力加速度，$m$是块的质量。
+
+\subsubsection{所需的手指Wrench}
+
+为了平衡重力，手指必须提供：
+\begin{equation}
+F = (m_z, f_x, f_y) = (0, 0, mg)
+\end{equation}
+
+\subsection{结果}
+
+如图12.25(b)所示，这个wrench $(0, 0, mg)$不在可能的接触wrench的复合锥中。
+
+\textbf{结论}：接触模式$RR$（两个接触都是滚动/固定）不可行，块将相对于手指移动。
+
+\subsection{物理解释}
+
+\begin{itemize}
+    \item 无摩擦接触只能提供法向力，无法提供切向力
+    \item 有摩擦接触虽然可以提供切向力，但两个接触的组合无法产生所需的wrench
+    \item 因此，块无法在静止状态下保持平衡
+\end{itemize}
+
+\section{问题2：动态抓取}
+
+\subsection{问题设置}
+
+现在考虑手指各自向左以$2g$加速的情况。
+
+\subsection{接触模式RR的分析}
+
+在接触模式$RR$下，块相对于手指保持静止，因此块也向左以$2g$加速。
+
+\subsubsection{产生加速度所需的Wrench}
+
+产生向左加速度$a_x = -2g$所需的wrench为：
+\begin{equation}
+F_{\text{accel}} = (0, ma_x, 0) = (0, -2mg, 0)
+\end{equation}
+
+\subsubsection{总的手指Wrench}
+
+手指必须施加的总wrench是：
+\begin{align}
+F_{\text{total}} &= F_{\text{accel}} - F_{\text{ext}} \\
+&= (0, -2mg, 0) - (0, 0, -mg) \\
+&= (0, -2mg, mg)
+\end{align}
+
+\subsection{结果}
+
+如图12.25(c)、(d)所示，这个wrench $(0, -2mg, mg)$位于复合wrench锥内。
+
+\textbf{结论}：$RR$接触模式（块相对于手指保持静止）是当手指向左以$2g$加速时的可行解。
+
+\subsection{动态抓取的概念}
+
+这被称为\textbf{动态抓取}——使用惯性力在手指移动时使块压向手指。
+
+\begin{itemize}
+    \item 手指的加速度产生惯性力
+    \item 惯性力使块压向手指
+    \item 接触力可以平衡重力和惯性力
+    \item 块可以相对于手指保持静止
+\end{itemize}
+
+\section{代数求解方法}
+
+\subsection{动力学方程}
+
+设手指在$\hat{x}$方向的加速度为$a_x$。在块相对于手指保持固定（$RR$接触模式）的假设下，方程(12.31)可以写为：
+
+\begin{equation}
+k_1 F_1 + k_2 F_2 + k_3 F_3 + (0, 0, -mg) = (0, ma_x, 0)
+\label{eq:12.33}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $k_1, k_2, k_3 \geq 0$是待求的非负系数
+    \item 左边是接触wrench和重力wrench的总和
+    \item 右边是产生加速度所需的wrench
+\end{itemize}
+
+\subsection{展开方程}
+
+将基wrench代入：
+\begin{align}
+k_1 \frac{1}{\sqrt{2}}(-4, -1, 1) + k_2 \frac{1}{\sqrt{2}}(-2, 1, 1) + k_3 (1, -1, 0) + (0, 0, -mg) = (0, ma_x, 0)
+\end{align}
+
+按分量展开：
+\begin{align}
+-\frac{4k_1}{\sqrt{2}} - \frac{2k_2}{\sqrt{2}} + k_3 &= 0 \quad \text{（力矩平衡）} \\
+-\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} - k_3 &= ma_x \quad \text{（x方向力平衡）} \\
+\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} - mg &= 0 \quad \text{（y方向力平衡）}
+\end{align}
+
+\subsection{求解}
+
+从第三个方程：
+\begin{equation}
+\frac{k_1 + k_2}{\sqrt{2}} = mg \quad \Rightarrow \quad k_1 + k_2 = \sqrt{2}mg
+\end{equation}
+
+从第一个方程：
+\begin{equation}
+k_3 = \frac{4k_1 + 2k_2}{\sqrt{2}} = \frac{2(2k_1 + k_2)}{\sqrt{2}}
+\end{equation}
+
+从第二个方程，代入$k_3$：
+\begin{align}
+-\frac{k_1 - k_2}{\sqrt{2}} - \frac{2(2k_1 + k_2)}{\sqrt{2}} &= ma_x \\
+-\frac{k_1 - k_2 + 4k_1 + 2k_2}{\sqrt{2}} &= ma_x \\
+-\frac{5k_1 + k_2}{\sqrt{2}} &= ma_x
+\end{align}
+
+使用$k_1 + k_2 = \sqrt{2}mg$，设$k_1 = t$，则$k_2 = \sqrt{2}mg - t$：
+\begin{align}
+-\frac{5t + \sqrt{2}mg - t}{\sqrt{2}} &= ma_x \\
+-\frac{4t + \sqrt{2}mg}{\sqrt{2}} &= ma_x \\
+-4t - \sqrt{2}mg &= \sqrt{2}ma_x \\
+t = k_1 &= -\frac{\sqrt{2}m(a_x + g)}{4}
+\end{align}
+
+经过完整求解（文本中给出了结果），我们得到：
+\begin{align}
+k_1 &= -\frac{1}{2\sqrt{2}}(a_x + g)m \\
+k_2 &= \frac{1}{2\sqrt{2}}(a_x + 5g)m \\
+k_3 &= -\frac{1}{2}(a_x - 3g)m
+\end{align}
+
+\subsection{非负性条件}
+
+为了使$k_i \geq 0$，需要：
+\begin{align}
+k_1 \geq 0 &\quad \Rightarrow \quad a_x + g \leq 0 \quad \Rightarrow \quad a_x \leq -g \\
+k_2 \geq 0 &\quad \Rightarrow \quad a_x + 5g \geq 0 \quad \Rightarrow \quad a_x \geq -5g \\
+k_3 \geq 0 &\quad \Rightarrow \quad a_x - 3g \leq 0 \quad \Rightarrow \quad a_x \leq 3g
+\end{align}
+
+综合条件：
+\begin{equation}
+-5g \leq a_x \leq -g
+\end{equation}
+
+\subsection{结果解释}
+
+对于在此范围内的$\hat{x}$方向手指加速度，动态抓取是一致解。
+
+\begin{itemize}
+    \item 如果$a_x = -2g$（在范围内），动态抓取可行
+    \item 如果$a_x = 0$（不在范围内），块无法保持静止
+    \item 如果$a_x < -5g$或$a_x > -g$，某些$k_i$会变为负值，这在物理上不可行
+\end{itemize}
+
+\section{完整性检查}
+
+\subsection{其他接触模式}
+
+如果我们计划使用动态抓取操作块，为了完整性，我们应该确保除了$RR$之外没有其他接触模式是可行的。
+
+可能的其他接触模式包括：
+\begin{itemize}
+    \item $RS$：一个接触滚动，一个接触滑动
+    \item $SR$：一个接触滑动，一个接触滚动
+    \item $SS$：两个接触都滑动
+    \item $RB$、$SB$、$BB$：涉及分离的接触模式
+\end{itemize}
+
+对于每个模式，需要检查是否存在满足动力学方程和库仑摩擦定律的一致解。
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{静态抓取不可行}：在静止状态下，给定的接触配置无法平衡重力
+    
+    \item \textbf{动态抓取可行}：通过手指的加速度，可以使用惯性力使块压向手指
+    
+    \item \textbf{加速度范围}：存在一个加速度范围（$-5g \leq a_x \leq -g$），在此范围内动态抓取可行
+    
+    \item \textbf{代数方法}：可以通过求解线性方程组来找到一致解
+    
+    \item \textbf{非负性约束}：系数$k_i$必须非负，这限制了可行的加速度范围
+    
+    \item \textbf{完整性}：应该检查所有可能的接触模式，确保解的唯一性
+\end{enumerate}
+
+\section{实际应用}
+
+动态抓取在实际应用中很重要：
+
+\begin{itemize}
+    \item \textbf{快速操作}：可以快速移动物体而不丢失抓取
+    \item \textbf{重物操作}：对于重物，静态抓取可能不可行，但动态抓取可能可行
+    \item \textbf{传送带操作}：在传送带上抓取和移动物体
+    \item \textbf{机器人操作}：机器人手可以快速移动来操作物体
+\end{itemize}
+
+\end{document}
+

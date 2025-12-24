@@ -1,0 +1,583 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric,decorations.pathreplacing}
+
+\geometry{margin=2.5cm}
+
+\title{12.1.6难点详解：CoR的深入理解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{概述}
+
+本文档专门解释12.1.6章节中的难点，包括：
+\begin{enumerate}
+\item 正线性组合对应的CoR线段/射线
+\item 不同符号角速度的情况
+\item 多个CoR标记的约束区域
+\end{enumerate}
+
+\section{基础回顾：从Twist到CoR}
+
+\subsection{平面Twist的表示}
+
+平面twist只有3个分量：
+\begin{equation}
+V = (\omega_z, v_x, v_y)
+\end{equation}
+
+\subsection{CoR的计算}
+
+如果$\omega_z \neq 0$，CoR的位置为：
+\begin{equation}
+\text{CoR} = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)
+\end{equation}
+
+\textbf{关键理解}：CoR是平面上的一个\textbf{点}，表示物体绕这个点旋转。
+
+\subsection{标记系统}
+
+\begin{itemize}
+\item \textbf{'+'}：$\omega_z > 0$（逆时针旋转）
+\item \textbf{'-'}：$\omega_z < 0$（顺时针旋转）
+\item \textbf{'$\pm$'}：在接触法线上（可以是滚动或滑动）
+\end{itemize}
+
+\section{难点1：两个Twist的线性组合}
+
+\subsection{问题设置}
+
+给定两个twist：
+\begin{align}
+V_1 &= (\omega_{1z}, v_{1x}, v_{1y}) \\
+V_2 &= (\omega_{2z}, v_{2x}, v_{2y})
+\end{align}
+
+它们的线性组合：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2 = (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y})
+\end{equation}
+
+其中$k_1, k_2 \in \mathbb{R}$可以是任意实数。
+
+\subsection{CoR的线性组合公式}
+
+如果$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} \neq 0$，则：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right) \\
+&= \left(-\frac{k_1 v_{1y} + k_2 v_{2y}}{k_1 \omega_{1z} + k_2 \omega_{2z}}, \frac{k_1 v_{1x} + k_2 v_{2x}}{k_1 \omega_{1z} + k_2 \omega_{2z}}\right)
+\end{align}
+
+\textbf{关键性质}：当$k_1$和$k_2$变化时，$\text{CoR}(V)$在通过$\text{CoR}(V_1)$和$\text{CoR}(V_2)$的\textbf{直线}上移动。
+
+\subsection{具体数值例子}
+
+\textbf{例子1}：两个'+' CoR
+
+设：
+\begin{align}
+V_1 &= (1, 2, 0) \quad \Rightarrow \quad \text{CoR}_1 = (0, 2) \\
+V_2 &= (1, 0, 2) \quad \Rightarrow \quad \text{CoR}_2 = (-2, 0)
+\end{align}
+
+线性组合：$V = k_1 V_1 + k_2 V_2 = (k_1 + k_2, 2k_1, 2k_2)$
+
+当$k_1 + k_2 \neq 0$时：
+\begin{equation}
+\text{CoR}(V) = \left(-\frac{2k_2}{k_1 + k_2}, \frac{2k_1}{k_1 + k_2}\right)
+\end{equation}
+
+当$k_1$和$k_2$变化时，CoR在通过$(0, 2)$和$(-2, 0)$的直线上移动。
+
+\section{难点2：正线性组合（$k_1, k_2 \geq 0$）}
+
+\subsection{为什么重要？}
+
+正线性组合对应\textbf{twist锥}，这在接触约束中非常重要，因为约束通常形成锥形。
+
+\subsection{情况1：相同符号的角速度}
+
+\textbf{条件}：$\omega_{1z}$和$\omega_{2z}$同号（都是正或都是负）
+
+\textbf{结论}：正线性组合的CoR都在两个CoR之间的\textbf{线段}上，且符号相同。
+
+\textbf{数学证明}：
+
+设$\omega_{1z} > 0$，$\omega_{2z} > 0$（都是'+'）
+
+对于$k_1, k_2 \geq 0$：
+\begin{align}
+\omega_z &= k_1 \omega_{1z} + k_2 \omega_{2z} > 0 \quad \text{（总是正的）}
+\end{align}
+
+CoR位置可以写成：
+\begin{equation}
+\text{CoR}(V) = \frac{k_1}{k_1 + k_2} \text{CoR}_1 + \frac{k_2}{k_1 + k_2} \text{CoR}_2
+\end{equation}
+
+这是$\text{CoR}_1$和$\text{CoR}_2$的\textbf{凸组合}（系数非负且和为1），所以CoR在连接两个CoR的线段上。
+
+\textbf{图示}：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 两个'+' CoR
+\filldraw[red] (0,2) circle (2pt) node[above left] {CoR$_1$ (+)};
+\filldraw[red] (-2,0) circle (2pt) node[below left] {CoR$_2$ (+)};
+
+% 连接线段
+\draw[thick,blue,line width=3pt] (0,2) -- (-2,0);
+\node[blue] at (-1,1) {可行CoR区域};
+
+% 标记几个点
+\filldraw[green] (-0.5,1.5) circle (1.5pt);
+\filldraw[green] (-1,1) circle (1.5pt);
+\filldraw[green] (-1.5,0.5) circle (1.5pt);
+
+\node[below] at (-1,-0.3) {所有点都是'+'标记};
+\end{tikzpicture}
+\end{center}
+
+\subsection{情况2：不同符号的角速度（重点难点）}
+
+\textbf{条件}：$\omega_{1z} > 0$（'+'），$\omega_{2z} < 0$（'-'）
+
+\textbf{关键观察}：当$k_1$和$k_2$变化时，$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z}$的符号会改变！
+
+\textbf{详细分析}：
+
+\begin{enumerate}
+\item \textbf{当$k_1 \omega_{1z} + k_2 \omega_{2z} > 0$时}：
+  \begin{itemize}
+  \item $\omega_z > 0$，CoR标记为'+'
+  \item CoR在通过两个CoR的直线上
+  \end{itemize}
+
+\item \textbf{当$k_1 \omega_{1z} + k_2 \omega_{2z} < 0$时}：
+  \begin{itemize}
+  \item $\omega_z < 0$，CoR标记为'-'
+  \item CoR也在同一条直线上
+  \end{itemize}
+
+\item \textbf{当$k_1 \omega_{1z} + k_2 \omega_{2z} = 0$时}：
+  \begin{itemize}
+  \item $\omega_z = 0$，纯平移
+  \item CoR在无穷远处
+  \end{itemize}
+\end{enumerate}
+
+\textbf{关键问题}：哪些CoR是可行的？
+
+对于正线性组合（$k_1, k_2 \geq 0$），我们需要找到满足$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} \geq 0$或$\leq 0$的区域。
+
+\textbf{数学分析}：
+
+设$\omega_{1z} = 1$，$\omega_{2z} = -1$（简化，不失一般性）
+
+则：$\omega_z = k_1 - k_2$
+
+\begin{itemize}
+\item 当$k_1 > k_2$时：$\omega_z > 0$（'+'）
+\item 当$k_1 < k_2$时：$\omega_z < 0$（'-'）
+\item 当$k_1 = k_2$时：$\omega_z = 0$（平移）
+\end{itemize}
+
+\textbf{CoR位置分析}：
+
+当$k_1$和$k_2$变化时，CoR在通过$\text{CoR}_1$和$\text{CoR}_2$的整条直线上移动。
+
+但是：
+\begin{itemize}
+\item \textbf{靠近CoR$_1$的区域}：$k_1$大，$k_2$小 → $\omega_z > 0$ → '+'标记
+\item \textbf{靠近CoR$_2$的区域}：$k_1$小，$k_2$大 → $\omega_z < 0$ → '-'标记
+\item \textbf{中间区域}：$k_1 \approx k_2$ → $\omega_z \approx 0$ → 接近平移
+\end{itemize}
+
+\textbf{关键结论}：
+
+正线性组合的CoR由以下部分组成：
+\begin{enumerate}
+\item 从CoR$_1$出发的'+' CoR射线（$k_1 > k_2$）
+\item 从CoR$_2$出发的'-' CoR射线（$k_1 < k_2$）
+\item 两个CoR之间的线段\textbf{不可行}（因为$\omega_z$会变号，但正组合要求$k_1, k_2 \geq 0$，所以中间段实际上对应$\omega_z$接近0的情况，即平移）
+\item 无穷远处的'0'点（对应$k_1 = k_2$，纯平移）
+\end{enumerate}
+
+\textbf{图示}：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 两个不同符号的CoR
+\filldraw[red] (0,2) circle (2pt) node[above left] {CoR$_1$ (+)};
+\filldraw[blue] (-2,0) circle (2pt) node[below left] {CoR$_2$ (-)};
+
+% 整条直线
+\draw[thick,green] (-3,-1) -- (1,3);
+
+% 标记中间不可行区域（实际上这部分对应平移）
+\draw[thick,red,dashed] (-0.5,1.5) -- (-1.5,0.5);
+\node[red] at (-1,1) {平移区域};
+
+% 标记可行区域
+\draw[thick,blue,->,line width=2pt] (0,2) -- (0.8,2.8) node[right] {可行 (+)};
+\draw[thick,green,->,line width=2pt] (-2,0) -- (-2.8,-0.8) node[below left] {可行 (-)};
+
+% 标记无穷远点
+\node at (-1,1) {$\infty$ (平移)};
+
+\node[below] at (-1.5,-0.8) {注意：中间段对应平移，不是旋转};
+\end{tikzpicture}
+\end{center}
+
+\textbf{为什么中间段"不可行"？}
+
+这里的"不可行"不是指物理上不可能，而是指：
+\begin{itemize}
+\item 中间段对应$\omega_z \approx 0$的情况
+\item 这是\textbf{平移}，不是旋转
+\item 平移的CoR在无穷远处，不在有限平面上
+\item 所以有限平面上的中间段实际上不对应旋转运动
+\end{itemize}
+
+\section{难点3：三个标记的CoR约束}
+
+\subsection{问题设置}
+
+给定静止物体和可动物体之间的接触，接触法线$\hat{n}$指向可动物体内部。
+
+\subsection{标记规则（详细解释）}
+
+\textbf{规则1}：接触法线上的点标记为'$\pm$'
+
+\textbf{为什么？}
+\begin{itemize}
+\item 如果CoR在接触法线上，接触点处的速度方向与法线垂直
+\item 这意味着$F^T V = 0$（满足滚动-滑动约束）
+\item 可以是滚动（R）或滑动（S）
+\end{itemize}
+
+\textbf{规则2}：法线左侧的点标记为'+'
+
+\textbf{为什么？}
+\begin{itemize}
+\item 想象你站在接触点，面向法线方向
+\item 左侧的点作为CoR时，物体会逆时针旋转
+\item 逆时针旋转时，接触点有远离法线的趋势
+\item 这满足不可穿透约束：$F^T V \geq 0$
+\end{itemize}
+
+\textbf{规则3}：法线右侧的点标记为'-'
+
+\textbf{为什么？}
+\begin{itemize}
+\item 右侧的点作为CoR时，物体会顺时针旋转
+\item 顺时针旋转时，接触点也有远离法线的趋势
+\item 同样满足不可穿透约束
+\end{itemize}
+
+\subsection{具体例子：单个接触}
+
+\begin{center}
+\begin{tikzpicture}[scale=2.5]
+% 坐标轴
+\draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,2.5) node[above] {$y$};
+
+% 接触法线（垂直向上）
+\draw[thick,blue,->,line width=2pt] (0,0) -- (0,2) node[above] {$\hat{n}$ (法线)};
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+
+% 标记区域
+\fill[red!20] (-2,0) -- (-2,2) -- (0,2) -- (0,0) -- cycle;
+\node[red] at (-1,1) {\Large +};
+
+\fill[green!20] (0,0) -- (0,2) -- (2,2) -- (2,0) -- cycle;
+\node[green] at (1,1) {\Large -};
+
+% 法线上的标记
+\draw[thick,blue,line width=2pt] (0,0) -- (0,2);
+\node[blue] at (0.3,1) {\Large $\pm$};
+
+% 标记一些具体的CoR
+\filldraw[red] (-1,0.5) circle (1.5pt) node[below] {+, B};
+\filldraw[red] (-1,1.5) circle (1.5pt) node[above] {+, B};
+\filldraw[blue] (0,1) circle (1.5pt) node[right] {$\pm$, R或S};
+\filldraw[green] (1,0.5) circle (1.5pt) node[below] {-, B};
+\filldraw[green] (1,1.5) circle (1.5pt) node[above] {-, B};
+
+% 添加说明
+\node[below] at (0,-0.3) {法线左侧：+，右侧：-，法线上：$\pm$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{物理解释：为什么左侧是'+'？}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 接触点和法线
+\filldraw[black] (0,0) circle (2pt) node[below] {接触点};
+\draw[thick,blue,->] (0,0) -- (0,1.5) node[above] {$\hat{n}$};
+
+% 左侧的CoR
+\filldraw[red] (-1,1) circle (2pt) node[above left] {CoR (+)};
+
+% 从CoR到接触点的向量
+\draw[thick,red,dashed] (-1,1) -- (0,0);
+
+% 接触点的速度方向（垂直于CoR到接触点的向量）
+\draw[thick,green,->] (0,0) -- (0.3,0.3) node[right] {$v$};
+
+% 标注
+\node at (-0.5,0.5) {逆时针};
+\node at (0.2,0.2) {速度};
+\end{tikzpicture}
+\end{center}
+
+当CoR在左侧时：
+\begin{itemize}
+\item 物体绕CoR逆时针旋转（'+'）
+\item 接触点的速度方向向右（垂直于CoR到接触点的方向）
+\item 速度与法线的点积：$v \cdot \hat{n} = 0$（垂直）
+\item 或者有远离法线的分量，满足$F^T V \geq 0$
+\end{itemize}
+
+\section{难点4：多个接触的约束区域}
+
+\subsection{基本思想}
+
+如果有多个接触，每个接触都贡献一个约束区域。可行CoR区域是所有约束区域的\textbf{交集}。
+
+\subsection{例子：两个接触}
+
+\textbf{设置}：
+\begin{itemize}
+\item 接触1：法线$\hat{n}_1$垂直向上，在$(0, 0)$
+\item 接触2：法线$\hat{n}_2$水平向右，在$(2, 1)$
+\end{itemize}
+
+\textbf{约束区域}：
+\begin{itemize}
+\item 接触1：左侧'+'，右侧'-'，法线上'$\pm$'
+\item 接触2：下方'+'，上方'-'，法线上'$\pm$'
+\end{itemize}
+
+\textbf{可行区域}：两个约束区域的交集
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 接触1的法线
+\draw[thick,blue,->] (0,0) -- (0,2);
+\filldraw[black] (0,0) circle (2pt) node[below left] {接触1};
+\fill[red!10] (-2,0) -- (-2,2) -- (0,2) -- (0,0) -- cycle;
+\fill[green!10] (0,0) -- (0,2) -- (2,2) -- (2,0) -- cycle;
+
+% 接触2的法线
+\draw[thick,red,->] (2,1) -- (4,1);
+\filldraw[black] (2,1) circle (2pt) node[below] {接触2};
+\fill[blue!10,rotate around={0:(2,1)}] (2,1) rectangle (4,3);
+\fill[yellow!10,rotate around={0:(2,1)}] (2,-1) rectangle (4,1);
+
+% 交集区域（可行区域）
+\fill[purple!30] (0,0) -- (0,1) -- (2,1) -- (2,0) -- cycle;
+\node[purple] at (1,0.5) {可行区域};
+
+% 标记
+\node[red] at (-1,1) {接触1: +};
+\node[green] at (1,1) {接触1: -};
+\node[blue] at (3,2) {接触2: +};
+\node[yellow] at (3,0) {接触2: -};
+\end{tikzpicture}
+\end{center}
+
+\textbf{分析}：
+\begin{itemize}
+\item 可行区域必须同时满足两个约束
+\item 接触1要求：左侧'+'或右侧'-'
+\item 接触2要求：下方'+'或上方'-'
+\item 交集：同时满足的区域
+\end{itemize}
+
+\subsection{三个接触的例子}
+
+\textbf{关键点}：当有多个接触时，可行区域是\textbf{凸的}。
+
+\textbf{为什么？}
+\begin{itemize}
+\item 每个接触的约束区域是半空间（凸集）
+\item 多个半空间的交集仍然是凸集
+\item 因此可行CoR区域是凸的
+\end{itemize}
+
+\section{总结：关键理解点}
+
+\subsection{正线性组合的CoR}
+
+\begin{enumerate}
+\item \textbf{相同符号}：CoR在两个CoR之间的线段上
+\item \textbf{不同符号}：CoR在两条射线上（分别从两个CoR出发），中间段对应平移
+\end{enumerate}
+
+\subsection{标记规则}
+
+\begin{enumerate}
+\item \textbf{法线左侧}：'+'（逆时针旋转可行）
+\item \textbf{法线右侧}：'-'（顺时针旋转可行）
+\item \textbf{法线上}：'$\pm$'（滚动或滑动）
+\end{enumerate}
+
+\subsection{多个接触}
+
+\begin{enumerate}
+\item 每个接触贡献一个约束区域
+\item 可行区域是约束区域的交集
+\item 可行区域是凸的
+\end{enumerate}
+
+\section{超级详细的数值例子}
+
+\subsection{例子：不同符号角速度的完整计算}
+
+让我们用一个具体的数值例子来彻底理解不同符号角速度的情况。
+
+\textbf{设置}：
+\begin{align}
+V_1 &= (1, 2, 0) \quad \Rightarrow \quad \text{CoR}_1 = (0, 2), \quad \text{标记：'+'} \\
+V_2 &= (-1, 0, 2) \quad \Rightarrow \quad \text{CoR}_2 = (2, 0), \quad \text{标记：'-'}
+\end{align}
+
+\textbf{正线性组合}：$V = k_1 V_1 + k_2 V_2$，其中$k_1, k_2 \geq 0$
+
+计算：
+\begin{align}
+V &= k_1(1, 2, 0) + k_2(-1, 0, 2) \\
+&= (k_1 - k_2, 2k_1, 2k_2)
+\end{align}
+
+\textbf{角速度}：$\omega_z = k_1 - k_2$
+
+\textbf{CoR位置}（当$\omega_z \neq 0$时）：
+\begin{equation}
+\text{CoR} = \left(-\frac{2k_2}{k_1 - k_2}, \frac{2k_1}{k_1 - k_2}\right)
+\end{equation}
+
+\textbf{情况分析}：
+
+\begin{enumerate}
+\item \textbf{当$k_1 = 2, k_2 = 0$时}：
+  \begin{itemize}
+  \item $\omega_z = 2 - 0 = 2 > 0$ → 标记：'+'
+  \item $\text{CoR} = (0, 2) = \text{CoR}_1$
+  \item 这就是$V_1$本身
+  \end{itemize}
+
+\item \textbf{当$k_1 = 1.5, k_2 = 0.5$时}：
+  \begin{itemize}
+  \item $\omega_z = 1.5 - 0.5 = 1 > 0$ → 标记：'+'
+  \item $\text{CoR} = \left(-\frac{1}{1}, \frac{3}{1}\right) = (-1, 3)$
+  \item CoR在从CoR$_1$出发的射线上
+  \end{itemize}
+
+\item \textbf{当$k_1 = 1, k_2 = 1$时}：
+  \begin{itemize}
+  \item $\omega_z = 1 - 1 = 0$ → 纯平移
+  \item CoR在无穷远处
+  \item 这是两个CoR之间的"分界点"
+  \end{itemize}
+
+\item \textbf{当$k_1 = 0.5, k_2 = 1.5$时}：
+  \begin{itemize}
+  \item $\omega_z = 0.5 - 1.5 = -1 < 0$ → 标记：'-'
+  \item $\text{CoR} = \left(-\frac{3}{-1}, \frac{1}{-1}\right) = (3, -1)$
+  \item CoR在从CoR$_2$出发的射线上
+  \end{itemize}
+
+\item \textbf{当$k_1 = 0, k_2 = 2$时}：
+  \begin{itemize}
+  \item $\omega_z = 0 - 2 = -2 < 0$ → 标记：'-'
+  \item $\text{CoR} = (2, 0) = \text{CoR}_2$
+  \item 这就是$V_2$本身
+  \end{itemize}
+\end{enumerate}
+
+\textbf{关键观察}：
+
+\begin{itemize}
+\item 当$k_1 > k_2$时：$\omega_z > 0$，CoR标记为'+'，在从CoR$_1$出发的射线上
+\item 当$k_1 = k_2$时：$\omega_z = 0$，纯平移，CoR在无穷远
+\item 当$k_1 < k_2$时：$\omega_z < 0$，CoR标记为'-'，在从CoR$_2$出发的射线上
+\end{itemize}
+
+\textbf{图示}：
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2]
+% 两个CoR
+\filldraw[red] (0,2) circle (3pt) node[above left] {CoR$_1$ (+)};
+\filldraw[blue] (2,0) circle (3pt) node[below right] {CoR$_2$ (-)};
+
+% 连接直线
+\draw[thick,green] (-2,4) -- (4,-2);
+
+% 标记不同区域
+\draw[thick,red,->,line width=2pt] (0,2) -- (-1.5,3.5) node[above left] {$k_1 > k_2$\\$\omega_z > 0$\\标记：'+'};
+
+\draw[thick,blue,->,line width=2pt] (2,0) -- (3.5,-1.5) node[below right] {$k_1 < k_2$\\$\omega_z < 0$\\标记：'-'};
+
+% 标记中间点（平移）
+\node[purple] at (1,1) {$k_1 = k_2$\\$\omega_z = 0$\\平移（$\infty$）};
+
+% 标记一些具体点
+\filldraw[red] (-1,3) circle (2pt) node[above] {$(-1, 3)$};
+\filldraw[blue] (3,-1) circle (2pt) node[below] {$(3, -1)$};
+
+\node[below] at (1,-1) {注意：中间段对应平移，不在有限平面上};
+\end{tikzpicture}
+\end{center}
+
+\section{常见误解澄清}
+
+\subsection{误解1：中间段"不可行"是什么意思？}
+
+\textbf{澄清}：
+\begin{itemize}
+\item 不是物理上不可能
+\item 而是指中间段对应$\omega_z \approx 0$（平移）
+\item 平移的CoR在无穷远处，不在有限平面上
+\item 所以有限平面上的中间段不对应旋转运动
+\item 从数学上看，当$\omega_z \to 0$时，CoR位置$\to \infty$
+\end{itemize}
+
+\subsection{误解2：为什么不同符号时是射线而不是线段？}
+
+\textbf{澄清}：
+\begin{itemize}
+\item 因为$\omega_z$的符号会改变
+\item 当$k_1$和$k_2$变化时，$\omega_z$从正变负（或从负变正）
+\item 中间有一个点对应$\omega_z = 0$（平移）
+\item 所以可行区域被分成两部分：一条'+'射线和一条'-'射线
+\end{itemize}
+
+\subsection{误解3：标记'+'和'-'的含义}
+
+\textbf{澄清}：
+\begin{itemize}
+\item '+'不是"正方向"，而是"逆时针旋转"
+\item '-'不是"负方向"，而是"顺时针旋转"
+\item 标记表示旋转方向，不是位置的正负
+\end{itemize}
+
+\end{document}
+

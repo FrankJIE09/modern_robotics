@@ -1,0 +1,342 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{软接触（Soft Contact）的详细理解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{概述}
+
+\textbf{软接触}（soft contact），也称为\textbf{软指接触}（soft-finger contact），是接触运动学中的三种点接触模型之一。它是三种模型中约束最严格的一种，能够模拟由于接触面积非零而产生的额外约束。
+
+\section{三种点接触模型}
+
+在接触运动学中，为了在不显式建模力的情况下近似摩擦效果，我们定义了三种纯运动学点接触模型：
+
+\subsection{1. 无摩擦点接触（Frictionless Point Contact）}
+
+\begin{itemize}
+\item \textbf{约束}：只强制执行滚动-滑动约束(12.5)
+  \begin{equation}
+  F^T (V_A - V_B) \geq 0
+  \end{equation}
+\item \textbf{允许的运动}：
+  \begin{itemize}
+  \item 分离（Breaking）：$F^T (V_A - V_B) > 0$
+  \item 滑动（Sliding）：$F^T (V_A - V_B) = 0$，但$\dot{p}_A \neq \dot{p}_B$
+  \item 滚动（Rolling）：$F^T (V_A - V_B) = 0$，且$\dot{p}_A = \dot{p}_B$
+  \end{itemize}
+\item \textbf{特点}：约束最少，允许接触点处有相对滑动
+\end{itemize}
+
+\subsection{2. 有摩擦点接触（Point Contact with Friction）}
+
+\begin{itemize}
+\item \textbf{约束}：强制执行滚动约束(12.8)
+  \begin{equation}
+  \dot{p}_A = v_A + [\omega_A]p_A = v_B + [\omega_B]p_B = \dot{p}_B
+  \end{equation}
+\item \textbf{允许的运动}：
+  \begin{itemize}
+  \item 分离（Breaking）：$F^T (V_A - V_B) > 0$
+  \item 滚动（Rolling）：$\dot{p}_A = \dot{p}_B$（接触点处无相对运动）
+  \item \textbf{不允许滑动}
+  \end{itemize}
+\item \textbf{特点}：隐式建模了足以防止接触处滑动的摩擦力
+\item \textbf{物理意义}：摩擦力足够大，使得接触点处不能有切向相对运动
+\end{itemize}
+
+\subsection{3. 软接触（Soft Contact / Soft-Finger Contact）}
+
+\begin{itemize}
+\item \textbf{约束}：
+  \begin{enumerate}
+  \item 滚动约束(12.8)：$\dot{p}_A = \dot{p}_B$
+  \item \textbf{额外的约束}：两个物体不能绕接触法线轴相对旋转
+  \end{enumerate}
+\item \textbf{允许的运动}：
+  \begin{itemize}
+  \item 分离（Breaking）：$F^T (V_A - V_B) > 0$
+  \item 滚动（Rolling）：$\dot{p}_A = \dot{p}_B$，且绕法线轴无相对旋转
+  \item \textbf{不允许滑动，也不允许绕法线轴旋转}
+  \end{itemize}
+\item \textbf{特点}：约束最严格
+\end{itemize}
+
+\section{软接触的详细分析}
+
+\subsection{额外约束的数学表达}
+
+软接触除了滚动约束外，还要求两个物体不能绕接触法线轴相对旋转。
+
+设接触法线为$\hat{n}$，则额外约束为：
+\begin{equation}
+\hat{n}^T (\omega_A - \omega_B) = 0
+\label{eq:soft_contact_constraint}
+\end{equation}
+
+这意味着：两个物体的角速度在接触法线方向上的分量必须相等。
+
+\subsection{为什么叫"软"接触？}
+
+\textbf{"软"的含义}：
+\begin{itemize}
+\item 不是指材料软，而是指接触时物体会发生\textbf{变形}
+\item 由于变形，接触不是理想点接触，而是有\textbf{非零接触面积}
+\item 非零接触面积导致可以传递\textbf{摩擦力矩}（friction moment）
+\item 摩擦力矩抵抗绕接触法线轴的旋转
+\end{itemize}
+
+\subsection{物理机制}
+
+\begin{enumerate}
+\item \textbf{接触变形}：
+  \begin{itemize}
+  \item 当两个物体接触时，如果材料较软或接触力较大，会发生变形
+  \item 变形导致接触不是点接触，而是有接触面积
+  \end{itemize}
+
+\item \textbf{摩擦力矩}：
+  \begin{itemize}
+  \item 由于有接触面积，摩擦力不仅产生在切向，还产生\textbf{绕法线轴的力矩}
+  \item 这个力矩抵抗两个物体绕接触法线轴的相对旋转
+  \end{itemize}
+
+\item \textbf{运动学约束}：
+  \begin{itemize}
+  \item 从运动学角度，我们用一个额外的约束来模拟这个效果
+  \item 约束：$\hat{n}^T (\omega_A - \omega_B) = 0$
+  \end{itemize}
+\end{enumerate}
+
+\section{三种接触模型的对比}
+
+\subsection{约束数量}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{接触模型} & \textbf{约束数量} & \textbf{约束内容} \\
+\hline
+无摩擦点接触 & 1个 & 滚动-滑动约束 \\
+\hline
+有摩擦点接触 & 3个 & 滚动约束（接触点处无相对运动） \\
+\hline
+软接触 & 4个 & 滚动约束 + 绕法线轴无相对旋转 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{允许的自由度}
+
+对于3D情况，两个物体在接触点处的相对运动有6个自由度：
+\begin{itemize}
+\item 3个平移自由度：$v_A - v_B$
+\item 3个旋转自由度：$\omega_A - \omega_B$
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{接触模型} & \textbf{允许的相对运动} \\
+\hline
+无摩擦点接触 & 法线方向分离，切向滑动，任意旋转 \\
+\hline
+有摩擦点接触 & 法线方向分离，无滑动，任意旋转 \\
+\hline
+软接触 & 法线方向分离，无滑动，无绕法线轴旋转 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{约束方程总结}
+
+\textbf{无摩擦点接触}：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\end{equation}
+其中$F = ([p]\hat{n}, \hat{n})$是接触wrench。
+
+\textbf{有摩擦点接触}：
+\begin{align}
+F^T (V_A - V_B) &\geq 0 \quad \text{（不可穿透）} \\
+\dot{p}_A &= \dot{p}_B \quad \text{（滚动约束，3个标量方程）}
+\end{align}
+
+\textbf{软接触}：
+\begin{align}
+F^T (V_A - V_B) &\geq 0 \quad \text{（不可穿透）} \\
+\dot{p}_A &= \dot{p}_B \quad \text{（滚动约束，3个标量方程）} \\
+\hat{n}^T (\omega_A - \omega_B) &= 0 \quad \text{（绕法线轴无相对旋转，1个标量方程）}
+\end{align}
+
+\section{平面情况下的特殊性质}
+
+\subsection{平面问题的特点}
+
+对于\textbf{平面问题}（planar problems）：
+\begin{itemize}
+\item 物体限制在平面内运动
+\item 只有绕垂直于平面的轴的旋转（$\omega_z$）
+\item 接触法线也在平面内
+\end{itemize}
+
+\subsection{有摩擦点接触与软接触的等价性}
+
+\textbf{重要结论}：对于平面问题，\textbf{有摩擦点接触和软接触是等价的}。
+
+\textbf{原因}：
+\begin{itemize}
+\item 在平面问题中，旋转只有$\omega_z$分量
+\item 接触法线$\hat{n}$在平面内，垂直于$z$轴
+\item 因此：$\hat{n}^T \omega = 0$（法线垂直于旋转轴）
+\item 约束$\hat{n}^T (\omega_A - \omega_B) = 0$自动满足
+\item 软接触的额外约束在平面情况下是冗余的
+\end{itemize}
+
+\textbf{数学证明}：
+
+在平面问题中：
+\begin{itemize}
+\item 角速度：$\omega_A = [0, 0, \omega_{Az}]^T$，$\omega_B = [0, 0, \omega_{Bz}]^T$
+\item 接触法线：$\hat{n} = [n_x, n_y, 0]^T$（在$xy$平面内）
+\end{itemize}
+
+因此：
+\begin{align}
+\hat{n}^T (\omega_A - \omega_B) &= [n_x, n_y, 0] \begin{bmatrix} 0 \\ 0 \\ \omega_{Az} - \omega_{Bz} \end{bmatrix} \\
+&= 0
+\end{align}
+
+所以约束$\hat{n}^T (\omega_A - \omega_B) = 0$总是成立，是冗余约束。
+
+\section{实际应用}
+
+\subsection{何时使用软接触模型？}
+
+软接触模型适用于：
+\begin{itemize}
+\item \textbf{软材料}：橡胶、硅胶等容易变形的材料
+\item \textbf{大接触力}：即使材料较硬，如果接触力很大，也会产生变形
+\item \textbf{需要精确控制旋转}：当需要防止物体绕接触法线轴旋转时
+\end{itemize}
+
+\subsection{例子：机器人手指抓取}
+
+\begin{itemize}
+\item \textbf{硬手指}：使用有摩擦点接触模型
+  \begin{itemize}
+  \item 接触面积小，近似点接触
+  \item 可以传递切向摩擦力，但不能传递绕法线轴的力矩
+  \end{itemize}
+
+\item \textbf{软手指}：使用软接触模型
+  \begin{itemize}
+  \item 手指材料软，接触时发生变形
+  \item 有接触面积，可以传递绕法线轴的摩擦力矩
+  \item 可以更好地控制被抓取物体的旋转
+  \end{itemize}
+\end{itemize}
+
+\section{约束的维度分析}
+
+\subsection{3D情况}
+
+对于3D情况，两个物体的相对运动有6个自由度：
+
+\begin{itemize}
+\item \textbf{无摩擦点接触}：
+  \begin{itemize}
+  \item 1个约束（不可穿透）
+  \item 剩余5个自由度
+  \end{itemize}
+
+\item \textbf{有摩擦点接触}：
+  \begin{itemize}
+  \item 1个不可穿透约束 + 3个滚动约束 = 4个约束
+  \item 剩余2个自由度（可以绕法线轴旋转，可以分离）
+  \end{itemize}
+
+\item \textbf{软接触}：
+  \begin{itemize}
+  \item 1个不可穿透约束 + 3个滚动约束 + 1个旋转约束 = 5个约束
+  \item 剩余1个自由度（只能分离）
+  \end{itemize}
+\end{itemize}
+
+\subsection{平面情况}
+
+对于平面情况，两个物体的相对运动有3个自由度（$v_x, v_y, \omega_z$）：
+
+\begin{itemize}
+\item \textbf{无摩擦点接触}：
+  \begin{itemize}
+  \item 1个约束
+  \item 剩余2个自由度
+  \end{itemize}
+
+\item \textbf{有摩擦点接触和软接触}：
+  \begin{itemize}
+  \item 1个不可穿透约束 + 2个滚动约束 = 3个约束
+  \item 剩余0个自由度（完全固定，除非分离）
+  \end{itemize}
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键点}
+
+\begin{enumerate}
+\item \textbf{软接触}是三种点接触模型中约束最严格的一种
+
+\item \textbf{额外约束}：两个物体不能绕接触法线轴相对旋转
+  \begin{equation}
+  \hat{n}^T (\omega_A - \omega_B) = 0
+  \end{equation}
+
+\item \textbf{物理机制}：由于接触变形和非零接触面积，可以传递绕法线轴的摩擦力矩
+
+\item \textbf{平面情况}：对于平面问题，有摩擦点接触和软接触是等价的
+
+\item \textbf{应用}：适用于软材料或需要防止绕法线轴旋转的情况
+\end{enumerate}
+
+\subsection{三种模型的层次结构}
+
+\begin{center}
+\begin{tikzpicture}[node distance=2cm]
+% 定义节点
+\node[draw,rectangle] (frictionless) {无摩擦点接触\\1个约束};
+\node[draw,rectangle,below of=frictionless] (friction) {有摩擦点接触\\4个约束};
+\node[draw,rectangle,below of=friction] (soft) {软接触\\5个约束};
+
+% 连接
+\draw[->] (frictionless) -- (friction) node[midway,right] {增加滚动约束};
+\draw[->] (friction) -- (soft) node[midway,right] {增加旋转约束};
+
+% 标签
+\node[left of=frictionless,xshift=-1cm] {约束最少};
+\node[left of=soft,xshift=-1cm] {约束最多};
+\end{tikzpicture}
+\end{center}
+
+约束严格程度：无摩擦点接触 $<$ 有摩擦点接触 $<$ 软接触
+
+\end{document}
+

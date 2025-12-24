@@ -1,0 +1,439 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{12.1.4 物体集合的详细理解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{章节概述}
+
+12.1.4章节"物体集合"（Collections of Bodies）将前面的讨论从\textbf{单个物体}扩展到\textbf{多个物体}的情况。这是接触运动学的一个重要推广，因为在实际应用中，我们经常需要处理多个物体同时接触的情况。
+
+\section{从单个物体到多个物体}
+
+\subsection{12.1.3章节的回顾}
+
+在12.1.3章节中，我们讨论了：
+\begin{itemize}
+\item \textbf{单个物体}$A$受到多个接触的约束
+\item 可行twist集合：$\mathcal{V} = \{V_A | F_i^T (V_A - V_{j(i)}) \geq 0 \text{ 对所有 } i\}$
+\item 可行集合是$V_A$空间（6维）中的多面体
+\end{itemize}
+
+\subsection{12.1.4章节的扩展}
+
+在12.1.4章节中，我们考虑：
+\begin{itemize}
+\item \textbf{多个物体}同时存在，它们之间相互接触
+\item 每个物体都有自己的twist $V_i$
+\item 需要同时考虑所有物体的约束
+\end{itemize}
+
+\section{两个物体接触的情况}
+
+\subsection{基本设置}
+
+考虑两个物体$i$和$j$在点$p$处接触：
+\begin{itemize}
+\item 接触法线$\hat{n}$指向物体$i$
+\item 接触wrench：$F = ([p]\hat{n}, \hat{n})$
+\item 物体$i$的twist：$V_i$
+\item 物体$j$的twist：$V_j$
+\end{itemize}
+
+\subsection{不可穿透约束}
+
+两个物体之间的不可穿透约束为：
+\begin{equation}
+F^T (V_i - V_j) \geq 0
+\label{eq:two_bodies_constraint}
+\end{equation}
+
+这与12.1.2节中的公式(12.5)相同，但现在我们明确考虑两个物体都在运动。
+
+\subsection{复合twist空间}
+
+\textbf{关键概念}：我们需要在\textbf{复合twist空间}中考虑约束。
+
+对于两个物体：
+\begin{itemize}
+\item 物体$i$的twist：$V_i \in \mathbb{R}^6$（6维）
+\item 物体$j$的twist：$V_j \in \mathbb{R}^6$（6维）
+\item \textbf{复合twist}：$(V_i, V_j) \in \mathbb{R}^{12}$（12维）
+\end{itemize}
+
+约束$F^T (V_i - V_j) \geq 0$在12维复合twist空间中定义了一个\textbf{齐次半空间约束}。
+
+\subsection{为什么是齐次约束？}
+
+约束$F^T (V_i - V_j) \geq 0$可以写成：
+\begin{equation}
+F^T V_i - F^T V_j \geq 0
+\end{equation}
+
+或者：
+\begin{equation}
+[F^T \quad -F^T] \begin{bmatrix} V_i \\ V_j \end{bmatrix} \geq 0
+\end{equation}
+
+这是一个\textbf{齐次约束}，因为：
+\begin{itemize}
+\item 约束超平面通过原点：$F^T V_i - F^T V_j = 0$在$(V_i, V_j) = (0, 0)$处成立
+\item 如果$(V_i, V_j)$满足约束，那么$\lambda (V_i, V_j)$（$\lambda \geq 0$）也满足约束
+\end{itemize}
+
+\section{多个物体装配的情况}
+
+\subsection{基本设置}
+
+考虑一个由$m$个物体组成的装配（assembly）：
+\begin{itemize}
+\item 物体编号：$i = 1, 2, \ldots, m$
+\item 每个物体$i$的twist：$V_i \in \mathbb{R}^6$
+\item 物体之间可能有多个接触
+\end{itemize}
+
+\subsection{复合twist空间}
+
+对于$m$个物体：
+\begin{itemize}
+\item \textbf{复合twist空间}：$(V_1, V_2, \ldots, V_m) \in \mathbb{R}^{6m}$
+\item 对于平面物体：$(V_1, V_2, \ldots, V_m) \in \mathbb{R}^{3m}$（每个物体3维）
+\end{itemize}
+
+\textbf{维度分析}：
+\begin{itemize}
+\item 每个物体有6个自由度（3D）或3个自由度（平面）
+\item $m$个物体总共有$6m$个自由度（3D）或$3m$个自由度（平面）
+\item 复合twist空间就是所有可能运动的集合
+\end{itemize}
+
+\subsection{成对接触约束}
+
+如果物体$i$和物体$j$在点$p$处接触：
+\begin{itemize}
+\item 接触法线$\hat{n}$指向物体$i$
+\item 接触wrench：$F = ([p]\hat{n}, \hat{n})$
+\item 约束：$F^T (V_i - V_j) \geq 0$
+\end{itemize}
+
+这个约束在$6m$维复合twist空间中定义了一个半空间。
+
+\subsection{所有约束的组合}
+
+假设装配中有多个成对接触，每个接触贡献一个约束。所有约束的\textbf{交集}定义了可行twist集合：
+
+\begin{equation}
+\mathcal{V} = \{(V_1, \ldots, V_m) | \text{所有接触约束都满足}\}
+\label{eq:assembly_feasible}
+\end{equation}
+
+\subsection{可行twist集合的性质}
+
+如果所有物体都是\textbf{不受控制的}（uncontrolled），即没有外部运动控制：
+\begin{itemize}
+\item 所有约束都是齐次的
+\item 可行twist集合是一个\textbf{以原点为根部的多面体凸锥}
+\item 原点$(V_1, \ldots, V_m) = (0, \ldots, 0)$总是可行的（所有物体静止）
+\end{itemize}
+
+\section{受控物体与非受控物体}
+
+\subsection{基本概念}
+
+在实际应用中，有些物体的运动是\textbf{受控的}（controlled），有些是\textbf{非受控的}（uncontrolled）：
+
+\begin{itemize}
+\item \textbf{受控物体}：运动由外部控制（例如，机器人手指）
+  \begin{itemize}
+  \item 它们的twist $V_i$是\textbf{已知的}或\textbf{指定的}
+  \item 例如：$V_{\text{finger}} = [0, 0, 0, v_x, 0, 0]^T$（手指以速度$v_x$移动）
+  \end{itemize}
+
+\item \textbf{非受控物体}：运动由接触约束和动力学决定（例如，被抓取的物体）
+  \begin{itemize}
+  \item 它们的twist $V_i$是\textbf{未知的}，需要求解
+  \item 约束限制了它们的可能运动
+  \end{itemize}
+\end{itemize}
+
+\subsection{约束的变化}
+
+当有受控物体时，约束的性质发生变化：
+
+\begin{itemize}
+\item \textbf{齐次约束}：$F^T (V_i - V_j) \geq 0$
+  \begin{itemize}
+  \item 如果$V_j$是受控的且$V_j \neq 0$，约束变为：$F^T V_i \geq F^T V_j$
+  \item 这是一个\textbf{非齐次约束}，因为超平面不通过原点
+  \end{itemize}
+
+\item \textbf{可行集合的变化}：
+  \begin{itemize}
+  \item 如果所有物体都非受控：可行集合是\textbf{以原点为根部的锥}
+  \item 如果有受控物体：可行集合是\textbf{一般的多面体}（可能是有界的）
+  \end{itemize}
+\end{itemize}
+
+\subsection{例子：单个受控物体}
+
+考虑两个物体：
+\begin{itemize}
+\item 物体1：受控（机器人手指），$V_1$已知
+\item 物体2：非受控（被抓取物体），$V_2$未知
+\end{itemize}
+
+约束：$F^T (V_1 - V_2) \geq 0$
+
+可以写成：
+\begin{equation}
+F^T V_2 \leq F^T V_1
+\end{equation}
+
+这是一个\textbf{非齐次约束}，因为：
+\begin{itemize}
+\item 超平面$F^T V_2 = F^T V_1$不通过原点（除非$V_1 = 0$）
+\item 可行集合不再是锥，而是一个半空间
+\end{itemize}
+
+\section{接触模式}
+
+\subsection{装配的接触模式}
+
+对于整个装配，\textbf{接触模式}（contact mode）是：
+\begin{itemize}
+\item 装配中每个接触处接触标签的连接
+\item 例如：如果有3个接触，接触模式可能是"RRS"、"BSB"等
+\end{itemize}
+
+\subsection{与单个物体的区别}
+
+\begin{itemize}
+\item \textbf{单个物体}：接触模式描述物体$A$与多个其他物体的接触状态
+\item \textbf{多个物体}：接触模式描述整个装配中所有接触的状态
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：两个静止物体接触}
+
+考虑两个物体$A$和$B$在点$p$处接触，且都静止：
+
+\begin{itemize}
+\item 物体$A$的twist：$V_A$
+\item 物体$B$的twist：$V_B$
+\item 约束：$F^T (V_A - V_B) \geq 0$
+\end{itemize}
+
+\textbf{可行twist集合}：
+\begin{itemize}
+\item 复合twist空间：$(V_A, V_B) \in \mathbb{R}^{12}$
+\item 约束在12维空间中定义了一个半空间
+\item 可行集合是一个以原点为根部的锥
+\item 原点$(V_A, V_B) = (0, 0)$是可行的（两个物体都静止）
+\end{itemize}
+
+\subsection{例子2：机器人手指抓取物体}
+
+考虑：
+\begin{itemize}
+\item 物体1：机器人手指（受控），$V_1 = [0, 0, 0, v_x, 0, 0]^T$（以速度$v_x$移动）
+\item 物体2：被抓取物体（非受控），$V_2$未知
+\item 接触约束：$F^T (V_1 - V_2) \geq 0$
+\end{itemize}
+
+\textbf{约束分析}：
+\begin{itemize}
+\item 约束可以写成：$F^T V_2 \leq F^T V_1$
+\item 这是一个非齐次约束
+\item 可行集合是$V_2$空间中的一个半空间（不是锥）
+\item 如果$v_x > 0$，可行集合不包含原点
+\end{itemize}
+
+\subsection{例子3：三个物体的装配}
+
+考虑三个物体$A$、$B$、$C$：
+\begin{itemize}
+\item $A$和$B$在点$p_1$处接触
+\item $B$和$C$在点$p_2$处接触
+\item 所有物体都非受控
+\end{itemize}
+
+\textbf{约束}：
+\begin{align}
+F_1^T (V_A - V_B) &\geq 0 \quad \text{（接触1）} \\
+F_2^T (V_B - V_C) &\geq 0 \quad \text{（接触2）}
+\end{align}
+
+\textbf{可行twist集合}：
+\begin{itemize}
+\item 复合twist空间：$(V_A, V_B, V_C) \in \mathbb{R}^{18}$
+\item 两个约束在18维空间中定义了两个半空间
+\item 可行集合是两个半空间的交集：一个以原点为根部的凸锥
+\end{itemize}
+
+\section{维度分析}
+
+\subsection{复合twist空间的维度}
+
+对于$m$个物体：
+\begin{itemize}
+\item \textbf{3D情况}：每个物体6维，总共$6m$维
+\item \textbf{平面情况}：每个物体3维，总共$3m$维
+\end{itemize}
+
+\subsection{约束的维度}
+
+每个成对接触约束：
+\begin{itemize}
+\item 在$6m$维（或$3m$维）复合twist空间中
+\item 定义了一个$(6m-1)$维（或$(3m-1)$维）的半空间
+\item 边界是$(6m-1)$维（或$(3m-1)$维）的超平面
+\end{itemize}
+
+\subsection{可行集合的维度}
+
+\begin{itemize}
+\item 如果有$k$个独立的接触约束
+\item 可行集合的维度至少是$6m - k$（或$3m - k$）
+\item 如果所有约束都主动，维度可能更小
+\end{itemize}
+
+\section{齐次 vs 非齐次约束}
+
+\subsection{齐次约束（所有物体非受控）}
+
+如果所有物体都非受控：
+\begin{itemize}
+\item 约束形式：$F^T (V_i - V_j) \geq 0$
+\item 这是齐次约束（超平面通过原点）
+\item 可行集合：以原点为根部的多面体凸锥
+\item 原点总是可行的（所有物体静止）
+\end{itemize}
+
+\subsection{非齐次约束（有受控物体）}
+
+如果有受控物体：
+\begin{itemize}
+\item 约束形式：$F^T (V_i - V_j) \geq 0$，其中$V_j$是受控的
+\item 可以写成：$F^T V_i \geq F^T V_j$（非齐次）
+\item 可行集合：一般的多面体（可能是有界的）
+\item 原点可能不可行（如果受控物体在运动）
+\end{itemize}
+
+\section{关键概念总结}
+
+\subsection{从单个物体到多个物体}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{方面} & \textbf{单个物体（12.1.3）} & \textbf{多个物体（12.1.4）} \\
+\hline
+考虑对象 & 物体$A$的twist $V_A$ & 所有物体的twist $(V_1, \ldots, V_m)$ \\
+\hline
+空间维度 & 6维（$V_A$空间） & $6m$维（复合twist空间） \\
+\hline
+约束形式 & $F_i^T (V_A - V_{j(i)}) \geq 0$ & $F^T (V_i - V_j) \geq 0$ \\
+\hline
+可行集合 & $V_A$空间中的多面体 & 复合空间中的多面体 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{受控 vs 非受控}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{特征} & \textbf{所有物体非受控} & \textbf{有受控物体} \\
+\hline
+约束类型 & 齐次 & 非齐次 \\
+\hline
+可行集合 & 以原点为根部的锥 & 一般多面体（可能封闭） \\
+\hline
+原点 & 总是可行 & 可能不可行 \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{物理直觉}
+
+\subsection{为什么需要复合twist空间？}
+
+\begin{itemize}
+\item 每个物体都有自己的运动
+\item 接触约束涉及\textbf{两个物体}的相对运动
+\item 需要在\textbf{所有物体的联合空间}中考虑约束
+\item 就像在"大房间"中考虑所有物体的位置，而不是单独考虑每个物体
+\end{itemize}
+
+\subsection{为什么受控物体会改变约束性质？}
+
+\begin{itemize}
+\item 受控物体的运动是"固定的"
+\item 约束变成了对非受控物体的"绝对限制"
+\item 就像"墙"在移动，而不是静止的
+\item 可行区域会"移动"，不再是固定的锥
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{抓取操作}
+
+在机器人抓取中：
+\begin{itemize}
+\item 手指是受控物体（运动由机器人控制）
+\item 被抓取物体是非受控物体（运动由接触约束决定）
+\item 需要分析被抓取物体在给定手指运动下的可能运动
+\end{itemize}
+
+\subsection{装配分析}
+
+在装配分析中：
+\begin{itemize}
+\item 所有物体可能都非受控
+\item 需要分析整个装配的可行运动
+\item 判断装配是否稳定（形状闭合）
+\end{itemize}
+
+\section{总结}
+
+12.1.4章节的核心思想：
+
+\begin{enumerate}
+\item \textbf{推广到多个物体}：从单个物体扩展到多个物体同时接触的情况
+
+\item \textbf{复合twist空间}：需要在所有物体的联合twist空间中考虑约束
+
+\item \textbf{成对接触约束}：每个接触约束涉及两个物体的相对运动
+
+\item \textbf{受控 vs 非受控}：
+  \begin{itemize}
+  \item 所有物体非受控：齐次约束，可行集合是锥
+  \item 有受控物体：非齐次约束，可行集合是一般多面体
+  \end{itemize}
+
+\item \textbf{接触模式}：整个装配的接触模式是所有接触标签的连接
+\end{enumerate}
+
+理解这些概念对于分析复杂的多物体接触系统至关重要。
+
+\end{document}
+

@@ -1,0 +1,273 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{为什么Wrench不在复合锥中导致静态抓取不可行}
+\author{现代机器人学：第12章 抓取与操作\\
+例12.9详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题回顾}
+
+在例12.9中，我们遇到以下情况：
+
+\begin{itemize}
+    \item 要使块保持静止，手指必须提供wrench $F = (0, 0, mg)$来平衡重力
+    \item 这个wrench $(0, 0, mg)$不在可能的接触wrench的复合锥中
+    \item \textbf{结论}：接触模式$RR$不可行，块将相对于手指移动
+\end{itemize}
+
+\textbf{问题}：为什么wrench不在复合锥中就不可行？
+
+\section{核心原理}
+
+\subsection{静态平衡的必要条件}
+
+要使块保持静止（静态平衡），必须满足：
+
+\begin{equation}
+F_{\text{ext}} + F_{\text{contact}} = 0
+\label{eq:equilibrium}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $F_{\text{ext}}$是外部wrench（如重力）
+    \item $F_{\text{contact}}$是接触产生的wrench
+\end{itemize}
+
+\subsection{接触Wrench的约束}
+
+接触产生的wrench $F_{\text{contact}}$不是任意的，它必须满足：
+
+\begin{enumerate}
+    \item \textbf{在复合wrench锥内}：$F_{\text{contact}} \in \mathcal{WC}$
+    \item \textbf{由接触力产生}：$F_{\text{contact}} = \sum_i k_i F_i$，其中$k_i \geq 0$，$F_i \in \mathcal{WC}_i$
+\end{enumerate}
+
+\section{复合Wrench锥的定义}
+
+\subsection{什么是复合Wrench锥？}
+
+复合wrench锥$\mathcal{WC}$是所有可能的接触wrench的集合：
+
+\begin{equation}
+\mathcal{WC} = \text{pos}(\{F_1, F_2, \ldots, F_n\}) = \left\{\sum_{i=1}^n k_i F_i \middle| k_i \geq 0, F_i \in \mathcal{WC}_i \right\}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $F_i$是各个接触的基wrench（摩擦锥的边）
+    \item $k_i \geq 0$是非负系数
+    \item $\mathcal{WC}_i$是接触$i$的wrench锥
+\end{itemize}
+
+\subsection{复合Wrench锥的物理意义}
+
+复合wrench锥表示：
+\begin{itemize}
+    \item \textbf{所有可能}：接触可以产生的所有wrench
+    \item \textbf{限制}：接触\textbf{只能}产生锥内的wrench，无法产生锥外的wrench
+\end{itemize}
+
+\section{为什么不在锥中就不可行？}
+
+\subsection{逻辑推理}
+
+\begin{enumerate}
+    \item \textbf{静态平衡要求}：$F_{\text{ext}} + F_{\text{contact}} = 0$
+    
+    \item \textbf{因此}：$F_{\text{contact}} = -F_{\text{ext}}$
+    
+    \item \textbf{对于例12.9}：
+    \begin{itemize}
+        \item $F_{\text{ext}} = (0, 0, -mg)$（重力向下）
+        \item 需要$F_{\text{contact}} = (0, 0, mg)$（向上支撑）
+    \end{itemize}
+    
+    \item \textbf{约束条件}：$F_{\text{contact}} \in \mathcal{WC}$（必须在复合锥内）
+    
+    \item \textbf{如果} $(0, 0, mg) \notin \mathcal{WC}$：
+    \begin{itemize}
+        \item 接触无法产生wrench $(0, 0, mg)$
+        \item 无法满足平衡方程
+        \item 静态平衡不可能实现
+    \end{itemize}
+    
+    \item \textbf{结论}：块无法保持静止，必须移动
+\end{enumerate}
+
+\subsection{数学证明}
+
+假设存在静态平衡解，则：
+
+\begin{align}
+F_{\text{ext}} + F_{\text{contact}} &= 0 \\
+F_{\text{contact}} &= -F_{\text{ext}} = (0, 0, mg)
+\end{align}
+
+但根据定义，$F_{\text{contact}} \in \mathcal{WC}$，因此：
+
+\begin{equation}
+(0, 0, mg) \in \mathcal{WC}
+\end{equation}
+
+这与已知条件$(0, 0, mg) \notin \mathcal{WC}$矛盾。
+
+\textbf{因此}：不存在静态平衡解，块必须移动。
+
+\section{物理解释}
+
+\subsection{为什么接触无法产生某些Wrench？}
+
+接触无法产生某些wrench的原因：
+
+\begin{enumerate}
+    \item \textbf{摩擦限制}：
+    \begin{itemize}
+        \item 无摩擦接触只能提供法向力
+        \item 有摩擦接触可以提供切向力，但受摩擦系数限制
+        \item 摩擦锥限制了力的方向范围
+    \end{itemize}
+    
+    \item \textbf{几何限制}：
+    \begin{itemize}
+        \item 接触位置决定了力矩
+        \item 接触法线方向限制了力的方向
+        \item 多个接触的组合仍然受限
+    \end{itemize}
+    
+    \item \textbf{非负性约束}：
+    \begin{itemize}
+        \item 接触只能"推"，不能"拉"（$k_i \geq 0$）
+        \item 法向力必须非负
+        \item 这进一步限制了可能的wrench
+    \end{itemize}
+\end{enumerate}
+
+\subsection{例12.9的具体情况}
+
+在例12.9中：
+
+\begin{itemize}
+    \item \textbf{一个接触无摩擦}：只能提供法向力，无法提供切向力
+    \item \textbf{一个接触有摩擦}：可以提供切向力，但受摩擦系数$\mu = 1$限制
+    \item \textbf{接触位置}：下手指在$(-3, -1)$，上手指在$(1, 1)$
+    \item \textbf{结果}：这两个接触的组合无法产生wrench $(0, 0, mg)$
+\end{itemize}
+
+\section{图形理解}
+
+\subsection{力矩标记方法}
+
+使用力矩标记方法可以直观地理解：
+
+\begin{itemize}
+    \item \textbf{复合wrench锥}：在力矩标记图中显示为标记区域
+    \item \textbf{所需wrench} $(0, 0, mg)$：在图中表示为某个点
+    \item \textbf{如果点不在标记区域内}：接触无法产生这个wrench
+\end{itemize}
+
+\subsection{Wrench空间中的表示}
+
+在wrench空间中：
+
+\begin{itemize}
+    \item \textbf{复合wrench锥}：是一个凸锥（以原点为根部）
+    \item \textbf{所需wrench}：是空间中的一个点
+    \item \textbf{如果点在锥外}：无法通过接触产生
+    \item \textbf{如果点在锥内}：可以通过接触产生
+\end{itemize}
+
+\section{动态情况 vs 静态情况}
+
+\subsection{静态情况}
+
+在静态情况下：
+\begin{itemize}
+    \item 加速度为零：$\dot{V} = 0$
+    \item 动力学方程简化为：$F_{\text{ext}} + F_{\text{contact}} = 0$
+    \item 如果$F_{\text{contact}} \notin \mathcal{WC}$，则无解
+\end{itemize}
+
+\subsection{动态情况}
+
+在动态情况下：
+\begin{itemize}
+    \item 加速度非零：$\dot{V} \neq 0$
+    \item 动力学方程为：$F_{\text{ext}} + F_{\text{contact}} = G \dot{V} - [\text{ad}_V]^T G V$
+    \item 即使$F_{\text{contact}} \notin \mathcal{WC}$（对于静态平衡），可能仍然有解
+    \item 因为惯性力$G \dot{V}$可以帮助平衡
+\end{itemize}
+
+这就是为什么在例12.9中，虽然静态抓取不可行，但动态抓取（手指加速）可行。
+
+\section{一般原理}
+
+\subsection{可行性条件}
+
+对于任何操作任务，可行性条件为：
+
+\begin{enumerate}
+    \item \textbf{静态情况}：
+    \begin{equation}
+    -F_{\text{ext}} \in \mathcal{WC}
+    \end{equation}
+    即，所需的反向wrench必须在复合wrench锥内。
+    
+    \item \textbf{动态情况}：
+    \begin{equation}
+    -F_{\text{ext}} + G \dot{V} - [\text{ad}_V]^T G V \in \mathcal{WC}
+    \end{equation}
+    即，考虑惯性力后，所需的wrench必须在复合wrench锥内。
+\end{enumerate}
+
+\subsection{判断方法}
+
+要判断操作是否可行：
+
+\begin{enumerate}
+    \item 计算所需的接触wrench：$F_{\text{required}} = -F_{\text{ext}}$（静态）或考虑惯性力（动态）
+    \item 检查：$F_{\text{required}} \in \mathcal{WC}$？
+    \item 如果"是"：操作可行
+    \item 如果"否"：操作不可行（静态）或需要动态调整（动态）
+\end{enumerate}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{静态平衡要求}：$F_{\text{ext}} + F_{\text{contact}} = 0$
+    
+    \item \textbf{接触约束}：$F_{\text{contact}} \in \mathcal{WC}$（必须在复合wrench锥内）
+    
+    \item \textbf{逻辑结论}：如果$-F_{\text{ext}} \notin \mathcal{WC}$，则静态平衡不可能
+    
+    \item \textbf{物理原因}：接触受摩擦、几何和非负性约束，无法产生任意wrench
+    
+    \item \textbf{动态解决方案}：即使静态不可行，动态（通过加速度）可能可行
+    
+    \item \textbf{判断方法}：检查所需wrench是否在复合wrench锥内
+\end{enumerate}
+
+\section{实际应用}
+
+理解这个原理有助于：
+
+\begin{itemize}
+    \item \textbf{抓取规划}：判断给定的接触配置是否能够保持物体静止
+    \item \textbf{操作设计}：设计能够产生所需wrench的接触配置
+    \item \textbf{故障诊断}：理解为什么某些操作失败
+    \item \textbf{优化设计}：改进接触配置以扩大可行的wrench范围
+\end{itemize}
+
+\end{document}
+

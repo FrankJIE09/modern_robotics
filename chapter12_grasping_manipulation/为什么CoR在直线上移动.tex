@@ -1,0 +1,367 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{为什么CoR在直线上移动？}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+给定两个twist $V_1$和$V_2$，它们的线性组合：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2
+\end{equation}
+
+\textbf{问题}：为什么当$k_1$和$k_2$变化时，$\text{CoR}(V)$在通过$\text{CoR}(V_1)$和$\text{CoR}(V_2)$的\textbf{直线}上移动？
+
+\section{数学证明}
+
+\subsection{设置}
+
+设：
+\begin{align}
+V_1 &= (\omega_{1z}, v_{1x}, v_{1y}) \quad \Rightarrow \quad \text{CoR}_1 = \left(-\frac{v_{1y}}{\omega_{1z}}, \frac{v_{1x}}{\omega_{1z}}\right) \\
+V_2 &= (\omega_{2z}, v_{2x}, v_{2y}) \quad \Rightarrow \quad \text{CoR}_2 = \left(-\frac{v_{2y}}{\omega_{2z}}, \frac{v_{2x}}{\omega_{2z}}\right)
+\end{align}
+
+线性组合：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2 = (k_1 \omega_{1z} + k_2 \omega_{2z}, k_1 v_{1x} + k_2 v_{2x}, k_1 v_{1y} + k_2 v_{2y})
+\end{equation}
+
+\subsection{CoR位置的计算}
+
+如果$\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} \neq 0$，则：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right) \\
+&= \left(-\frac{k_1 v_{1y} + k_2 v_{2y}}{k_1 \omega_{1z} + k_2 \omega_{2z}}, \frac{k_1 v_{1x} + k_2 v_{2x}}{k_1 \omega_{1z} + k_2 \omega_{2z}}\right)
+\label{eq:cor_combination}
+\end{align}
+
+\subsection{关键技巧：引入参数$t$}
+
+\textbf{关键观察}：CoR位置只依赖于$k_1$和$k_2$的\textbf{比值}，而不是绝对值。
+
+设：
+\begin{equation}
+t = \frac{k_1}{k_1 + k_2}, \quad \text{当 } k_1 + k_2 \neq 0
+\end{equation}
+
+则：
+\begin{align}
+k_1 &= t(k_1 + k_2) \\
+k_2 &= (1-t)(k_1 + k_2)
+\end{align}
+
+\textbf{注意}：这里我们假设$k_1 + k_2 \neq 0$。如果$k_1 + k_2 = 0$，则$k_2 = -k_1$，这是特殊情况（后面会讨论）。
+
+\subsection{重写CoR公式}
+
+将$k_1$和$k_2$用$t$表示，代入公式(\ref{eq:cor_combination})：
+
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{t(k_1+k_2) v_{1y} + (1-t)(k_1+k_2) v_{2y}}{t(k_1+k_2) \omega_{1z} + (1-t)(k_1+k_2) \omega_{2z}}, \frac{t(k_1+k_2) v_{1x} + (1-t)(k_1+k_2) v_{2x}}{t(k_1+k_2) \omega_{1z} + (1-t)(k_1+k_2) \omega_{2z}}\right) \\
+&= \left(-\frac{t v_{1y} + (1-t) v_{2y}}{t \omega_{1z} + (1-t) \omega_{2z}}, \frac{t v_{1x} + (1-t) v_{2x}}{t \omega_{1z} + (1-t) \omega_{2z}}\right)
+\label{eq:cor_t}
+\end{align}
+
+\textbf{关键点}：$(k_1 + k_2)$被约掉了！CoR位置只依赖于$t$。
+
+\subsection{参数化直线方程}
+
+现在我们需要证明：当$t$变化时，$\text{CoR}(V)$在通过$\text{CoR}_1$和$\text{CoR}_2$的直线上。
+
+\textbf{思路}：我们需要找到一个参数$\lambda$，使得：
+\begin{equation}
+\text{CoR}(V) = \lambda \text{CoR}_1 + (1-\lambda) \text{CoR}_2
+\end{equation}
+
+或者，更一般地，证明$\text{CoR}(V)$满足通过$\text{CoR}_1$和$\text{CoR}_2$的直线方程。
+
+\subsection{直线方程}
+
+通过两点$(x_1, y_1)$和$(x_2, y_2)$的直线方程可以写成参数形式：
+\begin{equation}
+(x, y) = (1-\lambda)(x_1, y_1) + \lambda(x_2, y_2), \quad \lambda \in \mathbb{R}
+\end{equation}
+
+或者：
+\begin{equation}
+(x, y) = (x_1, y_1) + \lambda[(x_2, y_2) - (x_1, y_1)], \quad \lambda \in \mathbb{R}
+\end{equation}
+
+\subsection{证明CoR在直线上}
+
+\textbf{方法1}：直接验证
+
+我们需要证明存在$\lambda$使得：
+\begin{equation}
+\text{CoR}(V) = (1-\lambda) \text{CoR}_1 + \lambda \text{CoR}_2
+\end{equation}
+
+这等价于证明$\text{CoR}(V)$、$\text{CoR}_1$和$\text{CoR}_2$三点共线。
+
+\textbf{方法2}：使用向量叉积
+
+三点共线的充要条件是：
+\begin{equation}
+(\text{CoR}(V) - \text{CoR}_1) \times (\text{CoR}_2 - \text{CoR}_1) = 0
+\end{equation}
+
+\textbf{方法3}：直接计算（推荐）
+
+让我们直接计算$\text{CoR}(V)$的表达式，看看它是否在直线上。
+
+从公式(\ref{eq:cor_t})，我们有：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{t v_{1y} + (1-t) v_{2y}}{t \omega_{1z} + (1-t) \omega_{2z}}, \frac{t v_{1x} + (1-t) v_{2x}}{t \omega_{1z} + (1-t) \omega_{2z}}\right)
+\end{align}
+
+而：
+\begin{align}
+\text{CoR}_1 &= \left(-\frac{v_{1y}}{\omega_{1z}}, \frac{v_{1x}}{\omega_{1z}}\right) \\
+\text{CoR}_2 &= \left(-\frac{v_{2y}}{\omega_{2z}}, \frac{v_{2x}}{\omega_{2z}}\right)
+\end{align}
+
+\textbf{关键观察}：虽然不能直接写成$\text{CoR}_1$和$\text{CoR}_2$的线性组合，但我们可以证明$\text{CoR}(V)$满足通过$\text{CoR}_1$和$\text{CoR}_2$的直线方程。
+
+\subsection{几何证明思路}
+
+\textbf{更直观的方法}：考虑CoR的几何意义。
+
+\begin{itemize}
+\item CoR是平面上的一个点
+\item 当$k_1$和$k_2$变化时，twist $V$在twist空间中沿直线变化
+\item 从twist到CoR的映射是\textbf{分式线性变换}（Möbius变换）
+\item 分式线性变换将直线映射为直线或圆
+\item 在这个特殊情况下，它映射为直线
+\end{itemize}
+
+\section{具体数值例子}
+
+让我们用一个具体的例子来验证。
+
+\subsection{例子设置}
+
+设：
+\begin{align}
+V_1 &= (1, 2, 0) \quad \Rightarrow \quad \text{CoR}_1 = (0, 2) \\
+V_2 &= (1, 0, 2) \quad \Rightarrow \quad \text{CoR}_2 = (-2, 0)
+\end{align}
+
+\subsection{计算几个CoR位置}
+
+\textbf{情况1}：$k_1 = 1, k_2 = 0$（即$V = V_1$）
+\begin{align}
+V &= (1, 2, 0) \\
+\text{CoR}(V) &= (0, 2) = \text{CoR}_1 \quad \checkmark
+\end{align}
+
+\textbf{情况2}：$k_1 = 0, k_2 = 1$（即$V = V_2$）
+\begin{align}
+V &= (1, 0, 2) \\
+\text{CoR}(V) &= (-2, 0) = \text{CoR}_2 \quad \checkmark
+\end{align}
+
+\textbf{情况3}：$k_1 = 1, k_2 = 1$（即$V = V_1 + V_2$）
+\begin{align}
+V &= (2, 2, 2) \\
+\text{CoR}(V) &= \left(-\frac{2}{2}, \frac{2}{2}\right) = (-1, 1)
+\end{align}
+
+\textbf{验证}：$(-1, 1)$是否在通过$(0, 2)$和$(-2, 0)$的直线上？
+
+通过两点的直线方程：
+\begin{equation}
+\frac{y - 2}{x - 0} = \frac{0 - 2}{-2 - 0} = 1
+\end{equation}
+
+即：$y - 2 = x$，或$y = x + 2$
+
+检查$(-1, 1)$：$1 = -1 + 2 = 1$ \quad $\checkmark$
+
+\textbf{情况4}：$k_1 = 2, k_2 = 1$
+\begin{align}
+V &= (3, 4, 2) \\
+\text{CoR}(V) &= \left(-\frac{2}{3}, \frac{4}{3}\right) = \left(-\frac{2}{3}, \frac{4}{3}\right)
+\end{align}
+
+验证：$\frac{4}{3} = -\frac{2}{3} + 2 = \frac{4}{3}$ \quad $\checkmark$
+
+\textbf{情况5}：$k_1 = 1, k_2 = 2$
+\begin{align}
+V &= (3, 2, 4) \\
+\text{CoR}(V) &= \left(-\frac{4}{3}, \frac{2}{3}\right)
+\end{align}
+
+验证：$\frac{2}{3} = -\frac{4}{3} + 2 = \frac{2}{3}$ \quad $\checkmark$
+
+\subsection{图示}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 两个CoR
+\filldraw[red] (0,2) circle (3pt) node[above left] {CoR$_1$ $(0, 2)$};
+\filldraw[blue] (-2,0) circle (3pt) node[below left] {CoR$_2$ $(-2, 0)$};
+
+% 连接直线
+\draw[thick,green] (-2.5,-0.5) -- (0.5,2.5);
+\node[green] at (-1.2,1.2) {直线 $y = x + 2$};
+
+% 标记几个CoR
+\filldraw[purple] (-1,1) circle (2pt) node[above right] {$(-1, 1)$\\$k_1=1, k_2=1$};
+\filldraw[purple] (-0.67,1.33) circle (2pt) node[above right] {$(-\frac{2}{3}, \frac{4}{3})$\\$k_1=2, k_2=1$};
+\filldraw[purple] (-1.33,0.67) circle (2pt) node[below left] {$(-\frac{4}{3}, \frac{2}{3})$\\$k_1=1, k_2=2$};
+
+\node[below] at (-1,-0.8) {所有CoR都在同一条直线上};
+\end{tikzpicture}
+\end{center}
+
+\section{一般性证明}
+
+\subsection{参数化表示}
+
+从公式(\ref{eq:cor_t})，我们有：
+\begin{equation}
+\text{CoR}(V) = \left(-\frac{t v_{1y} + (1-t) v_{2y}}{t \omega_{1z} + (1-t) \omega_{2z}}, \frac{t v_{1x} + (1-t) v_{2x}}{t \omega_{1z} + (1-t) \omega_{2z}}\right)
+\end{equation}
+
+其中$t = \frac{k_1}{k_1 + k_2}$。
+
+\textbf{关键观察}：这个表达式是$t$的\textbf{分式线性函数}。
+
+\subsection{分式线性变换的性质}
+
+分式线性变换（Möbius变换）的一般形式：
+\begin{equation}
+f(z) = \frac{az + b}{cz + d}
+\end{equation}
+
+在我们的情况下，CoR的每个坐标都是$t$的分式线性函数。
+
+\textbf{重要性质}：分式线性变换将直线映射为直线或圆。在我们的情况下，由于分子和分母都是$t$的线性函数，结果总是直线。
+
+\subsection{验证端点}
+
+\textbf{当$t = 1$时}（即$k_2 = 0$）：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{v_{1y}}{\omega_{1z}}, \frac{v_{1x}}{\omega_{1z}}\right) = \text{CoR}_1
+\end{align}
+
+\textbf{当$t = 0$时}（即$k_1 = 0$）：
+\begin{align}
+\text{CoR}(V) &= \left(-\frac{v_{2y}}{\omega_{2z}}, \frac{v_{2x}}{\omega_{2z}}\right) = \text{CoR}_2
+\end{align}
+
+\textbf{结论}：当$t$从0变化到1时，$\text{CoR}(V)$从$\text{CoR}_2$移动到$\text{CoR}_1$，沿着连接两点的直线。
+
+\subsection{扩展到整个实数轴}
+
+当$t$取所有实数值时：
+\begin{itemize}
+\item $t < 0$：CoR在从CoR$_2$出发的延长线上
+\item $0 \leq t \leq 1$：CoR在CoR$_1$和CoR$_2$之间的线段上
+\item $t > 1$：CoR在从CoR$_1$出发的延长线上
+\end{itemize}
+
+\textbf{关键}：无论$t$取什么值，CoR都在通过CoR$_1$和CoR$_2$的\textbf{整条直线}上。
+
+\section{几何直觉}
+
+\subsection{为什么是直线？
+
+\textbf{直觉1}：线性组合的"线性"性质
+
+\begin{itemize}
+\item Twist的线性组合：$V = k_1 V_1 + k_2 V_2$
+\item 这是"线性"的
+\item CoR是twist的"非线性"函数（分式）
+\item 但分式线性函数仍然保持"直线性"
+\end{itemize}
+
+\textbf{直觉2}：参数化
+
+\begin{itemize}
+\item 当$k_1$和$k_2$变化时，实际上只有一个自由度（比值$t$）
+\item 一个自由度的变化通常对应一条曲线
+\item 在这个特殊情况下，是直线
+\end{itemize}
+
+\textbf{直觉3}：连续性
+
+\begin{itemize}
+\item 当$k_1$和$k_2$连续变化时，CoR也连续变化
+\item 从CoR$_1$到CoR$_2$的最短路径是直线
+\item 数学上，分式线性变换保证了这种"直线性"
+\end{itemize}
+
+\section{特殊情况}
+
+\subsection{当$\omega_z = 0$时}
+
+如果$k_1 \omega_{1z} + k_2 \omega_{2z} = 0$：
+\begin{itemize}
+\item 这是纯平移
+\item CoR在无穷远处
+\item 可以认为这是直线的"端点"（在射影几何中）
+\end{itemize}
+
+\subsection{当$k_1 + k_2 = 0$时}
+
+如果$k_2 = -k_1$：
+\begin{itemize}
+\item $V = k_1(V_1 - V_2)$
+\item 这是$V_1$和$V_2$的差
+\item 需要单独处理
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键结论}
+
+\begin{enumerate}
+\item \textbf{数学事实}：当$k_1$和$k_2$变化时，$\text{CoR}(V)$在通过$\text{CoR}(V_1)$和$\text{CoR}(V_2)$的直线上移动
+
+\item \textbf{原因}：
+  \begin{itemize}
+  \item CoR位置只依赖于$k_1$和$k_2$的比值$t$
+  \item CoR是$t$的分式线性函数
+  \item 分式线性函数将参数直线映射为直线
+  \end{itemize}
+
+\item \textbf{几何意义}：
+  \begin{itemize}
+  \item 一个自由度的变化对应一条曲线
+  \item 在这个情况下，是直线
+  \end{itemize}
+
+\item \textbf{验证}：通过具体数值例子可以验证
+\end{enumerate}
+
+\subsection{应用}
+
+这个性质在12.1.6章节中非常重要：
+\begin{itemize}
+\item 理解正线性组合的CoR区域
+\item 分析可行运动集合
+\item 可视化接触约束
+\end{itemize}
+
+\end{document}
+

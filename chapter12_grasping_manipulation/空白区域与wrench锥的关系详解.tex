@@ -1,0 +1,274 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{空白区域与Wrench锥的关系：为什么力矩符号不定仍然不行？}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题的核心}
+
+\subsection{看似矛盾的现象}
+
+\begin{itemize}
+    \item \textbf{空白区域}：表示力矩符号取决于系数选择，可以产生任意符号的力矩
+    \item \textbf{但}：wrench $(0, 0, mg)$不在复合wrench锥中，就不可行
+    \item \textbf{困惑}：如果空白区域表示"灵活性大"，为什么wrench不在锥中就不行？
+\end{itemize}
+
+\subsection{关键误解}
+
+\textbf{误解}：空白区域表示可以产生"任意"wrench。
+
+\textbf{正确理解}：空白区域只表示对于\textbf{平面中的某个点}，可以产生\textbf{任意符号的力矩}，但这不意味着可以产生\textbf{任意的wrench}。
+
+\section{Wrench vs 力矩}
+
+\subsection{Wrench的完整定义}
+
+平面wrench是一个\textbf{三维向量}：
+\begin{equation}
+F = (m_z, f_x, f_y)
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $m_z$：关于$\hat{z}$轴的力矩
+    \item $f_x$：$\hat{x}$方向的力
+    \item $f_y$：$\hat{y}$方向的力
+\end{itemize}
+
+\subsection{力矩标记只关注力矩}
+
+\textbf{关键点}：力矩标记方法只关注wrench对\textbf{平面中某个点}产生的\textbf{力矩}，而不考虑wrench的\textbf{力分量}。
+
+\subsubsection{力矩的计算}
+
+对于平面中的点$p = (x, y)$，wrench $F = (m_z, f_x, f_y)$对该点产生的力矩为：
+\begin{equation}
+m_z(p) = m_z + x f_y - y f_x
+\end{equation}
+
+\subsubsection{空白区域的含义}
+
+空白区域表示：对于点$p$，正线性组合可以产生\textbf{任意符号的力矩}$m_z(p)$。
+
+但这\textbf{不意味着}可以产生\textbf{任意的wrench} $F = (m_z, f_x, f_y)$。
+
+\section{为什么空白区域不能保证Wrench在锥中？}
+
+\subsection{三个约束 vs 一个自由度}
+
+\subsubsection{Wrench的三个分量}
+
+要产生特定的wrench $F = (m_z, f_x, f_y)$，需要同时满足：
+\begin{enumerate}
+    \item 力矩分量：$m_z = m_{z,\text{desired}}$
+    \item x方向力：$f_x = f_{x,\text{desired}}$
+    \item y方向力：$f_y = f_{y,\text{desired}}$
+\end{enumerate}
+
+\subsubsection{空白区域只提供一个自由度}
+
+空白区域只告诉我们：
+\begin{itemize}
+    \item 对于点$p$，可以产生\textbf{任意符号的力矩}$m_z(p)$
+    \item 这是一个\textbf{自由度}
+    \item 但wrench需要\textbf{三个分量}都正确
+\end{itemize}
+
+\subsection{具体例子：例12.9}
+
+\subsubsection{所需的Wrench}
+
+要使块保持静止，需要：
+\begin{equation}
+F_{\text{required}} = (0, 0, mg)
+\end{equation}
+
+即：
+\begin{itemize}
+    \item 力矩：$m_z = 0$
+    \item x方向力：$f_x = 0$
+    \item y方向力：$f_y = mg$（向上）
+\end{itemize}
+
+\subsubsection{复合Wrench锥的限制}
+
+复合wrench锥$\mathcal{WC} = \text{pos}(\{F_1, F_2, F_3\})$，其中：
+\begin{align}
+F_1 &= \frac{1}{\sqrt{2}}(-4, -1, 1) \\
+F_2 &= \frac{1}{\sqrt{2}}(-2, 1, 1) \\
+F_3 &= (1, -1, 0)
+\end{align}
+
+\subsubsection{检查是否在锥中}
+
+需要检查是否存在$k_1, k_2, k_3 \geq 0$，使得：
+\begin{equation}
+k_1 F_1 + k_2 F_2 + k_3 F_3 = (0, 0, mg)
+\end{equation}
+
+展开：
+\begin{align}
+-\frac{4k_1}{\sqrt{2}} - \frac{2k_2}{\sqrt{2}} + k_3 &= 0 \quad \text{（力矩）} \\
+-\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} - k_3 &= 0 \quad \text{（x方向力）} \\
+\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} &= mg \quad \text{（y方向力）}
+\end{align}
+
+\subsubsection{求解约束}
+
+从第一个和第二个方程：
+\begin{align}
+-\frac{4k_1}{\sqrt{2}} - \frac{2k_2}{\sqrt{2}} + k_3 &= 0 \\
+-\frac{k_1}{\sqrt{2}} + \frac{k_2}{\sqrt{2}} - k_3 &= 0
+\end{align}
+
+相加：
+\begin{equation}
+-\frac{5k_1}{\sqrt{2}} - \frac{k_2}{\sqrt{2}} = 0
+\end{equation}
+
+由于$k_1, k_2 \geq 0$，这要求$k_1 = k_2 = 0$。
+
+但从第三个方程：
+\begin{equation}
+\frac{k_1 + k_2}{\sqrt{2}} = mg > 0
+\end{equation}
+
+这要求$k_1 + k_2 > 0$，与$k_1 = k_2 = 0$矛盾。
+
+\textbf{因此}：不存在非负系数使得$k_1 F_1 + k_2 F_2 + k_3 F_3 = (0, 0, mg)$。
+
+\subsubsection{空白区域的作用}
+
+即使对于某些点$p$，wrench锥产生空白区域（可以产生任意符号的力矩$m_z(p)$），这\textbf{不意味着}可以产生wrench $(0, 0, mg)$。
+
+因为：
+\begin{itemize}
+    \item 空白区域只保证\textbf{力矩}$m_z(p)$的灵活性
+    \item 但wrench还需要\textbf{力分量}$f_x$和$f_y$正确
+    \item 这三个约束可能无法同时满足
+\end{itemize}
+
+\section{力矩标记的局限性}
+
+\subsection{力矩标记只提供部分信息}
+
+力矩标记方法：
+\begin{itemize}
+    \item \textbf{提供}：对于每个点$p$，力矩$m_z(p)$的符号信息
+    \item \textbf{不提供}：wrench的力分量$f_x$和$f_y$的信息
+    \item \textbf{不提供}：wrench是否在锥中的完整信息
+\end{itemize}
+
+\subsection{完整判断需要什么？}
+
+要判断wrench $F$是否在复合锥$\mathcal{WC}$中，需要：
+
+\begin{enumerate}
+    \item \textbf{检查线性组合}：是否存在$k_i \geq 0$使得$\sum_i k_i F_i = F$
+    \item \textbf{或者检查锥的边界}：$F$是否在锥的边界或内部
+    \item \textbf{或者使用力矩标记}：检查$F$的箭头是否在标记区域内（但这只提供部分信息）
+\end{enumerate}
+
+\section{为什么空白区域仍然有用？}
+
+\subsection{力闭合的判断}
+
+虽然空白区域不能直接判断wrench是否在锥中，但它对\textbf{力闭合}的判断很有用：
+
+\begin{itemize}
+    \item \textbf{力闭合要求}：没有一致标记的区域
+    \item \textbf{原因}：如果所有区域都是空白（不一致），则wrench锥可以产生任意方向的wrench
+    \item \textbf{但}：这仍然不意味着可以产生\textbf{任意大小}的wrench
+\end{itemize}
+
+\subsection{力矩标记的适用场景}
+
+力矩标记适用于：
+\begin{itemize}
+    \item \textbf{判断力闭合}：检查是否有一致标记区域
+    \item \textbf{可视化wrench锥}：理解wrench锥的几何结构
+    \item \textbf{定性分析}：理解哪些方向的wrench可能产生
+\end{itemize}
+
+但不适用于：
+\begin{itemize}
+    \item \textbf{精确判断}：判断特定wrench是否在锥中
+    \item \textbf{定量分析}：计算所需的接触力
+\end{itemize}
+
+\section{正确的理解}
+
+\subsection{空白区域的含义}
+
+空白区域表示：
+\begin{itemize}
+    \item 对于点$p$，可以产生\textbf{任意符号的力矩}$m_z(p)$
+    \item 这是一个\textbf{自由度}
+    \item 但这\textbf{不意味着}可以产生\textbf{任意的wrench}
+\end{itemize}
+
+\subsection{Wrench在锥中的条件}
+
+Wrench $F$在复合锥$\mathcal{WC}$中的条件是：
+\begin{equation}
+F \in \mathcal{WC} = \text{pos}(\{F_1, F_2, \ldots, F_n\})
+\end{equation}
+
+即存在$k_i \geq 0$使得：
+\begin{equation}
+F = \sum_{i=1}^n k_i F_i
+\end{equation}
+
+这需要\textbf{三个分量}都同时满足，而不仅仅是力矩。
+
+\subsection{例12.9的情况}
+
+\begin{itemize}
+    \item 即使某些区域是空白（力矩灵活）
+    \item 但wrench $(0, 0, mg)$的三个分量无法同时满足
+    \item 因此不在复合锥中
+    \item 静态抓取不可行
+\end{itemize}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{空白区域}：只表示力矩$m_z(p)$的灵活性，不表示整个wrench的灵活性
+    
+    \item \textbf{Wrench是三维的}：需要同时满足$m_z$、$f_x$、$f_y$三个分量
+    
+    \item \textbf{力矩标记的局限性}：只提供力矩信息，不提供力的信息
+    
+    \item \textbf{判断wrench在锥中}：需要检查三个分量是否都能通过正线性组合实现
+    
+    \item \textbf{例12.9}：即使有空白区域，wrench $(0, 0, mg)$的三个分量无法同时满足，因此不在锥中
+    
+    \item \textbf{力矩标记的用途}：主要用于力闭合判断和可视化，不用于精确判断特定wrench
+\end{enumerate}
+
+\section{实际应用}
+
+理解这个区别有助于：
+
+\begin{itemize}
+    \item \textbf{正确使用力矩标记}：理解其适用场景和局限性
+    \item \textbf{精确分析}：使用代数方法判断特定wrench是否可行
+    \item \textbf{设计抓取}：理解需要同时考虑力矩和力的约束
+    \item \textbf{避免误解}：不要将力矩的灵活性与wrench的灵活性混淆
+\end{itemize}
+
+\end{document}
+

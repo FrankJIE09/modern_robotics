@@ -1,0 +1,670 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{相同符号 vs 不同符号：CoR区域的详细解释}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{问题}
+
+\textbf{问题1}：为什么相同符号的角速度时，CoR限制在\textbf{线段}上？
+
+\textbf{问题2}：为什么不同符号的角速度时，CoR是\textbf{两条射线}？
+
+\section{关键：正线性组合的限制}
+
+\subsection{正线性组合的定义}
+
+我们考虑的是\textbf{正线性组合}（非负线性组合）：
+\begin{equation}
+V = k_1 V_1 + k_2 V_2, \quad k_1, k_2 \geq 0
+\label{eq:positive_combination}
+\end{equation}
+
+\textbf{关键限制}：$k_1, k_2 \geq 0$（不能为负）
+
+\subsection{参数化}
+
+引入参数：
+\begin{equation}
+t = \frac{k_1}{k_1 + k_2}, \quad \text{当 } k_1 + k_2 > 0
+\end{equation}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 由于$k_1, k_2 \geq 0$，我们有$k_1 + k_2 \geq 0$
+\item 如果$k_1 + k_2 = 0$，则$k_1 = k_2 = 0$（对应$V = 0$，特殊情况）
+\item 因此，对于非零组合，$k_1 + k_2 > 0$
+\item 所以$t = \frac{k_1}{k_1 + k_2}$有定义
+\end{itemize}
+
+\textbf{参数$t$的范围}：
+\begin{itemize}
+\item 当$k_1 = 0, k_2 > 0$时：$t = 0$
+\item 当$k_1 > 0, k_2 = 0$时：$t = 1$
+\item 当$k_1, k_2 > 0$时：$0 < t < 1$
+\item \textbf{因此}：$0 \leq t \leq 1$（这是正线性组合的限制！）
+\end{itemize}
+
+\section{情况1：相同符号的角速度}
+
+\subsection{设置}
+
+设$\omega_{1z} > 0$，$\omega_{2z} > 0$（都是'+'，逆时针）
+
+\subsection{角速度的符号}
+
+对于正线性组合$V = k_1 V_1 + k_2 V_2$（$k_1, k_2 \geq 0$）：
+\begin{align}
+\omega_z &= k_1 \omega_{1z} + k_2 \omega_{2z} \\
+&= k_1 \cdot (\text{正数}) + k_2 \cdot (\text{正数}) \\
+&> 0 \quad \text{（总是正的！）}
+\end{align}
+
+\textbf{关键}：由于$k_1, k_2 \geq 0$且$\omega_{1z}, \omega_{2z} > 0$，我们有$\omega_z > 0$。
+
+\subsection{CoR位置的限制}
+
+从之前的分析，我们知道CoR在通过CoR$_1$和CoR$_2$的直线上。
+
+\textbf{问题}：CoR在这条直线的哪一部分？
+
+\textbf{答案}：由于$0 \leq t \leq 1$，CoR在从CoR$_2$（$t=0$）到CoR$_1$（$t=1$）的\textbf{线段}上。
+
+\subsection{详细分析}
+
+\textbf{当$t = 0$时}（$k_1 = 0, k_2 > 0$）：
+\begin{itemize}
+\item $V = k_2 V_2$
+\item $\omega_z = k_2 \omega_{2z} > 0$
+\item CoR = CoR$_2$
+\end{itemize}
+
+\textbf{当$t = 1$时}（$k_1 > 0, k_2 = 0$）：
+\begin{itemize}
+\item $V = k_1 V_1$
+\item $\omega_z = k_1 \omega_{1z} > 0$
+\item CoR = CoR$_1$
+\end{itemize}
+
+\textbf{当$0 < t < 1$时}（$k_1, k_2 > 0$）：
+\begin{itemize}
+\item $V = k_1 V_1 + k_2 V_2$
+\item $\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} > 0$
+\item CoR在CoR$_1$和CoR$_2$之间的线段上
+\end{itemize}
+
+\textbf{关键限制}：
+\begin{itemize}
+\item $t$的范围是$[0, 1]$（因为$k_1, k_2 \geq 0$）
+\item 这限制了CoR在\textbf{线段}上，不能延伸到直线外
+\end{itemize}
+
+\subsection{图示}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 两个'+' CoR
+\filldraw[red] (0,2) circle (3pt) node[above left] {CoR$_1$ (+)};
+\filldraw[red] (-2,0) circle (3pt) node[below left] {CoR$_2$ (+)};
+
+% 整条直线（虚线）
+\draw[thick,gray,dashed] (-3,-1) -- (1,3);
+
+% 线段（实线，粗）
+\draw[thick,blue,line width=3pt] (0,2) -- (-2,0);
+\node[blue] at (-1,1) {\textbf{可行CoR区域}\\（线段）};
+
+% 标记端点
+\node[red] at (0.3,2) {$t=1$};
+\node[red] at (-2.3,0) {$t=0$};
+
+% 标记中间点
+\filldraw[green] (-1,1) circle (2pt) node[above right] {$t=0.5$};
+
+\node[below] at (-1,-0.5) {限制：$0 \leq t \leq 1$（因为$k_1, k_2 \geq 0$）};
+\end{tikzpicture}
+\end{center}
+
+\section{情况2：不同符号的角速度}
+
+\subsection{设置}
+
+设$\omega_{1z} > 0$（'+'），$\omega_{2z} < 0$（'-'）
+
+\subsection{角速度的符号变化}
+
+对于正线性组合$V = k_1 V_1 + k_2 V_2$（$k_1, k_2 \geq 0$）：
+\begin{align}
+\omega_z &= k_1 \omega_{1z} + k_2 \omega_{2z} \\
+&= k_1 \cdot (\text{正数}) + k_2 \cdot (\text{负数})
+\end{align}
+
+\textbf{关键观察}：$\omega_z$的符号取决于$k_1$和$k_2$的比值！
+
+\subsection{符号变化的临界点}
+
+\textbf{问题}：什么时候$\omega_z = 0$？
+
+\begin{align}
+k_1 \omega_{1z} + k_2 \omega_{2z} &= 0 \\
+k_1 \omega_{1z} &= -k_2 \omega_{2z} \\
+\frac{k_1}{k_2} &= \frac{-\omega_{2z}}{\omega_{1z}} > 0
+\end{align}
+
+设$\omega_{1z} = 1$，$\omega_{2z} = -1$（不失一般性），则：
+\begin{equation}
+\frac{k_1}{k_2} = 1, \quad \text{即 } k_1 = k_2
+\end{equation}
+
+对应的$t$值：
+\begin{equation}
+t_0 = \frac{k_1}{k_1 + k_2} = \frac{k_1}{2k_1} = \frac{1}{2}
+\end{equation}
+
+\textbf{更一般地}：
+\begin{equation}
+t_0 = \frac{-\omega_{2z}}{\omega_{1z} - \omega_{2z}}
+\end{equation}
+
+\subsection{CoR位置的限制}
+
+\textbf{当$t > t_0$时}（$k_1 > k_2$，更接近$V_1$）：
+\begin{itemize}
+\item $\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} > 0$
+\item CoR标记为'+'
+\item CoR在从CoR$_1$出发的射线上
+\end{itemize}
+
+\textbf{当$t = t_0$时}（$k_1 = k_2$）：
+\begin{itemize}
+\item $\omega_z = 0$
+\item 纯平移
+\item CoR在无穷远处
+\end{itemize}
+
+\textbf{当$t < t_0$时}（$k_1 < k_2$，更接近$V_2$）：
+\begin{itemize}
+\item $\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z} < 0$
+\item CoR标记为'-'
+\item CoR在从CoR$_2$出发的射线上
+\end{itemize}
+
+\textbf{关键限制}：
+\begin{itemize}
+\item $t$的范围仍然是$[0, 1]$（因为$k_1, k_2 \geq 0$）
+\item 但$\omega_z$的符号在$t = t_0$处改变
+\item 这导致CoR区域被分成\textbf{两部分}：两条射线
+\end{itemize}
+
+\subsection{详细分析：为什么是射线而不是线段？}
+
+\textbf{问题}：为什么不能是线段？
+
+\textbf{答案}：因为中间部分（$t \approx t_0$）对应$\omega_z \approx 0$，这是\textbf{平移}，不是旋转。平移的CoR在无穷远处，不在有限平面上。
+
+\textbf{更准确地说}：
+
+\begin{enumerate}
+\item \textbf{当$t$从$t_0$增加到1时}：
+   \begin{itemize}
+   \item $\omega_z$从0增加到正值
+   \item CoR从无穷远移动到CoR$_1$
+   \item 这形成从CoR$_1$出发的\textbf{射线}（指向远离CoR$_2$的方向）
+   \end{itemize}
+
+\item \textbf{当$t$从0减少到$t_0$时}：
+   \begin{itemize}
+   \item $\omega_z$从负值增加到0
+   \item CoR从CoR$_2$移动到无穷远
+   \item 这形成从CoR$_2$出发的\textbf{射线}（指向远离CoR$_1$的方向）
+   \end{itemize}
+
+\item \textbf{中间部分}（$t = t_0$）：
+   \begin{itemize}
+   \item 对应$\omega_z = 0$（平移）
+   \item CoR在无穷远处
+   \item 在有限平面上"不可见"
+   \end{itemize}
+\end{enumerate}
+
+\subsection{图示}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 两个不同符号的CoR
+\filldraw[red] (0,2) circle (3pt) node[above left] {CoR$_1$ (+)};
+\filldraw[blue] (-2,0) circle (3pt) node[below left] {CoR$_2$ (-)};
+
+% 整条直线（虚线）
+\draw[thick,gray,dashed] (-3,-1) -- (1,3);
+
+% 标记临界点（平移点）
+\node[purple] at (-1,1) {$\times$};
+\node[purple,below] at (-1,0.7) {$t=t_0$\\平移\\$\omega_z=0$};
+
+% 两条射线
+\draw[thick,red,->,line width=3pt] (0,2) -- (0.8,2.8);
+\node[red] at (0.5,2.5) {\textbf{射线1}\\$t > t_0$\\$\omega_z > 0$\\标记：'+'};
+
+\draw[thick,blue,->,line width=3pt] (-2,0) -- (-2.8,-0.8);
+\node[blue] at (-2.5,-0.5) {\textbf{射线2}\\$t < t_0$\\$\omega_z < 0$\\标记：'-'};
+
+% 标记中间不可行区域（对应平移）
+\draw[thick,red,dashed] (-0.5,1.5) -- (-1.5,0.5);
+\node[red,above] at (-1,1.2) {中间段\\对应平移\\（$\omega_z \approx 0$）};
+
+\node[below] at (-1.5,-1) {限制：$0 \leq t \leq 1$，但$\omega_z$符号改变导致分成两部分};
+\end{tikzpicture}
+\end{center}
+
+\section{对比总结}
+
+\subsection{相同符号 vs 不同符号}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{方面} & \textbf{相同符号} & \textbf{不同符号} \\
+\hline
+$\omega_z$符号 & 不变（总是正或总是负） & 会改变 \\
+\hline
+$t$的范围 & $[0, 1]$ & $[0, 1]$（相同） \\
+\hline
+CoR区域 & \textbf{线段}（从CoR$_2$到CoR$_1$） & \textbf{两条射线}（分别从两个CoR出发） \\
+\hline
+中间部分 & 在线段上（旋转） & 在无穷远（平移） \\
+\hline
+标记 & 统一（都是'+'或都是'-'） & 不同（一条'+'，一条'-'） \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{关键理解}
+
+\begin{enumerate}
+\item \textbf{正线性组合的限制}：$k_1, k_2 \geq 0$导致$t \in [0, 1]$
+
+\item \textbf{相同符号}：
+   \begin{itemize}
+   \item $\omega_z$符号不变
+   \item CoR在$t \in [0, 1]$对应的线段上
+   \item 这是\textbf{有界的}（线段）
+   \end{itemize}
+
+\item \textbf{不同符号}：
+   \begin{itemize}
+   \item $\omega_z$符号在$t = t_0$处改变
+   \item $t \in [0, t_0)$对应一条射线（$\omega_z < 0$）
+   \item $t \in (t_0, 1]$对应另一条射线（$\omega_z > 0$）
+   \item 中间点$t = t_0$对应平移（无穷远）
+   \item 这是\textbf{无界的}（射线）
+   \end{itemize}
+\end{enumerate}
+
+\section{具体数值例子}
+
+\subsection{例子1：相同符号}
+
+设：
+\begin{align}
+V_1 &= (1, 2, 0) \quad \Rightarrow \quad \text{CoR}_1 = (0, 2), \quad \omega_{1z} = 1 > 0 \\
+V_2 &= (1, 0, 2) \quad \Rightarrow \quad \text{CoR}_2 = (-2, 0), \quad \omega_{2z} = 1 > 0
+\end{align}
+
+\textbf{情况A}：$k_1 = 0, k_2 = 1$（$t = 0$）
+\begin{align}
+V &= (1, 0, 2) \\
+\omega_z &= 1 > 0 \\
+\text{CoR} &= (-2, 0) = \text{CoR}_2
+\end{align}
+
+\textbf{情况B}：$k_1 = 0.5, k_2 = 0.5$（$t = 0.5$）
+\begin{align}
+V &= (1, 1, 1) \\
+\omega_z &= 1 > 0 \\
+\text{CoR} &= (-1, 1) \quad \text{（在线段上）}
+\end{align}
+
+\textbf{情况C}：$k_1 = 1, k_2 = 0$（$t = 1$）
+\begin{align}
+V &= (1, 2, 0) \\
+\omega_z &= 1 > 0 \\
+\text{CoR} &= (0, 2) = \text{CoR}_1
+\end{align}
+
+\textbf{观察}：所有情况$\omega_z > 0$，CoR在线段上。
+
+\subsection{例子2：不同符号}
+
+设：
+\begin{align}
+V_1 &= (1, 2, 0) \quad \Rightarrow \quad \text{CoR}_1 = (0, 2), \quad \omega_{1z} = 1 > 0 \\
+V_2 &= (-1, 0, 2) \quad \Rightarrow \quad \text{CoR}_2 = (2, 0), \quad \omega_{2z} = -1 < 0
+\end{align}
+
+临界点：$t_0 = \frac{1}{1 - (-1)} = \frac{1}{2}$
+
+\textbf{情况A}：$k_1 = 0, k_2 = 1$（$t = 0 < t_0$）
+\begin{align}
+V &= (-1, 0, 2) \\
+\omega_z &= -1 < 0 \\
+\text{CoR} &= (2, 0) = \text{CoR}_2 \quad \text{（射线2的起点）}
+\end{align}
+
+\textbf{情况B}：$k_1 = 0.25, k_2 = 0.75$（$t = 0.25 < t_0$）
+\begin{align}
+V &= (-0.5, 0.5, 1.5) \\
+\omega_z &= -0.5 < 0 \\
+\text{CoR} &= (3, -1) \quad \text{（在射线2上，远离CoR$_2$）}
+\end{align}
+
+\textbf{情况C}：$k_1 = 0.5, k_2 = 0.5$（$t = 0.5 = t_0$）
+\begin{align}
+V &= (0, 1, 1) \\
+\omega_z &= 0 \quad \text{（平移！）} \\
+\text{CoR} &= \text{无穷远}
+\end{align}
+
+\textbf{情况D}：$k_1 = 0.75, k_2 = 0.25$（$t = 0.75 > t_0$）
+\begin{align}
+V &= (0.5, 1.5, 0.5) \\
+\omega_z &= 0.5 > 0 \\
+\text{CoR} &= (-1, 3) \quad \text{（在射线1上，远离CoR$_1$）}
+\end{align}
+
+\textbf{情况E}：$k_1 = 1, k_2 = 0$（$t = 1 > t_0$）
+\begin{align}
+V &= (1, 2, 0) \\
+\omega_z &= 1 > 0 \\
+\text{CoR} &= (0, 2) = \text{CoR}_1 \quad \text{（射线1的起点）}
+\end{align}
+
+\textbf{观察}：
+\begin{itemize}
+\item $t < t_0$：$\omega_z < 0$，CoR在从CoR$_2$出发的射线上
+\item $t = t_0$：$\omega_z = 0$，平移，CoR在无穷远
+\item $t > t_0$：$\omega_z > 0$，CoR在从CoR$_1$出发的射线上
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键点}
+
+\begin{enumerate}
+\item \textbf{正线性组合的限制}：$k_1, k_2 \geq 0$导致$t \in [0, 1]$
+
+\item \textbf{相同符号}：
+   \begin{itemize}
+   \item $\omega_z$符号不变
+   \item CoR限制在\textbf{线段}上（从CoR$_2$到CoR$_1$）
+   \item 这是凸组合的结果
+   \end{itemize}
+
+\item \textbf{不同符号}：
+   \begin{itemize}
+   \item $\omega_z$符号在$t = t_0$处改变
+   \item CoR分成\textbf{两条射线}（分别从两个CoR出发）
+   \item 中间部分对应平移（无穷远）
+   \end{itemize}
+
+\item \textbf{几何意义}：
+   \begin{itemize}
+   \item 线段：有界区域
+   \item 射线：无界区域
+   \item 区别在于$\omega_z$是否变号
+   \end{itemize}
+\end{enumerate}
+
+\subsection{物理直觉}
+
+\begin{itemize}
+\item \textbf{相同符号}：两个旋转方向相同，可以"平滑混合"，CoR在线段上
+\item \textbf{不同符号}：两个旋转方向相反，必须"经过平移"才能转换，CoR在射线上
+\end{itemize}
+
+\section{重要澄清：为什么$t \in [0,1]$但结果不同？}
+
+\subsection{你的观察}
+
+你正确地指出：无论是相同符号还是不同符号，都有$0 \leq t \leq 1$的限制。那么为什么结果不同？
+
+\subsection{关键区别：$\omega_z$的符号变化}
+
+\textbf{关键点}：虽然$t$的范围相同，但\textbf{$\omega_z$的行为不同}！
+
+\subsubsection{相同符号的情况}
+
+\begin{itemize}
+\item $t \in [0, 1]$
+\item $\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z}$ \textbf{始终同号}（总是正或总是负）
+\item 因此$\omega_z \neq 0$（除了边界情况）
+\item CoR公式$\text{CoR} = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)$始终有定义
+\item 当$t$从0连续变化到1时，CoR在有限平面上从CoR$_2$连续移动到CoR$_1$
+\item \textbf{结果}：CoR在\textbf{线段}上（有限平面上的连续曲线）
+\end{itemize}
+
+\subsubsection{不同符号的情况}
+
+\begin{itemize}
+\item $t \in [0, 1]$（相同！）
+\item $\omega_z = k_1 \omega_{1z} + k_2 \omega_{2z}$ \textbf{会变号}！
+  \begin{itemize}
+  \item 当$t < t_0$时：$\omega_z < 0$
+  \item 当$t = t_0$时：$\omega_z = 0$（临界点！）
+  \item 当$t > t_0$时：$\omega_z > 0$
+  \end{itemize}
+\item \textbf{关键问题}：当$\omega_z = 0$时，CoR公式$\text{CoR} = \left(-\frac{v_y}{\omega_z}, \frac{v_x}{\omega_z}\right)$\textbf{无定义}（分母为0）
+\item 在有限平面上，这对应CoR在\textbf{无穷远处}
+\end{itemize}
+
+\subsection{详细分析：$t$连续变化时CoR的行为}
+
+\subsubsection{相同符号：连续移动}
+
+当$t$从0连续变化到1时：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 时间轴
+\draw[->] (0,0) -- (5,0) node[right] {$t$};
+\draw (0,0) -- (0,-0.1) node[below] {$0$};
+\draw (2.5,0) -- (2.5,-0.1) node[below] {$0.5$};
+\draw (5,0) -- (5,-0.1) node[below] {$1$};
+
+% CoR位置
+\draw[->] (0,1) -- (5,1) node[right] {CoR位置};
+\draw[thick,blue] (0,1) -- (5,1);
+\node[blue] at (2.5,1.3) {连续移动};
+
+% 标记
+\node at (0,0.7) {CoR$_2$};
+\node at (5,0.7) {CoR$_1$};
+
+\node[below] at (2.5,-0.5) {相同符号：CoR连续在线段上移动};
+\end{tikzpicture}
+\end{center}
+
+\textbf{关键}：CoR在有限平面上的位置是\textbf{连续的}，没有"跳跃"。
+
+\subsubsection{不同符号：被"切断"}
+
+当$t$从0连续变化到1时：
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 时间轴
+\draw[->] (0,0) -- (5,0) node[right] {$t$};
+\draw (0,0) -- (0,-0.1) node[below] {$0$};
+\draw (2.5,0) -- (2.5,-0.1) node[below] {$t_0$};
+\draw (5,0) -- (5,-0.1) node[below] {$1$};
+
+% CoR位置（被切断）
+\draw[thick,blue,->] (0,1) -- (2.3,1);
+\draw[thick,red,dashed] (2.3,1) -- (2.7,1);
+\draw[thick,green,->] (2.7,1) -- (5,1);
+
+% 标记
+\node[blue] at (1.15,1.3) {射线2};
+\node[red] at (2.5,1.3) {$\infty$};
+\node[green] at (3.85,1.3) {射线1};
+
+\node at (0,0.7) {CoR$_2$};
+\node at (5,0.7) {CoR$_1$};
+
+\node[below] at (2.5,-0.5) {不同符号：CoR被$\omega_z=0$的点"切断"};
+\end{tikzpicture}
+\end{center}
+
+\textbf{关键}：
+\begin{itemize}
+\item 当$t$从0变化到$t_0$时：CoR从CoR$_2$移动到无穷远（射线2）
+\item 当$t = t_0$时：CoR在无穷远处（在有限平面上"不可见"）
+\item 当$t$从$t_0$变化到1时：CoR从无穷远移动到CoR$_1$（射线1）
+\item 在有限平面上，我们看到的是\textbf{两条分离的射线}，中间部分"消失"了
+\end{itemize}
+
+\subsection{数学上的连续性 vs 有限平面上的可见性}
+
+\textbf{重要理解}：
+
+\begin{enumerate}
+\item \textbf{在数学上}：CoR位置作为$t$的函数是连续的（在射影几何中）
+   \begin{itemize}
+   \item 包括无穷远点
+   \item 整条直线是连续的
+   \end{itemize}
+
+\item \textbf{在有限平面上}：
+   \begin{itemize}
+   \item 无穷远点"不可见"
+   \item 我们看到的是两条分离的射线
+   \item 中间部分（对应$\omega_z \approx 0$）在有限平面上"消失"
+   \end{itemize}
+\end{enumerate}
+
+\subsection{射影几何的观点}
+
+在\textbf{射影几何}（projective geometry）中：
+
+\begin{itemize}
+\item 无穷远点被视为"普通点"
+\item 整条直线（包括无穷远点）是连续的
+\item 从这个角度看，CoR确实在整条直线上连续移动
+\end{itemize}
+
+但在\textbf{有限平面}（affine plane）中：
+
+\begin{itemize}
+\item 我们只看到有限点
+\item 无穷远点"不可见"
+\item 因此看到的是两条射线
+\end{itemize}
+
+\subsection{具体例子：为什么中间"消失"了？}
+
+\textbf{例子}：$\omega_{1z} = 1$，$\omega_{2z} = -1$，$t_0 = 0.5$
+
+\textbf{当$t$接近$t_0$时}：
+
+\begin{itemize}
+\item $t = 0.49$：$\omega_z = 0.49 \cdot 1 + 0.51 \cdot (-1) = -0.02$（很小的负数）
+\item CoR位置：$\text{CoR} = \left(-\frac{v_y}{-0.02}, \frac{v_x}{-0.02}\right)$
+\item 由于分母很小，CoR位置会变得\textbf{非常大}（接近无穷远）
+
+\item $t = 0.5$：$\omega_z = 0$（纯平移）
+\item CoR在无穷远处
+
+\item $t = 0.51$：$\omega_z = 0.51 \cdot 1 + 0.49 \cdot (-1) = 0.02$（很小的正数）
+\item CoR位置：$\text{CoR} = \left(-\frac{v_y}{0.02}, \frac{v_x}{0.02}\right)$
+\item 同样，CoR位置会变得\textbf{非常大}（接近无穷远）
+\end{itemize}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 当$\omega_z$接近0时，CoR位置趋于无穷
+\item 在有限平面上，我们看不到这些"接近无穷"的点
+\item 因此，在有限平面上，CoR区域被"切断"成两部分
+\end{itemize}
+
+\subsection{对比总结}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{方面} & \textbf{相同符号} & \textbf{不同符号} \\
+\hline
+$t$的范围 & $[0, 1]$ & $[0, 1]$（相同） \\
+\hline
+$\omega_z$符号 & 不变 & 会改变 \\
+\hline
+$\omega_z = 0$的点 & 不存在（或只在边界） & 存在（$t = t_0$） \\
+\hline
+CoR在有限平面 & 连续线段 & 两条分离的射线 \\
+\hline
+CoR在射影平面 & 连续线段 & 连续直线（包括$\infty$） \\
+\hline
+中间部分 & 在线段上（可见） & 在无穷远（不可见） \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{关键理解}
+
+\begin{enumerate}
+\item \textbf{$t$的范围相同}：$0 \leq t \leq 1$（因为$k_1, k_2 \geq 0$）
+
+\item \textbf{关键区别}：
+   \begin{itemize}
+   \item 相同符号：$\omega_z$不变号，CoR始终在有限平面上
+   \item 不同符号：$\omega_z$会变号，在$t = t_0$处$\omega_z = 0$，CoR在无穷远
+   \end{itemize}
+
+\item \textbf{有限平面 vs 射影平面}：
+   \begin{itemize}
+   \item 在射影几何中，CoR在整条直线上（包括$\infty$）
+   \item 在有限平面上，$\infty$点不可见，所以看到两条射线
+   \end{itemize}
+
+\item \textbf{为什么是射线而不是线段}：
+   \begin{itemize}
+   \item 因为中间部分（$t \approx t_0$）对应$\omega_z \approx 0$
+   \item 这些点的CoR在无穷远或接近无穷远
+   \item 在有限平面上"不可见"
+   \item 所以看到的是从两个CoR出发的射线
+   \end{itemize}
+\end{enumerate}
+
+\subsection{你的观察的修正}
+
+你的观察"由于$0 \leq t \leq 1$，CoR在从CoR$_2$到CoR$_1$的线段上"是\textbf{部分正确}的：
+
+\begin{itemize}
+\item \textbf{在射影几何中}：这是正确的（包括无穷远点）
+\item \textbf{在有限平面中}：
+  \begin{itemize}
+  \item 相同符号：正确，CoR在线段上
+  \item 不同符号：\textbf{不正确}，CoR在两条射线上（中间部分在$\infty$）
+  \end{itemize}
+\end{itemize}
+
+\textbf{关键区别}：$\omega_z$是否会在$t \in [0, 1]$内变为0。
+
+\end{document}
+

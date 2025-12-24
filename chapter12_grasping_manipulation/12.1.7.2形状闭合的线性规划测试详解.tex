@@ -1,0 +1,565 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{12.1.7.2 形状闭合的线性规划测试详解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+\newtheorem{proposition}{命题}
+
+\begin{document}
+
+\maketitle
+
+\section{章节概述}
+
+12.1.7.2章节介绍如何使用\textbf{线性规划}（Linear Programming, LP）来测试一阶形状闭合。这是一个实用的方法，可以用计算机算法来判断抓取是否产生形状闭合。
+
+\section{形状闭合的数学条件回顾}
+
+\subsection{形状闭合的定义}
+
+\textbf{形状闭合}：如果一组静止约束阻止物体的所有运动，则实现形状闭合。
+
+\textbf{数学表达}：可行twist集合只有原点，即：
+\begin{equation}
+\mathcal{V} = \{V | F_i^T V \geq 0 \text{ 对所有 } i\} = \{0\}
+\end{equation}
+
+\subsection{正张成条件}
+
+形状闭合的充要条件是：接触wrench $F_i$正张成整个wrench空间：
+\begin{equation}
+\text{pos}(\{F_1, F_2, \ldots, F_j\}) = \mathbb{R}^n
+\end{equation}
+
+其中：
+\begin{itemize}
+\item 对于平面物体：$n = 3$
+\item 对于3D物体：$n = 6$
+\end{itemize}
+
+\section{线性规划测试的建立}
+
+\subsection{矩阵F的构造}
+
+将$j$个接触wrench排列成矩阵：
+\begin{equation}
+F = [F_1 \, F_2 \, \cdots \, F_j] \in \mathbb{R}^{n \times j}
+\end{equation}
+
+\textbf{注意}：
+\begin{itemize}
+\item 对于平面物体：$n = 3$，$F_i = [m_{iz} \, f_{ix} \, f_{iy}]^T$
+\item 对于3D物体：$n = 6$，$F_i = [m_{ix} \, m_{iy} \, m_{iz} \, f_{ix} \, f_{iy} \, f_{iz}]^T$
+\end{itemize}
+
+\subsection{形状闭合的等价条件}
+
+\textbf{条件1}：对于任何外部wrench $F_{\text{ext}} \in \mathbb{R}^n$，存在权重向量$k \in \mathbb{R}^j$，$k \geq 0$，使得：
+\begin{equation}
+F k + F_{\text{ext}} = 0
+\label{eq:form_closure_condition}
+\end{equation}
+
+\textbf{关键约束}：$k \geq 0$（所有分量非负）
+
+\textbf{为什么$k$不能是负数？}
+
+\begin{enumerate}
+\item \textbf{物理意义}：
+   \begin{itemize}
+   \item $k_i$表示接触$i$处的\textbf{法向力大小}
+   \item 法向力必须是"推"（pushing），不能是"拉"（pulling）
+   \item 如果$k_i < 0$，意味着"拉"物体，这在刚体接触中是不可能的
+   \item 接触只能提供\textbf{压力}，不能提供\textbf{拉力}
+   \end{itemize}
+
+\item \textbf{数学意义}：
+   \begin{itemize}
+   \item $F k$是接触wrench的\textbf{正线性组合}
+   \item 正线性组合要求系数非负（$k_i \geq 0$）
+   \item 如果允许$k_i < 0$，就不是正线性组合了
+   \end{itemize}
+
+\item \textbf{几何意义}：
+   \begin{itemize}
+   \item 正线性组合形成\textbf{凸锥}
+   \item 如果允许负系数，就是一般的线性组合（整个空间）
+   \item 这样就失去了"正张成"的意义
+   \end{itemize}
+\end{enumerate}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item $F k$是接触可以提供的wrench（通过压力）
+\item $F_{\text{ext}}$是作用在物体上的外部wrench
+\item 形状闭合要求：接触可以平衡任何外部wrench
+\item 但接触只能提供\textbf{压力}，不能提供拉力
+\end{itemize}
+
+\subsection{关键观察}
+
+\textbf{如果$F_{\text{ext}} = 0$}（无外部干扰），条件(\ref{eq:form_closure_condition})变为：
+\begin{equation}
+F k = 0
+\end{equation}
+
+\textbf{关键}：如果存在\textbf{严格正}的系数$k > 0$使得$F k = 0$，则形状闭合成立。
+
+\textbf{为什么需要$k > 0$？}
+\begin{itemize}
+\item $k > 0$意味着所有接触都"参与"（没有冗余接触）
+\item 如果某些$k_i = 0$，说明对应的接触是冗余的
+\item 严格正系数确保所有接触都起作用
+\end{itemize}
+
+\section{秩条件}
+
+\subsection{必要条件：满秩}
+
+\textbf{命题}：如果$\text{rank}(F) < n$，则物体\textbf{不处于}形状闭合。
+
+\textbf{证明思路}：
+\begin{itemize}
+\item 如果$\text{rank}(F) < n$，则$F$的列向量不能张成整个$\mathbb{R}^n$
+\item 因此不能正张成$\mathbb{R}^n$
+\item 形状闭合不成立
+\end{itemize}
+
+\textbf{结论}：形状闭合的\textbf{必要条件}是$F$满秩。
+
+\subsection{满秩的检查}
+
+\textbf{方法}：计算矩阵$F$的秩
+\begin{equation}
+\text{rank}(F) = n \quad \text{（对于形状闭合是必要的）}
+\end{equation}
+
+\textbf{注意}：满秩是\textbf{必要但不充分}的条件。
+
+\section{线性规划问题(12.14)}
+
+\subsection{问题表述}
+
+如果$F$是满秩的，形状闭合测试可以表述为以下线性规划问题：
+
+\begin{align}
+\text{寻找} \quad & k \\
+\text{最小化} \quad & \mathbf{1}^T k \\
+\text{使得} \quad & F k = 0 \\
+& k_i \geq 1, \quad i = 1, \ldots, j
+\label{eq:LP_form_closure}
+\end{align}
+
+其中$\mathbf{1}$是$j$维全1向量。
+
+\subsection{约束条件的解释}
+
+\textbf{约束1}：$F k = 0$
+\begin{itemize}
+\item 这要求接触wrench的线性组合为零
+\item 等价于：接触可以产生零wrench（通过内力平衡）
+\end{itemize}
+
+\textbf{约束2}：$k_i \geq 1$（对所有$i$）
+\begin{itemize}
+\item 这确保所有系数\textbf{严格为正}（$k_i > 0$）
+\item 因为如果$k_i \geq 1$，则$k_i > 0$
+\item 这排除了冗余接触的情况
+\end{itemize}
+
+\textbf{目标函数}：$\mathbf{1}^T k = \sum_{i=1}^j k_i$
+\begin{itemize}
+\item 对于回答"是否形状闭合"这个二元问题，目标函数不是必需的
+\item 但包含它可以确保问题\textbf{适定}（well-posed）
+\item 某些LP求解器需要目标函数
+\end{itemize}
+
+\subsection{测试结果}
+
+\textbf{如果存在解$k$}：
+\begin{itemize}
+\item 物体处于一阶形状闭合
+\item 所有$k_i \geq 1 > 0$，说明所有接触都起作用
+\item $F k = 0$，说明接触wrench可以正张成整个空间
+\end{itemize}
+
+\textbf{如果不存在解}：
+\begin{itemize}
+\item 物体不处于形状闭合
+\item 可能的原因：
+  \begin{itemize}
+  \item $F$不是满秩
+  \item 即使$F$满秩，也不能正张成整个空间
+  \end{itemize}
+\end{itemize}
+
+\section{例题12.7的详细分析}
+
+\subsection{问题设置}
+
+\textbf{设置}：
+\begin{itemize}
+\item 平面物体，中心有孔
+\item 两个手指，每个手指接触孔的两条边
+\item 总共4个接触点
+\item 4个接触wrench：$F_1, F_2, F_3, F_4$
+\end{itemize}
+
+\subsection{矩阵F}
+
+给定的矩阵：
+\begin{equation}
+F = \begin{bmatrix}
+0 & 0 & -1 & 2 \\
+-1 & 0 & 1 & 0 \\
+0 & -1 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+\textbf{分析}：
+\begin{itemize}
+\item $n = 3$（平面问题）
+\item $j = 4$（4个接触）
+\item $F \in \mathbb{R}^{3 \times 4}$
+\end{itemize}
+
+\subsection{秩的检查}
+
+\textbf{检查}：$\text{rank}(F) = 3$
+
+\textbf{验证}：
+\begin{itemize}
+\item 三个行向量线性无关
+\item 或者：三个列向量的某个子集线性无关
+\item 因此$F$是满秩的
+\end{itemize}
+
+\textbf{结论}：满足形状闭合的必要条件。
+
+\subsection{线性规划求解}
+
+\textbf{问题}：
+\begin{align}
+\text{最小化} \quad & k_1 + k_2 + k_3 + k_4 \\
+\text{使得} \quad & F k = 0 \\
+& k_i \geq 1, \quad i = 1, 2, 3, 4
+\end{align}
+
+\textbf{解}：$k_1 = 2$，$k_2 = 1$，$k_3 = 2$，$k_4 = 1$
+
+\textbf{验证}：
+\begin{align}
+F k &= \begin{bmatrix} 0 & 0 & -1 & 2 \\ -1 & 0 & 1 & 0 \\ 0 & -1 & 0 & 1 \end{bmatrix} \begin{bmatrix} 2 \\ 1 \\ 2 \\ 1 \end{bmatrix} \\
+&= \begin{bmatrix} 0 \cdot 2 + 0 \cdot 1 + (-1) \cdot 2 + 2 \cdot 1 \\ (-1) \cdot 2 + 0 \cdot 1 + 1 \cdot 2 + 0 \cdot 1 \\ 0 \cdot 2 + (-1) \cdot 1 + 0 \cdot 2 + 1 \cdot 1 \end{bmatrix} \\
+&= \begin{bmatrix} -2 + 2 \\ -2 + 2 \\ -1 + 1 \end{bmatrix} = \begin{bmatrix} 0 \\ 0 \\ 0 \end{bmatrix} \quad \checkmark
+\end{align}
+
+\textbf{结论}：物体处于形状闭合！
+
+\subsection{物理解释}
+
+\textbf{权重$k$的含义}：
+\begin{itemize}
+\item $k_1 = 2$：接触1的"贡献"较大
+\item $k_2 = 1$：接触2的"贡献"较小
+\item $k_3 = 2$：接触3的"贡献"较大
+\item $k_4 = 1$：接触4的"贡献"较小
+\end{itemize}
+
+\textbf{关键}：所有$k_i > 0$，说明所有接触都起作用，没有冗余。
+
+\section{修改后的例子：不产生形状闭合}
+
+\subsection{新的F矩阵}
+
+如果右手指移动到孔的右下角，新的$F$矩阵为：
+\begin{equation}
+F = \begin{bmatrix}
+0 & 0 & 0 & -2 \\
+-1 & 0 & 1 & 0 \\
+0 & -1 & 0 & -1
+\end{bmatrix}
+\end{equation}
+
+\subsection{分析}
+
+\textbf{秩检查}：$\text{rank}(F) = 3$（仍然是满秩）
+
+\textbf{线性规划}：
+\begin{itemize}
+\item 问题仍然有定义
+\item 但\textbf{不存在解}满足所有约束
+\end{itemize}
+
+\textbf{结论}：物体\textbf{不处于}形状闭合。
+
+\subsection{为什么没有形状闭合？}
+
+\textbf{原因}：物体可以沿页面\textbf{向下滑动}。
+
+\textbf{分析}：
+\begin{itemize}
+\item 虽然$F$是满秩的，但不能正张成整个$\mathbb{R}^3$
+\item 存在某些方向无法被接触约束阻止
+\item 具体来说：向下滑动的方向
+\end{itemize}
+
+\section{MATLAB实现}
+
+\subsection{代码说明}
+
+原书提供的MATLAB代码：
+
+\begin{verbatim}
+f = [1,1,1,1];  % 目标函数系数
+A = [[-1,0,0,0]; [0,-1,0,0]; [0,0,-1,0]; [0,0,0,-1]];  % 不等式约束
+b = [-1,-1,-1,-1];  % 不等式约束右端
+F = [[0,0,-1,2]; [-1,0,1,0]; [0,-1,0,1]];  % F矩阵
+Aeq = F;  % 等式约束
+beq = [0,0,0];  % 等式约束右端
+k = linprog(f,A,b,Aeq,beq);
+\end{verbatim}
+
+\subsection{约束的转换}
+
+\textbf{原始约束}：$k_i \geq 1$
+
+\textbf{标准LP形式}：$A k \leq b$
+
+\textbf{转换}：
+\begin{itemize}
+\item $k_i \geq 1$等价于$-k_i \leq -1$
+\item 因此：$A = -\mathbf{I}$（负单位矩阵）
+\item $b = -\mathbf{1}$（全-1向量）
+\end{itemize}
+
+\subsection{等式约束}
+
+\textbf{原始约束}：$F k = 0$
+
+\textbf{标准LP形式}：$A_{\text{eq}} k = b_{\text{eq}}$
+
+\textbf{转换}：
+\begin{itemize}
+\item $A_{\text{eq}} = F$
+\item $b_{\text{eq}} = \mathbf{0}$（零向量）
+\end{itemize}
+
+\section{为什么$k$不能是负数？详细解释}
+
+\subsection{物理原因}
+
+\textbf{关键理解}：$k_i$表示接触$i$处的\textbf{法向力大小}。
+
+\begin{itemize}
+\item \textbf{法向力必须是压力}：
+   \begin{itemize}
+   \item 接触只能"推"物体，不能"拉"物体
+   \item 如果$k_i < 0$，意味着"拉"物体
+   \item 这在刚体接触中是不可能的
+   \end{itemize}
+
+\item \textbf{接触力的方向}：
+   \begin{itemize}
+   \item 接触法线$\hat{n}_i$指向物体内部
+   \item 接触力必须沿$\hat{n}_i$方向（推入物体）
+   \item 不能沿$-\hat{n}_i$方向（拉出物体）
+   \end{itemize}
+\end{itemize}
+
+\subsection{数学原因}
+
+\textbf{正线性组合的要求}：
+
+形状闭合要求接触wrench \textbf{正张成}整个wrench空间：
+\begin{equation}
+\text{pos}(\{F_1, \ldots, F_j\}) = \mathbb{R}^n
+\end{equation}
+
+\textbf{正张成的定义}：
+\begin{equation}
+\text{pos}(\{F_1, \ldots, F_j\}) = \left\{\sum_{i=1}^j k_i F_i \middle| k_i \geq 0\right\}
+\end{equation}
+
+\textbf{关键}：系数$k_i$必须\textbf{非负}！
+
+如果允许$k_i < 0$：
+\begin{itemize}
+\item 就不是正线性组合了
+\item 变成一般的线性组合
+\item 失去了"正张成"的意义
+\end{itemize}
+
+\subsection{几何原因}
+
+\begin{itemize}
+\item \textbf{正线性组合}：形成以原点为顶点的\textbf{凸锥}
+\item \textbf{一般线性组合}：形成整个空间（如果$F_i$线性无关）
+\item 形状闭合需要的是\textbf{凸锥}，不是整个空间
+\end{itemize}
+
+\subsection{具体例子}
+
+\textbf{例子}：两个接触wrench $F_1$和$F_2$
+
+\begin{itemize}
+\item \textbf{如果$k_1, k_2 \geq 0$}：
+   \begin{itemize}
+   \item $k_1 F_1 + k_2 F_2$形成凸锥
+   \item 只能表示某些方向
+   \end{itemize}
+
+\item \textbf{如果允许$k_1, k_2 < 0$}：
+   \begin{itemize}
+   \item $k_1 F_1 + k_2 F_2$可以表示任何方向
+   \item 但这不是"正张成"
+   \end{itemize}
+\end{itemize}
+
+\section{为什么需要$k_i \geq 1$而不是$k_i > 0$？}
+
+\subsection{数学原因}
+
+\textbf{问题}：为什么用$k_i \geq 1$而不是$k_i > 0$？
+
+\textbf{答案}：
+\begin{itemize}
+\item 线性规划通常只支持\textbf{弱不等式}（$\geq$或$\leq$），不支持严格不等式（$>$或$<$）
+\item $k_i \geq 1$确保$k_i > 0$（因为$1 > 0$）
+\item 这是处理严格正约束的标准方法
+\end{itemize}
+
+\subsection{等价性证明}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 如果存在$k > 0$（严格正）使得$F k = 0$
+\item 那么存在$\tilde{k} = \alpha k$（$\alpha > 0$足够大）使得$\tilde{k}_i \geq 1$
+\item 因为如果$k_i > 0$，我们可以选择$\alpha \geq \frac{1}{\min_i k_i}$，使得$\tilde{k}_i = \alpha k_i \geq 1$
+\end{itemize}
+
+\textbf{因此}：$k_i \geq 1$和$k_i > 0$在这个问题中是等价的。
+
+\section{算法步骤总结}
+
+\subsection{测试流程}
+
+\begin{enumerate}
+\item \textbf{步骤1}：构造矩阵$F = [F_1 \, F_2 \, \cdots \, F_j]$
+
+\item \textbf{步骤2}：检查秩
+   \begin{itemize}
+   \item 如果$\text{rank}(F) < n$：\textbf{不是}形状闭合，结束
+   \item 如果$\text{rank}(F) = n$：继续
+   \end{itemize}
+
+\item \textbf{步骤3}：求解线性规划问题(12.14)
+   \begin{itemize}
+   \item 如果存在解$k$：\textbf{是}形状闭合
+   \item 如果不存在解：\textbf{不是}形状闭合
+   \end{itemize}
+\end{enumerate}
+
+\section{关键理解点}
+
+\subsection{为什么用线性规划？}
+
+\begin{enumerate}
+\item \textbf{可计算性}：
+   \begin{itemize}
+   \item 线性规划有高效的求解算法
+   \item 可以在多项式时间内求解
+   \end{itemize}
+
+\item \textbf{实用性}：
+   \begin{itemize}
+   \item 可以用标准软件（如MATLAB）求解
+   \item 适合自动化测试
+   \end{itemize}
+
+\item \textbf{精确性}：
+   \begin{itemize}
+   \item 给出明确的"是"或"否"答案
+   \item 不依赖图形方法
+   \end{itemize}
+\end{enumerate}
+
+\subsection{与正张成条件的关系}
+
+\textbf{正张成条件}：$\text{pos}(\{F_1, \ldots, F_j\}) = \mathbb{R}^n$
+
+\textbf{线性规划条件}：存在$k > 0$使得$F k = 0$
+
+\textbf{等价性}：
+\begin{itemize}
+\item 如果$F k = 0$且$k > 0$，则$F_i$可以正张成$\mathbb{R}^n$
+\item 反过来也成立
+\item 因此两个条件是等价的
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{抓取验证}
+
+\begin{itemize}
+\item 设计抓取后，可以用LP测试验证是否产生形状闭合
+\item 快速、准确、可自动化
+\end{itemize}
+
+\subsection{抓取优化}
+
+\begin{itemize}
+\item 可以结合优化方法
+\item 寻找产生形状闭合的接触位置
+\item 使用LP测试作为约束条件
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键公式}
+
+\textbf{线性规划问题(12.14)}：
+\begin{align}
+\text{最小化} \quad & \mathbf{1}^T k \\
+\text{使得} \quad & F k = 0 \\
+& k_i \geq 1, \quad i = 1, \ldots, j
+\end{align}
+
+\subsection{测试结果}
+
+\begin{itemize}
+\item \textbf{如果存在解}：形状闭合
+\item \textbf{如果不存在解}：不是形状闭合
+\end{itemize}
+
+\subsection{前提条件}
+
+\begin{itemize}
+\item $F$必须是满秩的（$\text{rank}(F) = n$）
+\item 否则直接判断为不是形状闭合
+\end{itemize}
+
+\subsection{优势}
+
+\begin{enumerate}
+\item \textbf{可计算}：可以用标准算法求解
+\item \textbf{精确}：给出明确答案
+\item \textbf{实用}：适合自动化测试
+\item \textbf{通用}：适用于任何数量的接触
+\end{enumerate}
+
+\end{document}
+

@@ -1,0 +1,347 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc}
+
+\geometry{margin=2.5cm}
+
+\title{接触约束可视化的几何理解：为什么$F^T V_A \geq 0$表示不可穿透}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+
+\begin{document}
+
+\maketitle
+
+\section{问题背景}
+
+在第12章中，我们遇到了一个重要的可视化例子，用于理解接触约束的几何意义。这个例子假设：
+
+\begin{itemize}
+\item 物体$B$是静止的（$V_B = 0$）
+\item 物体$A$被限制在$z = 0$平面内
+\item 物体的twist为$V_A = [\omega_{Ax} \, \omega_{Ay} \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, v_{Az}]^T = [0 \, 0 \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, 0]^T$
+\item 接触wrench为$F = [m_z \, f_x \, f_y]^T = [1 \, 0 \, 1]^T$
+\end{itemize}
+
+在这个设置下，滚动-滑动约束简化为：
+\begin{equation}
+v_{Ay} + \omega_{Az} = 0
+\label{eq:roll_slide}
+\end{equation}
+
+滚动约束简化为：
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= 0, \label{eq:rolling1} \\
+v_{Ay} + \omega_{Az} &= 0. \label{eq:rolling2}
+\end{align}
+
+\textbf{关键问题}：为什么不可穿透约束要求$F^T V_A \geq 0$？这个条件的几何意义是什么？
+
+\section{约束的推导}
+
+\subsection{平面接触的Twist和Wrench}
+
+对于平面问题，twist和wrench都是3维的：
+\begin{itemize}
+\item \textbf{Twist}：$V = [\omega_z \, v_x \, v_y]^T$，其中$\omega_z$是绕$z$轴的角速度，$v_x$和$v_y$是线速度
+\item \textbf{Wrench}：$F = [m_z \, f_x \, f_y]^T$，其中$m_z$是绕$z$轴的力矩，$f_x$和$f_y$是力
+\end{itemize}
+
+在给定的例子中：
+\begin{align}
+V_A &= [\omega_{Az} \, v_{Ax} \, v_{Ay}]^T \\
+F &= [1 \, 0 \, 1]^T
+\end{align}
+
+\subsection{滚动-滑动约束的推导}
+
+滚动-滑动约束来自公式(12.6)：
+\begin{equation}
+F^T (V_A - V_B) = 0
+\end{equation}
+
+由于$V_B = 0$，这简化为：
+\begin{equation}
+F^T V_A = 0
+\end{equation}
+
+展开：
+\begin{align}
+F^T V_A &= [1 \, 0 \, 1] \begin{bmatrix} \omega_{Az} \\ v_{Ax} \\ v_{Ay} \end{bmatrix} \\
+&= \omega_{Az} + 0 \cdot v_{Ax} + 1 \cdot v_{Ay} \\
+&= \omega_{Az} + v_{Ay} = 0
+\end{align}
+
+因此得到方程(\ref{eq:roll_slide})：$v_{Ay} + \omega_{Az} = 0$。
+
+\subsection{滚动约束的推导}
+
+滚动约束要求接触点处的相对速度为零。设接触点位置为$p = [p_x \, p_y \, 0]^T$，接触法线为$\hat{n} = [n_x \, n_y \, 0]^T$。
+
+接触点速度：
+\begin{equation}
+\dot{p}_A = v_A + \omega_A \times p_A
+\end{equation}
+
+对于平面问题，$\omega_A = [0 \, 0 \, \omega_{Az}]^T$，$v_A = [v_{Ax} \, v_{Ay} \, 0]^T$，$p_A = [p_x \, p_y \, 0]^T$。
+
+因此：
+\begin{align}
+\omega_A \times p_A &= \begin{bmatrix} 0 \\ 0 \\ \omega_{Az} \end{bmatrix} \times \begin{bmatrix} p_x \\ p_y \\ 0 \end{bmatrix} \\
+&= \begin{bmatrix} -\omega_{Az} p_y \\ \omega_{Az} p_x \\ 0 \end{bmatrix}
+\end{align}
+
+所以：
+\begin{equation}
+\dot{p}_A = \begin{bmatrix} v_{Ax} - \omega_{Az} p_y \\ v_{Ay} + \omega_{Az} p_x \\ 0 \end{bmatrix}
+\end{equation}
+
+滚动约束要求$\dot{p}_A = 0$（因为$B$是静止的），因此：
+\begin{align}
+v_{Ax} - \omega_{Az} p_y &= 0, \label{eq:rolling_p1} \\
+v_{Ay} + \omega_{Az} p_x &= 0. \label{eq:rolling_p2}
+\end{align}
+
+在给定的例子中，如果接触点位置使得$p_y = 2$和$p_x = -1$（或类似的值），我们得到：
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= 0, \\
+v_{Ay} + \omega_{Az} &= 0
+\end{align}
+
+这就是方程(\ref{eq:rolling1})和(\ref{eq:rolling2})。
+
+\section{约束空间的几何结构}
+
+\subsection{滚动-滑动约束：一个平面}
+
+滚动-滑动约束$v_{Ay} + \omega_{Az} = 0$在$(\omega_{Az}, v_{Ax}, v_{Ay})$空间中定义了一个平面。这个平面通过原点，因为当$V_A = 0$时，约束自动满足。
+
+这个平面可以参数化为：
+\begin{equation}
+\begin{bmatrix} \omega_{Az} \\ v_{Ax} \\ v_{Ay} \end{bmatrix} = \begin{bmatrix} t \\ s \\ -t \end{bmatrix}
+\end{equation}
+其中$t, s \in \mathbb{R}$是自由参数。
+
+\subsection{滚动约束：一条直线}
+
+滚动约束由两个方程组成：
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= 0 \\
+v_{Ay} + \omega_{Az} &= 0
+\end{align}
+
+这定义了一条通过原点的直线。从第一个方程：$v_{Ax} = 2\omega_{Az}$。从第二个方程：$v_{Ay} = -\omega_{Az}$。
+
+因此，这条直线可以参数化为：
+\begin{equation}
+\begin{bmatrix} \omega_{Az} \\ v_{Ax} \\ v_{Ay} \end{bmatrix} = \begin{bmatrix} t \\ 2t \\ -t \end{bmatrix} = t \begin{bmatrix} 1 \\ 2 \\ -1 \end{bmatrix}
+\end{equation}
+其中$t \in \mathbb{R}$。
+
+这条直线位于滚动-滑动约束平面内，因为$v_{Ay} + \omega_{Az} = -t + t = 0$。
+
+\section{不可穿透约束的几何意义}
+
+\subsection{不可穿透约束：$F^T V_A \geq 0$}
+
+不可穿透约束要求：
+\begin{equation}
+F^T V_A \geq 0
+\end{equation}
+
+在我们的例子中：
+\begin{equation}
+F^T V_A = [1 \, 0 \, 1] \begin{bmatrix} \omega_{Az} \\ v_{Ax} \\ v_{Ay} \end{bmatrix} = \omega_{Az} + v_{Ay} \geq 0
+\end{equation}
+
+\subsection{几何解释}
+
+\textbf{关键观察}：$F^T V_A$是twist $V_A$在wrench $F$方向上的投影（带符号）。
+
+\begin{itemize}
+\item \textbf{$F^T V_A > 0$}：$V_A$与$F$的夹角小于$90°$，twist指向"远离接触"的方向，物体正在分离。
+
+\item \textbf{$F^T V_A = 0$}：$V_A$与$F$正交，twist位于约束平面上，接触得以保持（滚动或滑动）。
+
+\item \textbf{$F^T V_A < 0$}：$V_A$与$F$的夹角大于$90°$，twist指向"朝向接触"的方向，这将导致穿透（不可行）。
+\end{itemize}
+
+\subsection{半空间约束}
+
+约束$F^T V_A \geq 0$在twist空间中定义了一个\textbf{半空间}（half-space）。这个半空间：
+
+\begin{itemize}
+\item 以通过原点的超平面$F^T V_A = 0$为边界
+\item 包含所有满足$F^T V_A \geq 0$的twist
+\item 排除所有满足$F^T V_A < 0$的twist（这些会导致穿透）
+\end{itemize}
+
+在我们的平面例子中，这个半空间是：
+\begin{equation}
+\omega_{Az} + v_{Ay} \geq 0
+\end{equation}
+
+这是一个半平面，边界是直线$\omega_{Az} + v_{Ay} = 0$（这正是滚动-滑动约束平面）。
+
+\section{为什么$V_B = 0$时约束通过原点}
+
+\subsection{齐次约束}
+
+当$V_B = 0$时，约束$F^T (V_A - V_B) \geq 0$简化为$F^T V_A \geq 0$。这是一个\textbf{齐次约束}（homogeneous constraint），因为：
+
+\begin{itemize}
+\item 如果$V_A$满足约束，那么$kV_A$（$k \geq 0$）也满足约束
+\item 约束超平面$F^T V_A = 0$通过原点
+\item 可行twist集形成一个以原点为根部的\textbf{凸锥}
+\end{itemize}
+
+\subsection{非齐次约束}
+
+如果$V_B \neq 0$，约束变为$F^T (V_A - V_B) \geq 0$，即$F^T V_A \geq F^T V_B$。这是一个\textbf{非齐次约束}：
+
+\begin{itemize}
+\item 约束超平面$F^T V_A = F^T V_B$不通过原点（除非$F^T V_B = 0$）
+\item 可行twist集是一个\textbf{凸多面体}，但不一定以原点为根部
+\item 约束"平移"了，但几何结构类似
+\end{itemize}
+
+\section{图形可视化}
+
+\subsection{约束空间的维度}
+
+在我们的例子中，$V_A$是3维的：$[\omega_{Az} \, v_{Ax} \, v_{Ay}]^T$。我们可以在这个3维空间中可视化约束。
+
+\subsection{约束的层次结构}
+
+\begin{enumerate}
+\item \textbf{不可穿透约束}：$F^T V_A \geq 0$（半空间）
+   \begin{itemize}
+   \item 边界：平面$F^T V_A = 0$（滚动-滑动约束）
+   \item 内部：所有满足$F^T V_A > 0$的twist（分离运动）
+   \end{itemize}
+
+\item \textbf{滚动-滑动约束}：$F^T V_A = 0$（平面）
+   \begin{itemize}
+   \item 这是不可穿透约束的边界
+   \item 包含所有保持接触的运动
+   \end{itemize}
+
+\item \textbf{滚动约束}：$v_{Ax} - 2\omega_{Az} = 0$和$v_{Ay} + \omega_{Az} = 0$（直线）
+   \begin{itemize}
+   \item 这是滚动-滑动约束平面内的一条直线
+   \item 包含所有纯滚动运动（无滑动）
+   \end{itemize}
+\end{enumerate}
+
+\subsection{几何关系总结}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2]
+% 定义坐标轴
+\draw[->] (0,0,0) -- (4,0,0) node[right] {$v_{Ax}$};
+\draw[->] (0,0,0) -- (0,4,0) node[above] {$v_{Ay}$};
+\draw[->] (0,0,0) -- (0,0,4) node[above] {$\omega_{Az}$};
+
+% 绘制约束平面 F^T V_A = 0 (v_{Ay} + \omega_{Az} = 0)
+% 这是一个通过原点的平面
+\filldraw[fill=blue!20,opacity=0.3] (0,0,0) -- (3,0,3) -- (3,-3,0) -- (0,-3,3) -- cycle;
+\node[blue] at (2,-1.5,1.5) {滚动-滑动约束平面};
+
+% 绘制滚动约束直线
+\draw[thick,red] (0,0,0) -- (2,1,-1) node[right] {滚动约束直线};
+\draw[thick,red,->] (0,0,0) -- (1.5,0.75,-0.75);
+
+% 标记可行区域（半空间 F^T V_A >= 0）
+% 这是平面一侧的所有点
+\node[green] at (1,2,1) {可行区域\\$F^T V_A \geq 0$};
+
+% 标记不可行区域
+\node[red] at (-1,-2,-1) {不可行区域\\$F^T V_A < 0$\\（穿透）};
+
+\end{tikzpicture}
+\end{center}
+
+\section{物理直觉}
+
+\subsection{为什么$F^T V_A \geq 0$表示不可穿透？}
+
+\textbf{物理原理}：接触法线方向上的相对速度决定了两个物体是分离还是穿透。
+
+\begin{itemize}
+\item \textbf{分离}：如果接触点在法线方向上的相对速度指向"远离"方向，则物体分离（$F^T V_A > 0$）。
+
+\item \textbf{保持接触}：如果接触点在法线方向上的相对速度为零，则接触得以保持（$F^T V_A = 0$）。
+
+\item \textbf{穿透}：如果接触点在法线方向上的相对速度指向"朝向"方向，则会发生穿透（$F^T V_A < 0$，不可行）。
+\end{itemize}
+
+\subsection{Wrench的物理意义}
+
+接触wrench $F$表示沿接触法线方向的单位力。$F^T V_A$可以理解为：
+
+\begin{itemize}
+\item \textbf{功率}：如果$F$是力，$V_A$是速度，则$F^T V_A$是功率
+\item \textbf{功的符号}：正功率意味着力与速度方向一致，物体在力的方向上运动
+\item \textbf{约束方向}：$F$的方向定义了"允许"和"禁止"运动的分界线
+\end{itemize}
+
+\section{数学严格性}
+
+\subsection{从距离函数到约束}
+
+从距离函数$d(q)$的角度：
+
+\begin{itemize}
+\item 不可穿透要求：$d(q) \geq 0$
+\item 在接触点处：$d = 0$
+\item 为了保持不穿透：$\dot{d} \geq 0$
+\item 一阶近似：$\dot{d} = \frac{\partial d}{\partial q} \dot{q} = \hat{n}^T (\dot{p}_A - \dot{p}_B)$
+\item 使用twist表示：$\hat{n}^T (\dot{p}_A - \dot{p}_B) = F^T (V_A - V_B)$
+\end{itemize}
+
+因此，$\dot{d} \geq 0$等价于$F^T (V_A - V_B) \geq 0$。
+
+\subsection{约束的凸性}
+
+不可穿透约束$F^T V_A \geq 0$定义了一个\textbf{凸集}：
+
+\begin{itemize}
+\item 如果$V_1$和$V_2$满足约束，则$\lambda V_1 + (1-\lambda) V_2$（$0 \leq \lambda \leq 1$）也满足约束
+\item 这保证了可行twist集是凸的
+\item 多个接触的约束的交集仍然是凸的（凸集的交集是凸的）
+\end{itemize}
+
+\section{总结}
+
+\begin{theorem}[不可穿透约束的几何意义]
+对于静止约束（$V_B = 0$），不可穿透约束$F^T V_A \geq 0$在twist空间中定义了一个以原点为根部的半空间。这个半空间：
+
+\begin{enumerate}
+\item 边界是滚动-滑动约束平面$F^T V_A = 0$
+\item 内部包含所有分离运动（$F^T V_A > 0$）
+\item 排除所有穿透运动（$F^T V_A < 0$）
+\item 形成可行twist的凸锥
+\end{enumerate}
+\end{theorem}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item $F^T V_A$是twist在wrench方向上的投影
+\item 正投影意味着"远离"接触，负投影意味着"朝向"接触（穿透）
+\item 约束的几何结构（平面、直线）反映了运动学约束的层次
+\item 当$V_B \neq 0$时，约束"平移"但几何结构类似
+\end{itemize}
+
+这个可视化帮助我们理解接触约束的本质：它们将twist空间划分为"允许"和"禁止"的区域，其中边界由保持接触的运动定义。
+
+\end{document}
+
+

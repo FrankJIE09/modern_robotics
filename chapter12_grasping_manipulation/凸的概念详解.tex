@@ -1,0 +1,465 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{凸的概念详解：从基础到应用}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{lemma}{引理}
+\newtheorem{example}{例子}
+\newtheorem{proposition}{命题}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{概述}
+
+\textbf{凸性}（convexity）是数学、优化和几何中的一个基本概念，在接触运动学、机器人抓取和操作中起着关键作用。理解凸性对于分析可行运动集合、接触约束和抓取稳定性至关重要。
+
+\section{凸集（Convex Set）}
+
+\subsection{定义}
+
+\begin{definition}[凸集]
+集合$C \subseteq \mathbb{R}^n$是\textbf{凸集}（convex set），如果对于任意两点$x_1, x_2 \in C$和任意$\lambda \in [0, 1]$，都有：
+\begin{equation}
+\lambda x_1 + (1-\lambda) x_2 \in C
+\label{eq:convex_set}
+\end{equation}
+\end{definition}
+
+\textbf{几何意义}：连接集合中任意两点的线段完全在集合内。
+
+\subsection{直观理解}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 凸集
+\begin{scope}
+\fill[blue!20] (0,0) ellipse (2 and 1.5);
+\draw[thick,blue] (0,0) ellipse (2 and 1.5);
+\filldraw[red] (-1,0.5) circle (2pt) node[below left] {$x_1$};
+\filldraw[red] (1,-0.5) circle (2pt) node[below right] {$x_2$};
+\draw[thick,green] (-1,0.5) -- (1,-0.5);
+\node[blue] at (0,1.8) {凸集};
+\end{scope}
+
+% 非凸集
+\begin{scope}[xshift=6cm]
+\fill[red!20] (0,0) -- (1.5,1) -- (2,0) -- (1.5,-1) -- (0,0);
+\draw[thick,red] (0,0) -- (1.5,1) -- (2,0) -- (1.5,-1) -- cycle;
+\filldraw[red] (0.3,0.2) circle (2pt) node[below left] {$x_1$};
+\filldraw[red] (1.7,-0.2) circle (2pt) node[below right] {$x_2$};
+\draw[thick,green,dashed] (0.3,0.2) -- (1.7,-0.2);
+\node[red] at (1,1.8) {非凸集};
+\node[red] at (1,-1.3) {线段超出集合};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{例子}
+
+\textbf{凸集的例子}：
+\begin{itemize}
+\item 线段、直线、射线
+\item 圆、椭圆、球
+\item 半空间、多面体
+\item 整个空间$\mathbb{R}^n$
+\end{itemize}
+
+\textbf{非凸集的例子}：
+\begin{itemize}
+\item 星形（有"凹陷"）
+\item 月牙形
+\item 字母"C"的形状
+\end{itemize}
+
+\section{凸组合（Convex Combination）}
+
+\subsection{定义}
+
+\begin{definition}[凸组合]
+给定$k$个点$x_1, x_2, \ldots, x_k \in \mathbb{R}^n$，它们的\textbf{凸组合}定义为：
+\begin{equation}
+x = \sum_{i=1}^k \lambda_i x_i
+\end{equation}
+其中系数$\lambda_i$满足：
+\begin{enumerate}
+\item \textbf{非负性}：$\lambda_i \geq 0$ 对所有$i = 1, \ldots, k$
+\item \textbf{归一性}：$\sum_{i=1}^k \lambda_i = 1$
+\end{enumerate}
+\end{definition}
+
+\subsection{两个点的凸组合}
+
+对于两个点$x_1$和$x_2$：
+\begin{equation}
+x = \lambda x_1 + (1-\lambda) x_2, \quad 0 \leq \lambda \leq 1
+\end{equation}
+
+\textbf{几何意义}：$x$在连接$x_1$和$x_2$的线段上。
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+\filldraw[red] (0,0) circle (2pt) node[below left] {$x_1$};
+\filldraw[blue] (3,1) circle (2pt) node[below right] {$x_2$};
+\draw[thick,green] (0,0) -- (3,1);
+\filldraw[purple] (1.5,0.5) circle (2pt) node[above] {$\lambda=0.5$};
+\filldraw[purple] (0.75,0.25) circle (1.5pt) node[below] {$\lambda=0.25$};
+\filldraw[purple] (2.25,0.75) circle (1.5pt) node[above] {$\lambda=0.75$};
+\node[below] at (1.5,-0.3) {凸组合：连接两点的线段};
+\end{tikzpicture}
+\end{center}
+
+\subsection{三个点的凸组合}
+
+对于三个点$x_1, x_2, x_3$：
+\begin{equation}
+x = \lambda_1 x_1 + \lambda_2 x_2 + \lambda_3 x_3, \quad \lambda_i \geq 0, \sum \lambda_i = 1
+\end{equation}
+
+\textbf{几何意义}：$x$在由三个点形成的三角形内部（包括边界）。
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+\filldraw[red] (0,0) circle (2pt) node[below left] {$x_1$};
+\filldraw[blue] (3,0) circle (2pt) node[below right] {$x_2$};
+\filldraw[green] (1.5,2) circle (2pt) node[above] {$x_3$};
+\fill[purple!20] (0,0) -- (3,0) -- (1.5,2) -- cycle;
+\draw[thick,green] (0,0) -- (3,0) -- (1.5,2) -- cycle;
+\filldraw[purple] (1.5,0.7) circle (1.5pt);
+\node[purple] at (1.5,0.4) {凸组合区域};
+\node[below] at (1.5,-0.3) {三角形内部（包括边界）};
+\end{tikzpicture}
+\end{center}
+
+\section{凸包（Convex Hull）}
+
+\subsection{定义}
+
+\begin{definition}[凸包]
+给定集合$S \subseteq \mathbb{R}^n$，$S$的\textbf{凸包}（convex hull）$\text{conv}(S)$是包含$S$的\textbf{最小凸集}，即：
+\begin{equation}
+\text{conv}(S) = \left\{\sum_{i=1}^k \lambda_i x_i \middle| x_i \in S, \lambda_i \geq 0, \sum_{i=1}^k \lambda_i = 1, k \in \mathbb{N}\right\}
+\end{equation}
+\end{definition}
+
+\textbf{直观理解}：用橡皮筋套住所有点，橡皮筋收缩后的形状就是凸包。
+
+\subsection{例子}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 原始点集
+\begin{scope}
+\filldraw[red] (0,0) circle (2pt);
+\filldraw[red] (1,0.5) circle (2pt);
+\filldraw[red] (2,0) circle (2pt);
+\filldraw[red] (1.5,1.5) circle (2pt);
+\filldraw[red] (0.5,1) circle (2pt);
+\filldraw[red] (1,2) circle (2pt);
+\node[below] at (1,-0.5) {原始点集};
+\end{scope}
+
+% 凸包
+\begin{scope}[xshift=5cm]
+\filldraw[red] (0,0) circle (2pt);
+\filldraw[red] (1,0.5) circle (2pt);
+\filldraw[red] (2,0) circle (2pt);
+\filldraw[red] (1.5,1.5) circle (2pt);
+\filldraw[red] (0.5,1) circle (2pt);
+\filldraw[red] (1,2) circle (2pt);
+\fill[blue!20] (0,0) -- (2,0) -- (1.5,1.5) -- (1,2) -- (0.5,1) -- cycle;
+\draw[thick,blue] (0,0) -- (2,0) -- (1.5,1.5) -- (1,2) -- (0.5,1) -- cycle;
+\node[blue] at (1,0.8) {凸包};
+\node[below] at (1,-0.5) {最小凸集};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\section{凸锥（Convex Cone）}
+
+\subsection{定义}
+
+\begin{definition}[凸锥]
+集合$C \subseteq \mathbb{R}^n$是\textbf{凸锥}（convex cone），如果：
+\begin{enumerate}
+\item 对于任意$x \in C$和$\lambda \geq 0$，有$\lambda x \in C$（锥性）
+\item 对于任意$x_1, x_2 \in C$，有$x_1 + x_2 \in C$（凸性）
+\end{enumerate}
+\end{definition}
+
+\textbf{等价定义}：$C$是凸锥当且仅当对于任意$x_1, x_2 \in C$和$\lambda_1, \lambda_2 \geq 0$，有：
+\begin{equation}
+\lambda_1 x_1 + \lambda_2 x_2 \in C
+\end{equation}
+
+\subsection{几何意义}
+
+\begin{itemize}
+\item 凸锥以原点为顶点
+\item 如果$x$在锥中，那么从原点到$x$的整条射线都在锥中
+\item 锥可以延伸到无穷远
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 凸锥
+\fill[blue!20] (0,0) -- (2,1) -- (2,2) -- (0,1) -- cycle;
+\draw[thick,blue] (0,0) -- (2,1);
+\draw[thick,blue] (0,0) -- (0,1);
+\draw[thick,blue,dashed] (2,1) -- (2,2);
+\draw[thick,blue,dashed] (0,1) -- (2,2);
+\filldraw[red] (0,0) circle (2pt) node[below left] {原点};
+\node[blue] at (1,0.5) {凸锥};
+\node[below] at (1,-0.3) {以原点为顶点};
+\end{tikzpicture}
+\end{center}
+
+\section{正线性组合（Positive Linear Combination）}
+
+\subsection{定义}
+
+\begin{definition}[正线性组合]
+给定$k$个向量$x_1, x_2, \ldots, x_k \in \mathbb{R}^n$，它们的\textbf{正线性组合}（positive linear combination）或\textbf{非负线性组合}定义为：
+\begin{equation}
+x = \sum_{i=1}^k \lambda_i x_i, \quad \lambda_i \geq 0
+\end{equation}
+\end{definition}
+
+\textbf{与凸组合的区别}：
+\begin{itemize}
+\item 凸组合：$\lambda_i \geq 0$且$\sum \lambda_i = 1$（有界）
+\item 正线性组合：$\lambda_i \geq 0$（无界，可以任意大）
+\end{itemize}
+
+\subsection{正张成（Positive Span）}
+
+\begin{definition}[正张成]
+向量集合$\{x_1, \ldots, x_k\}$的\textbf{正张成}（positive span）定义为：
+\begin{equation}
+\text{pos}(\{x_1, \ldots, x_k\}) = \left\{\sum_{i=1}^k \lambda_i x_i \middle| \lambda_i \geq 0\right\}
+\end{equation}
+\end{definition}
+
+\textbf{几何意义}：这是以原点为顶点的凸锥。
+
+\section{凸性的性质}
+
+\subsection{基本性质}
+
+\begin{proposition}[凸集的交集]
+如果$C_1$和$C_2$是凸集，那么$C_1 \cap C_2$也是凸集。
+\end{proposition}
+
+\textbf{推广}：任意多个凸集的交集仍然是凸集。
+
+\begin{proposition}[凸集的并集]
+凸集的并集不一定是凸集。
+\end{proposition}
+
+\textbf{例子}：两个不相交的圆，它们的并集不是凸集。
+
+\subsection{半空间是凸集}
+
+\begin{proposition}
+半空间$H = \{x | a^T x \geq b\}$是凸集。
+\end{proposition}
+
+\textbf{证明}：对于$x_1, x_2 \in H$和$\lambda \in [0, 1]$：
+\begin{align}
+a^T (\lambda x_1 + (1-\lambda) x_2) &= \lambda a^T x_1 + (1-\lambda) a^T x_2 \\
+&\geq \lambda b + (1-\lambda) b = b
+\end{align}
+
+因此$\lambda x_1 + (1-\lambda) x_2 \in H$。
+
+\subsection{多面体是凸集}
+
+\begin{proposition}
+多面体（多个半空间的交集）是凸集。
+\end{proposition}
+
+\textbf{证明}：多面体是多个半空间的交集，而半空间是凸集，凸集的交集是凸集。
+
+\section{在接触运动学中的应用}
+
+\subsection{可行Twist集合是凸的}
+
+在接触约束中，可行twist集合：
+\begin{equation}
+\mathcal{V} = \{V_A | F_i^T (V_A - V_{j(i)}) \geq 0 \text{ 对所有 } i\}
+\end{equation}
+
+\textbf{为什么是凸的？}
+\begin{itemize}
+\item 每个约束$F_i^T (V_A - V_{j(i)}) \geq 0$定义了一个半空间
+\item 半空间是凸集
+\item 多个半空间的交集是凸集
+\item 因此可行twist集合是凸集
+\end{itemize}
+
+\subsection{CoR区域是凸的}
+
+在平面问题中，可行CoR区域是凸的。
+
+\textbf{原因}：
+\begin{itemize}
+\item 每个接触贡献一个约束区域
+\item 约束区域的交集是凸的
+\item 因此可行CoR区域是凸的
+\end{itemize}
+
+\subsection{形状闭合的条件}
+
+形状闭合要求接触wrench的凸包包含原点在其内部。
+
+\textbf{等价条件}：接触wrench正张成整个wrench空间。
+
+\section{凸函数（Convex Function）}
+
+\subsection{定义}
+
+\begin{definition}[凸函数]
+函数$f: \mathbb{R}^n \to \mathbb{R}$是\textbf{凸函数}（convex function），如果对于任意$x_1, x_2 \in \mathbb{R}^n$和$\lambda \in [0, 1]$，有：
+\begin{equation}
+f(\lambda x_1 + (1-\lambda) x_2) \leq \lambda f(x_1) + (1-\lambda) f(x_2)
+\label{eq:convex_function}
+\end{equation}
+\end{definition}
+
+\textbf{几何意义}：函数图像上任意两点之间的线段在函数图像的上方。
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 凸函数
+\draw[thick,blue] (0,2) .. controls (1,1) and (2,0.5) .. (3,1);
+\draw[thick,green,dashed] (0,2) -- (3,1);
+\filldraw[red] (0,2) circle (1.5pt) node[above left] {$(x_1, f(x_1))$};
+\filldraw[red] (3,1) circle (1.5pt) node[below right] {$(x_2, f(x_2))$};
+\node[blue] at (1.5,0.2) {凸函数};
+\node[green] at (1.5,1.5) {线段在函数上方};
+\end{tikzpicture}
+\end{center}
+
+\subsection{例子}
+
+\textbf{凸函数}：
+\begin{itemize}
+\item $f(x) = x^2$
+\item $f(x) = |x|$
+\item $f(x) = e^x$
+\item $f(x) = -\log x$（$x > 0$）
+\end{itemize}
+
+\textbf{非凸函数}：
+\begin{itemize}
+\item $f(x) = -x^2$
+\item $f(x) = \sin x$
+\end{itemize}
+
+\section{凸优化（Convex Optimization）}
+
+\subsection{凸优化问题}
+
+\textbf{标准形式}：
+\begin{align}
+\text{最小化} \quad & f(x) \\
+\text{使得} \quad & g_i(x) \leq 0, \quad i = 1, \ldots, m \\
+& h_j(x) = 0, \quad j = 1, \ldots, p \\
+& x \in C
+\end{align}
+
+其中：
+\begin{itemize}
+\item $f$是凸函数
+\item $g_i$是凸函数
+\item $h_j$是仿射函数（线性函数）
+\item $C$是凸集
+\end{itemize}
+
+\subsection{凸优化的优势}
+
+\begin{enumerate}
+\item \textbf{全局最优}：任何局部最优解都是全局最优解
+\item \textbf{高效算法}：存在多项式时间的求解算法
+\item \textbf{对偶理论}：强对偶性成立
+\end{enumerate}
+
+\section{在机器人学中的应用}
+
+\subsection{接触约束}
+
+\begin{itemize}
+\item 可行twist集合是凸的
+\item 可行CoR区域是凸的
+\item 这简化了分析和优化
+\end{itemize}
+
+\subsection{抓取规划}
+
+\begin{itemize}
+\item 形状闭合测试可以转化为凸优化问题
+\item 抓取质量度量通常是凸函数
+\item 可以使用凸优化方法求解
+\end{itemize}
+
+\subsection{路径规划}
+
+\begin{itemize}
+\item 自由空间（如果凸）的路径规划更简单
+\item 可以使用凸优化方法
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键概念}
+
+\begin{enumerate}
+\item \textbf{凸集}：连接任意两点的线段在集合内
+
+\item \textbf{凸组合}：系数非负且和为1的线性组合
+
+\item \textbf{凸包}：包含集合的最小凸集
+
+\item \textbf{凸锥}：以原点为顶点的凸集，可以延伸到无穷
+
+\item \textbf{正线性组合}：系数非负的线性组合（形成凸锥）
+
+\item \textbf{凸函数}：函数图像上任意两点之间的线段在图像上方
+\end{enumerate}
+
+\subsection{重要性质}
+
+\begin{enumerate}
+\item 半空间是凸集
+\item 多个半空间的交集是凸集（多面体）
+\item 凸集的交集是凸集
+\item 凸集的并集不一定是凸集
+\end{enumerate}
+
+\subsection{在接触运动学中的重要性}
+
+\begin{enumerate}
+\item 可行运动集合是凸的
+\item 这简化了分析和优化
+\item 可以使用凸优化方法
+\item 保证了某些优化问题的全局最优解
+\end{enumerate}
+
+\end{document}
+

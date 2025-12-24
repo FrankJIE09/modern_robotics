@@ -23,7 +23,37 @@ Kevin M. Lynch 和 Frank C. Park\\
 
 \section{引言}
 
-前面章节的重点是描述、规划和控制机器人本身的运动。为了完成有用的工作，机器人必须能够操作环境中的物体。在本章中，我们建模机器人与物体之间的接触，特别是接触对物体运动施加的约束以及可以通过摩擦接触传递的力。利用这些模型，我们研究通过形状闭合（form closure）和力闭合（force closure）抓取来选择接触以固定物体的问题。我们还将接触建模应用于抓取以外的操作问题，例如推动物体、动态携带物体以及测试结构的稳定性。
+前面章节的重点是描述、规划和控制机器人本身的运动。为了完成有用的工作，机器人必须能够操作环境中的物体。操作包括抓取、推动、滚动、投掷、接球、敲击等。为了限制我们的范围，我们将假设操作器、物体和环境中的障碍物都是刚体。
+
+为了模拟、规划和控制机器人操作任务，我们需要理解（至少）三个要素：接触运动学；通过接触施加的力；以及刚体动力学。在接触运动学中，我们研究刚体如何在不穿透的情况下相对运动，并根据接触是滚动、滑动还是分离来分类这些可行运动。接触力模型处理可以通过滚动和滑动接触传递的法向力和摩擦力。最后，物体的实际运动是同时满足运动学约束、接触力模型和刚体动力学的运动。
+
+本章介绍接触运动学（第12.1节）和接触力建模（第12.2节），并将这些模型应用于机器人抓取和其他类型的操作问题。
+
+本章中来自线性代数的以下定义将是有用的。
+
+\begin{definition}[12.1]
+给定一组$j$个向量$\mathcal{A} = \{a_1, \ldots, a_j\} \in \mathbb{R}^n$，我们定义向量的线性张成，或线性组合集，为
+\begin{equation}
+\text{span}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \in \mathbb{R} \right\},
+\end{equation}
+非负线性组合，有时称为正或锥形张成，为
+\begin{equation}
+\text{pos}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \geq 0 \right\},
+\end{equation}
+以及凸张成为
+\begin{equation}
+\text{conv}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \geq 0 \text{ 且 } \sum_i k_i = 1 \right\}.
+\end{equation}
+\end{definition}
+
+显然$\text{conv}(\mathcal{A}) \subseteq \text{pos}(\mathcal{A}) \subseteq \text{span}(\mathcal{A})$（见图12.1）。以下来自线性代数的事实也将是有用的。
+
+\begin{enumerate}
+\item 空间$\mathbb{R}^n$可以由$n$个向量线性张成，但不能更少。
+\item 空间$\mathbb{R}^n$可以由$n + 1$个向量正张成，但不能更少。
+\end{enumerate}
+
+第一个事实隐含在我们使用$n$个坐标来表示$n$维欧几里得空间的使用中。事实2来自以下事实：对于任何$n$个向量的选择$\mathcal{A} = \{a_1, \ldots, a_n\}$，存在一个向量$c \in \mathbb{R}^n$使得对所有$i$有$a_i^T c \leq 0$。换句话说，$\mathcal{A}$中向量的非负组合不能创建方向$c$的向量。然而，如果我们选择$a_1, \ldots, a_n$为$\mathbb{R}^n$的正交坐标基，然后选择$a_{n+1} = -\sum_{i=1}^n a_i$，我们看到这$n + 1$个向量的集合正张成$\mathbb{R}^n$。
 
 \section{接触运动学}
 \label{sec:contact_kinematics}
@@ -104,6 +134,30 @@ F = (p_A \times \hat{n}, \hat{n}) = ([p_A]\hat{n}, \hat{n}).
 \label{eq:12.5}
 \end{equation}
 
+\textbf{例12.2}。考虑图12.3中所示的接触。物体$A$和$B$在$p_A = p_B = [1 \, 2 \, 0]^T$处接触，接触法线方向为$\hat{n} = [0 \, 1 \, 0]^T$。不可穿透约束(12.5)是
+\begin{equation}
+F^T (V_A - V_B) \geq 0,
+\end{equation}
+这变为
+\begin{equation}
+[([p_A]\hat{n})^T \, \hat{n}^T] \begin{bmatrix} \omega_A - \omega_B \\ v_A - v_B \end{bmatrix} \geq 0.
+\end{equation}
+代入值，我们得到
+\begin{equation}
+[0 \, 0 \, 1 \, 0 \, 1 \, 0][\omega_{Ax} - \omega_{Bx} \, \omega_{Ay} - \omega_{By} \, \omega_{Az} - \omega_{Bz} \, v_{Ax} - v_{Bx} \, v_{Ay} - v_{By} \, v_{Az} - v_{Bz}]^T \geq 0
+\end{equation}
+或
+\begin{equation}
+\omega_{Az} - \omega_{Bz} + v_{Ay} - v_{By} \geq 0;
+\end{equation}
+因此滚动-滑动twist满足
+\begin{equation}
+\omega_{Az} - \omega_{Bz} + v_{Ay} - v_{By} = 0.
+\label{eq:12.9}
+\end{equation}
+
+方程(12.9)在12维twist空间$(V_A, V_B)$中定义了一个11维超平面。
+
 如果
 \begin{equation}
 \text{（主动约束）} \quad F^T (V_A - V_B) = 0,
@@ -128,6 +182,35 @@ F^T V_A \geq 0.
 注意"滚动"接触包括两个物体保持相对静止的情况，即没有相对旋转。因此，"粘附"是这些接触的另一个术语。
 
 如果twist满足方程(12.6)但不满足(12.8)的滚动方程，则它们是滑动的。
+
+滚动约束(12.8)等价于：
+\begin{align}
+v_{Ax} - \omega_{Az} p_{Ay} + \omega_{Ay} p_{Az} &= v_{Bx} - \omega_{Bz} p_{By} + \omega_{By} p_{Bz}, \\
+v_{Ay} + \omega_{Az} p_{Ax} - \omega_{Ax} p_{Az} &= v_{By} + \omega_{Bz} p_{Bx} - \omega_{Bx} p_{Bz}, \\
+v_{Az} + \omega_{Ax} p_{Ay} - \omega_{Ay} p_{Ax} &= v_{Bz} + \omega_{Bx} p_{By} - \omega_{By} p_{Bx};
+\end{align}
+代入$p_A$和$p_B$的值，我们得到
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= v_{Bx} - 2\omega_{Bz}, \label{eq:12.10} \\
+v_{Ay} + \omega_{Az} &= v_{By} + \omega_{Bz}, \label{eq:12.11} \\
+v_{Az} + 2\omega_{Ax} - \omega_{Ay} &= v_{Bz} + 2\omega_{Bx} - \omega_{By}. \label{eq:12.12}
+\end{align}
+
+约束方程(12.10)–(12.12)定义了滚动-滑动twist的11维超平面中的9维超平面子空间。
+
+为了在低维空间中可视化约束，让我们假设$B$是静止的（$V_B = 0$）且$A$被限制在$z = 0$平面内，即$V_A = [\omega_{Ax} \, \omega_{Ay} \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, v_{Az}]^T = [0 \, 0 \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, 0]^T$。wrench $F$写为$[m_z \, f_x \, f_y]^T = [1 \, 0 \, 1]^T$。滚动-滑动约束(12.9)简化为
+\begin{equation}
+v_{Ay} + \omega_{Az} = 0,
+\end{equation}
+而滚动约束简化为
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= 0, \\
+v_{Ay} + \omega_{Az} &= 0.
+\end{align}
+
+单个滚动-滑动约束在$(\omega_{Az}, v_{Ax}, v_{Ay})$空间中产生一个平面，而两个滚动约束在该平面中产生一条直线。因为$V_B = 0$，约束曲面通过原点$V_A = 0$。如果$V_B \neq 0$，这通常不再是这种情况。
+
+图12.3图形化地显示，当$V_B = 0$时，不可穿透的twist $V_A$必须与约束wrench $F$具有非负点积。
 
 我们为滚动接触分配接触标签$R$，为滑动接触分配标签$S$，为正在分离的接触（满足不可穿透约束(12.5)但不满足主动约束(12.6)）分配标签$B$。
 

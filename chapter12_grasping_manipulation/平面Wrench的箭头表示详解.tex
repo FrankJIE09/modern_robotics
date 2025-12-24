@@ -1,0 +1,398 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.markings}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{平面Wrench的箭头表示详解}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{引言}
+
+\subsection{问题}
+
+如何将3维wrench空间中的平面wrench $F = (m_z, f_x, f_y)$可视化？
+
+\textbf{挑战}：
+\begin{itemize}
+\item Wrench空间是3维的（力矩$m_z$，力$f_x, f_y$）
+\item 难以在3维空间中直观理解
+\item 需要一种图形表示方法
+\end{itemize}
+
+\textbf{解决方案}：将wrench表示为平面上的\textbf{箭头}
+
+\subsection{基本思想}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item 平面wrench包含\textbf{力}（$f_x, f_y$）和\textbf{力矩}（$m_z$）
+\item 力可以自然地表示为平面上的向量（箭头）
+\item 力矩信息编码在箭头的\textbf{位置}中
+\end{itemize}
+
+\section{箭头表示的公式}
+
+\subsection{基本公式}
+
+对于任何具有\textbf{非零线性分量}的平面wrench $F = (m_z, f_x, f_y)$，可以表示为平面上的箭头：
+
+\textbf{箭头起点}：
+\begin{equation}
+(x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)
+\label{eq:arrow_base}
+\end{equation}
+
+\textbf{箭头终点}：
+\begin{equation}
+(x + f_x, y + f_y)
+\label{eq:arrow_head}
+\end{equation}
+
+\textbf{条件}：$f_x^2 + f_y^2 \neq 0$（线性分量非零）
+
+\subsection{特殊情况}
+
+\textbf{纯力矩}：如果$f_x = f_y = 0$且$m_z \neq 0$，则wrench是纯力矩，不能用箭头表示。
+
+\section{公式推导}
+
+\subsection{物理原理}
+
+\textbf{关键原理}：作用在平面上的力产生的力矩等于力的大小乘以力臂（垂直距离）。
+
+\textbf{力矩公式}：
+\begin{equation}
+m_z = (p \times f)_z = p_x f_y - p_y f_x
+\label{eq:moment_formula}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $p = (p_x, p_y)$是力的作用点
+\item $f = (f_x, f_y)$是力向量
+\item $m_z$是关于$z$轴的力矩
+\end{itemize}
+
+\subsection{推导箭头起点位置}
+
+\textbf{目标}：找到力作用线上的一个点$p = (x, y)$，使得该力产生的力矩等于$m_z$。
+
+\textbf{约束条件}：
+\begin{enumerate}
+\item 力矩约束：$x f_y - y f_x = m_z$
+\item 点在力线上：力线方向为$(f_x, f_y)$
+\end{enumerate}
+
+\textbf{求解}：
+
+从力矩约束：
+\begin{equation}
+x f_y - y f_x = m_z
+\label{eq:moment_constraint}
+\end{equation}
+
+我们想要找到力线上离原点最近的点（或某个特定点）。
+
+\textbf{方法1}：使用垂直距离
+
+力线到原点的垂直距离为：
+\begin{equation}
+d = \frac{|m_z|}{\sqrt{f_x^2 + f_y^2}}
+\end{equation}
+
+力线的法向量为$\hat{n} = \frac{(-f_y, f_x)}{\sqrt{f_x^2 + f_y^2}}$（垂直于力方向）。
+
+最近点（在力线上，到原点距离为$d$）为：
+\begin{equation}
+p = d \cdot \text{sign}(m_z) \cdot \hat{n} = \frac{m_z}{\sqrt{f_x^2 + f_y^2}} \cdot \frac{(-f_y, f_x)}{\sqrt{f_x^2 + f_y^2}} = \frac{m_z}{f_x^2 + f_y^2}(-f_y, f_x)
+\end{equation}
+
+\textbf{方法2}：直接求解
+
+从方程(\ref{eq:moment_constraint})，我们可以选择：
+\begin{equation}
+x = \frac{m_z f_y}{f_x^2 + f_y^2}, \quad y = \frac{-m_z f_x}{f_x^2 + f_y^2}
+\end{equation}
+
+验证：
+\begin{align}
+x f_y - y f_x &= \frac{m_z f_y}{f_x^2 + f_y^2} \cdot f_y - \frac{-m_z f_x}{f_x^2 + f_y^2} \cdot f_x \\
+&= \frac{m_z (f_y^2 + f_x^2)}{f_x^2 + f_y^2} = m_z \quad \checkmark
+\end{align}
+
+\textbf{因此}，箭头起点为：
+\begin{equation}
+(x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)
+\end{equation}
+
+\subsection{箭头终点}
+
+\textbf{定义}：箭头终点是起点加上力向量：
+\begin{equation}
+(x + f_x, y + f_y)
+\end{equation}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 箭头方向：力的方向
+\item 箭头长度：力的大小$\sqrt{f_x^2 + f_y^2}$
+\item 箭头位置：编码了力矩信息
+\end{itemize}
+
+\section{关键性质}
+
+\subsection{性质1：沿力线滑动不变性}
+
+\textbf{重要性质}：如果我们在力线上滑动箭头（保持方向和长度），力矩不变。
+
+\textbf{证明}：
+
+设箭头起点为$p = (x, y)$，力为$f = (f_x, f_y)$。
+
+如果我们将起点沿力线移动$t$个单位：
+\begin{equation}
+p' = p + t \cdot \frac{f}{\|f\|} = p + t \cdot \frac{(f_x, f_y)}{\sqrt{f_x^2 + f_y^2}}
+\end{equation}
+
+新起点产生的力矩：
+\begin{align}
+m_z' &= p'_x f_y - p'_y f_x \\
+&= (p_x + t \frac{f_x}{\|f\|}) f_y - (p_y + t \frac{f_y}{\|f\|}) f_x \\
+&= p_x f_y - p_y f_x + t \frac{f_x f_y - f_y f_x}{\|f\|} \\
+&= m_z + 0 = m_z
+\end{align}
+
+\textbf{结论}：沿力线滑动箭头，力矩不变，因此表示相同的wrench。
+
+\subsection{性质2：力矩的几何意义}
+
+\textbf{力矩计算}：
+\begin{equation}
+m_z = (p \times f)_z = x f_y - y f_x
+\end{equation}
+
+\textbf{几何解释}：
+\begin{itemize}
+\item 力矩等于从原点到力线的\textbf{垂直距离}乘以力的大小
+\item 符号表示力矩的方向（顺时针或逆时针）
+\end{itemize}
+
+\textbf{可视化}：
+\begin{itemize}
+\item 如果原点在力线左侧（从力方向看），力矩为正
+\item 如果原点在力线右侧，力矩为负
+\end{itemize}
+
+\section{具体例子}
+
+\subsection{例子1：纯力（无力矩）}
+
+\textbf{Wrench}：$F = (0, 2, 0)$（$m_z = 0$，$f_x = 2$，$f_y = 0$）
+
+\textbf{箭头起点}：
+\begin{equation}
+(x, y) = \frac{1}{2^2 + 0^2} (0 \cdot 0, -0 \cdot 2) = (0, 0)
+\end{equation}
+
+\textbf{箭头终点}：$(0 + 2, 0 + 0) = (2, 0)$
+
+\textbf{结果}：从原点$(0,0)$指向$(2,0)$的箭头，长度为2。
+
+\textbf{物理解释}：作用在原点的水平力，不产生力矩。
+
+\subsection{例子2：力+力矩}
+
+\textbf{Wrench}：$F = (2.5, -1, 2)$（$m_z = 2.5$，$f_x = -1$，$f_y = 2$）
+
+\textbf{计算}：
+\begin{align}
+f_x^2 + f_y^2 &= (-1)^2 + 2^2 = 1 + 4 = 5 \\
+(x, y) &= \frac{1}{5} (2.5 \cdot 2, -2.5 \cdot (-1)) = \frac{1}{5} (5, 2.5) = (1, 0.5)
+\end{align}
+
+\textbf{箭头起点}：$(1, 0.5)$
+
+\textbf{箭头终点}：$(1 + (-1), 0.5 + 2) = (0, 2.5)$
+
+\textbf{验证力矩}：
+\begin{align}
+m_z &= x f_y - y f_x = 1 \cdot 2 - 0.5 \cdot (-1) = 2 + 0.5 = 2.5 \quad \checkmark
+\end{align}
+
+\textbf{可视化}：
+\begin{itemize}
+\item 箭头从$(1, 0.5)$指向$(0, 2.5)$
+\item 方向：左上方向
+\item 长度：$\sqrt{(-1)^2 + 2^2} = \sqrt{5} \approx 2.24$
+\end{itemize}
+
+\subsection{例子3：不同位置的相同wrench}
+
+\textbf{同一个wrench}：$F = (2.5, -1, 2)$
+
+\textbf{可以沿力线滑动箭头}：
+
+力线方向：$\frac{(-1, 2)}{\sqrt{5}}$
+
+\textbf{新的起点}（沿力线移动）：
+\begin{equation}
+p' = (1, 0.5) + t \cdot \frac{(-1, 2)}{\sqrt{5}}
+\end{equation}
+
+对于任何$t$，产生的力矩都是$m_z = 2.5$。
+
+\textbf{结论}：所有沿这条线的箭头都表示同一个wrench。
+
+\section{图形求和}
+
+\subsection{两个Wrench的求和}
+
+\textbf{问题}：如何图形化地求两个wrench的和？
+
+\textbf{方法}：
+\begin{enumerate}
+\item 将两个箭头沿各自的力线滑动，直到它们的起点重合
+\item 使用平行四边形法则求力向量的和
+\item 新箭头的起点在重合点，终点是力向量的和
+\end{enumerate}
+
+\textbf{数学验证}：
+
+设两个wrench：
+\begin{itemize}
+\item $F_1 = (m_{1z}, f_{1x}, f_{1y})$，箭头起点$p_1$
+\item $F_2 = (m_{2z}, f_{2x}, f_{2y})$，箭头起点$p_2$
+\end{itemize}
+
+\textbf{和}：$F = F_1 + F_2 = (m_{1z} + m_{2z}, f_{1x} + f_{2x}, f_{1y} + f_{2y})$
+
+\textbf{验证力矩}：
+\begin{align}
+m_z &= m_{1z} + m_{2z} \\
+&= (p_1 \times f_1)_z + (p_2 \times f_2)_z
+\end{align}
+
+如果$p_1 = p_2 = p$（起点重合），则：
+\begin{align}
+m_z &= (p \times f_1)_z + (p \times f_2)_z \\
+&= (p \times (f_1 + f_2))_z = (p \times f)_z
+\end{align}
+
+其中$f = f_1 + f_2$是力的和。
+
+\textbf{结论}：图形求和正确！
+
+\section{几何理解}
+
+\subsection{力矩的符号}
+
+\textbf{右手法则}：
+\begin{itemize}
+\item 如果从原点看，力使物体\textbf{逆时针}旋转，力矩为正
+\item 如果从原点看，力使物体\textbf{顺时针}旋转，力矩为负
+\end{itemize}
+
+\textbf{从箭头判断}：
+\begin{itemize}
+\item 如果原点在箭头左侧（从箭头方向看），力矩为正
+\item 如果原点在箭头右侧，力矩为负
+\end{itemize}
+
+\subsection{力线到原点的距离}
+
+\textbf{距离公式}：
+\begin{equation}
+d = \frac{|m_z|}{\sqrt{f_x^2 + f_y^2}} = \frac{|m_z|}{\|f\|}
+\end{equation}
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 力矩越大，力线离原点越远
+\item 力越大，距离可能越小（如果力矩不变）
+\end{itemize}
+
+\subsection{箭头的方向}
+
+\textbf{箭头方向}：力的方向$(f_x, f_y)$
+
+\textbf{箭头长度}：力的大小$\sqrt{f_x^2 + f_y^2}$
+
+\textbf{箭头位置}：编码力矩信息
+
+\section{应用}
+
+\subsection{可视化接触Wrench}
+
+\textbf{应用1}：可视化单个接触的wrench
+\begin{itemize}
+\item 接触位置：$p$
+\item 接触法向量：$\hat{n}$
+\item Wrench：$F = ([p] \hat{n}, \hat{n})$
+\item 可以用箭头表示
+\end{itemize}
+
+\textbf{应用2}：可视化多个接触的wrench锥
+\begin{itemize}
+\item 每个接触wrench用箭头表示
+\item 可以图形化地看到wrench锥的形状
+\end{itemize}
+
+\subsection{图形分析}
+
+\textbf{优势}：
+\begin{itemize}
+\item 直观理解wrench的几何结构
+\item 便于图形化分析
+\item 可以用于教学和可视化
+\end{itemize}
+
+\textbf{局限性}：
+\begin{itemize}
+\item 只适用于平面问题
+\item 纯力矩无法表示
+\item 需要线性分量非零
+\end{itemize}
+
+\section{总结}
+
+\subsection{核心公式}
+
+对于平面wrench $F = (m_z, f_x, f_y)$，其中$f_x^2 + f_y^2 \neq 0$：
+
+\textbf{箭头起点}：
+\begin{equation}
+(x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)
+\end{equation}
+
+\textbf{箭头终点}：
+\begin{equation}
+(x + f_x, y + f_y)
+\end{equation}
+
+\subsection{关键性质}
+
+\begin{enumerate}
+\item \textbf{沿力线滑动不变性}：在力线上滑动箭头，wrench不变
+\item \textbf{力矩编码}：力矩信息编码在箭头位置中
+\item \textbf{图形求和}：可以通过图形方法求wrench的和
+\end{enumerate}
+
+\subsection{物理解释}
+
+\begin{itemize}
+\item 箭头方向：力的方向
+\item 箭头长度：力的大小
+\item 箭头位置：力矩信息（通过力线到原点的距离编码）
+\end{itemize}
+
+\end{document}
+

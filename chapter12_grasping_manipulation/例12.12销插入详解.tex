@@ -1,0 +1,275 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{例12.12\quad 销插入\quad 详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+
+考虑力控制的平面销在插入过程中与孔的两点接触（如图12.28所示）。
+
+\subsection{系统组成}
+
+\begin{itemize}
+    \item \textbf{销}：力控制的平面物体
+    \item \textbf{孔}：固定约束
+    \item \textbf{接触}：销与孔在两个点处接触
+    \item \textbf{力控制}：力控制器对销施加特定的wrench
+\end{itemize}
+
+\section{问题设置}
+
+\subsection{接触配置}
+
+图12.28显示了：
+\begin{itemize}
+    \item 作用在销上的接触摩擦锥
+    \item 相应的复合wrench锥
+    \item 使用力矩标记说明
+\end{itemize}
+
+\subsection{力控制}
+
+力控制器可以对销施加特定的wrench $F_{\text{control}}$。
+
+\section{问题1：卡住现象}
+
+\subsection{情况描述}
+
+如果力控制器将wrench $F_1$施加到销上，它可能会\textbf{卡住}。
+
+\subsection{卡住的机制}
+
+\begin{itemize}
+    \item \textbf{力控制器施加wrench} $F_1$
+    \item \textbf{孔可能产生接触力}来平衡$F_1$
+    \item \textbf{如果接触力在摩擦锥内}，则可以平衡$F_1$
+    \item \textbf{结果}：销可能卡在这个位置，无法继续插入
+\end{itemize}
+
+\subsection{数学表述}
+
+销卡住的条件是：存在接触wrench $\sum_i k_i F_i$，使得：
+
+\begin{equation}
+F_{\text{control}} + \sum_i k_i F_i = 0, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\end{equation}
+
+即，接触可以产生与控制器wrench相反的wrench，从而平衡它。
+
+\subsection{物理解释}
+
+\begin{itemize}
+    \item 控制器试图推动销插入
+    \item 但接触力可以抵抗这个推动
+    \item 如果接触力足够大，可以完全平衡控制力
+    \item 销无法移动，卡在当前位置
+\end{itemize}
+
+\section{问题2：成功插入}
+
+\subsection{情况描述}
+
+如果力控制器将wrench $F_2$施加到销上，\textbf{插入继续进行}。
+
+\subsection{成功插入的机制}
+
+\begin{itemize}
+    \item \textbf{力控制器施加wrench} $F_2$
+    \item \textbf{接触无法平衡} $F_2$
+    \item \textbf{结果}：销继续移动，插入继续进行
+\end{itemize}
+
+\subsection{数学表述}
+
+插入成功的条件是：不存在接触wrench $\sum_i k_i F_i$，使得：
+
+\begin{equation}
+F_{\text{control}} + \sum_i k_i F_i = 0, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\end{equation}
+
+即，接触无法产生与控制器wrench相反的wrench来平衡它。
+
+\subsection{物理解释}
+
+\begin{itemize}
+    \item 控制器推动销插入
+    \item 接触力无法完全抵抗这个推动
+    \item 存在净wrench使销继续移动
+    \item 插入成功
+\end{itemize}
+
+\section{关键区别}
+
+\subsection{Wrench $F_1$ vs $F_2$}
+
+\begin{itemize}
+    \item \textbf{$F_1$}：在复合wrench锥内 $\Rightarrow$ 可能被平衡 $\Rightarrow$ 可能卡住
+    \item \textbf{$F_2$}：不在复合wrench锥内 $\Rightarrow$ 无法被平衡 $\Rightarrow$ 插入继续
+\end{itemize}
+
+\subsection{力矩标记的视角}
+
+使用力矩标记：
+\begin{itemize}
+    \item 如果控制wrench在复合wrench锥内，接触可以产生相反的wrench
+    \item 如果控制wrench不在复合wrench锥内，接触无法产生相反的wrench
+\end{itemize}
+
+\section{力闭合与楔入}
+
+\subsection{力闭合条件}
+
+如果两个接触处的摩擦系数足够大，使得两个摩擦锥可以"看到"彼此的基（如图12.22(b)所示），则：
+
+\begin{itemize}
+    \item 销处于\textbf{力闭合}
+    \item 接触可能能够抵抗任何wrench
+    \item 这取决于两个接触之间的内力
+\end{itemize}
+
+\subsection{楔入现象}
+
+当销处于力闭合时，它被称为\textbf{楔入}（wedged）。
+
+\begin{itemize}
+    \item \textbf{定义}：销被"卡"在孔中，无法移动
+    \item \textbf{原因}：接触可以产生任何方向的wrench来抵抗外部wrench
+    \item \textbf{条件}：两个摩擦锥可以"看到"彼此的基
+\end{itemize}
+
+\subsection{楔入的数学条件}
+
+销楔入的条件是：
+\begin{itemize}
+    \item 两个接触的摩擦锥足够宽
+    \item 两个摩擦锥可以"看到"彼此的基
+    \item 四个接触wrench（每个接触两条摩擦锥边）正张成整个wrench空间
+    \item 销处于力闭合
+\end{itemize}
+
+\section{插入策略}
+
+\subsection{避免卡住}
+
+为了避免卡住，应该：
+
+\begin{enumerate}
+    \item \textbf{选择合适的控制wrench}：
+    \begin{itemize}
+        \item 确保控制wrench不在复合wrench锥内
+        \item 或者确保控制wrench的方向使接触无法平衡它
+    \end{itemize}
+    
+    \item \textbf{控制插入速度}：
+    \begin{itemize}
+        \item 快速插入可能减少卡住的可能性
+        \item 但需要平衡速度和精度
+    \end{itemize}
+    
+    \item \textbf{使用适当的摩擦系数}：
+    \begin{itemize}
+        \item 较低的摩擦系数可以减少卡住的可能性
+        \item 但可能影响其他操作性能
+    \end{itemize}
+\end{enumerate}
+
+\subsection{成功插入的条件}
+
+为了成功插入，需要：
+
+\begin{itemize}
+    \item 控制wrench不在复合wrench锥内
+    \item 或者控制wrench的方向使接触无法完全平衡它
+    \item 存在净wrench使销继续移动
+\end{itemize}
+
+\section{动态分析}
+
+\subsection{准静态 vs 动态}
+
+\begin{itemize}
+    \item \textbf{准静态}：假设速度很小，忽略惯性力
+    \item \textbf{动态}：考虑加速度和惯性力
+\end{itemize}
+
+\subsection{动态情况下的卡住}
+
+在动态情况下：
+\begin{itemize}
+    \item 即使接触可以平衡控制wrench，销可能仍然有速度
+    \item 惯性可能使销继续移动
+    \item 但最终会减速并可能卡住
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{装配任务}
+
+这个例子展示了：
+
+\begin{itemize}
+    \item \textbf{插入操作}：如何成功执行插入任务
+    \item \textbf{避免卡住}：如何避免在插入过程中卡住
+    \item \textbf{力控制策略}：如何选择合适的控制wrench
+\end{itemize}
+
+\subsection{相关应用}
+
+\begin{itemize}
+    \item \textbf{销插入}：将销插入孔中
+    \item \textbf{螺栓拧入}：将螺栓拧入螺纹孔
+    \item \textbf{装配操作}：各种装配任务
+    \item \textbf{精密插入}：需要精确控制的操作
+\end{itemize}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{卡住现象}：如果控制wrench在复合wrench锥内，销可能卡住
+    
+    \item \textbf{成功插入}：如果控制wrench不在复合wrench锥内，插入可以继续
+    
+    \item \textbf{力闭合}：如果两个摩擦锥可以"看到"彼此的基，销处于力闭合
+    
+    \item \textbf{楔入}：力闭合时，销可能被楔入，无法移动
+    
+    \item \textbf{插入策略}：选择合适的控制wrench和插入策略可以避免卡住
+    
+    \item \textbf{力矩标记}：使用力矩标记可以直观地理解wrench锥和插入过程
+\end{enumerate}
+
+\section{设计建议}
+
+\subsection{避免卡住的设计}
+
+\begin{itemize}
+    \item \textbf{几何设计}：设计销和孔的几何形状，使接触wrench锥较小
+    \item \textbf{材料选择}：选择适当的摩擦系数
+    \item \textbf{控制策略}：选择合适的控制wrench方向
+    \item \textbf{速度控制}：使用适当的速度来减少卡住的可能性
+\end{itemize}
+
+\subsection{成功插入的设计}
+
+\begin{itemize}
+    \item \textbf{引导}：使用引导结构帮助插入
+    \item \textbf{对齐}：确保销和孔正确对齐
+    \item \textbf{力控制}：使用力控制而不是位置控制
+    \item \textbf{反馈}：使用力反馈来调整插入策略
+\end{itemize}
+
+\end{document}
+

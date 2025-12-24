@@ -1,0 +1,437 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{不可穿透约束公式(12.5)的证明：$F^T (V_A - V_B) \geq 0$}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+
+\begin{document}
+
+\maketitle
+
+\section{问题陈述}
+
+在第12章中，我们遇到了不可穿透约束的两种等价形式：
+
+\begin{enumerate}
+\item \textbf{形式1（公式12.4）}：
+\begin{equation}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) \geq 0
+\label{eq:12.4}
+\end{equation}
+
+\item \textbf{形式2（公式12.5）}：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\label{eq:12.5}
+\end{equation}
+\end{enumerate}
+
+其中：
+\begin{itemize}
+\item $\hat{n} \in \mathbb{R}^3$是单位接触法线向量，指向物体$A$
+\item $p_A, p_B \in \mathbb{R}^3$是两个物体上接触点在世界坐标系中的位置
+\item $\dot{p}_A, \dot{p}_B \in \mathbb{R}^3$是接触点的速度
+\item $V_A = (\omega_A, v_A)$和$V_B = (\omega_B, v_B)$是两个物体的twist
+\item $F = ([p_A]\hat{n}, \hat{n}) \in \mathbb{R}^6$是接触wrench
+\end{itemize}
+
+本文档将详细证明这两个公式是等价的。
+
+\section{预备知识}
+
+\subsection{Twist和接触点速度的关系}
+
+对于刚体，接触点的速度可以通过twist计算。设物体的twist为$V = (\omega, v)$，其中$\omega$是角速度，$v$是线速度。则接触点$p$的速度为：
+\begin{equation}
+\dot{p} = v + \omega \times p = v + [\omega] p
+\label{eq:contact_velocity}
+\end{equation}
+其中$[\omega]$是角速度向量$\omega$的反对称矩阵：
+\begin{equation}
+[\omega] = \begin{bmatrix}
+0 & -\omega_z & \omega_y \\
+\omega_z & 0 & -\omega_x \\
+-\omega_y & \omega_x & 0
+\end{bmatrix}
+\end{equation}
+
+\subsection{接触Wrench的定义}
+
+接触wrench $F$定义为对应于沿接触法线施加的单位力的wrench：
+\begin{equation}
+F = (p_A \times \hat{n}, \hat{n}) = ([p_A]\hat{n}, \hat{n})
+\label{eq:wrench_definition}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $p_A \times \hat{n}$是力矩部分（$m \in \mathbb{R}^3$）
+\item $\hat{n}$是力部分（$f \in \mathbb{R}^3$）
+\item $[p_A]$是位置向量$p_A$的反对称矩阵
+\end{itemize}
+
+因此，$F$是一个6维向量：
+\begin{equation}
+F = \begin{bmatrix} m \\ f \end{bmatrix} = \begin{bmatrix} [p_A]\hat{n} \\ \hat{n} \end{bmatrix} \in \mathbb{R}^6
+\end{equation}
+
+\section{主要证明}
+
+\subsection{目标}
+
+我们需要证明：
+\begin{equation}
+F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\label{eq:equivalence}
+\end{equation}
+
+如果这个等式成立，那么公式(12.4)和(12.5)显然是等价的。
+
+\subsection{证明步骤}
+
+\textbf{步骤1：展开$F^T (V_A - V_B)$}
+
+首先，我们有：
+\begin{align}
+F^T (V_A - V_B) &= \begin{bmatrix} ([p_A]\hat{n})^T & \hat{n}^T \end{bmatrix} \begin{bmatrix} \omega_A - \omega_B \\ v_A - v_B \end{bmatrix} \\
+&= ([p_A]\hat{n})^T (\omega_A - \omega_B) + \hat{n}^T (v_A - v_B)
+\label{eq:step1}
+\end{align}
+
+\textbf{步骤2：处理第一项$([p_A]\hat{n})^T (\omega_A - \omega_B)$}
+
+反对称矩阵$[p_A]$满足：
+\begin{equation}
+[p_A]^T = -[p_A]
+\end{equation}
+
+因此：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= \hat{n}^T [p_A]^T (\omega_A - \omega_B) \\
+&= -\hat{n}^T [p_A] (\omega_A - \omega_B) \\
+&= -\hat{n}^T ([p_A] \omega_A - [p_A] \omega_B)
+\end{align}
+
+利用反对称矩阵的性质：$[p_A] \omega = p_A \times \omega$，我们得到：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= -\hat{n}^T (p_A \times \omega_A - p_A \times \omega_B) \\
+&= -\hat{n}^T (p_A \times (\omega_A - \omega_B))
+\end{align}
+
+利用向量三重积的性质：$\hat{n}^T (p_A \times \omega) = (p_A \times \hat{n})^T \omega = -(\hat{n} \times p_A)^T \omega$，但更直接的方法是使用标量三重积的循环性质：
+\begin{equation}
+\hat{n}^T (p_A \times \omega) = \omega^T (\hat{n} \times p_A) = -(\hat{n} \times p_A)^T \omega
+\end{equation}
+
+实际上，我们有：
+\begin{equation}
+\hat{n}^T (p_A \times \omega) = -(\hat{n} \times p_A)^T \omega = (p_A \times \hat{n})^T \omega
+\end{equation}
+
+因此：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= (p_A \times \hat{n})^T (\omega_A - \omega_B) \\
+&= \hat{n}^T [p_A] (\omega_A - \omega_B) \\
+&= \hat{n}^T ([p_A] \omega_A - [p_A] \omega_B)
+\label{eq:step2}
+\end{align}
+
+\textbf{步骤3：组合两项}
+
+将方程(\ref{eq:step1})和(\ref{eq:step2})结合：
+\begin{align}
+F^T (V_A - V_B) &= ([p_A]\hat{n})^T (\omega_A - \omega_B) + \hat{n}^T (v_A - v_B) \\
+&= \hat{n}^T ([p_A] \omega_A - [p_A] \omega_B) + \hat{n}^T (v_A - v_B) \\
+&= \hat{n}^T ([p_A] \omega_A + v_A - [p_A] \omega_B - v_B)
+\end{align}
+
+\textbf{步骤4：使用接触点速度公式}
+
+根据方程(\ref{eq:contact_velocity})，我们有：
+\begin{align}
+\dot{p}_A &= v_A + [\omega_A] p_A = v_A + [p_A]^T \omega_A \\
+\dot{p}_B &= v_B + [\omega_B] p_B = v_B + [p_B]^T \omega_B
+\end{align}
+
+注意：$[\omega] p = -[p] \omega$，因为$[\omega] p = \omega \times p = -p \times \omega = -[p] \omega$。
+
+实际上，更准确的关系是：
+\begin{equation}
+[\omega] p = \omega \times p = -p \times \omega = -[p] \omega
+\end{equation}
+
+因此：
+\begin{align}
+\dot{p}_A &= v_A - [p_A] \omega_A \\
+\dot{p}_B &= v_B - [p_B] \omega_B
+\end{align}
+
+在接触点处，$p_A = p_B = p$（初始时刻），因此：
+\begin{align}
+\dot{p}_A &= v_A - [p] \omega_A \\
+\dot{p}_B &= v_B - [p] \omega_B
+\end{align}
+
+因此：
+\begin{align}
+\dot{p}_A - \dot{p}_B &= (v_A - [p] \omega_A) - (v_B - [p] \omega_B) \\
+&= v_A - v_B - [p] (\omega_A - \omega_B)
+\end{align}
+
+\textbf{步骤5：完成证明}
+
+现在我们有：
+\begin{align}
+F^T (V_A - V_B) &= \hat{n}^T ([p_A] \omega_A + v_A - [p_A] \omega_B - v_B) \\
+&= \hat{n}^T (v_A - v_B + [p_A] (\omega_A - \omega_B))
+\end{align}
+
+而：
+\begin{align}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) &= \hat{n}^T (v_A - v_B - [p] (\omega_A - \omega_B)) \\
+&= \hat{n}^T (v_A - v_B) - \hat{n}^T [p] (\omega_A - \omega_B)
+\end{align}
+
+等等，这里有个符号问题。让我重新检查。
+
+实际上，正确的公式是：
+\begin{equation}
+\dot{p} = v + \omega \times p = v + [\omega] p
+\end{equation}
+
+其中$[\omega]$是$\omega$的反对称矩阵。我们有：
+\begin{equation}
+[\omega] p = \omega \times p
+\end{equation}
+
+而$[p] \omega = p \times \omega = -\omega \times p = -[\omega] p$。
+
+因此：
+\begin{equation}
+\dot{p} = v + [\omega] p = v - [p] \omega
+\end{equation}
+
+所以：
+\begin{align}
+\dot{p}_A &= v_A - [p_A] \omega_A \\
+\dot{p}_B &= v_B - [p_B] \omega_B
+\end{align}
+
+在接触点处$p_A = p_B = p$，因此：
+\begin{align}
+\dot{p}_A - \dot{p}_B &= (v_A - [p] \omega_A) - (v_B - [p] \omega_B) \\
+&= v_A - v_B - [p] (\omega_A - \omega_B)
+\end{align}
+
+现在，让我们重新计算$F^T (V_A - V_B)$：
+\begin{align}
+F^T (V_A - V_B) &= ([p_A]\hat{n})^T (\omega_A - \omega_B) + \hat{n}^T (v_A - v_B)
+\end{align}
+
+对于第一项，我们有：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= \hat{n}^T [p_A]^T (\omega_A - \omega_B) \\
+&= -\hat{n}^T [p_A] (\omega_A - \omega_B) \\
+&= -\hat{n}^T ([p_A] \omega_A - [p_A] \omega_B)
+\end{align}
+
+由于$[p_A] \omega = p_A \times \omega$，且$\hat{n}^T (p_A \times \omega) = (p_A \times \hat{n})^T \omega$（通过标量三重积的循环性质），我们得到：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= -\hat{n}^T ([p_A] \omega_A - [p_A] \omega_B) \\
+&= -(\hat{n} \times p_A)^T (\omega_A - \omega_B) \\
+&= (p_A \times \hat{n})^T (\omega_A - \omega_B)
+\end{align}
+
+实际上，让我使用更直接的方法。我们知道：
+\begin{equation}
+([p_A]\hat{n})^T \omega = \hat{n}^T [p_A]^T \omega = -\hat{n}^T [p_A] \omega
+\end{equation}
+
+而$[p_A] \omega = p_A \times \omega$，所以：
+\begin{equation}
+([p_A]\hat{n})^T \omega = -\hat{n}^T (p_A \times \omega) = (p_A \times \hat{n})^T \omega
+\end{equation}
+
+这是因为$\hat{n}^T (p_A \times \omega) = \omega^T (\hat{n} \times p_A) = -(\hat{n} \times p_A)^T \omega = (p_A \times \hat{n})^T \omega$。
+
+因此：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= (p_A \times \hat{n})^T (\omega_A - \omega_B) \\
+&= \hat{n}^T [p_A] (\omega_A - \omega_B)
+\end{align}
+
+等等，这里符号还是有问题。让我用更系统的方法。
+
+\section{系统化证明}
+
+让我们使用反对称矩阵和标量三重积的性质来系统化地证明。
+
+\subsection{关键恒等式}
+
+\textbf{引理1（标量三重积的循环性质）}：对于任意向量$a, b, c \in \mathbb{R}^3$，有：
+\begin{equation}
+(a \times b)^T c = (b \times c)^T a = (c \times a)^T b
+\end{equation}
+
+\textbf{引理2（反对称矩阵的性质）}：对于任意向量$p, \omega \in \mathbb{R}^3$，有：
+\begin{equation}
+[\omega] p = \omega \times p, \quad [p] \omega = p \times \omega = -\omega \times p = -[\omega] p
+\end{equation}
+
+\textbf{引理3}：对于任意向量$a, b, c \in \mathbb{R}^3$，有：
+\begin{equation}
+(a \times b)^T c = -a^T (b \times c)
+\end{equation}
+
+\subsection{主要证明}
+
+\textbf{定理}：$F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)$
+
+\textbf{证明}：
+
+\textbf{步骤1}：展开$F^T (V_A - V_B)$
+
+\begin{align}
+F^T (V_A - V_B) &= \begin{bmatrix} ([p_A]\hat{n})^T & \hat{n}^T \end{bmatrix} \begin{bmatrix} \omega_A - \omega_B \\ v_A - v_B \end{bmatrix} \\
+&= ([p_A]\hat{n})^T (\omega_A - \omega_B) + \hat{n}^T (v_A - v_B)
+\label{eq:expand}
+\end{align}
+
+\textbf{步骤2}：处理第一项$([p_A]\hat{n})^T (\omega_A - \omega_B)$
+
+我们有$[p_A]\hat{n} = p_A \times \hat{n}$。使用标量三重积的性质（引理1）：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= (p_A \times \hat{n})^T (\omega_A - \omega_B) \\
+&= (\hat{n} \times (\omega_A - \omega_B))^T p_A \quad \text{（标量三重积循环）} \\
+&= p_A^T (\hat{n} \times (\omega_A - \omega_B)) \\
+&= p_A^T [\hat{n}] (\omega_A - \omega_B)
+\label{eq:first_term_step1}
+\end{align}
+
+现在，$[\hat{n}] (\omega_A - \omega_B) = \hat{n} \times (\omega_A - \omega_B) = -(\omega_A - \omega_B) \times \hat{n}$。
+
+使用标量三重积的另一种形式：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= (p_A \times \hat{n})^T (\omega_A - \omega_B) \\
+&= \hat{n}^T ((\omega_A - \omega_B) \times p_A) \quad \text{（由引理1）} \\
+&= \hat{n}^T [\omega_A - \omega_B] p_A \\
+&= \hat{n}^T [\omega_A - \omega_B] p \quad \text{（因为$p_A = p$在接触点处）}
+\label{eq:first_term}
+\end{align}
+
+\textbf{步骤3}：组合两项}
+
+将方程(\ref{eq:expand})和(\ref{eq:first_term})结合：
+\begin{align}
+F^T (V_A - V_B) &= \hat{n}^T [\omega_A - \omega_B] p + \hat{n}^T (v_A - v_B) \\
+&= \hat{n}^T (v_A - v_B + [\omega_A - \omega_B] p)
+\label{eq:combined}
+\end{align}
+
+\textbf{步骤4}：使用接触点速度公式}
+
+接触点速度：
+\begin{align}
+\dot{p}_A &= v_A + \omega_A \times p_A = v_A + [\omega_A] p_A \\
+\dot{p}_B &= v_B + \omega_B \times p_B = v_B + [\omega_B] p_B
+\end{align}
+
+在接触点处，$p_A = p_B = p$（初始时刻），因此：
+\begin{align}
+\dot{p}_A - \dot{p}_B &= (v_A + [\omega_A] p) - (v_B + [\omega_B] p) \\
+&= v_A - v_B + ([\omega_A] - [\omega_B]) p \\
+&= v_A - v_B + [\omega_A - \omega_B] p
+\label{eq:velocity_diff}
+\end{align}
+
+\textbf{步骤5}：完成证明}
+
+计算$\hat{n}^T (\dot{p}_A - \dot{p}_B)$：
+\begin{align}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) &= \hat{n}^T (v_A - v_B + [\omega_A - \omega_B] p)
+\label{eq:target}
+\end{align}
+
+比较方程(\ref{eq:combined})和(\ref{eq:target})，我们得到：
+\begin{equation}
+F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\end{equation}
+
+因此，公式(12.4)和(12.5)等价。$\square$
+
+\section{完整证明总结}
+
+\begin{theorem}
+对于两个在点$p$处接触的刚体$A$和$B$，接触法线$\hat{n}$指向物体$A$，接触wrench $F = ([p_A]\hat{n}, \hat{n})$，以及twist $V_A = (\omega_A, v_A)$和$V_B = (\omega_B, v_B)$，有：
+\begin{equation}
+F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)
+\end{equation}
+\end{theorem}
+
+\textbf{证明}：
+
+\textbf{步骤1}：展开$F^T (V_A - V_B)$
+\begin{align}
+F^T (V_A - V_B) &= ([p_A]\hat{n})^T (\omega_A - \omega_B) + \hat{n}^T (v_A - v_B)
+\end{align}
+
+\textbf{步骤2}：处理第一项
+
+使用标量三重积的性质：$(a \times b)^T c = (b \times c)^T a = (c \times a)^T b$，我们有：
+\begin{align}
+([p_A]\hat{n})^T (\omega_A - \omega_B) &= (p_A \times \hat{n})^T (\omega_A - \omega_B) \\
+&= \hat{n}^T ((\omega_A - \omega_B) \times p_A) \\
+&= \hat{n}^T [\omega_A - \omega_B] p_A
+\end{align}
+
+\textbf{步骤3}：组合结果
+
+\begin{align}
+F^T (V_A - V_B) &= \hat{n}^T [\omega_A - \omega_B] p_A + \hat{n}^T (v_A - v_B) \\
+&= \hat{n}^T (v_A - v_B + [\omega_A - \omega_B] p_A)
+\end{align}
+
+\textbf{步骤4}：使用接触点速度公式
+
+接触点速度：
+\begin{align}
+\dot{p}_A &= v_A + [\omega_A] p_A \\
+\dot{p}_B &= v_B + [\omega_B] p_B
+\end{align}
+
+在接触点处$p_A = p_B = p$，因此：
+\begin{align}
+\dot{p}_A - \dot{p}_B &= (v_A + [\omega_A] p) - (v_B + [\omega_B] p) \\
+&= v_A - v_B + [\omega_A - \omega_B] p
+\end{align}
+
+\textbf{步骤5}：完成证明
+
+\begin{align}
+\hat{n}^T (\dot{p}_A - \dot{p}_B) &= \hat{n}^T (v_A - v_B + [\omega_A - \omega_B] p) \\
+&= F^T (V_A - V_B)
+\end{align}
+
+因此，公式(12.4)和(12.5)等价。$\square$
+
+\section{推论}
+
+由于$F^T (V_A - V_B) = \hat{n}^T (\dot{p}_A - \dot{p}_B)$，不可穿透约束可以等价地写为：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\end{equation}
+
+这提供了使用twist和wrench表示接触约束的优雅方式，避免了显式计算接触点速度。
+
+\end{document}
+

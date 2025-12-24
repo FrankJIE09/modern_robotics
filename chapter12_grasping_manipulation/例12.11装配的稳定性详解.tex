@@ -1,0 +1,287 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{例12.11\quad 装配的稳定性\quad 详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题描述}
+
+考虑图12.27中的拱结构。问题是：\textbf{它在重力下稳定吗？}
+
+\subsection{系统组成}
+
+拱结构由多个物体组成：
+\begin{itemize}
+    \item 物体1：拱的左侧部分
+    \item 物体2：拱的右侧部分
+    \item 物体3：拱的顶部（可能还有其他物体）
+    \item 物体之间存在接触
+    \item 每个物体都受到重力作用
+\end{itemize}
+
+\section{问题特点}
+
+\subsection{多物体系统}
+
+这是一个\textbf{多物体系统}，与前面的单物体例子不同：
+\begin{itemize}
+    \item 有多个可移动的物体
+    \item 物体之间存在接触约束
+    \item 每个物体都有自己的动力学方程
+    \item 接触力是成对出现的（作用-反作用）
+\end{itemize}
+
+\subsection{图形方法的局限性}
+
+对于这样的问题，图形平面方法很难使用：
+\begin{itemize}
+    \item 有多个移动物体
+    \item 接触关系复杂
+    \item 难以在平面上可视化所有约束
+\end{itemize}
+
+因此，我们需要使用\textbf{代数方法}。
+
+\section{分析方法}
+
+\subsection{接触模式假设}
+
+我们代数测试所有接触标记为$R$（滚动/固定）的接触模式的一致性。
+
+\begin{itemize}
+    \item 假设所有接触都是固定的（$R$模式）
+    \item 测试是否存在满足所有约束的一致解
+    \item 如果存在，则装配是稳定的
+    \item 如果不存在，则装配不稳定
+\end{itemize}
+
+\subsection{摩擦锥}
+
+摩擦锥如图12.27所示。每个接触都有摩擦，摩擦锥定义了可以通过该接触传递的力的范围。
+
+\section{数学建模}
+
+\subsection{接触编号}
+
+假设总共有16个接触（或接触wrench）：
+\begin{itemize}
+    \item 接触1-8：与物体1相关的接触
+    \item 接触9-16：与物体2相关的接触
+    \item 接触5-12：物体1和物体3之间的接触，以及物体2和物体3之间的接触
+\end{itemize}
+
+\subsection{Wrench平衡方程}
+
+对于每个物体，需要满足wrench平衡。假设所有接触都是$R$模式（固定接触），则：
+
+\subsubsection{物体1的平衡}
+
+\begin{equation}
+\sum_{i=1}^8 k_i F_i + F_{\text{ext}1} = 0
+\label{eq:body1}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $k_i \geq 0$，$i = 1, \ldots, 8$是接触系数
+    \item $F_i$是接触$i$的wrench（在摩擦锥内）
+    \item $F_{\text{ext}1}$是物体1上的重力wrench
+\end{itemize}
+
+\subsubsection{物体2的平衡}
+
+\begin{equation}
+\sum_{i=9}^{16} k_i F_i + F_{\text{ext}2} = 0
+\label{eq:body2}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $k_i \geq 0$，$i = 9, \ldots, 16$是接触系数
+    \item $F_i$是接触$i$的wrench（在摩擦锥内）
+    \item $F_{\text{ext}2}$是物体2上的重力wrench
+\end{itemize}
+
+\subsubsection{物体3的平衡}
+
+\begin{equation}
+-\sum_{i=5}^{12} k_i F_i + F_{\text{ext}3} = 0
+\label{eq:body3}
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item 负号是因为物体3施加到物体1和2的wrench与物体1和2施加到物体3的wrench方向相反
+    \item $F_{\text{ext}3}$是物体3上的重力wrench
+\end{itemize}
+
+\subsection{作用-反作用原理}
+
+最后一组方程来自\textbf{作用-反作用原理}：
+
+\begin{itemize}
+    \item 物体1施加到物体3的wrench等于且相反于物体3施加到物体1的wrench
+    \item 物体2施加到物体3的wrench等于且相反于物体3施加到物体2的wrench
+    \item 因此，物体3的平衡方程中使用负号
+\end{itemize}
+
+\section{完整的问题表述}
+
+\subsection{线性约束满足问题}
+
+我们需要找到$k_i \geq 0$，$i = 1, \ldots, 16$，满足：
+
+\begin{align}
+\sum_{i=1}^8 k_i F_i + F_{\text{ext}1} &= 0 \label{eq:system1} \\
+\sum_{i=9}^{16} k_i F_i + F_{\text{ext}2} &= 0 \label{eq:system2} \\
+-\sum_{i=5}^{12} k_i F_i + F_{\text{ext}3} &= 0 \label{eq:system3}
+\end{align}
+
+其中：
+\begin{itemize}
+    \item 每个方程是3维的（平面问题）或6维的（三维问题）
+    \item 总共有9个标量方程（3个物体 $\times$ 3个分量）或18个标量方程（3个物体 $\times$ 6个分量）
+    \item 有16个未知数$k_i$
+    \item 约束条件：$k_i \geq 0$，$F_i \in \mathcal{WC}_i$（在摩擦锥内）
+\end{itemize}
+
+\subsection{摩擦锥约束}
+
+每个$F_i$必须在相应的摩擦锥内：
+
+\begin{itemize}
+    \item 对于平面问题，每个摩擦锥由两条边定义
+    \item $F_i$必须是摩擦锥边的非负线性组合
+    \item 这可以表示为：$F_i = \sum_j \alpha_{ij} F_{ij}$，其中$\alpha_{ij} \geq 0$，$F_{ij}$是摩擦锥的边
+\end{itemize}
+
+\section{求解方法}
+
+\subsection{线性规划}
+
+这个线性约束满足问题可以通过多种方法求解，包括\textbf{线性规划}。
+
+\subsubsection{线性规划形式}
+
+可以将问题表述为线性规划问题：
+
+\begin{align}
+\text{寻找} \quad & k_i, \quad i = 1, \ldots, 16 \\
+\text{最小化} \quad & \mathbf{1}^T \mathbf{k} \quad \text{（或任意目标函数）} \\
+\text{使得} \quad & \text{方程(\ref{eq:system1})-(\ref{eq:system3})成立} \\
+& k_i \geq 0, \quad i = 1, \ldots, 16 \\
+& F_i \in \mathcal{WC}_i, \quad i = 1, \ldots, 16
+\end{align}
+
+\subsubsection{摩擦锥的线性化}
+
+为了使用线性规划，需要将摩擦锥线性化：
+
+\begin{itemize}
+    \item 用多面体锥近似摩擦锥
+    \item 每个摩擦锥由有限条边定义
+    \item $F_i$必须是这些边的非负线性组合
+\end{itemize}
+
+\subsection{可行性测试}
+
+\begin{itemize}
+    \item \textbf{如果存在解}：装配在重力下是稳定的
+    \item \textbf{如果不存在解}：装配不稳定，物体会移动或分离
+\end{itemize}
+
+\section{稳定性分析}
+
+\subsection{稳定的条件}
+
+装配在重力下稳定，如果：
+
+\begin{enumerate}
+    \item 存在满足所有平衡方程的接触力
+    \item 所有接触力都在相应的摩擦锥内
+    \item 所有接触系数$k_i \geq 0$
+    \item 满足作用-反作用原理
+\end{enumerate}
+
+\subsection{不稳定的情况}
+
+装配不稳定，如果：
+
+\begin{enumerate}
+    \item 不存在满足所有约束的解
+    \item 某些接触必须分离（$B$模式）
+    \item 某些接触必须滑动（$S$模式）
+    \item 物体开始移动
+\end{enumerate}
+
+\section{扩展分析}
+
+\subsection{其他接触模式}
+
+虽然我们主要测试了所有接触都是$R$模式的情况，但也可以测试其他接触模式：
+
+\begin{itemize}
+    \item 某些接触滑动（$S$模式）
+    \item 某些接触分离（$B$模式）
+    \item 混合模式
+\end{itemize}
+
+\subsection{动态分析}
+
+如果需要考虑动态效应：
+
+\begin{itemize}
+    \item 使用完整的动力学方程(12.31)
+    \item 考虑加速度项
+    \item 分析接触模式的转换
+\end{itemize}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{多物体系统}：需要为每个物体建立平衡方程
+    
+    \item \textbf{作用-反作用原理}：接触力是成对出现的
+    
+    \item \textbf{代数方法}：对于复杂系统，代数方法比图形方法更适用
+    
+    \item \textbf{线性规划}：可以使用线性规划求解约束满足问题
+    
+    \item \textbf{摩擦锥约束}：每个接触力必须在摩擦锥内
+    
+    \item \textbf{可行性测试}：通过测试是否存在可行解来判断稳定性
+\end{enumerate}
+
+\section{实际应用}
+
+这个例子展示了如何分析：
+
+\begin{itemize}
+    \item \textbf{装配稳定性}：判断装配是否会在重力下保持稳定
+    \item \textbf{结构分析}：分析多物体系统的平衡
+    \item \textbf{接触力计算}：计算保持平衡所需的接触力
+    \item \textbf{设计验证}：验证设计是否满足稳定性要求
+\end{itemize}
+
+这些方法在以下应用中很重要：
+\begin{itemize}
+    \item 机器人装配
+    \item 结构工程
+    \item 产品设计
+    \item 稳定性分析
+\end{itemize}
+
+\end{document}
+

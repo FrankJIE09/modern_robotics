@@ -1,0 +1,940 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{12.1.3 多个接触的详细理解}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{章节概述}
+
+12.1.3章节"多个接触"是接触运动学中非常重要的内容，它从单个接触扩展到多个接触的情况。这一章节的核心思想是：\textbf{多个接触约束的组合形成了一个可行运动的集合，这个集合具有特殊的几何结构——多面体凸集（polytope）}。
+
+\section{基本设置}
+
+\subsection{符号定义}
+
+假设物体$A$受到与$m$个其他物体的$n$个接触，其中$n \geq m$（一个物体可以与$A$有多个接触点）。
+
+\begin{itemize}
+\item \textbf{接触编号}：$i = 1, 2, \ldots, n$（总共$n$个接触）
+\item \textbf{其他物体编号}：$j = 1, 2, \ldots, m$（总共$m$个其他物体）
+\item \textbf{函数$j(i)$}：表示参与接触$i$的其他物体的编号
+  \begin{itemize}
+  \item 例如：如果接触1和接触2都来自物体1，则$j(1) = 1$，$j(2) = 1$
+  \item 如果接触3来自物体2，则$j(3) = 2$
+  \end{itemize}
+\item \textbf{接触wrench}：$F_i$表示第$i$个接触的法线wrench（指向物体$A$）
+\item \textbf{其他物体的twist}：$V_{j(i)}$表示接触$i$处其他物体的twist
+\end{itemize}
+
+\subsection{单个接触的约束回顾}
+
+对于单个接触$i$，不可穿透约束为：
+\begin{equation}
+F_i^T (V_A - V_{j(i)}) \geq 0
+\label{eq:single_contact}
+\end{equation}
+
+这个约束在6维twist空间$V_A$中定义了一个\textbf{半空间}（half-space），边界是5维超平面：
+\begin{equation}
+F_i^T (V_A - V_{j(i)}) = 0
+\label{eq:constraint_boundary}
+\end{equation}
+
+\section{半空间（Half-Space）的详细解释}
+
+\subsection{什么是半空间？}
+
+\textbf{半空间}（half-space）是线性代数中的一个基本几何概念。简单来说，半空间就是被一个超平面（hyperplane）分成两半的空间中的"一半"。
+
+\subsection{一维情况：数轴上的半空间}
+
+在一维空间中（数轴），半空间就是一条射线：
+
+\begin{itemize}
+\item 不等式$x \geq 0$定义了从原点向右的半空间（射线）
+\item 不等式$x \leq 0$定义了从原点向左的半空间（射线）
+\item 等式$x = 0$定义了边界点（原点）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 绘制数轴
+\draw[->] (-3,0) -- (3,0) node[right] {$x$};
+\draw[thick,red,->] (0,0) -- (2.5,0) node[right] {半空间 $x \geq 0$};
+\draw[thick,blue,->] (0,0) -- (-2.5,0) node[left] {半空间 $x \leq 0$};
+\filldraw[black] (0,0) circle (2pt) node[above] {边界 $x=0$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{二维情况：平面上的半空间}
+
+在二维空间中（平面），半空间就是被一条直线分成两半的平面中的"一半"：
+
+\begin{itemize}
+\item 不等式$ax + by \geq c$定义了一个半平面（half-plane）
+\item 直线$ax + by = c$是边界
+\item 半平面包含所有满足不等式的点
+\end{itemize}
+
+\textbf{例子}：考虑不等式$x + y \geq 1$
+
+\begin{itemize}
+\item 边界：直线$x + y = 1$
+\item 半空间：包含所有满足$x + y \geq 1$的点
+\item 几何上：直线将平面分成两部分，半空间是"上方"的那部分
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 绘制坐标轴
+\draw[->] (-1,0) -- (3,0) node[right] {$x$};
+\draw[->] (0,-1) -- (0,3) node[above] {$y$};
+
+% 绘制边界直线 x + y = 1
+\draw[thick,blue] (-0.5,1.5) -- (2.5,-1.5) node[below right] {$x + y = 1$};
+
+% 填充半空间 x + y >= 1
+\fill[red!20] (-0.5,1.5) -- (2.5,-1.5) -- (2.5,3) -- (-0.5,3) -- cycle;
+\node[red] at (1.5,2) {半空间 $x + y \geq 1$};
+
+% 标记一些点
+\filldraw[green] (1,1) circle (1.5pt) node[above right] {$(1,1)$};
+\filldraw[green] (2,0.5) circle (1.5pt) node[above right] {$(2,0.5)$};
+\filldraw[red] (0.5,0.3) circle (1.5pt) node[below] {$(0.5,0.3)$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{三维情况：空间中的半空间}
+
+在三维空间中，半空间就是被一个平面分成两半的空间中的"一半"：
+
+\begin{itemize}
+\item 不等式$ax + by + cz \geq d$定义了一个半空间
+\item 平面$ax + by + cz = d$是边界
+\item 半空间包含所有满足不等式的点
+\end{itemize}
+
+\textbf{例子}：考虑不等式$z \geq 0$
+
+\begin{itemize}
+\item 边界：平面$z = 0$（$xy$平面）
+\item 半空间：包含所有$z \geq 0$的点（"上方"的空间）
+\end{itemize}
+
+\subsection{高维情况：$n$维空间中的半空间}
+
+在$n$维空间中，半空间就是被一个$(n-1)$维超平面分成两半的空间中的"一半"：
+
+\begin{itemize}
+\item 不等式$a_1 x_1 + a_2 x_2 + \cdots + a_n x_n \geq b$定义了一个半空间
+\item 超平面$a_1 x_1 + a_2 x_2 + \cdots + a_n x_n = b$是边界
+\item 半空间是$n$维空间的一个凸集
+\end{itemize}
+
+\subsection{半空间的数学定义}
+
+\begin{definition}[半空间]
+给定$n$维空间$\mathbb{R}^n$中的一个超平面：
+\begin{equation}
+H = \{x \in \mathbb{R}^n | a^T x = b\}
+\end{equation}
+其中$a \in \mathbb{R}^n$是非零向量（法向量），$b \in \mathbb{R}$是标量。
+
+由这个超平面定义的两个\textbf{闭半空间}（closed half-spaces）为：
+\begin{align}
+H^+ &= \{x \in \mathbb{R}^n | a^T x \geq b\} \quad \text{（正半空间）} \\
+H^- &= \{x \in \mathbb{R}^n | a^T x \leq b\} \quad \text{（负半空间）}
+\end{align}
+
+\textbf{开半空间}（open half-spaces）将$\geq$和$\leq$分别替换为$>$和$<$。
+\end{definition}
+
+\subsection{半空间的性质}
+
+\begin{enumerate}
+\item \textbf{凸性}：半空间是凸集
+  \begin{itemize}
+  \item 如果$x_1$和$x_2$都在半空间中，那么连接它们的线段上的所有点也在半空间中
+  \item 这是线性不等式的直接结果
+  \end{itemize}
+
+\item \textbf{无界性}：半空间通常是无界的
+  \begin{itemize}
+  \item 半空间可以延伸到无穷远
+  \item 例如：$x \geq 0$包含从0到$+\infty$的所有点
+  \end{itemize}
+
+\item \textbf{边界}：半空间的边界是超平面
+  \begin{itemize}
+  \item 边界是$(n-1)$维的
+  \item 在边界上，等式成立
+  \end{itemize}
+\end{enumerate}
+
+\subsection{接触约束中的半空间}
+
+在接触运动学中，每个接触约束：
+\begin{equation}
+F_i^T (V_A - V_{j(i)}) \geq 0
+\end{equation}
+
+定义了一个\textbf{6维twist空间中的半空间}：
+
+\begin{itemize}
+\item \textbf{空间维度}：$n = 6$（twist有6个分量）
+\item \textbf{边界超平面}：$F_i^T (V_A - V_{j(i)}) = 0$（5维超平面）
+\item \textbf{法向量}：$F_i$（接触wrench）
+\item \textbf{半空间}：所有满足$F_i^T (V_A - V_{j(i)}) \geq 0$的twist $V_A$
+\end{itemize}
+
+\subsection{为什么是"半"空间？}
+
+\begin{itemize}
+\item 超平面将整个空间分成\textbf{两个相等的部分}
+\item 每个部分就是一个"半空间"
+\item 不等式$\geq$选择其中一个半空间
+\item 另一个半空间由$\leq$定义（但在这个应用中不可行，因为会导致穿透）
+\end{itemize}
+
+\subsection{直观理解}
+
+想象你站在一个房间里：
+
+\begin{itemize}
+\item \textbf{一堵墙}（超平面）将房间分成两半
+\item \textbf{半空间}就是墙一侧的所有空间
+\item \textbf{接触约束}就像一堵"墙"，限制物体不能朝某个方向运动
+\item 物体只能在"墙"的一侧（半空间内）运动
+\end{itemize}
+
+\subsection{多个半空间的交集}
+
+当有多个接触时，每个接触定义一个半空间。所有半空间的\textbf{交集}就是可行twist集合：
+
+\begin{equation}
+\mathcal{V} = \bigcap_{i=1}^n \{V_A | F_i^T (V_A - V_{j(i)}) \geq 0\}
+\end{equation}
+
+\textbf{关键性质}：
+\begin{itemize}
+\item 多个半空间的交集仍然是凸集
+\item 交集可能是有界的（封闭多面体）或无界的（锥）
+\item 交集的边界由多个超平面的部分组成
+\end{itemize}
+
+\textbf{二维例子}：两个半空间的交集
+
+\begin{center}
+\begin{tikzpicture}[scale=2]
+% 坐标轴
+\draw[->] (-1,0) -- (3,0) node[right] {$x$};
+\draw[->] (0,-1) -- (0,3) node[above] {$y$};
+
+% 第一个半空间：x + y >= 1
+\draw[thick,blue] (-0.5,1.5) -- (2.5,-1.5) node[below right] {$x + y = 1$};
+\fill[red!20] (-0.5,1.5) -- (2.5,-1.5) -- (2.5,3) -- (-0.5,3) -- cycle;
+
+% 第二个半空间：x - y >= 0
+\draw[thick,green] (-0.5,-0.5) -- (2.5,2.5) node[above right] {$x - y = 0$};
+\fill[blue!20] (-0.5,-0.5) -- (2.5,2.5) -- (2.5,3) -- (-0.5,3) -- cycle;
+
+% 交集区域（重叠部分）
+\fill[purple!30] (0.5,0.5) -- (2.5,2.5) -- (2.5,3) -- (-0.5,3) -- (-0.5,1.5) -- (0.5,0.5);
+\node[purple] at (1.5,2.2) {交集};
+
+% 标记交点
+\filldraw[black] (0.5,0.5) circle (1.5pt) node[below left] {$(0.5,0.5)$};
+\end{tikzpicture}
+\end{center}
+
+在这个例子中：
+\begin{itemize}
+\item 红色区域：满足$x + y \geq 1$的半空间
+\item 蓝色区域：满足$x - y \geq 0$的半空间
+\item 紫色区域：两个半空间的交集（同时满足两个不等式）
+\end{itemize}
+
+\subsection{总结}
+
+\begin{itemize}
+\item \textbf{半空间}是被超平面分成两半的空间中的"一半"
+\item \textbf{数学表达}：$a^T x \geq b$或$a^T x \leq b$
+\item \textbf{性质}：凸集、通常无界、边界是超平面
+\item \textbf{在接触约束中}：每个接触定义一个6维半空间
+\item \textbf{多个接触}：多个半空间的交集形成可行twist多面体
+\end{itemize}
+
+\section{多个接触的约束集合}
+
+\subsection{可行twist集合的定义}
+
+当有多个接触时，每个接触都贡献一个约束。所有约束的\textbf{交集}（intersection）定义了可行twist的集合：
+
+\begin{equation}
+\mathcal{V} = \{V_A | F_i^T (V_A - V_{j(i)}) \geq 0 \text{ 对所有 } i = 1, \ldots, n\}
+\label{eq:feasible_set}
+\end{equation}
+
+这个集合$\mathcal{V}$称为\textbf{可行twist多面体}（feasible twist polytope）。
+
+\subsection{为什么是多面体凸集？}
+
+\begin{enumerate}
+\item \textbf{半空间的交集}：每个约束$F_i^T (V_A - V_{j(i)}) \geq 0$定义了一个半空间。多个半空间的交集仍然是凸集。
+
+\item \textbf{多面体}：由于每个约束都是线性不等式，可行集合是由超平面界定的凸集，即多面体（polytope）。
+
+\item \textbf{可能的结构}：
+  \begin{itemize}
+  \item 有界多面体（bounded polytope）：封闭的多面体
+  \item 无界多面体（unbounded polytope）：可能是锥形，延伸到无穷远
+  \item 点：如果所有约束非常严格，可能只有一个点（通常是原点）
+  \item 空集：如果约束不兼容，可能没有可行解
+  \end{itemize}
+\end{enumerate}
+
+\section{约束的维度分析}
+
+\subsection{多面体的不同维度面}
+
+可行twist多面体$\mathcal{V}$可以包含不同维度的"面"（facets）：
+
+\begin{itemize}
+\item \textbf{6维内部}：没有任何约束是主动的（active）
+  \begin{itemize}
+  \item 所有接触都在分离（breaking），即$F_i^T (V_A - V_{j(i)}) > 0$对所有$i$
+  \item 物体可以自由运动
+  \end{itemize}
+
+\item \textbf{5维面}：恰好一个约束是主动的
+  \begin{itemize}
+  \item 一个接触满足$F_i^T (V_A - V_{j(i)}) = 0$（滚动或滑动）
+  \item 其他接触都在分离
+  \end{itemize}
+
+\item \textbf{4维面}：恰好两个约束是主动的
+  \begin{itemize}
+  \item 两个接触满足约束等式
+  \item 其他接触都在分离
+  \end{itemize}
+
+\item \textbf{3维面}：恰好三个约束是主动的
+
+\item \textbf{2维面}：恰好四个约束是主动的
+
+\item \textbf{1维边}：恰好五个约束是主动的
+
+\item \textbf{0维点}：恰好六个约束是主动的
+  \begin{itemize}
+  \item 所有6个自由度都被约束
+  \item 物体完全不能运动（除了零速度）
+  \end{itemize}
+\end{itemize}
+
+\subsection{关键公式}
+
+如果twist $V_A$位于多面体的$k$维面上，则：
+\begin{equation}
+\text{主动约束数量} = 6 - k
+\label{eq:active_constraints}
+\end{equation}
+
+其中$k$是面的维度，$6 - k$是独立（非冗余）的主动接触约束数量。
+
+\subsection{冗余约束}
+
+\textbf{冗余约束}（redundant constraint）是指：如果移除该约束，可行twist多面体$\mathcal{V}$不会改变。
+
+例如，如果两个接触的法线方向相同，且位置相近，其中一个约束可能是冗余的。
+
+\section{齐次约束与非齐次约束}
+
+\subsection{齐次约束（Homogeneous Constraints）}
+
+如果所有提供约束的物体都是\textbf{静止的}，即$V_j = 0$对所有$j$，则约束变为：
+
+\begin{equation}
+F_i^T V_A \geq 0 \text{ 对所有 } i
+\label{eq:homogeneous}
+\end{equation}
+
+这种约束称为\textbf{齐次约束}，因为：
+\begin{itemize}
+\item 每个约束超平面$F_i^T V_A = 0$都通过原点$V_A = 0$
+\item 如果$V_A$是可行的，那么$\lambda V_A$（$\lambda \geq 0$）也是可行的
+\item 可行集合形成一个\textbf{以原点为根部的锥}（cone）
+\end{itemize}
+
+\subsection{齐次可行twist锥}
+
+对于齐次约束，可行twist集合为：
+\begin{equation}
+\mathcal{V} = \{V_A | F_i^T V_A \geq 0 \text{ 对所有 } i\}
+\label{eq:homogeneous_cone}
+\end{equation}
+
+这是一个\textbf{齐次多面体凸锥}（homogeneous polyhedral convex cone）。
+
+\subsection{非齐次约束}
+
+如果有些物体是运动的（例如，机器人手指在移动），即$V_{j(i)} \neq 0$，则约束为：
+\begin{equation}
+F_i^T (V_A - V_{j(i)}) \geq 0
+\label{eq:nonhomogeneous}
+\end{equation}
+
+这种约束称为\textbf{非齐次约束}，因为：
+\begin{itemize}
+\item 约束超平面$F_i^T (V_A - V_{j(i)}) = 0$不通过原点
+\item 可行集合不再是锥，而是一般的多面体
+\item 可能是有界的（封闭多边形）
+\end{itemize}
+
+\section{线性代数基础：张成、正张成和凸包}
+
+在理解形状闭合之前，我们需要理解几个重要的线性代数概念。这些概念来自\textbf{线性代数}和\textbf{凸分析}（convex analysis）。
+
+\subsection{线性张成（Linear Span）}
+
+\begin{definition}[线性张成]
+给定一组$j$个向量$\mathcal{A} = \{a_1, a_2, \ldots, a_j\} \in \mathbb{R}^n$，\textbf{线性张成}（linear span）定义为所有可能的线性组合：
+\begin{equation}
+\text{span}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \in \mathbb{R} \right\}
+\label{eq:linear_span}
+\end{equation}
+\end{definition}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 系数$k_i$可以是\textbf{任何实数}（正数、负数、零）
+\item 线性张成是包含所有向量$\mathcal{A}$的\textbf{最小线性子空间}
+\item 如果$\text{span}(\mathcal{A}) = \mathbb{R}^n$，我们说$\mathcal{A}$\textbf{线性张成}（linearly span）$\mathbb{R}^n$
+\end{itemize}
+
+\textbf{例子}：在二维空间中
+\begin{itemize}
+\item 向量$a_1 = (1, 0)$和$a_2 = (0, 1)$线性张成$\mathbb{R}^2$
+\item 任何向量$(x, y)$可以写成：$(x, y) = x \cdot (1, 0) + y \cdot (0, 1)$
+\item 系数可以是负数，例如：$(-1, 2) = -1 \cdot (1, 0) + 2 \cdot (0, 1)$
+\end{itemize}
+
+\subsection{正张成（Positive Span / Conic Span）}
+
+\begin{definition}[正张成]
+给定一组$j$个向量$\mathcal{A} = \{a_1, a_2, \ldots, a_j\} \in \mathbb{R}^n$，\textbf{正张成}（positive span）或\textbf{锥形张成}（conic span）定义为所有可能的\textbf{非负线性组合}：
+\begin{equation}
+\text{pos}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \geq 0 \right\}
+\label{eq:positive_span}
+\end{equation}
+\end{definition}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 系数$k_i$必须是\textbf{非负的}（$k_i \geq 0$）
+\item 正张成形成一个\textbf{凸锥}（convex cone），以原点为顶点
+\item 如果$\text{pos}(\mathcal{A}) = \mathbb{R}^n$，我们说$\mathcal{A}$\textbf{正张成}（positively span）$\mathbb{R}^n$
+\end{itemize}
+
+\textbf{几何直观}：
+\begin{itemize}
+\item 正张成是从原点出发的"射线"的集合
+\item 只能朝"正方向"组合，不能朝"负方向"
+\item 形成一个"锥形"区域
+\end{itemize}
+
+\textbf{例子}：在二维空间中
+\begin{itemize}
+\item 向量$a_1 = (1, 0)$和$a_2 = (0, 1)$的正张成是\textbf{第一象限}
+  \begin{itemize}
+  \item 可以表示$(x, y)$，其中$x \geq 0$且$y \geq 0$
+  \item 但不能表示$(-1, 0)$，因为需要负系数
+  \end{itemize}
+\item 要正张成整个$\mathbb{R}^2$，至少需要3个向量
+  \begin{itemize}
+  \item 例如：$a_1 = (1, 0)$，$a_2 = (0, 1)$，$a_3 = (-1, -1)$
+  \item 任何向量都可以用这三个向量的非负组合表示
+  \end{itemize}
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 坐标轴
+\draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\draw[->] (0,-2) -- (0,2) node[above] {$y$};
+
+% 两个向量的正张成（第一象限）
+\draw[thick,red,->] (0,0) -- (1.5,0) node[below] {$a_1$};
+\draw[thick,red,->] (0,0) -- (0,1.5) node[left] {$a_2$};
+\fill[blue!20] (0,0) -- (1.5,0) -- (1.5,1.5) -- (0,1.5) -- cycle;
+\node[blue] at (0.7,0.7) {正张成区域};
+
+% 三个向量的正张成（整个空间）
+\begin{scope}[xshift=5cm]
+\draw[->] (-2,0) -- (2,0) node[right] {$x$};
+\draw[->] (0,-2) -- (0,2) node[above] {$y$};
+\draw[thick,red,->] (0,0) -- (1,0) node[below] {$a_1$};
+\draw[thick,red,->] (0,0) -- (0,1) node[left] {$a_2$};
+\draw[thick,red,->] (0,0) -- (-0.7,-0.7) node[below left] {$a_3$};
+\fill[blue!20,opacity=0.3] (-1.5,-1.5) -- (1.5,-1.5) -- (1.5,1.5) -- (-1.5,1.5) -- cycle;
+\node[blue] at (0,0) {正张成整个空间};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{凸包（Convex Hull）}
+
+\begin{definition}[凸包]
+给定一组$j$个向量$\mathcal{A} = \{a_1, a_2, \ldots, a_j\} \in \mathbb{R}^n$，\textbf{凸包}（convex hull）或\textbf{凸张成}（convex span）定义为所有可能的\textbf{凸组合}：
+\begin{equation}
+\text{conv}(\mathcal{A}) = \left\{\sum_{i=1}^j k_i a_i \middle| k_i \geq 0 \text{ 且 } \sum_{i=1}^j k_i = 1 \right\}
+\label{eq:convex_hull}
+\end{equation}
+\end{definition}
+
+\textbf{关键点}：
+\begin{itemize}
+\item 系数$k_i$必须\textbf{非负}且\textbf{和为1}（$\sum k_i = 1$）
+\item 凸包是包含所有向量$\mathcal{A}$的\textbf{最小凸集}
+\item 凸包是\textbf{有界的}（因为系数和为1）
+\end{itemize}
+
+\textbf{几何直观}：
+\begin{itemize}
+\item 凸包是"包围"所有点的最小凸多边形（2D）或多面体（3D）
+\item 想象用一根橡皮筋套住所有点，橡皮筋收缩后的形状就是凸包
+\item 凸包内的任何点都可以表示为顶点的凸组合
+\end{itemize}
+
+\textbf{例子}：在二维空间中
+\begin{itemize}
+\item 三个点$a_1 = (0, 0)$，$a_2 = (2, 0)$，$a_3 = (1, 2)$的凸包是一个三角形
+\item 点$(1, 0.5)$在凸包内，可以写成：$(1, 0.5) = 0.25 \cdot (0, 0) + 0.5 \cdot (2, 0) + 0.25 \cdot (1, 2)$
+\item 系数：$0.25 + 0.5 + 0.25 = 1$，且都非负
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+% 坐标轴
+\draw[->] (-0.5,0) -- (2.5,0) node[right] {$x$};
+\draw[->] (0,-0.5) -- (0,2.5) node[above] {$y$};
+
+% 三个点
+\filldraw[red] (0,0) circle (2pt) node[below left] {$a_1$};
+\filldraw[red] (2,0) circle (2pt) node[below right] {$a_2$};
+\filldraw[red] (1,2) circle (2pt) node[above] {$a_3$};
+
+% 凸包（三角形）
+\fill[blue!20] (0,0) -- (2,0) -- (1,2) -- cycle;
+\draw[thick,blue] (0,0) -- (2,0) -- (1,2) -- cycle;
+\node[blue] at (1,0.7) {凸包};
+
+% 凸包内的点
+\filldraw[green] (1,0.5) circle (2pt) node[below] {$(1, 0.5)$};
+\end{tikzpicture}
+\end{center}
+
+\subsection{三种张成的关系}
+
+\begin{theorem}[包含关系]
+对于任何向量集合$\mathcal{A}$，有：
+\begin{equation}
+\text{conv}(\mathcal{A}) \subseteq \text{pos}(\mathcal{A}) \subseteq \text{span}(\mathcal{A})
+\label{eq:containment}
+\end{equation}
+\end{theorem}
+
+\textbf{直观理解}：
+\begin{itemize}
+\item \textbf{线性张成}最大：允许正负系数，可以表示任何方向
+\item \textbf{正张成}中等：只允许非负系数，形成锥形
+\item \textbf{凸包}最小：非负系数且和为1，形成有界区域
+\end{itemize}
+
+\textbf{例子对比}：考虑两个向量$a_1 = (1, 0)$和$a_2 = (0, 1)$
+
+\begin{itemize}
+\item \textbf{线性张成}：整个$\mathbb{R}^2$（任何$(x, y)$都可以表示）
+\item \textbf{正张成}：第一象限（只能表示$x \geq 0, y \geq 0$的点）
+\item \textbf{凸包}：从$(0, 0)$到$(1, 0)$到$(0, 1)$的线段（有界区域）
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2]
+% 线性张成
+\begin{scope}
+\draw[->] (-1.5,0) -- (1.5,0);
+\draw[->] (0,-1.5) -- (0,1.5);
+\draw[thick,red,->] (0,0) -- (1,0) node[below] {$a_1$};
+\draw[thick,red,->] (0,0) -- (0,1) node[left] {$a_2$};
+\fill[blue!10] (-1.5,-1.5) rectangle (1.5,1.5);
+\node[blue] at (0,0) {线性张成\\整个空间};
+\end{scope}
+
+% 正张成
+\begin{scope}[xshift=4cm]
+\draw[->] (-1.5,0) -- (1.5,0);
+\draw[->] (0,-1.5) -- (0,1.5);
+\draw[thick,red,->] (0,0) -- (1,0) node[below] {$a_1$};
+\draw[thick,red,->] (0,0) -- (0,1) node[left] {$a_2$};
+\fill[blue!20] (0,0) -- (1.5,0) -- (1.5,1.5) -- (0,1.5) -- cycle;
+\node[blue] at (0.7,0.7) {正张成\\第一象限};
+\end{scope}
+
+% 凸包
+\begin{scope}[xshift=8cm]
+\draw[->] (-1.5,0) -- (1.5,0);
+\draw[->] (0,-1.5) -- (0,1.5);
+\draw[thick,red,->] (0,0) -- (1,0) node[below] {$a_1$};
+\draw[thick,red,->] (0,0) -- (0,1) node[left] {$a_2$};
+\fill[blue!30] (0,0) -- (1,0) -- (0,1) -- cycle;
+\draw[thick,blue] (0,0) -- (1,0) -- (0,1) -- cycle;
+\node[blue] at (0.3,0.3) {凸包\\三角形};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\subsection{重要事实}
+
+\begin{enumerate}
+\item \textbf{线性张成}：$\mathbb{R}^n$可以由$n$个线性无关的向量线性张成，但不能更少。
+  \begin{itemize}
+  \item 例如：$\mathbb{R}^2$需要至少2个向量
+  \item 例如：$\mathbb{R}^6$需要至少6个向量
+  \end{itemize}
+
+\item \textbf{正张成}：$\mathbb{R}^n$可以由$n + 1$个向量正张成，但不能更少。
+  \begin{itemize}
+  \item 例如：$\mathbb{R}^2$需要至少3个向量
+  \item 例如：$\mathbb{R}^6$需要至少7个向量
+  \item 这是因为：对于任何$n$个向量，总存在一个方向，使得所有向量的非负组合都无法表示该方向
+  \end{itemize}
+\end{enumerate}
+
+\subsection{为什么正张成需要更多向量？}
+
+\textbf{直观解释}：
+\begin{itemize}
+\item 线性张成允许负系数，所以可以用"相反方向"的向量表示
+\item 正张成只允许非负系数，所以需要"覆盖所有方向"的向量
+\item 想象一个圆：要覆盖所有方向，至少需要3个向量（形成120度角）
+\end{itemize}
+
+\textbf{数学证明思路}：
+\begin{itemize}
+\item 对于任何$n$个向量$\{a_1, \ldots, a_n\}$，存在向量$c$使得$a_i^T c \leq 0$对所有$i$
+\item 这意味着所有$a_i$都在$c$的"负半空间"中
+\item 因此，$c$方向无法用这些向量的非负组合表示
+\item 需要第$(n+1)$个向量来"填补"这个方向
+\end{itemize}
+
+\subsection{在接触约束中的应用}
+
+在形状闭合中：
+\begin{itemize}
+\item 接触wrench $F_i$必须\textbf{正张成}整个wrench空间$\mathbb{R}^6$
+\item 这意味着：对于任何可能的运动方向，至少有一个接触wrench可以阻止它
+\item 因此需要至少$6 + 1 = 7$个接触（对于3D物体）
+\item 对于平面物体（3维wrench空间），需要至少$3 + 1 = 4$个接触
+\end{itemize}
+
+\subsection{凸包与形状闭合的关系}
+
+形状闭合的等价条件：
+\begin{itemize}
+\item 条件1：$\text{pos}(\{F_i\}) = \mathbb{R}^6$（正张成整个空间）
+\item 条件2：$\text{conv}(\{F_i\})$包含原点在其\textbf{内部}
+\end{itemize}
+
+\textbf{为什么等价？}
+\begin{itemize}
+\item 如果正张成整个空间，那么从原点出发的任何方向都可以用$F_i$的非负组合表示
+\item 这意味着原点在凸包的内部（不是边界上）
+\item 反过来，如果原点在凸包内部，那么$F_i$可以正张成整个空间
+\end{itemize}
+
+\section{形状闭合（Form Closure）}
+
+\subsection{形状闭合的定义}
+
+如果所有提供约束的物体都是静止的，且可行twist多面体$\mathcal{V}$退化为\textbf{原点处的单个点}（即$V_A = 0$是唯一可行运动），则称物体处于\textbf{形状闭合}（form closure）。
+
+换句话说，形状闭合意味着：
+\begin{itemize}
+\item 物体完全不能运动（除了零速度）
+\item 仅通过几何约束（接触法线）就完全限制了物体的运动
+\item 不需要摩擦力就能固定物体
+\end{itemize}
+
+\subsection{形状闭合的条件}
+
+形状闭合的充要条件是：接触wrench $F_i$ \textbf{正张成}（positively span）整个6维wrench空间$\mathbb{R}^6$。
+
+等价地，$F_i$的\textbf{凸包}（convex span）包含原点在其\textbf{内部}。
+
+数学表达：
+\begin{equation}
+\text{pos}(\{F_1, F_2, \ldots, F_n\}) = \mathbb{R}^6
+\label{eq:form_closure_condition}
+\end{equation}
+
+其中$\text{pos}(\mathcal{A})$表示向量集合$\mathcal{A}$的非负线性组合（正张成）。
+
+\subsection{形状闭合的直观理解}
+
+\begin{itemize}
+\item \textbf{正张成}意味着：对于wrench空间中的任何方向，都可以用接触wrench的非负组合来表示
+\item 如果接触wrench可以"覆盖"所有方向，那么物体在任何方向上的运动都会被至少一个接触阻止
+\item 因此，唯一可行的运动是零速度
+\end{itemize}
+
+\section{接触模式（Contact Modes）}
+
+\subsection{接触标签}
+
+如12.1.2节所述，每个接触$i$可以有一个标签：
+
+\begin{itemize}
+\item \textbf{B（Breaking）}：接触正在分离
+  \begin{itemize}
+  \item $F_i^T (V_A - V_{j(i)}) > 0$
+  \item 接触点正在远离
+  \end{itemize}
+
+\item \textbf{R（Rolling）}：接触是滚动的（粘附）
+  \begin{itemize}
+  \item $F_i^T (V_A - V_{j(i)}) = 0$（满足滚动-滑动约束）
+  \item 且满足滚动约束：$\dot{p}_A = \dot{p}_B$（接触点处无相对运动）
+  \end{itemize}
+
+\item \textbf{S（Sliding）}：接触是滑动的
+  \begin{itemize}
+  \item $F_i^T (V_A - V_{j(i)}) = 0$（满足滚动-滑动约束）
+  \item 但不满足滚动约束：$\dot{p}_A \neq \dot{p}_B$（接触点处有相对运动）
+  \end{itemize}
+\end{itemize}
+
+\subsection{系统接触模式}
+
+对于有$n$个接触的系统，\textbf{接触模式}（contact mode）是各个接触标签的\textbf{连接}（concatenation）。
+
+例如，对于3个接触的系统，可能的接触模式包括：
+\begin{itemize}
+\item \textbf{RRR}：所有接触都是滚动的
+\item \textbf{RRS}：前两个滚动，第三个滑动
+\item \textbf{RSB}：第一个滚动，第二个滑动，第三个分离
+\item \textbf{BBB}：所有接触都在分离
+\item 等等...
+\end{itemize}
+
+\subsection{接触模式的数量}
+
+由于每个接触有3种可能的标签（B、R、S），$n$个接触的系统最多有：
+\begin{equation}
+\text{最大接触模式数} = 3^n
+\label{eq:max_contact_modes}
+\end{equation}
+
+\subsection{可行接触模式}
+
+\textbf{重要}：并非所有$3^n$种接触模式都是\textbf{可行的}（feasible）。
+
+一个接触模式可行，当且仅当：
+\begin{itemize}
+\item 对应的运动学约束是\textbf{兼容的}（compatible）
+\item 存在twist $V_A$同时满足该模式下的所有约束
+\end{itemize}
+
+例如，如果两个接触的法线方向相反，那么同时让两个接触都滚动（RR）可能是不可行的。
+
+\section{具体例子}
+
+\subsection{例子12.3：六边形与手指}
+
+考虑图12.4中的例子：六边形物体$A$与三角形手指接触。
+
+\begin{enumerate}
+\item \textbf{单个静止手指}（图12.4(a)）：
+  \begin{itemize}
+  \item 一个约束：$F_1^T V_A \geq 0$
+  \item 可行集合：一个半空间
+  \item 接触模式：
+    \begin{itemize}
+    \item \textbf{B}：2维区域（所有接触分离的twist）
+    \item \textbf{S}：1维线（滑动接触的twist）
+    \item \textbf{R}：0维点（$V_A = 0$，唯一滚动接触）
+    \end{itemize}
+  \end{itemize}
+
+\item \textbf{两个静止手指}（图12.4(b)）：
+  \begin{itemize}
+  \item 两个约束：$F_1^T V_A \geq 0$和$F_2^T V_A \geq 0$
+  \item 可行集合：两个半空间的交集，形成一个\textbf{锥}
+  \item 接触模式：RR、SB、BS、BB（共4种）
+  \end{itemize}
+
+\item \textbf{三个手指，一个运动}（图12.4(c)）：
+  \begin{itemize}
+  \item 两个静止手指 + 一个运动手指（速度为$V_3$）
+  \item 约束：$F_1^T V_A \geq 0$，$F_2^T V_A \geq 0$，$F_3^T (V_A - V_3) \geq 0$
+  \item 可行集合：\textbf{封闭多边形}（不再是锥，因为第三个约束不通过原点）
+  \item 接触模式：7种可能
+    \begin{itemize}
+    \item 2维区域：所有接触分离（BBB）
+    \item 3个1维线：一个约束主动（SBB、BSB、BBS）
+    \item 3个0维点：两个约束主动（SSB、SBS、BSS）
+    \end{itemize}
+  \item 注意：在运动手指处滚动（R）不可行，因为要跟随手指运动会违反其他约束
+  \end{itemize}
+
+\item \textbf{三个静止手指}：
+  \begin{itemize}
+  \item 如果所有三个手指都静止，唯一可行运动是$V_A = 0$
+  \item 接触模式：\textbf{RRR}（所有接触滚动）
+  \item 这是形状闭合的情况
+  \end{itemize}
+\end{enumerate}
+
+\subsection{例子12.4：三个静止接触}
+
+考虑图12.5中的例子：平面物体$A$与三个静止接触。
+
+\begin{itemize}
+\item 物体限制在平面内运动：$v_{Az} = \omega_{Ax} = \omega_{Ay} = 0$
+\item 三个接触wrench：$F_1 = (0, 1, -2)$，$F_2 = (-1, 0, 1)$，$F_3 = (1, 0, 1)$
+\item 约束：
+  \begin{align}
+  v_{Ay} - 2\omega_{Az} &\geq 0, \\
+  -v_{Ax} + \omega_{Az} &\geq 0, \\
+  v_{Ax} + \omega_{Az} &\geq 0
+  \end{align}
+\item 可行集合：3维空间$(\omega_{Az}, v_{Ax}, v_{Ay})$中的\textbf{多面体凸锥}
+\item 锥的不同部分：
+  \begin{itemize}
+  \item \textbf{内部}：所有接触分离（BBB）
+  \item \textbf{面}：一个约束主动（SBB、BSB、BBS）
+  \item \textbf{边}：两个约束主动（SSB、SBS、BSS）
+  \end{itemize}
+\end{itemize}
+
+\section{关键概念总结}
+
+\subsection{从单个接触到多个接触}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{方面} & \textbf{单个接触} & \textbf{多个接触} \\
+\hline
+约束 & 一个半空间 & 多个半空间的交集 \\
+\hline
+可行集合 & 半空间 & 多面体凸集 \\
+\hline
+边界 & 5维超平面 & 不同维度的面 \\
+\hline
+接触模式 & B、R、S（3种） & $3^n$种（但可能不可行） \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{齐次 vs 非齐次}
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{特征} & \textbf{齐次约束} & \textbf{非齐次约束} \\
+\hline
+条件 & 所有物体静止 & 有物体运动 \\
+\hline
+约束形式 & $F_i^T V_A \geq 0$ & $F_i^T (V_A - V_{j(i)}) \geq 0$ \\
+\hline
+可行集合 & 以原点为根部的锥 & 一般多面体（可能封闭） \\
+\hline
+形状闭合 & 可能（如果$F_i$正张成$\mathbb{R}^6$） & 不可能 \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{维度分析}
+
+\begin{itemize}
+\item \textbf{6维twist空间}：物体有6个运动自由度
+\item \textbf{每个接触约束}：减少1个自由度（在边界上）
+\item \textbf{主动约束数量}：$6 - k$，其中$k$是twist所在面的维度
+\item \textbf{形状闭合}：需要至少7个接触（对于3D物体）或4个接触（对于平面物体）
+\end{itemize}
+
+\section{物理直觉}
+
+\subsection{为什么多个接触形成多面体？}
+
+想象你在一个房间里，房间的墙壁定义了你的可行位置。每个接触就像一堵"墙"，限制物体不能朝某个方向运动。多个接触就像多堵墙，它们的交集就是你可以到达的区域——这就是多面体。
+
+\subsection{为什么齐次约束形成锥？}
+
+如果所有"墙"都通过原点（齐次约束），那么：
+\begin{itemize}
+\item 如果你可以朝某个方向运动，你也可以朝该方向的任何倍数运动
+\item 这就像从原点发出的射线，形成锥形
+\end{itemize}
+
+\subsection{为什么形状闭合需要正张成？}
+
+正张成意味着：无论你想朝哪个方向运动，至少有一个接触会阻止你。这就像被完全包围，无法逃脱。
+
+\section{实际应用}
+
+\subsection{抓取规划}
+
+在机器人抓取中，我们需要：
+\begin{itemize}
+\item 选择接触位置，使得可行twist集合尽可能小
+\item 理想情况下实现形状闭合（完全固定物体）
+\item 考虑接触模式的可行性
+\end{itemize}
+
+\subsection{操作任务}
+
+在操作任务中：
+\begin{itemize}
+\item 多个接触定义了物体可以如何运动
+\item 不同的接触模式对应不同的操作策略
+\item 需要分析哪些接触模式是可行的
+\end{itemize}
+
+\section{总结}
+
+12.1.3章节的核心思想可以总结为：
+
+\begin{enumerate}
+\item \textbf{多个接触的约束}：每个接触贡献一个半空间约束，所有约束的交集形成可行twist多面体。
+
+\item \textbf{几何结构}：可行集合是多面体凸集，可以包含不同维度的面，对应不同数量的主动约束。
+
+\item \textbf{齐次 vs 非齐次}：静止接触产生齐次约束和锥形可行集合；运动接触产生非齐次约束和一般多面体。
+
+\item \textbf{形状闭合}：当接触wrench正张成整个wrench空间时，物体完全被固定。
+
+\item \textbf{接触模式}：每个接触有B、R、S三种状态，系统有$3^n$种可能的接触模式，但只有一部分是可行的。
+\end{enumerate}
+
+理解这些概念对于后续学习形状闭合、力闭合和操作任务至关重要。
+
+\end{document}
+

@@ -1,0 +1,381 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc,shapes.geometric}
+
+\geometry{margin=2.5cm}
+
+\title{图12.14的详细理解：一阶分析 vs 二阶分析}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{definition}{定义}
+\newtheorem{example}{例子}
+
+\begin{document}
+
+\maketitle
+
+\section{概述}
+
+图12.14展示了\textbf{一阶分析}和\textbf{二阶分析}在判断抓取稳定性时的区别。这个图非常重要，因为它揭示了仅考虑接触法线（一阶分析）的局限性，以及考虑接触曲率（二阶分析）的重要性。
+
+\section{一阶分析 vs 二阶分析回顾}
+
+\subsection{一阶分析}
+
+\textbf{只考虑}：
+\begin{itemize}
+\item 接触法线方向$\hat{n}$
+\item 一阶导数：$\dot{d} = \frac{\partial d}{\partial q} \dot{q}$
+\item 假设：如果$\dot{d} = 0$，接触得以保持
+\end{itemize}
+
+\textbf{局限性}：
+\begin{itemize}
+\item 忽略接触曲率
+\item 可能错误地认为某些运动是可行的
+\item 图12.14中的(b)和(c)在一阶分析中看起来相同
+\end{itemize}
+
+\subsection{二阶分析}
+
+\textbf{还考虑}：
+\begin{itemize}
+\item 接触曲率$\frac{\partial^2 d}{\partial q^2}$
+\item 二阶导数：$\ddot{d} = \dot{q}^T \frac{\partial^2 d}{\partial q^2} \dot{q} + \frac{\partial d}{\partial q} \ddot{q}$
+\item 更准确地判断运动的可行性
+\end{itemize}
+
+\textbf{优势}：
+\begin{itemize}
+\item 能够区分一阶分析中看起来相同的接触
+\item 更准确地判断形状闭合
+\item 可以发现一阶分析遗漏的约束
+\end{itemize}
+
+\section{图12.14的六个子图详解}
+
+\subsection{图(a)：四个手指的形状闭合}
+
+\textbf{设置}：
+\begin{itemize}
+\item 等边三角形
+\item 四个手指接触
+\item 一阶分析：形状闭合（正确）
+\end{itemize}
+
+\textbf{分析}：
+\begin{itemize}
+\item 四个接触wrench正张成$\mathbb{R}^3$
+\item 可行twist集合只有原点
+\item 物体完全不能运动
+\item \textbf{一阶和二阶分析都正确}
+\end{itemize}
+
+\textbf{关键}：如果一阶分析显示形状闭合，则\textbf{任何分析}都显示形状闭合。
+
+\subsection{图(b)：三个手指，一阶分析认为可以旋转}
+
+\textbf{设置}：
+\begin{itemize}
+\item 等边三角形
+\item 三个手指接触（三个顶点处）
+\item 一阶分析：可以绕中心旋转
+\item \textbf{二阶分析：不能旋转（形状闭合）}
+\end{itemize}
+
+\textbf{一阶分析的观点}：
+\begin{itemize}
+\item 三个接触法线不共线
+\item 一阶分析认为可以绕中心旋转
+\item 因为接触法线在中心处的"切线"方向
+\end{itemize}
+
+\textbf{二阶分析的观点}：
+\begin{itemize}
+\item 考虑接触曲率
+\item 三角形在顶点处的曲率很大（尖锐）
+\item 即使一阶条件满足，二阶条件也会阻止旋转
+\item \textbf{实际上物体被固定}
+\end{itemize}
+
+\textbf{关键理解}：
+\begin{itemize}
+\item 一阶分析：$\dot{d} = 0$（满足）
+\item 二阶分析：$\ddot{d} < 0$（不满足，会导致穿透）
+\item 因此旋转是不可能的
+\end{itemize}
+
+\subsection{图(c)：三个手指，一阶分析认为可以旋转}
+
+\textbf{设置}：
+\begin{itemize}
+\item 等边三角形
+\item 三个矩形手指接触（平面接触）
+\item 一阶分析：可以绕中心旋转
+\item \textbf{二阶分析：可以旋转（与(b)不同！）}
+\end{itemize}
+
+\textbf{为什么与(b)不同？}
+\begin{itemize}
+\item 矩形手指提供的是\textbf{平面接触}，不是点接触
+\item 接触曲率不同
+\item 二阶分析显示旋转是可能的
+\end{itemize}
+
+\textbf{关键}：一阶分析将(b)和(c)视为相同（因为它们有相同的接触法线），但二阶分析显示它们不同。
+
+\subsection{图(d)：两个手指，椭圆（垂直）}
+
+\textbf{设置}：
+\begin{itemize}
+\item 垂直椭圆
+\item 两个手指在上下两端接触
+\item 一阶分析：可以绕垂直线上任何点旋转
+\item \textbf{二阶分析：可以绕垂直线上任何点旋转（正确）}
+\end{itemize}
+
+\textbf{分析}：
+\begin{itemize}
+\item 椭圆在接触点处的曲率较小
+\item 一阶分析的预测是正确的
+\item 物体确实可以绕垂直线上任何点旋转
+\end{itemize}
+
+\subsection{图(e)：两个手指，椭圆（水平）}
+
+\textbf{设置}：
+\begin{itemize}
+\item 水平椭圆
+\item 两个手指在上下两端接触
+\item 一阶分析：可以绕垂直线上任何点旋转
+\item \textbf{二阶分析：只能绕垂直线上某些点旋转}
+\end{itemize}
+
+\textbf{为什么不同？}
+\begin{itemize}
+\item 水平椭圆在接触点处的曲率较大
+\item 不是所有旋转中心都是可行的
+\item 只有某些旋转中心不会导致穿透
+\end{itemize}
+
+\textbf{关键}：一阶分析高估了可行运动。
+
+\subsection{图(f)：两个手指，沙漏形状}
+
+\textbf{设置}：
+\begin{itemize}
+\item 沙漏形状（中间窄）
+\item 两个手指在上下两端接触
+\item 一阶分析：可以绕垂直线上任何点旋转
+\item \textbf{二阶分析：完全不能运动（形状闭合）}
+\end{itemize}
+
+\textbf{为什么？}
+\begin{itemize}
+\item 沙漏形状在接触点处的曲率\textbf{非常大}
+\item 即使一阶条件满足，任何旋转都会导致穿透
+\item \textbf{实际上物体被完全固定}
+\end{itemize}
+
+\textbf{关键}：仅用两个手指就实现了形状闭合（由于曲率效应）！
+
+\section{关键理解点}
+
+\subsection{一阶分析的局限性}
+
+\begin{enumerate}
+\item \textbf{总是正确}：
+   \begin{itemize}
+   \item 分离（B）运动
+   \item 穿透（不可行）运动
+   \end{itemize}
+
+\item \textbf{可能错误}：
+   \begin{itemize}
+   \item 滚动-滑动（R或S）运动
+   \item 可能将不可行的运动误判为可行
+   \item 可能将可行的运动误判为不可行
+   \end{itemize}
+\end{enumerate}
+
+\subsection{二阶分析的作用}
+
+\begin{enumerate}
+\item \textbf{更准确}：
+   \begin{itemize}
+   \item 考虑接触曲率
+   \item 能够区分一阶分析中相同的接触
+   \end{itemize}
+
+\item \textbf{可以发现形状闭合}：
+   \begin{itemize}
+   \item 一阶分析认为只有滚动-滑动运动
+   \item 二阶分析可能显示形状闭合
+   \end{itemize}
+\end{enumerate}
+
+\subsection{形状闭合的保证}
+
+\begin{theorem}[形状闭合的保证]
+如果一阶分析显示形状闭合，则\textbf{任何分析}都显示形状闭合。
+\end{theorem}
+
+\textbf{逆命题不成立}：
+\begin{itemize}
+\item 如果一阶分析显示只有滚动-滑动运动，物体\textbf{可能}通过高阶分析处于形状闭合
+\item 例如：图(b)和图(f)
+\end{itemize}
+
+\section{具体例子分析}
+
+\subsection{例子1：图(b) vs 图(c)}
+
+\textbf{一阶分析}：
+\begin{itemize}
+\item 两者有相同的接触法线
+\item 一阶分析认为两者相同
+\item 都可以绕中心旋转
+\end{itemize}
+
+\textbf{二阶分析}：
+\begin{itemize}
+\item 图(b)：三角形顶点处曲率大 → 不能旋转
+\item 图(c)：矩形手指平面接触 → 可以旋转
+\item 两者不同！
+\end{itemize}
+
+\textbf{关键}：接触曲率决定了运动的可行性。
+
+\subsection{例子2：图(d) vs 图(e) vs 图(f)}
+
+\textbf{一阶分析}：
+\begin{itemize}
+\item 三者相同：都可以绕垂直线上任何点旋转
+\end{itemize}
+
+\textbf{二阶分析}：
+\begin{itemize}
+\item 图(d)：椭圆曲率小 → 可以绕任何点旋转
+\item 图(e)：椭圆曲率中等 → 只能绕某些点旋转
+\item 图(f)：沙漏曲率大 → 完全不能运动（形状闭合）
+\end{itemize}
+
+\textbf{关键}：曲率越大，约束越强。
+
+\section{曲率的影响}
+
+\subsection{曲率与约束强度}
+
+\begin{itemize}
+\item \textbf{小曲率}（如圆、椭圆）：
+  \begin{itemize}
+  \item 约束较弱
+  \item 允许更多运动
+  \end{itemize}
+
+\item \textbf{大曲率}（如尖锐顶点、沙漏形状）：
+  \begin{itemize}
+  \item 约束较强
+  \item 限制更多运动
+  \item 可能实现形状闭合
+  \end{itemize}
+\end{itemize}
+
+\subsection{数学表达}
+
+接触曲率由$\frac{\partial^2 d}{\partial q^2}$表示。
+
+\begin{itemize}
+\item 如果$\ddot{d} < 0$（即使$\dot{d} = 0$），会导致穿透
+\item 如果$\ddot{d} > 0$（即使$\dot{d} = 0$），接触会分离
+\item 只有当$\ddot{d} = 0$时，接触才得以保持
+\end{itemize}
+
+\section{异常物体（Exceptional Objects）}
+
+\subsection{定义}
+
+\textbf{异常物体}（exceptional objects）：无论接触数量如何，都无法通过运动学分析阻止其运动。
+
+\textbf{例子}：
+\begin{itemize}
+\item \textbf{平面}：圆盘（总是可以绕中心旋转）
+\item \textbf{3D}：球体、椭球体等旋转表面
+\end{itemize}
+
+\textbf{原因}：
+\begin{itemize}
+\item 物体上所有点的接触法向力的正张成不等于$\mathbb{R}^n$
+\item 存在某些方向无法被接触约束阻止
+\end{itemize}
+
+\subsection{图12.14中的例子}
+
+\begin{itemize}
+\item 图(b)的三角形：\textbf{不是}异常物体（二阶分析显示形状闭合）
+\item 圆盘：\textbf{是}异常物体（总是可以旋转）
+\end{itemize}
+
+\section{实际应用}
+
+\subsection{抓取设计}
+
+\begin{itemize}
+\item \textbf{利用曲率}：选择曲率大的接触点可以增强约束
+\item \textbf{避免异常物体}：某些形状无法完全固定
+\item \textbf{验证抓取}：需要二阶或更高阶分析来验证
+\end{itemize}
+
+\subsection{抓取稳定性}
+
+\begin{itemize}
+\item 一阶分析：快速初步判断
+\item 二阶分析：更准确的验证
+\item 高阶分析：最准确的判断（但计算复杂）
+\end{itemize}
+
+\section{总结}
+
+\subsection{关键结论}
+
+\begin{enumerate}
+\item \textbf{一阶分析}：
+   \begin{itemize}
+   \item 总是正确识别分离和穿透
+   \item 可能错误判断滚动-滑动运动
+   \item 如果显示形状闭合，则保证形状闭合
+   \end{itemize}
+
+\item \textbf{二阶分析}：
+   \begin{itemize}
+   \item 考虑接触曲率
+   \item 更准确地判断运动可行性
+   \item 可以发现一阶分析遗漏的形状闭合
+   \end{itemize}
+
+\item \textbf{图12.14的启示}：
+   \begin{itemize}
+   \item 一阶分析将(b)和(c)视为相同，但实际不同
+   \item 一阶分析将(d)、(e)、(f)视为相同，但实际不同
+   \item 曲率效应很重要
+   \end{itemize}
+\end{enumerate}
+
+\subsection{设计建议}
+
+\begin{enumerate}
+\item 初步设计：使用一阶分析快速判断
+\item 详细验证：使用二阶分析验证
+\item 利用曲率：选择曲率大的接触点
+\item 避免异常物体：注意某些形状无法完全固定
+\end{enumerate}
+
+\end{document}
+

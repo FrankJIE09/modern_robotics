@@ -1,0 +1,297 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+\title{例12.10\quad 米尺技巧\quad 详解}
+\author{现代机器人学：第12章 抓取与操作\\
+详细解释}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{实验描述}
+
+\subsection{实验步骤}
+
+\begin{enumerate}
+    \item 拿一根米尺（或任何类似的长而光滑的棍子）
+    \item 水平地平衡在你的两个食指上
+    \item 将左手指放在10 cm标记附近
+    \item 将右手指放在60 cm标记附近
+    \item 质心更靠近右手指，但仍然在手指之间，因此棍子被支撑
+    \item 保持左手指静止，慢慢地将右手指向左移动，直到它们接触
+\end{enumerate}
+
+\subsection{问题}
+
+\textbf{棍子会发生什么？}
+
+\subsubsection{直觉猜测}
+
+如果你没有尝试实验，你可能会猜测：
+\begin{itemize}
+    \item 右手指通过棍子的质心下方
+    \item 此时棍子下落
+\end{itemize}
+
+\subsubsection{实际观察}
+
+如果你确实尝试了实验，你看到了不同的情况：\textbf{棍子永远不会下落！}
+
+\section{问题分析}
+
+\subsection{系统设置}
+
+图12.26显示了由两个摩擦手指支撑的棍子：
+\begin{itemize}
+    \item 两个手指都有摩擦（摩擦系数$\mu > 0$）
+    \item 棍子受到重力作用
+    \item 手指可以移动
+\end{itemize}
+
+\subsection{准静态近似}
+
+由于所有运动都很慢，我们使用\textbf{准静态近似}：
+\begin{itemize}
+    \item 棍子的加速度为零
+    \item 忽略惯性力
+    \item 净接触wrench必须平衡重力wrench
+\end{itemize}
+
+动力学方程简化为：
+\begin{equation}
+F_{\text{ext}} + \sum_i k_i F_i = 0, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\end{equation}
+
+\section{接触模式分析}
+
+\subsection{关键观察}
+
+当两个手指一起移动时，棍子必须在一个或两个手指上滑动，以适应手指彼此靠近的事实。
+
+\subsection{三种可能的接触模式}
+
+图12.26显示了三种不同接触模式的复合wrench锥的力矩标记表示：
+
+\subsubsection{接触模式1：$RS_r$}
+
+\begin{itemize}
+    \item \textbf{定义}：棍子相对于左手指保持静止（$R$），相对于右手指向右滑动（$S_r$）
+    \item \textbf{物理意义}：
+    \begin{itemize}
+        \item 左手指与棍子粘附
+        \item 右手指在棍子下向右滑动
+    \end{itemize}
+    \item \textbf{Wrench锥}：由这种接触模式产生的wrench锥
+\end{itemize}
+
+\subsubsection{接触模式2：$S_lR$}
+
+\begin{itemize}
+    \item \textbf{定义}：棍子相对于左手指向左滑动（$S_l$），相对于右手指保持静止（$R$）
+    \item \textbf{物理意义}：
+    \begin{itemize}
+        \item 左手指在棍子下向左滑动
+        \item 右手指与棍子粘附
+    \end{itemize}
+    \item \textbf{Wrench锥}：由这种接触模式产生的wrench锥
+\end{itemize}
+
+\subsubsection{接触模式3：$S_lS_r$}
+
+\begin{itemize}
+    \item \textbf{定义}：棍子在两个手指上都滑动
+    \item \textbf{物理意义}：
+    \begin{itemize}
+        \item 左手指向左滑动
+        \item 右手指向右滑动
+    \end{itemize}
+    \item \textbf{Wrench锥}：由这种接触模式产生的wrench锥
+\end{itemize}
+
+\section{结果分析}
+
+\subsection{关键发现}
+
+从图12.26中可以清楚地看出，\textbf{只有$S_lR$接触模式可以提供平衡重力wrench的wrench}。
+
+\subsection{物理解释}
+
+\begin{itemize}
+    \item \textbf{支撑更多重量的手指保持固定}：右手指支撑更多棍子重量，因此与棍子保持粘附（$R$）
+    \item \textbf{支撑较少重量的手指滑动}：左手指支撑较少重量，因此在棍子下滑动（$S_l$）
+    \item \textbf{质心移动}：由于右手指在世界坐标系中向左移动，且棍子与右手指粘附，这意味着质心以相同的速度向左移动
+\end{itemize}
+
+\section{运动过程}
+
+\subsection{第一阶段：$S_lR$模式}
+
+\begin{itemize}
+    \item 右手指向左移动
+    \item 棍子与右手指粘附，质心向左移动
+    \item 左手指在棍子下向左滑动
+    \item 这个过程持续到质心在手指之间的一半处
+\end{itemize}
+
+\subsection{第二阶段：转换到$S_lS_r$模式}
+
+当质心在手指之间的一半处时：
+\begin{itemize}
+    \item 棍子转换到$S_lS_r$接触模式
+    \item 两个手指都在滑动
+    \item 质心保持在手指之间居中
+\end{itemize}
+
+\subsection{第三阶段：持续到手指相遇}
+
+\begin{itemize}
+    \item 质心保持在手指之间居中
+    \item 两个手指继续滑动
+    \item 直到它们相遇
+    \item \textbf{棍子永远不会下落！}
+\end{itemize}
+
+\section{为什么棍子不会下落？}
+
+\subsection{关键机制}
+
+棍子不会下落的原因是：
+
+\begin{enumerate}
+    \item \textbf{接触模式的选择}：系统自动选择能够平衡重力的接触模式（$S_lR$或$S_lS_r$）
+    
+    \item \textbf{质心的自动调整}：通过滑动，质心自动调整到手指之间，保持平衡
+    
+    \item \textbf{摩擦力的作用}：摩擦力使棍子与支撑更多重量的手指保持粘附
+    
+    \item \textbf{准静态平衡}：在每个时刻，接触力都能平衡重力
+\end{enumerate}
+
+\subsection{与直觉的对比}
+
+\begin{itemize}
+    \item \textbf{直觉}：当手指移动时，棍子应该下落
+    \item \textbf{实际}：通过接触模式的自动选择，棍子保持平衡
+    \item \textbf{原因}：系统选择能够平衡重力的接触模式，而不是导致下落的模式
+\end{itemize}
+
+\section{限制条件}
+
+\subsection{准静态假设的重要性}
+
+这个分析依赖于准静态假设：
+
+\begin{itemize}
+    \item \textbf{如果快速移动右手指}：很容易使棍子下落
+    \item \textbf{原因}：右手指处的摩擦力不足以产生维持粘附接触所需的大棍子加速度
+    \item \textbf{结果}：接触模式可能从$R$转换到$S$或$B$，导致棍子下落
+\end{itemize}
+
+\subsection{静摩擦与动摩擦的差异}
+
+在你的实验中，你可能会注意到：
+
+\begin{itemize}
+    \item 当质心几乎居中时，棍子实际上并没有达到理想的$S_lS_r$接触模式
+    \item 而是在$S_lR$和$RS_r$接触模式之间快速切换
+    \item \textbf{原因}：静摩擦系数$\mu_s$大于动摩擦系数$\mu_k$
+\end{itemize}
+
+\subsubsection{静摩擦与动摩擦}
+
+\begin{itemize}
+    \item \textbf{静摩擦系数}$\mu_s$：接触静止时的摩擦系数
+    \item \textbf{动摩擦系数}$\mu_k$：接触滑动时的摩擦系数
+    \item \textbf{关系}：$\mu_s \geq \mu_k$
+\end{itemize}
+
+\subsubsection{模式切换的机制}
+
+\begin{enumerate}
+    \item 当棍子试图在某个手指上滑动时，如果静摩擦足够大，接触可能"抓住"（从$S$转换到$R$）
+    \item 当接触力超过静摩擦极限时，接触开始滑动（从$R$转换到$S$）
+    \item 这种切换导致棍子在两种模式之间振荡
+\end{enumerate}
+
+\section{数学分析框架}
+
+\subsection{准静态平衡方程}
+
+对于每个接触模式，我们需要求解：
+
+\begin{equation}
+F_{\text{gravity}} + \sum_i k_i F_i = 0, \quad k_i \geq 0, F_i \in \mathcal{WC}_i
+\end{equation}
+
+其中：
+\begin{itemize}
+    \item $F_{\text{gravity}} = (0, 0, -mg)$是重力wrench
+    \item $\sum_i k_i F_i$是接触wrench
+    \item $F_i$必须在相应接触模式的wrench锥内
+\end{itemize}
+
+\subsection{接触模式的一致性条件}
+
+对于每个接触模式，需要检查：
+
+\begin{enumerate}
+    \item \textbf{Wrench平衡}：是否存在$k_i \geq 0$使得平衡方程成立
+    
+    \item \textbf{摩擦约束}：
+    \begin{itemize}
+        \item 滚动接触（$R$）：wrench可以在摩擦锥内
+        \item 滑动接触（$S$）：wrench必须在摩擦锥边缘上，方向与滑动方向相反
+    \end{itemize}
+    
+    \item \textbf{运动学约束}：
+    \begin{itemize}
+        \item 滚动接触：$\dot{p}_A = \dot{p}_B$
+        \item 滑动接触：$F^T V = 0$（保持接触）
+    \end{itemize}
+\end{enumerate}
+
+\section{关键要点总结}
+
+\begin{enumerate}
+    \item \textbf{反直觉的结果}：棍子不会下落，尽管直觉认为应该下落
+    
+    \item \textbf{接触模式的选择}：系统自动选择能够平衡重力的接触模式
+    
+    \item \textbf{准静态分析}：适用于缓慢运动的情况
+    
+    \item \textbf{质心的自动调整}：通过滑动，质心自动调整到平衡位置
+    
+    \item \textbf{限制条件}：快速运动可能导致失败，静摩擦与动摩擦的差异导致模式切换
+    
+    \item \textbf{实际应用}：理解这种机制有助于设计稳定的操作策略
+\end{enumerate}
+
+\section{实际应用}
+
+这个例子展示了：
+
+\begin{itemize}
+    \item \textbf{接触模式的自动选择}：系统会自动选择可行的接触模式
+    \item \textbf{准静态操作}：缓慢操作可以保持稳定性
+    \item \textbf{摩擦的重要性}：摩擦使系统能够保持平衡
+    \item \textbf{多接触系统}：多个接触可以协同工作来保持平衡
+\end{itemize}
+
+这些概念在以下应用中很重要：
+\begin{itemize}
+    \item 机器人操作
+    \item 装配任务
+    \item 稳定抓取
+    \item 传送带操作
+\end{itemize}
+
+\end{document}
+

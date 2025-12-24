@@ -1,0 +1,929 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usetikzlibrary{shapes,arrows,positioning,calc,decorations.markings,angles,quotes}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+\title{图12.22：力旋量计算和绘制详解}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{问题设置}
+
+\subsection{图12.22的场景}
+
+\textbf{物体}：等边三角形
+
+\textbf{抓取配置}：
+\begin{itemize}
+\item 两个接触点（手指）在三角形的边上
+\item 每个接触有摩擦（摩擦系数$\mu$）
+\item 图(a)：$\mu = 0.25$，非力闭合
+\item 图(b)：$\mu = 1$，力闭合
+\end{itemize}
+
+\textbf{目标}：计算并绘制每个接触的wrench（力旋量）
+
+\section{第一步：建立坐标系和几何参数}
+
+\subsection{等边三角形的参数}
+
+\textbf{假设}：
+\begin{itemize}
+\item 等边三角形，边长为$L$
+\item 为了简化，设$L = 2$（单位：米）
+\item 质心在原点$(0, 0)$
+\item 一个顶点在$(0, h)$，其中$h = \frac{L\sqrt{3}}{3} \approx 1.155$
+\end{itemize}
+
+\textbf{三个顶点坐标}（假设一个顶点在上方）：
+\begin{itemize}
+\item 顶点1：$(0, h)$
+\item 顶点2：$(-L/2, -h/2) = (-1, -h/2)$
+\item 顶点3：$(L/2, -h/2) = (1, -h/2)$
+\end{itemize}
+
+\textbf{三条边的方程}：
+\begin{itemize}
+\item 边1（左）：从顶点1到顶点2
+\item 边2（右）：从顶点1到顶点3
+\item 边3（底）：从顶点2到顶点3
+\end{itemize}
+
+\subsection{接触点位置}
+
+\textbf{图12.22(a)}：
+\begin{itemize}
+\item 接触1：在左上边（边1），靠近顶点1
+\item 接触2：在右下边（边3），靠近顶点3
+\end{itemize}
+
+\textbf{图12.22(b)}：
+\begin{itemize}
+\item 接触1：在左上边（边1），靠近顶点1
+\item 接触2：在右上边（边2），靠近顶点1
+\end{itemize}
+
+\textbf{具体坐标}（假设）：
+
+\textbf{图(a)}：
+\begin{itemize}
+\item 接触1：$p_1 = (-0.5, 0.5)$（在左上边）
+\item 接触2：$p_2 = (0.5, -0.5)$（在右下边）
+\end{itemize}
+
+\textbf{图(b)}：
+\begin{itemize}
+\item 接触1：$p_1 = (-0.5, 0.5)$（在左上边）
+\item 接触2：$p_2 = (0.5, 0.5)$（在右上边）
+\end{itemize}
+
+\section{第二步：计算接触法向量}
+
+\subsection{边的方向向量}
+
+\textbf{边1}（左上边）：从顶点1到顶点2
+\begin{equation}
+\vec{v}_1 = (-1, -h/2) - (0, h) = (-1, -3h/2)
+\end{equation}
+
+\textbf{单位切向量}：
+\begin{equation}
+\hat{t}_1 = \frac{\vec{v}_1}{|\vec{v}_1|} = \frac{(-1, -3h/2)}{\sqrt{1 + 9h^2/4}}
+\end{equation}
+
+\textbf{法向量}（指向三角形内部）：
+\begin{equation}
+\hat{n}_1 = \text{旋转90度}(\hat{t}_1) = \frac{(-3h/2, 1)}{\sqrt{1 + 9h^2/4}}
+\end{equation}
+
+\textbf{简化}（对于等边三角形，角度为60度）：
+\begin{itemize}
+\item 如果边与水平成60度角
+\item 法向量与水平成30度角（指向内部）
+\end{itemize}
+
+\textbf{图(a)的接触1}：
+\begin{itemize}
+\item 位置：$p_1 = (-0.5, 0.5)$
+\item 法向量：$\hat{n}_1 = (\cos 30°, \sin 30°) = (\sqrt{3}/2, 1/2) \approx (0.866, 0.5)$
+\item 但需要指向内部，可能需要调整符号
+\end{itemize}
+
+\textbf{更简单的方法}：
+\begin{itemize}
+\item 对于等边三角形，每条边的法向量与边成90度
+\item 法向量指向三角形内部
+\item 可以通过几何计算得到
+\end{itemize}
+
+\section{第三步：计算摩擦锥边}
+
+\subsection{摩擦角}
+
+\textbf{摩擦角}：$\alpha = \tan^{-1}(\mu)$
+
+\textbf{图(a)}：$\mu = 0.25$
+\begin{equation}
+\alpha = \tan^{-1}(0.25) \approx 14.04°
+\end{equation}
+
+\textbf{图(b)}：$\mu = 1$
+\begin{equation}
+\alpha = \tan^{-1}(1) = 45°
+\end{equation}
+
+\subsection{摩擦锥边的真实含义：重要澄清}
+
+\textbf{常见误解}：一个接触点的两个wrench分别是"压力"和"摩擦力"
+
+\textbf{正确答案}：摩擦锥的两条边都是\textbf{法向力+摩擦力的组合}，只是切向分量的方向相反！
+
+\subsection{库仑摩擦定律回顾}
+
+\textbf{库仑摩擦定律}：
+\begin{equation}
+f_t \leq \mu f_n
+\label{eq:coulomb_friction}
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $f_n$：法向力（压力）的大小
+\item $f_t$：切向力（摩擦力）的大小
+\item $\mu$：摩擦系数
+\end{itemize}
+
+\textbf{物理意义}：
+\begin{itemize}
+\item 摩擦力不能超过法向力乘以摩擦系数
+\item 当$f_t = \mu f_n$时，摩擦力达到最大值
+\item 这是\textbf{极限情况}（即将滑动）
+\end{itemize}
+
+\subsection{摩擦锥的定义}
+
+\textbf{摩擦锥}：所有满足库仑摩擦定律的力向量集合
+
+\textbf{数学表达}：
+\begin{equation}
+\mathcal{FC} = \{f \in \mathbb{R}^2 \mid |f_t| \leq \mu f_n, f_n \geq 0\}
+\end{equation}
+
+\textbf{几何形状}：
+\begin{itemize}
+\item 在接触点的切平面内
+\item 是一个以法向量为轴的\textbf{圆锥}
+\item 半角为$\alpha = \tan^{-1}(\mu)$
+\end{itemize}
+
+\subsection{摩擦锥边的物理意义}
+
+\textbf{关键理解}：摩擦锥的\textbf{边}代表\textbf{极限情况}
+
+\textbf{两条边}：
+\begin{itemize}
+\item \textbf{边1}：$f_t = +\mu f_n$（正切向，摩擦力达到最大值，方向为正）
+\item \textbf{边2}：$f_t = -\mu f_n$（负切向，摩擦力达到最大值，方向为负）
+\end{itemize}
+
+\textbf{重要}：
+\begin{itemize}
+\item 两条边都包含\textbf{法向力}和\textbf{切向力}
+\item 区别在于切向分量的\textbf{方向相反}
+\item 不是"一条边是压力，另一条边是摩擦力"
+\end{itemize}
+
+\subsection{摩擦锥边的数学表达}
+
+\textbf{对于接触$i$，法向量$\hat{n}_i$，切向量$\hat{t}_i$}：
+
+\textbf{摩擦锥的两条边}：
+\begin{itemize}
+\item \textbf{边1}：$\hat{d}_{i1} = \frac{\hat{n}_i + \mu \hat{t}_i}{|\hat{n}_i + \mu \hat{t}_i|}$（归一化）
+   \begin{itemize}
+   \item 法向分量：$\hat{n}_i$（压力方向）
+   \item 切向分量：$+\mu \hat{t}_i$（正摩擦力方向）
+   \item 总方向：两者的组合
+   \end{itemize}
+
+\item \textbf{边2}：$\hat{d}_{i2} = \frac{\hat{n}_i - \mu \hat{t}_i}{|\hat{n}_i - \mu \hat{t}_i|}$（归一化）
+   \begin{itemize}
+   \item 法向分量：$\hat{n}_i$（压力方向，与边1相同）
+   \item 切向分量：$-\mu \hat{t}_i$（负摩擦力方向，与边1相反）
+   \item 总方向：两者的组合
+   \end{itemize}
+\end{itemize}
+
+\textbf{或者用角度表示}：
+\begin{itemize}
+\item 边1：与法向量成角度$+\alpha$（$\alpha = \tan^{-1}\mu$）
+\item 边2：与法向量成角度$-\alpha$
+\end{itemize}
+
+\subsection{具体数值例子}
+
+\textbf{接触1}：$p_1 = (-0.5, 0.5)$
+
+\textbf{法向量}：$\hat{n}_1 = (0.866, 0.5)$（指向内部）
+\textbf{切向量}：$\hat{t}_1 = (-0.5, 0.866)$（沿边方向）
+\textbf{摩擦系数}：$\mu = 0.25$
+
+\textbf{摩擦锥边1的详细分解}：
+\begin{align}
+\hat{d}_{11} &= \frac{\hat{n}_1 + \mu \hat{t}_1}{|\hat{n}_1 + \mu \hat{t}_1|} \\
+&= \frac{(0.866, 0.5) + 0.25(-0.5, 0.866)}{|(0.866, 0.5) + 0.25(-0.5, 0.866)|} \\
+&= \frac{(0.866 - 0.125, 0.5 + 0.217)}{1.031} \\
+&= \frac{(0.741, 0.717)}{1.031} \\
+&\approx (0.719, 0.695)
+\end{align}
+
+\textbf{分解为法向和切向分量}：
+\begin{itemize}
+\item \textbf{法向分量}：$(0.866, 0.5)$（压力方向）
+\item \textbf{切向分量}：$0.25(-0.5, 0.866) = (-0.125, 0.217)$（正摩擦力方向）
+\item \textbf{总方向}：$(0.741, 0.717)$（归一化后为$(0.719, 0.695)$）
+\end{itemize}
+
+\textbf{摩擦锥边2的详细分解}：
+\begin{align}
+\hat{d}_{12} &= \frac{\hat{n}_1 - \mu \hat{t}_1}{|\hat{n}_1 - \mu \hat{t}_1|} \\
+&= \frac{(0.866, 0.5) - 0.25(-0.5, 0.866)}{|(0.866, 0.5) - 0.25(-0.5, 0.866)|} \\
+&= \frac{(0.866 + 0.125, 0.5 - 0.217)}{1.030} \\
+&= \frac{(0.991, 0.283)}{1.030} \\
+&\approx (0.962, 0.275)
+\end{align}
+
+\textbf{分解为法向和切向分量}：
+\begin{itemize}
+\item \textbf{法向分量}：$(0.866, 0.5)$（压力方向，与边1相同）
+\item \textbf{切向分量}：$-0.25(-0.5, 0.866) = (0.125, -0.217)$（负摩擦力方向，与边1相反）
+\item \textbf{总方向}：$(0.991, 0.283)$（归一化后为$(0.962, 0.275)$）
+\end{itemize}
+
+\subsection{为什么需要两条边？}
+
+\textbf{物理原因}：
+\begin{itemize}
+\item 摩擦力可以沿\textbf{两个相反方向}
+\item 每个方向都有一个\textbf{极限值}（$f_t = \mu f_n$）
+\item 两条边分别代表这两个极限方向
+\end{itemize}
+
+\textbf{数学原因}：
+\begin{itemize}
+\item 摩擦锥是一个\textbf{圆锥}，需要两条边界线来定义
+\item 这两条边界线张成整个摩擦锥
+\item 摩擦锥内的任何力都可以表示为两条边的正线性组合
+\end{itemize}
+
+\textbf{几何原因}：
+\begin{itemize}
+\item 在2D平面中，圆锥由两条射线定义
+\item 这两条射线从接触点出发，对称分布在法向量两侧
+\item 角度为$\pm \alpha$，其中$\alpha = \tan^{-1}\mu$
+\end{itemize}
+
+\subsection{总结：摩擦锥边的真实含义}
+
+\textbf{关键要点}：
+
+\begin{enumerate}
+\item \textbf{不是"一个压力，一个摩擦力"}：
+   \begin{itemize}
+   \item 两条边都包含法向力和切向力
+   \item 区别在于切向分量的方向相反
+   \end{itemize}
+
+\item \textbf{都是"法向力+摩擦力的组合"}：
+   \begin{itemize}
+   \item 边1：法向力 + 正切向摩擦力（$f_t = +\mu f_n$）
+   \item 边2：法向力 + 负切向摩擦力（$f_t = -\mu f_n$）
+   \end{itemize}
+
+\item \textbf{代表极限情况}：
+   \begin{itemize}
+   \item 每条边代表摩擦力达到最大值的极限情况
+   \item 摩擦锥内的任何力都可以表示为两条边的正线性组合
+   \end{itemize}
+
+\item \textbf{为什么是两条边}：
+   \begin{itemize}
+   \item 摩擦力可以沿两个相反方向
+   \item 每个方向都有一个极限值
+   \item 两条边共同定义整个摩擦锥
+   \end{itemize}
+\end{enumerate}
+
+\textbf{数学表达总结}：
+\begin{itemize}
+\item 边1：$\hat{d}_1 = \hat{n} + \mu \hat{t}$（归一化）$\Rightarrow$ 法向 + 正切向
+\item 边2：$\hat{d}_2 = \hat{n} - \mu \hat{t}$（归一化）$\Rightarrow$ 法向 + 负切向
+\end{itemize}
+
+\textbf{物理解释}：
+\begin{itemize}
+\item 两条边都是法向力和摩擦力的组合
+\item 法向分量相同（都是$\hat{n}$）
+\item 切向分量相反（$+\mu \hat{t}$ vs $-\mu \hat{t}$）
+\end{itemize}
+
+\section{重要澄清：摩擦锥确实包含压力信息！}
+
+\subsection{问题的提出}
+
+\textbf{疑问}：为什么说"没有压力了"？摩擦锥包含压力信息了吗？
+
+\textbf{答案}：\textbf{是的！摩擦锥确实包含压力信息！}
+
+\subsection{摩擦锥包含压力信息的证据}
+
+\textbf{证据1：摩擦锥的定义}
+
+摩擦锥的定义本身就包含法向力（压力）：
+\begin{equation}
+\mathcal{FC} = \{f \in \mathbb{R}^2 \mid |f_t| \leq \mu f_n, f_n \geq 0\}
+\end{equation}
+
+\textbf{关键}：
+\begin{itemize}
+\item 条件$f_n \geq 0$明确要求\textbf{法向力必须存在且非负}
+\item 没有法向力，就没有摩擦锥
+\item 法向力是摩擦锥的\textbf{基础}
+\end{itemize}
+
+\textbf{证据2：摩擦锥边的数学表达}
+
+\textbf{摩擦锥边1}：
+\begin{equation}
+\hat{d}_1 = \frac{\hat{n} + \mu \hat{t}}{|\hat{n} + \mu \hat{t}|}
+\end{equation}
+
+\textbf{分解}：
+\begin{itemize}
+\item \textbf{法向分量}：$\hat{n}$（这就是压力方向！）
+\item \textbf{切向分量}：$+\mu \hat{t}$（摩擦力方向）
+\item \textbf{总方向}：两者的组合
+\end{itemize}
+
+\textbf{关键观察}：
+\begin{itemize}
+\item $\hat{n}$是摩擦锥边的\textbf{主要组成部分}
+\item 没有$\hat{n}$，就没有摩擦锥边
+\item 压力信息\textbf{包含在}摩擦锥边中
+\end{itemize}
+
+\textbf{证据3：摩擦角的概念}
+
+\textbf{摩擦角}：$\alpha = \tan^{-1}(\mu)$
+
+\textbf{几何意义}：
+\begin{itemize}
+\item 摩擦角是摩擦锥的\textbf{半角}
+\item 它定义了法向量和摩擦锥边之间的角度
+\item 这个角度是\textbf{相对于法向量}（压力方向）定义的
+\end{itemize}
+
+\textbf{图示}：
+\begin{itemize}
+\item 法向量$\hat{n}$：压力方向（0°）
+\item 摩擦锥边1：与法向量成角度$+\alpha$
+\item 摩擦锥边2：与法向量成角度$-\alpha$
+\end{itemize}
+
+\textbf{结论}：摩擦锥是\textbf{以法向量为轴}的圆锥，压力方向是摩擦锥的\textbf{中心轴}！
+
+\subsection{为什么会有"没有压力"的误解？}
+
+\textbf{误解的来源}：
+
+可能认为：
+\begin{itemize}
+\item "摩擦锥的两条边，一条是压力，一条是摩擦力"
+\item 如果这样理解，那么确实会认为"没有压力了"
+\end{itemize}
+
+\textbf{正确的理解}：
+
+实际上：
+\begin{itemize}
+\item 摩擦锥的\textbf{两条边都包含压力}
+\item 区别在于摩擦力的方向
+\item 压力是摩擦锥的\textbf{基础}，不是可选的
+\end{itemize}
+
+\subsection{压力在摩擦锥中的角色}
+
+\textbf{压力（法向力）的作用}：
+
+\begin{enumerate}
+\item \textbf{定义摩擦锥的轴}：
+   \begin{itemize}
+   \item 法向量$\hat{n}$是摩擦锥的中心轴
+   \item 所有摩擦锥边都围绕这个轴
+   \end{itemize}
+
+\item \textbf{限制摩擦力的大小}：
+   \begin{itemize}
+   \item 摩擦力不能超过$\mu f_n$
+   \item 没有压力，就没有摩擦力上限
+   \end{itemize}
+
+\item \textbf{构成摩擦锥边}：
+   \begin{itemize}
+   \item 每条摩擦锥边都包含法向分量$\hat{n}$
+   \item 压力是摩擦锥边的\textbf{必要组成部分}
+   \end{itemize}
+\end{enumerate}
+
+\subsection{摩擦锥的完整理解}
+
+\textbf{摩擦锥是什么？}
+
+摩擦锥是\textbf{所有可能的接触力方向}的集合，其中：
+\begin{itemize}
+\item \textbf{必须}有法向力（压力）：$f_n \geq 0$
+\item \textbf{可以}有切向力（摩擦力）：$|f_t| \leq \mu f_n$
+\item 力的方向必须在摩擦锥内
+\end{itemize}
+
+\textbf{摩擦锥的两条边}：
+
+\begin{itemize}
+\item \textbf{边1}：法向力 + 最大正切向摩擦力
+   \begin{equation}
+   \hat{d}_1 = \hat{n} + \mu \hat{t} \quad \text{（归一化）}
+   \end{equation}
+   \begin{itemize}
+   \item 包含压力：$\hat{n}$
+   \item 包含摩擦力：$+\mu \hat{t}$
+   \end{itemize}
+
+\item \textbf{边2}：法向力 + 最大负切向摩擦力
+   \begin{equation}
+   \hat{d}_2 = \hat{n} - \mu \hat{t} \quad \text{（归一化）}
+   \end{equation}
+   \begin{itemize}
+   \item 包含压力：$\hat{n}$（与边1相同）
+   \item 包含摩擦力：$-\mu \hat{t}$（与边1相反）
+   \end{itemize}
+\end{itemize}
+
+\textbf{关键}：
+\begin{itemize}
+\item 两条边\textbf{都包含压力}（法向分量$\hat{n}$）
+\item 两条边\textbf{都包含摩擦力}（切向分量$\pm \mu \hat{t}$）
+\item 区别在于摩擦力的\textbf{方向相反}
+\end{itemize}
+
+\subsection{具体例子：压力在摩擦锥中的体现}
+
+\textbf{例子}：接触1，$\hat{n}_1 = (0.866, 0.5)$，$\mu = 0.25$
+
+\textbf{摩擦锥边1}：
+\begin{align}
+\hat{d}_1 &= \frac{(0.866, 0.5) + 0.25(-0.5, 0.866)}{|\cdots|} \\
+&= \frac{(0.741, 0.717)}{1.031} \\
+&\approx (0.719, 0.695)
+\end{align}
+
+\textbf{分解}：
+\begin{itemize}
+\item \textbf{压力分量}：$(0.866, 0.5)$（这是$\hat{n}_1$，压力方向！）
+\item \textbf{摩擦力分量}：$0.25(-0.5, 0.866) = (-0.125, 0.217)$
+\item \textbf{总方向}：$(0.741, 0.717)$
+\end{itemize}
+
+\textbf{观察}：
+\begin{itemize}
+\item 压力分量$(0.866, 0.5)$是摩擦锥边的主要组成部分
+\item 如果没有压力分量，摩擦锥边就不存在
+\item 压力信息\textbf{明确包含}在摩擦锥边中
+\end{itemize}
+
+\subsection{压力大小的任意性}
+
+\textbf{重要理解}：摩擦锥定义的是\textbf{方向}，不是\textbf{大小}
+
+\textbf{压力的大小}：
+\begin{itemize}
+\item 摩擦锥定义的是\textbf{力的方向}，不是力的大小
+\item 压力的大小可以是\textbf{任意正值}：$f_n > 0$
+\item 只要方向在摩擦锥内，压力大小可以任意调整
+\end{itemize}
+
+\textbf{数学表达}：
+
+对于摩擦锥内的任何力$f$：
+\begin{equation}
+f = k \hat{d}, \quad k > 0
+\end{equation}
+
+其中：
+\begin{itemize}
+\item $\hat{d}$是摩擦锥内的方向（由摩擦锥边张成）
+\item $k$是力的大小（可以是任意正值）
+\item 这个力可以分解为：
+   \begin{align}
+   f_n &= k (\hat{d} \cdot \hat{n}) \quad \text{（法向力，压力）} \\
+   f_t &= k (\hat{d} \cdot \hat{t}) \quad \text{（切向力，摩擦力）}
+   \end{align}
+\end{itemize}
+
+\textbf{关键}：
+\begin{itemize}
+\item 压力大小$f_n$取决于力的大小$k$和方向$\hat{d}$
+\item 只要$\hat{d}$在摩擦锥内，$f_n > 0$（有压力）
+\item 压力\textbf{总是存在}，只是大小可以变化
+\end{itemize}
+
+\subsection{总结：摩擦锥与压力的关系}
+
+\textbf{摩擦锥确实包含压力信息！}
+
+\begin{enumerate}
+\item \textbf{压力是摩擦锥的基础}：
+   \begin{itemize}
+   \item 法向量$\hat{n}$是摩擦锥的中心轴
+   \item 没有压力，就没有摩擦锥
+   \end{itemize}
+
+\item \textbf{压力包含在摩擦锥边中}：
+   \begin{itemize}
+   \item 每条摩擦锥边都包含法向分量$\hat{n}$
+   \item 压力是摩擦锥边的必要组成部分
+   \end{itemize}
+
+\item \textbf{压力大小可以任意}：
+   \begin{itemize}
+   \item 摩擦锥定义的是方向，不是大小
+   \item 只要方向在摩擦锥内，压力大小可以是任意正值
+   \end{itemize}
+
+\item \textbf{摩擦锥的两条边都包含压力}：
+   \begin{itemize}
+   \item 边1：压力 + 正摩擦力
+   \item 边2：压力 + 负摩擦力
+   \item 区别在于摩擦力的方向，不是压力的有无
+   \end{itemize}
+\end{enumerate}
+
+\textbf{最终答案}：
+
+\begin{itemize}
+\item \textbf{摩擦锥确实包含压力信息}
+\item 压力是摩擦锥的\textbf{基础}和\textbf{必要组成部分}
+\item 摩擦锥的两条边\textbf{都包含压力}（法向分量）
+\item 区别在于摩擦力的方向，而不是压力的有无
+\item 压力大小可以是任意正值，但压力方向是固定的（沿法向量）
+\end{itemize}
+
+\section{第四步：计算Wrench}
+
+\subsection{Wrench的公式}
+
+\textbf{对于平面问题}，wrench为：
+\begin{equation}
+F = \begin{bmatrix} m_z \\ f_x \\ f_y \end{bmatrix}
+\end{equation}
+
+\textbf{对于摩擦锥边}，方向为$\hat{d} = (d_x, d_y)$，接触位置为$p = (p_x, p_y)$：
+
+\textbf{力矩}：
+\begin{equation}
+m_z = (p \times \hat{d})_z = p_x d_y - p_y d_x
+\end{equation}
+
+\textbf{力}：
+\begin{equation}
+f = \hat{d} = (d_x, d_y)
+\end{equation}
+
+\textbf{因此}：
+\begin{equation}
+F = \begin{bmatrix} p_x d_y - p_y d_x \\ d_x \\ d_y \end{bmatrix}
+\end{equation}
+
+\subsection{具体计算：图12.22(a)}
+
+\textbf{接触1}：$p_1 = (-0.5, 0.5)$
+
+\textbf{假设法向量}：$\hat{n}_1 = (0.866, 0.5)$（指向内部）
+\textbf{切向量}：$\hat{t}_1 = (-0.5, 0.866)$（沿边方向）
+
+\textbf{摩擦系数}：$\mu = 0.25$
+
+\textbf{摩擦锥边1}：
+\begin{align}
+\hat{d}_{11} &= \frac{\hat{n}_1 + \mu \hat{t}_1}{|\hat{n}_1 + \mu \hat{t}_1|} \\
+&= \frac{(0.866, 0.5) + 0.25(-0.5, 0.866)}{|(0.866, 0.5) + 0.25(-0.5, 0.866)|} \\
+&= \frac{(0.866 - 0.125, 0.5 + 0.217)}{|(0.741, 0.717)|} \\
+&= \frac{(0.741, 0.717)}{1.031} \\
+&\approx (0.719, 0.695)
+\end{align}
+
+\textbf{Wrench $F_1$}：
+\begin{align}
+m_{1z} &= p_{1x} d_{11y} - p_{1y} d_{11x} \\
+&= (-0.5) \cdot 0.695 - 0.5 \cdot 0.719 \\
+&= -0.3475 - 0.3595 = -0.707
+\end{align}
+
+\begin{equation}
+F_1 = \begin{bmatrix} -0.707 \\ 0.719 \\ 0.695 \end{bmatrix}
+\end{equation}
+
+\textbf{摩擦锥边2}：
+\begin{align}
+\hat{d}_{12} &= \frac{\hat{n}_1 - \mu \hat{t}_1}{|\hat{n}_1 - \mu \hat{t}_1|} \\
+&= \frac{(0.866, 0.5) - 0.25(-0.5, 0.866)}{|(0.866 + 0.125, 0.5 - 0.217)|} \\
+&= \frac{(0.991, 0.283)}{1.030} \\
+&\approx (0.962, 0.275)
+\end{align}
+
+\textbf{Wrench $F_2$}：
+\begin{align}
+m_{2z} &= p_{1x} d_{12y} - p_{1y} d_{12x} \\
+&= (-0.5) \cdot 0.275 - 0.5 \cdot 0.962 \\
+&= -0.1375 - 0.481 = -0.6185
+\end{align}
+
+\begin{equation}
+F_2 = \begin{bmatrix} -0.6185 \\ 0.962 \\ 0.275 \end{bmatrix}
+\end{equation}
+
+\textbf{类似地计算接触2的wrench $F_3$和$F_4$}
+
+\section{第五步：绘制Wrench箭头}
+
+\subsection{箭头起点的计算}
+
+\textbf{对于wrench $F = (m_z, f_x, f_y)$，其中$f_x^2 + f_y^2 \neq 0$}：
+
+\textbf{箭头起点}：
+\begin{equation}
+(x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)
+\end{equation}
+
+\textbf{箭头终点}：
+\begin{equation}
+(x + f_x, y + f_y)
+\end{equation}
+
+\subsection{具体例子：$F_1$}
+
+\textbf{已知}：$F_1 = (-0.707, 0.719, 0.695)$
+
+\textbf{计算}：
+\begin{align}
+f_x^2 + f_y^2 &= 0.719^2 + 0.695^2 = 0.517 + 0.483 = 1.0 \\
+(x, y) &= \frac{1}{1.0} (-0.707 \cdot 0.695, -(-0.707) \cdot 0.719) \\
+&= (-0.491, 0.508)
+\end{align}
+
+\textbf{箭头终点}：
+\begin{equation}
+(x + f_x, y + f_y) = (-0.491 + 0.719, 0.508 + 0.695) = (0.228, 1.203)
+\end{equation}
+
+\textbf{因此}：箭头从$(-0.491, 0.508)$指向$(0.228, 1.203)$
+
+\section{第六步：绘制摩擦锥}
+
+\subsection{摩擦锥的表示}
+
+\textbf{摩擦锥}由两条射线组成：
+\begin{itemize}
+\item 从接触点出发
+\item 方向沿摩擦锥边的方向
+\item 角度范围：$[\hat{n} - \alpha, \hat{n} + \alpha]$
+\end{itemize}
+
+\textbf{绘制方法}：
+\begin{itemize}
+\item 从接触点$p$出发
+\item 沿方向$\hat{d}_1$和$\hat{d}_2$绘制两条射线
+\item 用虚线表示
+\end{itemize}
+
+\section{第七步：绘制力矩标记区域}
+
+\subsection{力矩标记规则}
+
+\textbf{对于每个wrench $F_i$}：
+\begin{itemize}
+\item 箭头线左侧：标记$'+'$（正力矩）
+\item 箭头线右侧：标记$'-'$（负力矩）
+\item 箭头线上：标记$\pm$（零力矩）
+\end{itemize}
+
+\subsection{一致标记区域}
+
+\textbf{对于多个wrench}：
+\begin{itemize}
+\item 如果所有wrench对某点都产生正力矩：标记$'+'$（灰色）
+\item 如果所有wrench对某点都产生负力矩：标记$'-'$（灰色）
+\item 如果不一致：标记空白
+\end{itemize}
+
+\section{完整计算示例：图12.22(b)}
+
+\subsection{参数设置}
+
+\textbf{接触1}：$p_1 = (-0.5, 0.5)$
+\textbf{接触2}：$p_2 = (0.5, 0.5)$
+\textbf{摩擦系数}：$\mu = 1$（$\alpha = 45°$）
+
+\subsection{接触1的wrench}
+
+\textbf{法向量}：$\hat{n}_1 = (0.866, 0.5)$（指向内部）
+\textbf{切向量}：$\hat{t}_1 = (-0.5, 0.866)$
+
+\textbf{摩擦锥边1}（$\alpha = 45°$）：
+\begin{align}
+\hat{d}_{11} &= \text{旋转}(\hat{n}_1, +45°) \\
+&= (\cos(30°+45°), \sin(30°+45°)) \\
+&= (\cos 75°, \sin 75°) \\
+&\approx (0.259, 0.966)
+\end{align}
+
+\textbf{Wrench $F_1$}：
+\begin{align}
+m_{1z} &= p_{1x} d_{11y} - p_{1y} d_{11x} \\
+&= (-0.5) \cdot 0.966 - 0.5 \cdot 0.259 \\
+&= -0.483 - 0.130 = -0.613
+\end{align}
+
+\begin{equation}
+F_1 = \begin{bmatrix} -0.613 \\ 0.259 \\ 0.966 \end{bmatrix}
+\end{equation}
+
+\textbf{箭头起点}：
+\begin{align}
+(x_1, y_1) &= \frac{1}{0.259^2 + 0.966^2} (-0.613 \cdot 0.966, -(-0.613) \cdot 0.259) \\
+&= \frac{1}{1.0} (-0.592, 0.159) \\
+&= (-0.592, 0.159)
+\end{align}
+
+\textbf{箭头终点}：
+\begin{equation}
+(-0.592 + 0.259, 0.159 + 0.966) = (-0.333, 1.125)
+\end{equation}
+
+\subsection{接触2的wrench}
+
+\textbf{类似计算}，得到$F_2, F_3, F_4$
+
+\subsection{检查视线}
+
+\textbf{连接两个接触的直线}：
+\begin{equation}
+\text{从} (-0.5, 0.5) \text{到} (0.5, 0.5)
+\end{equation}
+
+\textbf{方向向量}：$(1, 0)$（水平向右）
+
+\textbf{检查}：
+\begin{itemize}
+\item 这条线是否在接触1的摩擦锥内？
+\item 这条线是否在接触2的摩擦锥内？
+\end{itemize}
+
+\textbf{如果两个摩擦角都是45°}，且法向量都指向内部：
+\begin{itemize}
+\item 摩擦锥覆盖角度：$[\hat{n} - 45°, \hat{n} + 45°]$
+\item 对于$\hat{n}_1 = (0.866, 0.5)$（约30°），摩擦锥：$[-15°, 75°]$
+\item 水平方向（0°）在摩擦锥内 $\checkmark$
+\end{itemize}
+
+\textbf{因此}：视线在两个摩擦锥内，力闭合成立！
+
+\section{绘制步骤总结}
+
+\subsection{步骤1：建立坐标系}
+\begin{itemize}
+\item 确定物体形状和接触位置
+\item 建立坐标系（通常质心在原点）
+\end{itemize}
+
+\subsection{步骤2：计算接触法向量}
+\begin{itemize}
+\item 确定每条边的方向
+\item 计算指向物体内部的法向量
+\end{itemize}
+
+\subsection{步骤3：计算摩擦锥边}
+\begin{itemize}
+\item 根据摩擦系数计算摩擦角$\alpha = \tan^{-1}(\mu)$
+\item 计算两条摩擦锥边的方向
+\end{itemize}
+
+\subsection{步骤4：计算Wrench}
+\begin{itemize}
+\item 对每个摩擦锥边，计算wrench $F = (m_z, f_x, f_y)$
+\item 其中$m_z = p_x f_y - p_y f_x$，$f = \hat{d}$
+\end{itemize}
+
+\subsection{步骤5：绘制Wrench箭头}
+\begin{itemize}
+\item 计算箭头起点：$(x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)$
+\item 计算箭头终点：$(x + f_x, y + f_y)$
+\item 绘制箭头
+\end{itemize}
+
+\subsection{步骤6：绘制摩擦锥}
+\begin{itemize}
+\item 从接触点出发，沿摩擦锥边方向绘制虚线
+\end{itemize}
+
+\subsection{步骤7：绘制力矩标记}
+\begin{itemize}
+\item 对每个wrench，标记箭头线两侧的区域
+\item 找出一致标记区域（灰色）
+\end{itemize}
+
+\subsection{步骤8：检查力闭合}
+\begin{itemize}
+\item 检查是否有灰色区域（一致标记）
+\item 或者检查视线是否在摩擦锥内
+\end{itemize}
+
+\section{MATLAB/Python代码示例}
+
+\subsection{计算Wrench的函数}
+
+\begin{verbatim}
+function F = compute_wrench(p, d)
+    % p: 接触位置 [px, py]
+    % d: 摩擦锥边方向 [dx, dy] (归一化)
+    % F: wrench [mz, fx, fy]
+    
+    mz = p(1)*d(2) - p(2)*d(1);
+    F = [mz; d(1); d(2)];
+end
+\end{verbatim}
+
+\subsection{绘制箭头的函数}
+
+\begin{verbatim}
+function [base, head] = wrench_to_arrow(F)
+    % F: wrench [mz, fx, fy]
+    % base: 箭头起点 [x, y]
+    % head: 箭头终点 [x, y]
+    
+    fx = F(2);
+    fy = F(3);
+    mz = F(1);
+    
+    f_norm_sq = fx^2 + fy^2;
+    
+    if f_norm_sq > 1e-10  % 非零力
+        base = [mz*fy, -mz*fx] / f_norm_sq;
+        head = base + [fx, fy];
+    else
+        error('纯力矩，无法用箭头表示');
+    end
+end
+\end{verbatim}
+
+\section{总结}
+
+\subsection{关键公式}
+
+\begin{enumerate}
+\item \textbf{Wrench计算}：
+   \begin{equation}
+   F = \begin{bmatrix} p_x d_y - p_y d_x \\ d_x \\ d_y \end{bmatrix}
+   \end{equation}
+
+\item \textbf{箭头起点}：
+   \begin{equation}
+   (x, y) = \frac{1}{f_x^2 + f_y^2} (m_z f_y, -m_z f_x)
+   \end{equation}
+
+\item \textbf{箭头终点}：
+   \begin{equation}
+   (x + f_x, y + f_y)
+   \end{equation}
+\end{enumerate}
+
+\subsection{绘制流程}
+
+\begin{enumerate}
+\item 计算接触位置和法向量
+\item 计算摩擦锥边方向
+\item 计算每个摩擦锥边对应的wrench
+\item 将wrench转换为箭头（起点和终点）
+\item 绘制箭头、摩擦锥和力矩标记
+\item 检查力闭合条件
+\end{enumerate}
+
+\end{document}
+

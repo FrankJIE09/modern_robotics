@@ -1,0 +1,327 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[UTF8]{ctex}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\usepackage{bm}
+\usepackage{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{arrows,arrows.meta,positioning,calc}
+
+\geometry{margin=2.5cm}
+
+\title{例题12.2的详细理解：接触约束的推导与可视化}
+\author{第12章抓取与操作补充说明}
+\date{}
+
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+\newtheorem{example}{例题}
+
+\begin{document}
+
+\maketitle
+
+\section{例题设置}
+
+\begin{example}[例题12.2]
+考虑图12.3所示的接触情况。物体$A$和$B$在接触点$p_A = p_B = [1 \, 2 \, 0]^T$处接触，接触法线方向为$\hat{n} = [0 \, 1 \, 0]^T$。
+\end{example}
+
+\subsection{给定参数}
+
+\begin{itemize}
+\item 接触点位置：$p_A = p_B = [1 \, 2 \, 0]^T$
+\item 接触法线方向：$\hat{n} = [0 \, 1 \, 0]^T$（指向物体$A$内部）
+\item 物体$A$的twist：$V_A = [\omega_{Ax} \, \omega_{Ay} \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, v_{Az}]^T$
+\item 物体$B$的twist：$V_B = [\omega_{Bx} \, \omega_{By} \, \omega_{Bz} \, v_{Bx} \, v_{By} \, v_{Bz}]^T$
+\end{itemize}
+
+\section{不可穿透约束的推导}
+
+\subsection{接触wrench的定义}
+
+根据接触法线$\hat{n}$和接触点$p_A$，我们可以定义接触wrench：
+\begin{equation}
+F = ([p_A] \hat{n}, \hat{n}) = (p_A \times \hat{n}, \hat{n})
+\end{equation}
+
+其中$[p_A]$是$p_A$的反对称矩阵表示。展开计算：
+\begin{align}
+p_A \times \hat{n} &= \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix} \times \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix} \\
+&= \begin{bmatrix} 2 \cdot 0 - 0 \cdot 1 \\ 0 \cdot 0 - 1 \cdot 0 \\ 1 \cdot 1 - 2 \cdot 0 \end{bmatrix} \\
+&= \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix}
+\end{align}
+
+因此，接触wrench为：
+\begin{equation}
+F = \begin{bmatrix} 0 \\ 0 \\ 1 \\ 0 \\ 1 \\ 0 \end{bmatrix} = \begin{bmatrix} m_x \\ m_y \\ m_z \\ f_x \\ f_y \\ f_z \end{bmatrix}
+\end{equation}
+
+即：$F = [m_x \, m_y \, m_z \, f_x \, f_y \, f_z]^T = [0 \, 0 \, 1 \, 0 \, 1 \, 0]^T$。
+
+\subsection{不可穿透约束的展开}
+
+不可穿透约束的一般形式为：
+\begin{equation}
+F^T (V_A - V_B) \geq 0
+\label{eq:impenetrability_general}
+\end{equation}
+
+展开计算：
+\begin{align}
+F^T (V_A - V_B) &= [0 \, 0 \, 1 \, 0 \, 1 \, 0] \begin{bmatrix} \omega_{Ax} - \omega_{Bx} \\ \omega_{Ay} - \omega_{By} \\ \omega_{Az} - \omega_{Bz} \\ v_{Ax} - v_{Bx} \\ v_{Ay} - v_{By} \\ v_{Az} - v_{Bz} \end{bmatrix} \\
+&= 0 \cdot (\omega_{Ax} - \omega_{Bx}) + 0 \cdot (\omega_{Ay} - \omega_{By}) + 1 \cdot (\omega_{Az} - \omega_{Bz}) \\
+&\quad + 0 \cdot (v_{Ax} - v_{Bx}) + 1 \cdot (v_{Ay} - v_{By}) + 0 \cdot (v_{Az} - v_{Bz}) \\
+&= \omega_{Az} - \omega_{Bz} + v_{Ay} - v_{By} \geq 0
+\label{eq:impenetrability_expanded}
+\end{align}
+
+\section{滚动-滑动约束}
+
+\subsection{滚动-滑动约束的定义}
+
+当约束是主动的（active）时，即两个物体保持接触，我们有：
+\begin{equation}
+F^T (V_A - V_B) = 0
+\label{eq:roll_slide_general}
+\end{equation}
+
+这称为\textbf{滚动-滑动约束}（roll-slide constraint），因为接触可能是滚动或滑动。
+
+\subsection{滚动-滑动约束的具体形式}
+
+将方程(\ref{eq:impenetrability_expanded})中的不等号改为等号，得到：
+\begin{equation}
+\omega_{Az} - \omega_{Bz} + v_{Ay} - v_{By} = 0
+\label{eq:12.9}
+\end{equation}
+
+这就是公式(12.9)。
+
+\subsection{约束空间的维度}
+
+方程(\ref{eq:12.9})定义了12维twist空间$(V_A, V_B)$中的一个11维超平面。这是因为：
+\begin{itemize}
+\item 总共有12个变量：$V_A$的6个分量和$V_B$的6个分量
+\item 一个约束方程减少了1个自由度
+\item 因此剩余11个自由度
+\end{itemize}
+
+\section{滚动约束}
+
+\subsection{滚动约束的定义}
+
+滚动约束要求两个物体在接触点处没有相对运动，即：
+\begin{equation}
+\dot{p}_A = v_A + [\omega_A] p_A = v_B + [\omega_B] p_B = \dot{p}_B
+\label{eq:rolling_general}
+\end{equation}
+
+其中$[\omega_A]$是角速度$\omega_A$的反对称矩阵表示。
+
+\subsection{滚动约束的展开}
+
+对于三维情况，接触点速度的计算公式为：
+\begin{align}
+\dot{p}_A &= v_A + \omega_A \times p_A \\
+&= v_A + [\omega_A] p_A
+\end{align}
+
+其中：
+\begin{equation}
+[\omega_A] = \begin{bmatrix} 0 & -\omega_{Az} & \omega_{Ay} \\ \omega_{Az} & 0 & -\omega_{Ax} \\ -\omega_{Ay} & \omega_{Ax} & 0 \end{bmatrix}
+\end{equation}
+
+因此：
+\begin{align}
+[\omega_A] p_A &= \begin{bmatrix} 0 & -\omega_{Az} & \omega_{Ay} \\ \omega_{Az} & 0 & -\omega_{Ax} \\ -\omega_{Ay} & \omega_{Ax} & 0 \end{bmatrix} \begin{bmatrix} 1 \\ 2 \\ 0 \end{bmatrix} \\
+&= \begin{bmatrix} -\omega_{Az} \cdot 2 + \omega_{Ay} \cdot 0 \\ \omega_{Az} \cdot 1 - \omega_{Ax} \cdot 0 \\ -\omega_{Ay} \cdot 1 + \omega_{Ax} \cdot 2 \end{bmatrix} \\
+&= \begin{bmatrix} -2\omega_{Az} \\ \omega_{Az} \\ -\omega_{Ay} + 2\omega_{Ax} \end{bmatrix}
+\end{align}
+
+所以：
+\begin{equation}
+\dot{p}_A = \begin{bmatrix} v_{Ax} - 2\omega_{Az} \\ v_{Ay} + \omega_{Az} \\ v_{Az} + 2\omega_{Ax} - \omega_{Ay} \end{bmatrix}
+\end{equation}
+
+类似地，对于物体$B$：
+\begin{equation}
+\dot{p}_B = \begin{bmatrix} v_{Bx} - 2\omega_{Bz} \\ v_{By} + \omega_{Bz} \\ v_{Bz} + 2\omega_{Bx} - \omega_{By} \end{bmatrix}
+\end{equation}
+
+滚动约束$\dot{p}_A = \dot{p}_B$给出三个标量方程：
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= v_{Bx} - 2\omega_{Bz}, \label{eq:12.10} \\
+v_{Ay} + \omega_{Az} &= v_{By} + \omega_{Bz}, \label{eq:12.11} \\
+v_{Az} + 2\omega_{Ax} - \omega_{Ay} &= v_{Bz} + 2\omega_{Bx} - \omega_{By}. \label{eq:12.12}
+\end{align}
+
+这就是公式(12.10)-(12.12)。
+
+\subsection{滚动约束空间的维度}
+
+滚动约束由三个独立的方程组成，因此：
+\begin{itemize}
+\item 滚动-滑动约束已经将空间从12维减少到11维
+\item 滚动约束进一步减少了3个自由度
+\item 因此滚动约束定义了11维超平面中的9维子空间
+\end{itemize}
+
+\section{简化条件下的约束可视化}
+
+为了在低维空间中可视化约束，我们做以下简化假设：
+
+\subsection{简化假设}
+
+\begin{enumerate}
+\item 物体$B$是静止的：$V_B = 0$
+\item 物体$A$被限制在$z = 0$平面内，即：
+\begin{equation}
+V_A = [\omega_{Ax} \, \omega_{Ay} \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, v_{Az}]^T = [0 \, 0 \, \omega_{Az} \, v_{Ax} \, v_{Ay} \, 0]^T
+\end{equation}
+\end{enumerate}
+
+在这些假设下，我们只需要考虑3个变量：$\omega_{Az}$、$v_{Ax}$和$v_{Ay}$。
+
+\subsection{简化后的滚动-滑动约束}
+
+在简化条件下，滚动-滑动约束(\ref{eq:12.9})变为：
+\begin{align}
+\omega_{Az} - \omega_{Bz} + v_{Ay} - v_{By} &= 0 \\
+\omega_{Az} - 0 + v_{Ay} - 0 &= 0 \\
+\omega_{Az} + v_{Ay} &= 0
+\label{eq:simplified_roll_slide}
+\end{align}
+
+这个约束在$(\omega_{Az}, v_{Ax}, v_{Ay})$空间中定义了一个\textbf{平面}。
+
+\subsection{简化后的滚动约束}
+
+在简化条件下，滚动约束(\ref{eq:12.10})-(\ref{eq:12.11})变为：
+\begin{align}
+v_{Ax} - 2\omega_{Az} &= 0, \label{eq:simplified_rolling1} \\
+v_{Ay} + \omega_{Az} &= 0. \label{eq:simplified_rolling2}
+\end{align}
+
+注意：第三个方程(\ref{eq:12.12})在简化条件下自动满足（因为$v_{Az} = 0$，$\omega_{Ax} = 0$，$\omega_{Ay} = 0$）。
+
+这两个约束在$(\omega_{Az}, v_{Ax}, v_{Ay})$空间中定义了一条\textbf{直线}，该直线位于滚动-滑动约束平面内。
+
+\subsection{约束的几何结构}
+
+\begin{itemize}
+\item \textbf{滚动-滑动约束平面}：$v_{Ay} + \omega_{Az} = 0$
+  \begin{itemize}
+  \item 这是一个通过原点的平面
+  \item 因为当$V_A = 0$时，约束自动满足
+  \end{itemize}
+
+\item \textbf{滚动约束直线}：$v_{Ax} - 2\omega_{Az} = 0$和$v_{Ay} + \omega_{Az} = 0$
+  \begin{itemize}
+  \item 这是滚动-滑动约束平面内的一条直线
+  \item 从第一个方程：$v_{Ax} = 2\omega_{Az}$
+  \item 从第二个方程：$v_{Ay} = -\omega_{Az}$
+  \item 因此直线方向为：$[\omega_{Az} \, v_{Ax} \, v_{Ay}]^T = t[1 \, 2 \, -1]^T$，其中$t \in \mathbb{R}$
+  \end{itemize}
+\end{itemize}
+
+\section{不可穿透约束的几何意义}
+
+\subsection{不可穿透约束条件}
+
+当$V_B = 0$时，不可穿透约束(\ref{eq:impenetrability_general})简化为：
+\begin{equation}
+F^T V_A \geq 0
+\label{eq:impenetrability_simplified}
+\end{equation}
+
+在简化条件下，这变为：
+\begin{equation}
+\omega_{Az} + v_{Ay} \geq 0
+\label{eq:impenetrability_simplified_expanded}
+\end{equation}
+
+\subsection{几何解释}
+
+约束$F^T V_A \geq 0$在twist空间中定义了一个\textbf{半空间}（half-space）：
+
+\begin{itemize}
+\item \textbf{边界}：超平面$F^T V_A = 0$（即$v_{Ay} + \omega_{Az} = 0$）
+\item \textbf{可行区域}：满足$F^T V_A \geq 0$的所有twist（不会导致穿透）
+\item \textbf{不可行区域}：满足$F^T V_A < 0$的所有twist（会导致穿透）
+\end{itemize}
+
+\subsection{接触标签}
+
+根据twist $V_A$与约束wrench $F$的关系，我们可以给接触分配标签：
+
+\begin{itemize}
+\item \textbf{B（Breaking）}：$F^T V_A > 0$，接触正在分离
+\item \textbf{R（Rolling）}：$F^T V_A = 0$且满足滚动约束，纯滚动
+\item \textbf{S（Sliding）}：$F^T V_A = 0$但不满足滚动约束，滑动
+\item \textbf{不可行}：$F^T V_A < 0$，会导致穿透（物理上不可能）
+\end{itemize}
+
+\section{关键理解点总结}
+
+\subsection{约束的层次结构}
+
+\begin{enumerate}
+\item \textbf{不可穿透约束}：$F^T (V_A - V_B) \geq 0$（半空间）
+  \begin{itemize}
+  \item 最宽松的约束
+  \item 允许分离、滚动和滑动
+  \end{itemize}
+
+\item \textbf{滚动-滑动约束}：$F^T (V_A - V_B) = 0$（超平面）
+  \begin{itemize}
+  \item 更严格的约束
+  \item 要求保持接触（不允许分离）
+  \item 允许滚动和滑动
+  \end{itemize}
+
+\item \textbf{滚动约束}：$\dot{p}_A = \dot{p}_B$（子空间）
+  \begin{itemize}
+  \item 最严格的约束
+  \item 要求接触点处无相对运动
+  \item 只允许纯滚动
+  \end{itemize}
+\end{enumerate}
+
+\subsection{维度分析}
+
+\begin{itemize}
+\item 完整twist空间：12维（$V_A$和$V_B$各6维）
+\item 滚动-滑动约束后：11维超平面
+\item 滚动约束后：9维子空间
+\item 简化条件下（$V_B = 0$，$A$限制在平面内）：3维空间
+  \begin{itemize}
+  \item 滚动-滑动约束：2维平面
+  \item 滚动约束：1维直线
+  \end{itemize}
+\end{itemize}
+
+\subsection{物理直觉}
+
+\begin{itemize}
+\item \textbf{$F^T V_A > 0$}：物体正在分离，接触点沿法线方向远离
+\item \textbf{$F^T V_A = 0$}：接触得以保持，接触点在法线方向上无相对速度
+\item \textbf{$F^T V_A < 0$}：会导致穿透，物理上不可能（除非有外力作用）
+\end{itemize}
+
+\section{结论}
+
+例题12.2展示了如何从接触几何（接触点位置和法线方向）推导出运动约束。关键步骤包括：
+
+\begin{enumerate}
+\item 根据接触几何构造接触wrench $F$
+\item 应用不可穿透约束得到半空间约束
+\item 应用滚动-滑动约束得到超平面约束
+\item 应用滚动约束得到子空间约束
+\item 在简化条件下可视化约束的几何结构
+\end{enumerate}
+
+这个例题帮助我们理解接触约束的数学表达和几何意义，为后续讨论摩擦力和抓取稳定性奠定了基础。
+
+\end{document}
+
